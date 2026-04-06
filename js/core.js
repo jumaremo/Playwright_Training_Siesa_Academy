@@ -1152,6 +1152,10 @@ function showComingSoon() {
 
 function startLearning() {
     console.log('🚀 Ejecutando startLearning...');
+    // Re-sync por si las lecciones cargaron después de initializeApp
+    if (Object.keys(window.PWAcademy.loadedLessons).length === 0) {
+        resyncAllLessons();
+    }
     // Ir a la primera lección disponible
     const availableIds = Object.keys(window.PWAcademy.loadedLessons).map(Number).sort((a, b) => a - b);
     if (availableIds.length > 0) {
@@ -1189,13 +1193,19 @@ function goToLessonsDetailed() {
 // ===== FUNCIONES DEL CURRICULUM =====
 function showCurriculum() {
     console.log('📚 Ejecutando showCurriculum...');
-    
+
     try {
+        // Re-inicializar curriculum si no está cargado
+        if (!window.PWAcademy.curriculum && typeof window.PLAYWRIGHT_CURRICULUM !== 'undefined') {
+            window.PWAcademy.curriculum = window.PLAYWRIGHT_CURRICULUM;
+            console.log('🔄 Curriculum re-cargado en showCurriculum');
+        }
+
         const welcomeScreen = document.getElementById('welcomeScreen');
         const lessonContent = document.getElementById('lessonContent');
         const lessonActions = document.getElementById('lessonActions');
         const breadcrumb = document.getElementById('breadcrumb');
-        
+
         // Validación crítica
         if (!lessonContent) {
             console.error('❌ Element lessonContent not found');
@@ -1537,6 +1547,13 @@ document.addEventListener('DOMContentLoaded', function() {
             showToast('Error inicializando la aplicación', 'error');
         }
     }, 100);
+});
+
+// ===== RE-SYNC CUANDO LAS LECCIONES TERMINAN DE CARGAR =====
+document.addEventListener('lessonsLoaded', function(event) {
+    console.log('🔄 Evento lessonsLoaded recibido, re-sincronizando...');
+    const count = resyncAllLessons();
+    console.log(`✅ Re-sync completado: ${count} lecciones disponibles`);
 });
 
 // ===== EXPOSICIÓN GLOBAL PARA DEBUG =====

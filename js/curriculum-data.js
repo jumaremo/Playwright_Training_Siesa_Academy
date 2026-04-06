@@ -4,7 +4,7 @@
  * Version: 2026.1-v1.0
  */
 
-const PLAYWRIGHT_CURRICULUM = {
+window.PLAYWRIGHT_CURRICULUM = {
     config: {
         academyName: "Playwright Academy",
         tagline: "135 Lecciones Prácticas para QA Engineers",
