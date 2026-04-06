@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playwright Academy - Academia Interactiva</title>
+    <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>">
+    <meta name="description" content="Academia interactiva de Playwright con Python - 135 lecciones prácticas para QA Engineers">
+    <meta name="keywords" content="Playwright, QA, Testing, Automatización, Python, pytest">
+</head>
+<body data-theme="light">
+    <!-- Loading Screen -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-robot">🎭</div>
+            <h2>Playwright Academy</h2>
+            <div class="loading-bar">
+                <div class="loading-progress" id="loadingProgress"></div>
+            </div>
+            <p id="loadingText">Inicializando academia...</p>
+        </div>
+    </div>
+
+    <!-- Main Application -->
+    <div id="app" class="app-container hidden">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="header-left">
+                    <button class="sidebar-toggle" id="sidebarToggle" title="Mostrar/Ocultar menú">
+                        <span class="toggle-icon">‹‹</span>
+                    </button>
+                    <div class="app-logo">
+                        <span class="logo-icon">🎭</span>
+                        <h1>PW Academy</h1>
+                    </div>
+                </div>
+
+                <div class="header-center">
+                    <div class="breadcrumb" id="breadcrumb" style="display: none;">
+                        <span class="breadcrumb-home" onclick="showWelcome()">🏠 Inicio</span>
+                        <span class="breadcrumb-separator">›</span>
+                        <span class="breadcrumb-current" id="currentLesson">Lección actual</span>
+                    </div>
+                </div>
+
+                <div class="header-right">
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Buscar lecciones..." class="search-input">
+                        <div class="search-results" id="searchResults"></div>
+                    </div>
+                    <div class="progress-indicator">
+                        <span id="globalProgressText">0/135</span>
+                        <div class="progress-ring">
+                            <div class="progress-circle" id="progressCircle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <div class="main-layout">
+            <!-- Sidebar -->
+            <aside class="sidebar" id="sidebar">
+                <div class="sidebar-content">
+                    <!-- Progress Summary -->
+                    <div class="progress-summary">
+                        <h3>📊 Tu Progreso</h3>
+                        <div class="progress-stats">
+                            <div class="stat-item">
+                                <span class="stat-number" id="completedCount">0</span>
+                                <span class="stat-label">Completadas</span>
+                            </div>
+                            <div class="stat-item">
+                                <span class="stat-number" id="progressPercent">0%</span>
+                                <span class="stat-label">Avance</span>
+                            </div>
+                        </div>
+                        <div class="global-progress-bar">
+                            <div class="progress-fill" id="globalProgressFill" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="lesson-filters">
+                        <button class="filter-btn active" data-filter="all">📚 Todas</button>
+                        <button class="filter-btn" data-filter="beginner">🟢 Básico</button>
+                        <button class="filter-btn" data-filter="intermediate">🟡 Intermedio</button>
+                        <button class="filter-btn" data-filter="advanced">🔴 Avanzado</button>
+                        <button class="filter-btn" data-filter="completed">✅ Completadas</button>
+                        <button class="filter-btn" data-filter="pending">⏳ Pendientes</button>
+                    </div>
+
+                    <!-- Sections Menu -->
+                    <div class="sections-menu" id="sectionsMenu">
+                        <!-- Se generará dinámicamente -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content -->
+            <main class="main-content">
+                <!-- Welcome Screen -->
+                <div id="welcomeScreen" class="welcome-screen">
+                    <div class="welcome-content">
+                        <div class="welcome-hero">
+                            <div class="hero-icon">🚀</div>
+                            <h1>Playwright Academy</h1>
+                            <p class="hero-subtitle">135 Lecciones Prácticas para QA Engineers</p>
+                            <p class="hero-description">
+                                Domina la automatización de pruebas web con Playwright y Python desde cero hasta nivel experto.
+                                Curso compacto con ejercicios prácticos, proyectos reales y certificación profesional.
+                            </p>
+                        </div>
+
+                        <div class="welcome-stats">
+                            <div class="stat-card">
+                                <div class="stat-icon">📖</div>
+                                <div class="stat-info">
+                                    <h3>135</h3>
+                                    <p>Lecciones Interactivas</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">⏱️</div>
+                                <div class="stat-info">
+                                    <h3>55-60</h3>
+                                    <p>Horas de Contenido</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🎯</div>
+                                <div class="stat-info">
+                                    <h3>20</h3>
+                                    <p>Secciones Temáticas</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon">🏆</div>
+                                <div class="stat-info">
+                                    <h3>Pro</h3>
+                                    <p>Certificación</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="welcome-actions">
+                            <button class="cta-primary" onclick="startLearning()">
+                                🚀 Comenzar Ahora
+                            </button>
+                            <button class="cta-secondary" onclick="showCurriculum()">
+                                📚 Ver Curriculum
+                            </button>
+                        </div>
+
+                        <div class="learning-path-preview">
+                            <h3>🗺️ Tu Camino de Aprendizaje</h3>
+                            <div class="path-stages">
+                                <div class="path-stage">
+                                    <div class="stage-number">1</div>
+                                    <div class="stage-info">
+                                        <h4>🟢 Fundamentos</h4>
+                                        <p>Setup, Python, primeros tests</p>
+                                    </div>
+                                </div>
+                                <div class="path-stage">
+                                    <div class="stage-number">2</div>
+                                    <div class="stage-info">
+                                        <h4>🟡 Intermedio</h4>
+                                        <p>POM, APIs, network mocking</p>
+                                    </div>
+                                </div>
+                                <div class="path-stage">
+                                    <div class="stage-number">3</div>
+                                    <div class="stage-info">
+                                        <h4>🔴 Avanzado</h4>
+                                        <p>CI/CD, visual testing, enterprise</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lesson Content -->
+                <div id="lessonContent" class="lesson-content hidden">
+                    <!-- Se cargará dinámicamente -->
+                </div>
+
+                <!-- Lesson Actions -->
+                <div id="lessonActions" class="lesson-actions hidden">
+                    <div class="actions-content">
+                        <button class="action-btn secondary" id="prevLessonBtn" onclick="navigateLesson('prev')">
+                            ‹ Anterior
+                        </button>
+                        <button class="action-btn primary" id="completeBtn" onclick="toggleLessonComplete()">
+                            ✅ Marcar Completada
+                        </button>
+                        <button class="action-btn secondary" id="nextLessonBtn" onclick="navigateLesson('next')">
+                            Siguiente ›
+                        </button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- ===== FLOATING ACTION BUTTONS - GESTIONADOS POR CORE.JS ===== -->
+    <div class="fab-container" id="fabContainer">
+        <div class="fab-menu">
+            <button class="fab-toggle" id="fabToggle" title="Menú de acciones">
+                <span class="fab-icon">⚙️</span>
+            </button>
+            <div class="fab-options" id="fabOptions">
+                <button class="fab-option" id="themeToggle" title="Cambiar tema">
+                    <span class="fab-icon theme-icon">🌙</span>
+                </button>
+                <button class="fab-option" id="exportProgress" title="Exportar progreso">
+                    <span class="fab-icon">📊</span>
+                </button>
+                <button class="fab-option" id="resetProgress" title="Reiniciar progreso">
+                    <span class="fab-icon">🔄</span>
+                </button>
+                <button class="fab-option" id="helpBtn" title="Ayuda">
+                    <span class="fab-icon">❓</span>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Modal Overlay -->
+    <div id="modalOverlay" class="modal-overlay hidden">
+        <div class="modal-content" id="modalContent">
+            <!-- Se cargará dinámicamente -->
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS CON SISTEMA DINÁMICO INTEGRADO ===== -->
+    <script src="js/curriculum-data.js"></script>
+    <script src="js/core.js"></script>
+
+    <!-- ===== DYNAMIC LESSON LOADER v2.0 - OPTIMIZED ===== -->
+    <script>
+        // 🚀 CARGADOR DINÁMICO DE LECCIONES 001-135
+        function loadAllLessons() {
+            console.log('🔄 Iniciando carga dinámica de lecciones 001-135...');
+
+            let loaded = 0;
+            let failed = 0;
+            const startTime = performance.now();
+
+            for (let i = 1; i <= 135; i++) {
+                const lessonNumber = String(i).padStart(3, '0');
+                const script = document.createElement('script');
+                script.src = `js/lessons/lesson-${lessonNumber}.js`;
+                script.async = false; // Mantener orden de carga
+
+                script.onload = () => {
+                    loaded++;
+                    if (loaded <= 10) { // Log solo las primeras 10 para no saturar consola
+                        console.log(`✅ Lección ${lessonNumber} cargada`);
+                    }
+                    checkLoadingComplete();
+                };
+
+                script.onerror = () => {
+                    failed++;
+                    // Solo mostrar error para lecciones que esperamos que existan
+                    if (i <= 20) {
+                        console.log(`⏳ Lección ${lessonNumber} no disponible aún`);
+                    }
+                    checkLoadingComplete();
+                };
+
+                document.head.appendChild(script);
+            }
+
+            function checkLoadingComplete() {
+                if (loaded + failed === 135) {
+                    const endTime = performance.now();
+                    const loadTime = Math.round(endTime - startTime);
+
+                    console.log(`🎯 CARGA DINÁMICA COMPLETADA:`);
+                    console.log(`   ✅ Lecciones cargadas: ${loaded}`);
+                    console.log(`   ⏳ No disponibles: ${failed}`);
+                    console.log(`   ⚡ Tiempo total: ${loadTime}ms`);
+
+                    // Notificar que la carga está lista
+                    document.dispatchEvent(new CustomEvent('lessonsLoaded', {
+                        detail: { loaded, failed, totalTime: loadTime }
+                    }));
+                }
+            }
+        }
+
+        // 🎯 INICIALIZAR CARGA INMEDIATAMENTE
+        loadAllLessons();
+    </script>
+
+    <!-- ===== INICIALIZACIÓN MEJORADA ===== -->
+    <script>
+        // Show loading screen initially
+        function showLoadingScreen() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const progressBar = document.getElementById('loadingProgress');
+            const loadingText = document.getElementById('loadingText');
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(interval);
+                    setTimeout(hideLoadingScreen, 500);
+                }
+
+                progressBar.style.width = progress + '%';
+
+                if (progress < 30) {
+                    loadingText.textContent = 'Cargando curriculum...';
+                } else if (progress < 50) {
+                    loadingText.textContent = 'Inicializando lecciones...';
+                } else if (progress < 80) {
+                    loadingText.textContent = 'Preparando interfaz...';
+                } else {
+                    loadingText.textContent = '¡Listo para aprender!';
+                }
+            }, 100);
+        }
+
+        function hideLoadingScreen() {
+            document.getElementById('loadingScreen').style.display = 'none';
+            document.getElementById('app').classList.remove('hidden');
+        }
+
+        // Start the loading sequence immediately
+        showLoadingScreen();
+
+        // Initialize app when DOM is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Inicializando Playwright Academy...');
+            // El core.js ya tiene su propio DOMContentLoaded listener
+        });
+
+        // 🎯 ESCUCHAR CUANDO TODAS LAS LECCIONES SE CARGUEN
+        document.addEventListener('lessonsLoaded', function(event) {
+            const { loaded, failed, totalTime } = event.detail;
+            console.log(`🎉 Sistema listo: ${loaded} lecciones disponibles de 135 total`);
+
+            // Opcional: Mostrar notificación al usuario
+            if (loaded > 0) {
+                setTimeout(() => {
+                    console.log(`💡 Tip: Tienes ${loaded} lecciones listas para estudiar`);
+                }, 2000);
+            }
+        });
+    </script>
+</body>
+</html>
