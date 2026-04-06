@@ -8,8 +8,8 @@ window.PLAYWRIGHT_CURRICULUM = {
     config: {
         academyName: "Playwright Academy",
         tagline: "135 Lecciones Prácticas para QA Engineers",
-        totalLessons: 135,
-        totalSections: 20,
+        totalLessons: 140,
+        totalSections: 21,
         version: "2026.1-v1.0",
         lastUpdated: "2026-04-01",
         defaultLanguage: "es",
@@ -432,6 +432,24 @@ window.PLAYWRIGHT_CURRICULUM = {
                 { id: 134, title: "Accessibility + Security Audit", duration: "20 min", level: "advanced", type: "capstone", section: "section-20", topics: ["accessibility", "security", "audit", "capstone"], hasCode: true, hasExercise: true, estimatedTime: 20, difficulty: "hard" },
                 { id: 135, title: "Proyecto Final: Certificación QA Playwright", duration: "25 min", level: "advanced", type: "capstone", section: "section-20", topics: ["certificación", "proyecto-final", "capstone"], hasCode: true, hasExercise: true, estimatedTime: 25, difficulty: "hard" }
             ]
+        },
+        "section-21": {
+            id: 21,
+            title: "Retos Abiertos y Recursos",
+            icon: "🎯",
+            description: "Challenges sin guía y recursos complementarios para seguir creciendo",
+            level: "advanced",
+            order: 21,
+            totalLessons: 5,
+            estimatedHours: 5,
+            status: "available",
+            lessons: [
+                { id: 136, title: "Challenge: Automatiza sin guía (Básico)", duration: "60 min", level: "beginner", type: "challenge", section: "section-21", topics: ["challenge", "reto-abierto", "saucedemo", "básico"], hasCode: false, hasExercise: true, estimatedTime: 60, difficulty: "medium" },
+                { id: 137, title: "Challenge: Diseña tu framework (Intermedio)", duration: "90 min", level: "intermediate", type: "challenge", section: "section-21", topics: ["challenge", "reto-abierto", "framework", "POM", "intermedio"], hasCode: false, hasExercise: true, estimatedTime: 90, difficulty: "hard" },
+                { id: 138, title: "Challenge: Auditoría QA completa (Avanzado)", duration: "120 min", level: "advanced", type: "challenge", section: "section-21", topics: ["challenge", "reto-abierto", "auditoría", "E2E", "API", "accesibilidad", "CI/CD", "avanzado"], hasCode: false, hasExercise: true, estimatedTime: 120, difficulty: "hard" },
+                { id: 139, title: "Glosario QA + Infraestructura Cloud", duration: "15 min", level: "beginner", type: "reference", section: "section-21", topics: ["glosario", "docker", "kubernetes", "GCP", "CI/CD", "referencia"], hasCode: false, hasExercise: false, estimatedTime: 15, difficulty: "easy" },
+                { id: 140, title: "Recursos y rutas de aprendizaje complementarias", duration: "10 min", level: "beginner", type: "reference", section: "section-21", topics: ["recursos", "herramientas", "práctica", "comunidad", "referencia"], hasCode: false, hasExercise: false, estimatedTime: 10, difficulty: "easy" }
+            ]
         }
     },
 
@@ -466,7 +484,7 @@ window.PLAYWRIGHT_CURRICULUM = {
                 levels: {
                     beginner: completedIds.filter(id => id >= 1 && id <= 52).length,
                     intermediate: completedIds.filter(id => id >= 53 && id <= 98).length,
-                    advanced: completedIds.filter(id => id >= 99 && id <= 135).length
+                    advanced: completedIds.filter(id => id >= 99 && id <= 140).length
                 }
             };
         }

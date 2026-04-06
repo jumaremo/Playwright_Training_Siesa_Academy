@@ -129,8 +129,8 @@ function initializeCurriculum() {
 function loadAvailableLessons() {
     const lessons = {};
     
-    // Intentar cargar lecciones disponibles (001-135)
-    for (let i = 1; i <= 135; i++) {
+    // Intentar cargar lecciones disponibles (001-140)
+    for (let i = 1; i <= 140; i++) {
         const lessonKey = `LESSON_${String(i).padStart(3, '0')}`;
         if (typeof window[lessonKey] !== 'undefined') {
             lessons[i] = window[lessonKey];
@@ -151,13 +151,13 @@ function resyncAllLessons() {
     console.log('🔄 Re-sincronizando lecciones...');
     
     const lessons = {};
-    for (let i = 1; i <= 135; i++) {
+    for (let i = 1; i <= 140; i++) {
         const lessonKey = `LESSON_${String(i).padStart(3, '0')}`;
         if (typeof window[lessonKey] !== 'undefined') {
             lessons[i] = window[lessonKey];
         }
     }
-    
+
     window.PWAcademy.loadedLessons = lessons;
     console.log(`✅ Re-sincronizado: ${Object.keys(lessons).length} lecciones`);
     
@@ -605,7 +605,7 @@ function applyFilter(filterType) {
                     shouldShow = lessonId >= 67 && lessonId <= 189;
                     break;
                 case 'advanced':
-                    shouldShow = lessonId >= 99 && lessonId <= 135;
+                    shouldShow = lessonId >= 99 && lessonId <= 140;
                     break;
                 case 'completed':
                     shouldShow = isCompleted;
@@ -944,7 +944,7 @@ function exportProgressData() {
                 levels: {
                     beginner: window.PWAcademy.completedLessons.filter(id => id >= 1 && id <= 52).length,
                     intermediate: window.PWAcademy.completedLessons.filter(id => id >= 53 && id <= 98).length,
-                    advanced: window.PWAcademy.completedLessons.filter(id => id >= 99 && id <= 135).length
+                    advanced: window.PWAcademy.completedLessons.filter(id => id >= 99 && id <= 140).length
                 }
             };
         }
@@ -1128,7 +1128,7 @@ function showHelpModal() {
             <ul>
                 <li><strong>🟢 Básico:</strong> Lecciones 001-066 (Fundamentos)</li>
                 <li><strong>🟡 Intermedio:</strong> Lecciones 067-189 (Técnicas avanzadas)</li>
-                <li><strong>🔴 Avanzado:</strong> Lecciones 099-135 (Patrones enterprise)</li>
+                <li><strong>🔴 Avanzado:</strong> Lecciones 099-140 (Patrones enterprise, retos y recursos)</li>
             </ul>
             
             <h3>⌨️ Atajos de teclado</h3>

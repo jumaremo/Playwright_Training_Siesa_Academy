@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/components.css">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎭</text></svg>">
-    <meta name="description" content="Academia interactiva de Playwright con Python - 135 lecciones prácticas para QA Engineers">
+    <meta name="description" content="Academia interactiva de Playwright con Python - 140 lecciones prácticas para QA Engineers">
     <meta name="keywords" content="Playwright, QA, Testing, Automatización, Python, pytest">
 </head>
 <body data-theme="light">
@@ -52,7 +52,7 @@
                         <div class="search-results" id="searchResults"></div>
                     </div>
                     <div class="progress-indicator">
-                        <span id="globalProgressText">0/135</span>
+                        <span id="globalProgressText">0/140</span>
                         <div class="progress-ring">
                             <div class="progress-circle" id="progressCircle"></div>
                         </div>
@@ -109,7 +109,7 @@
                         <div class="welcome-hero">
                             <div class="hero-icon">🚀</div>
                             <h1>Playwright Academy</h1>
-                            <p class="hero-subtitle">135 Lecciones Prácticas para QA Engineers</p>
+                            <p class="hero-subtitle">140 Lecciones Prácticas para QA Engineers</p>
                             <p class="hero-description">
                                 Domina la automatización de pruebas web con Playwright y Python desde cero hasta nivel experto.
                                 Curso compacto con ejercicios prácticos, proyectos reales y certificación profesional.
@@ -120,7 +120,7 @@
                             <div class="stat-card">
                                 <div class="stat-icon">📖</div>
                                 <div class="stat-info">
-                                    <h3>135</h3>
+                                    <h3>140</h3>
                                     <p>Lecciones Interactivas</p>
                                 </div>
                             </div>
@@ -134,7 +134,7 @@
                             <div class="stat-card">
                                 <div class="stat-icon">🎯</div>
                                 <div class="stat-info">
-                                    <h3>20</h3>
+                                    <h3>21</h3>
                                     <p>Secciones Temáticas</p>
                                 </div>
                             </div>
@@ -247,15 +247,15 @@
 
     <!-- ===== DYNAMIC LESSON LOADER v2.0 - OPTIMIZED ===== -->
     <script>
-        // 🚀 CARGADOR DINÁMICO DE LECCIONES 001-135
+        // 🚀 CARGADOR DINÁMICO DE LECCIONES 001-140
         function loadAllLessons() {
-            console.log('🔄 Iniciando carga dinámica de lecciones 001-135...');
+            console.log('🔄 Iniciando carga dinámica de lecciones 001-140...');
 
             let loaded = 0;
             let failed = 0;
             const startTime = performance.now();
 
-            for (let i = 1; i <= 135; i++) {
+            for (let i = 1; i <= 140; i++) {
                 const lessonNumber = String(i).padStart(3, '0');
                 const script = document.createElement('script');
                 script.src = `js/lessons/lesson-${lessonNumber}.js`;
@@ -282,7 +282,7 @@
             }
 
             function checkLoadingComplete() {
-                if (loaded + failed === 135) {
+                if (loaded + failed === 140) {
                     const endTime = performance.now();
                     const loadTime = Math.round(endTime - startTime);
 
@@ -351,7 +351,7 @@
         // 🎯 ESCUCHAR CUANDO TODAS LAS LECCIONES SE CARGUEN
         document.addEventListener('lessonsLoaded', function(event) {
             const { loaded, failed, totalTime } = event.detail;
-            console.log(`🎉 Sistema listo: ${loaded} lecciones disponibles de 135 total`);
+            console.log(`🎉 Sistema listo: ${loaded} lecciones disponibles de 140 total`);
 
             // Opcional: Mostrar notificación al usuario
             if (loaded > 0) {
