@@ -1,13 +1,13 @@
 /**
  * Playwright Academy - Curriculum Data Configuration
- * 135 Lecciones Prácticas organizadas en 20 Secciones
+ * 140 Lecciones Prácticas organizadas en 21 Secciones (~45 horas)
  * Version: 2026.1-v1.0
  */
 
 window.PLAYWRIGHT_CURRICULUM = {
     config: {
         academyName: "Playwright Academy",
-        tagline: "135 Lecciones Prácticas para QA Engineers",
+        tagline: "140 Lecciones Prácticas para QA Engineers (~45 horas)",
         totalLessons: 140,
         totalSections: 21,
         version: "2026.1-v1.0",
@@ -46,7 +46,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "beginner",
             order: 1,
             totalLessons: 10,
-            estimatedHours: 1,
+            estimatedHours: 1.5,
             status: "available",
             lessons: [
                 { id: 1, title: "Introducción a Playwright con Python", duration: "8 min", level: "beginner", type: "foundation", section: "section-01", topics: ["playwright", "introducción", "python"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "easy" },
@@ -69,7 +69,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "beginner",
             order: 2,
             totalLessons: 10,
-            estimatedHours: 1,
+            estimatedHours: 1.5,
             status: "available",
             lessons: [
                 { id: 11, title: "Anatomía de un test Playwright", duration: "8 min", level: "beginner", type: "foundation", section: "section-02", topics: ["test", "anatomía", "estructura"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "easy" },
@@ -92,7 +92,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "beginner",
             order: 3,
             totalLessons: 8,
-            estimatedHours: 1,
+            estimatedHours: 1.5,
             status: "available",
             lessons: [
                 { id: 21, title: "Variables, tipos de datos y f-strings", duration: "5 min", level: "beginner", type: "standard", section: "section-03", topics: ["python", "variables", "f-strings", "tipos"], hasCode: true, hasExercise: true, estimatedTime: 5, difficulty: "easy" },
@@ -113,7 +113,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "beginner",
             order: 4,
             totalLessons: 8,
-            estimatedHours: 1,
+            estimatedHours: 1.5,
             status: "available",
             lessons: [
                 { id: 29, title: "Formularios: fill, check, select", duration: "8 min", level: "beginner", type: "foundation", section: "section-04", topics: ["formularios", "fill", "check", "select"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "easy" },
@@ -134,13 +134,13 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "beginner",
             order: 5,
             totalLessons: 8,
-            estimatedHours: 1,
+            estimatedHours: 1.5,
             status: "available",
             lessons: [
                 { id: 37, title: "Localizadores built-in de Playwright", duration: "8 min", level: "beginner", type: "foundation", section: "section-05", topics: ["localizadores", "built-in", "playwright"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "easy" },
                 { id: 38, title: "CSS Selectors en Playwright", duration: "5 min", level: "beginner", type: "standard", section: "section-05", topics: ["css", "selectores"], hasCode: true, hasExercise: true, estimatedTime: 5, difficulty: "easy" },
                 { id: 39, title: "XPath cuando es necesario", duration: "5 min", level: "beginner", type: "standard", section: "section-05", topics: ["xpath", "selectores"], hasCode: true, hasExercise: true, estimatedTime: 5, difficulty: "easy" },
-                { id: 40, title: "Localizadores semánticos y accesibilidad", duration: "5 min", level: "beginner", type: "standard", section: "section-05", topics: ["semánticos", "accesibilidad", "aria"], hasCode: true, hasExercise: true, estimatedTime: 5, difficulty: "easy" },
+                { id: 40, title: "Localizadores semánticos y accesibilidad", duration: "15 min", level: "beginner", type: "standard", section: "section-05", topics: ["semánticos", "accesibilidad", "aria"], hasCode: true, hasExercise: true, estimatedTime: 15, difficulty: "easy" },
                 { id: 41, title: "Filtrado y encadenamiento de locators", duration: "5 min", level: "beginner", type: "standard", section: "section-05", topics: ["filtrado", "encadenamiento", "locators"], hasCode: true, hasExercise: true, estimatedTime: 5, difficulty: "easy" },
                 { id: 42, title: "Localizadores relativos y por layout", duration: "5 min", level: "beginner", type: "standard", section: "section-05", topics: ["relativos", "layout", "locators"], hasCode: true, hasExercise: true, estimatedTime: 5, difficulty: "easy" },
                 { id: 43, title: "Estrategias de localizadores robustos", duration: "5 min", level: "beginner", type: "standard", section: "section-05", topics: ["estrategias", "robustos", "mantenimiento"], hasCode: true, hasExercise: true, estimatedTime: 5, difficulty: "easy" },
@@ -155,7 +155,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "beginner",
             order: 6,
             totalLessons: 8,
-            estimatedHours: 1,
+            estimatedHours: 1.5,
             status: "available",
             lessons: [
                 { id: 45, title: "JavaScript execution desde Playwright", duration: "8 min", level: "beginner", type: "foundation", section: "section-06", topics: ["javascript", "evaluate", "ejecución"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "medium" },
@@ -165,7 +165,7 @@ window.PLAYWRIGHT_CURRICULUM = {
                 { id: 49, title: "Shadow DOM y Web Components", duration: "5 min", level: "beginner", type: "standard", section: "section-06", topics: ["shadow-dom", "web-components"], hasCode: true, hasExercise: true, estimatedTime: 5, difficulty: "easy" },
                 { id: 50, title: "Storage y cookies", duration: "5 min", level: "beginner", type: "standard", section: "section-06", topics: ["storage", "cookies", "localStorage"], hasCode: true, hasExercise: true, estimatedTime: 5, difficulty: "easy" },
                 { id: 51, title: "Geolocation, permissions, device emulation", duration: "5 min", level: "beginner", type: "standard", section: "section-06", topics: ["geolocation", "permisos", "emulación"], hasCode: true, hasExercise: true, estimatedTime: 5, difficulty: "easy" },
-                { id: 52, title: "Proyecto: Interacciones complejas E2E", duration: "10 min", level: "beginner", type: "integration", section: "section-06", topics: ["proyecto", "e2e", "interacciones"], hasCode: true, hasExercise: true, estimatedTime: 10, difficulty: "medium" }
+                { id: 52, title: "Proyecto: Interacciones complejas E2E", duration: "35 min", level: "beginner", type: "integration", section: "section-06", topics: ["proyecto", "e2e", "interacciones"], hasCode: true, hasExercise: true, estimatedTime: 35, difficulty: "medium" }
             ]
         },
         "section-07": {
@@ -176,7 +176,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "intermediate",
             order: 7,
             totalLessons: 7,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 53, title: "Introducción al Page Object Model", duration: "8 min", level: "intermediate", type: "foundation", section: "section-07", topics: ["pom", "page-object", "introducción"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "medium" },
@@ -196,7 +196,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "intermediate",
             order: 8,
             totalLessons: 5,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 60, title: "Concepto de Auto-waiting en Playwright", duration: "8 min", level: "intermediate", type: "foundation", section: "section-08", topics: ["auto-waiting", "concepto", "playwright"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "medium" },
@@ -214,7 +214,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "intermediate",
             order: 9,
             totalLessons: 6,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 65, title: "Fundamentos de intercepción de red", duration: "8 min", level: "intermediate", type: "foundation", section: "section-09", topics: ["network", "intercepción", "fundamentos"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "medium" },
@@ -233,7 +233,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "intermediate",
             order: 10,
             totalLessons: 7,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 71, title: "APIRequestContext de Playwright", duration: "8 min", level: "intermediate", type: "foundation", section: "section-10", topics: ["api", "request-context", "playwright"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "medium" },
@@ -253,7 +253,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "intermediate",
             order: 11,
             totalLessons: 5,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 78, title: "Conexión a bases de datos desde Python", duration: "8 min", level: "intermediate", type: "foundation", section: "section-11", topics: ["database", "conexión", "python"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "medium" },
@@ -271,7 +271,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "intermediate",
             order: 12,
             totalLessons: 5,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 83, title: "pytest.mark.parametrize básico", duration: "8 min", level: "intermediate", type: "foundation", section: "section-12", topics: ["parametrize", "data-driven", "pytest"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "medium" },
@@ -289,7 +289,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "intermediate",
             order: 13,
             totalLessons: 5,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 88, title: "Browser vs Context vs Page", duration: "8 min", level: "intermediate", type: "foundation", section: "section-13", topics: ["browser", "context", "page", "jerarquía"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "medium" },
@@ -307,7 +307,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "intermediate",
             order: 14,
             totalLessons: 6,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 93, title: "Playwright Inspector y PWDEBUG", duration: "8 min", level: "intermediate", type: "foundation", section: "section-14", topics: ["inspector", "pwdebug", "debugging"], hasCode: true, hasExercise: true, estimatedTime: 8, difficulty: "medium" },
@@ -326,11 +326,11 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "advanced",
             order: 15,
             totalLessons: 6,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 99, title: "Screenshot comparison nativa", duration: "10 min", level: "advanced", type: "foundation", section: "section-15", topics: ["visual-regression", "screenshots", "comparación"], hasCode: true, hasExercise: true, estimatedTime: 10, difficulty: "medium" },
-                { id: 100, title: "Masking y umbrales de comparación", duration: "7 min", level: "advanced", type: "standard", section: "section-15", topics: ["masking", "umbrales", "comparación"], hasCode: true, hasExercise: true, estimatedTime: 7, difficulty: "medium" },
+                { id: 100, title: "Masking y umbrales de comparación", duration: "18 min", level: "advanced", type: "standard", section: "section-15", topics: ["masking", "umbrales", "comparación"], hasCode: true, hasExercise: true, estimatedTime: 18, difficulty: "medium" },
                 { id: 101, title: "Accessibility testing con axe-core", duration: "7 min", level: "advanced", type: "standard", section: "section-15", topics: ["accessibility", "axe-core", "a11y"], hasCode: true, hasExercise: true, estimatedTime: 7, difficulty: "medium" },
                 { id: 102, title: "Auditorías de accesibilidad automatizadas", duration: "7 min", level: "advanced", type: "standard", section: "section-15", topics: ["auditorías", "accesibilidad", "automatización"], hasCode: true, hasExercise: true, estimatedTime: 7, difficulty: "medium" },
                 { id: 103, title: "Security headers y HTTPS validation", duration: "7 min", level: "advanced", type: "standard", section: "section-15", topics: ["security", "headers", "https"], hasCode: true, hasExercise: true, estimatedTime: 7, difficulty: "medium" },
@@ -345,7 +345,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "advanced",
             order: 16,
             totalLessons: 5,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 105, title: "Reportes HTML con pytest-html", duration: "10 min", level: "advanced", type: "foundation", section: "section-16", topics: ["reporting", "html", "pytest-html"], hasCode: true, hasExercise: true, estimatedTime: 10, difficulty: "medium" },
@@ -363,7 +363,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "advanced",
             order: 17,
             totalLessons: 7,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 110, title: "Playwright en Docker", duration: "10 min", level: "advanced", type: "foundation", section: "section-17", topics: ["docker", "contenedores", "playwright"], hasCode: true, hasExercise: true, estimatedTime: 10, difficulty: "medium" },
@@ -371,7 +371,7 @@ window.PLAYWRIGHT_CURRICULUM = {
                 { id: 112, title: "Jenkins y GitLab CI con Playwright", duration: "7 min", level: "advanced", type: "standard", section: "section-17", topics: ["jenkins", "gitlab-ci", "playwright"], hasCode: true, hasExercise: true, estimatedTime: 7, difficulty: "medium" },
                 { id: 113, title: "Ejecución paralela y sharding", duration: "7 min", level: "advanced", type: "standard", section: "section-17", topics: ["paralelo", "sharding", "ejecución"], hasCode: true, hasExercise: true, estimatedTime: 7, difficulty: "medium" },
                 { id: 114, title: "Retry y manejo de flaky tests", duration: "7 min", level: "advanced", type: "standard", section: "section-17", topics: ["retry", "flaky", "estabilidad"], hasCode: true, hasExercise: true, estimatedTime: 7, difficulty: "medium" },
-                { id: 115, title: "Azure DevOps y pipelines Windows", duration: "7 min", level: "advanced", type: "standard", section: "section-17", topics: ["azure-devops", "windows", "pipelines"], hasCode: true, hasExercise: true, estimatedTime: 7, difficulty: "medium" },
+                { id: 115, title: "Azure DevOps y pipelines Windows", duration: "20 min", level: "advanced", type: "standard", section: "section-17", topics: ["azure-devops", "windows", "pipelines"], hasCode: true, hasExercise: true, estimatedTime: 20, difficulty: "medium" },
                 { id: 116, title: "Proyecto: Pipeline CI/CD completo", duration: "15 min", level: "advanced", type: "capstone", section: "section-17", topics: ["proyecto", "pipeline", "cicd"], hasCode: true, hasExercise: true, estimatedTime: 15, difficulty: "hard" }
             ]
         },
@@ -383,7 +383,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "advanced",
             order: 18,
             totalLessons: 7,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 117, title: "Arquitectura de framework scalable", duration: "10 min", level: "advanced", type: "foundation", section: "section-18", topics: ["arquitectura", "framework", "scalable"], hasCode: true, hasExercise: true, estimatedTime: 10, difficulty: "hard" },
@@ -403,7 +403,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "advanced",
             order: 19,
             totalLessons: 5,
-            estimatedHours: 1,
+            estimatedHours: 2,
             status: "available",
             lessons: [
                 { id: 124, title: "Principios de tests mantenibles", duration: "10 min", level: "advanced", type: "foundation", section: "section-19", topics: ["principios", "mantenibilidad", "tests"], hasCode: true, hasExercise: true, estimatedTime: 10, difficulty: "medium" },
@@ -421,7 +421,7 @@ window.PLAYWRIGHT_CURRICULUM = {
             level: "advanced",
             order: 20,
             totalLessons: 7,
-            estimatedHours: 3,
+            estimatedHours: 5,
             status: "available",
             lessons: [
                 { id: 129, title: "E-commerce Testing Suite", duration: "20 min", level: "advanced", type: "capstone", section: "section-20", topics: ["e-commerce", "suite", "capstone"], hasCode: true, hasExercise: true, estimatedTime: 20, difficulty: "hard" },

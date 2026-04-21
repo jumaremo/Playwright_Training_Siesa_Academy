@@ -7,7 +7,7 @@
 const LESSON_100 = {
     id: 100,
     title: "Masking y umbrales de comparación",
-    duration: "7 min",
+    duration: "18 min",
     level: "advanced",
     section: "section-15",
     content: `
@@ -748,7 +748,7 @@ def test_strict_logo(visual_page: Page):
     topics: ["masking", "umbrales", "comparación"],
     hasCode: true,
     hasExercise: true,
-    estimatedTime: 7,
+    estimatedTime: 18,
     difficulty: "medium",
     type: "standard"
 };

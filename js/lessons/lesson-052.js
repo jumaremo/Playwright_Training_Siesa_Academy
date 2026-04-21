@@ -7,7 +7,7 @@
 const LESSON_052 = {
     id: 52,
     title: "Proyecto: Interacciones complejas E2E",
-    duration: "10 min",
+    duration: "35 min",
     level: "beginner",
     section: "section-06",
     content: `
@@ -1376,7 +1376,7 @@ pytest tests/ -v --html=test-results/report.html --self-contained-html</code></p
     topics: ["proyecto", "e2e", "interacciones"],
     hasCode: true,
     hasExercise: true,
-    estimatedTime: 10,
+    estimatedTime: 35,
     difficulty: "medium",
     type: "integration"
 };

@@ -7,7 +7,7 @@
 const LESSON_040 = {
     id: 40,
     title: "Localizadores semánticos y accesibilidad",
-    duration: "5 min",
+    duration: "15 min",
     level: "beginner",
     section: "section-05",
     content: `
@@ -689,7 +689,7 @@ def test_login_semantico(page: Page):
     topics: ["semánticos", "accesibilidad", "aria"],
     hasCode: true,
     hasExercise: true,
-    estimatedTime: 5,
+    estimatedTime: 15,
     difficulty: "easy",
     type: "standard"
 };

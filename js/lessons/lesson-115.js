@@ -7,7 +7,7 @@
 const LESSON_115 = {
     id: 115,
     title: "Azure DevOps y pipelines Windows",
-    duration: "7 min",
+    duration: "20 min",
     level: "advanced",
     section: "section-17",
     content: `
@@ -1107,7 +1107,7 @@ stages:
     topics: ["azure-devops", "windows", "pipelines"],
     hasCode: true,
     hasExercise: true,
-    estimatedTime: 7,
+    estimatedTime: 20,
     difficulty: "medium",
     type: "standard"
 };

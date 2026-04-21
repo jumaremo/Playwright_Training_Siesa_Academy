@@ -137,10 +137,12 @@ class TableComponent:
 
     def find_row_with_text(self, text):
         """Encontrar la primera fila que contenga el texto."""
+        # filter(has_text=...) requiere Playwright >= 1.44
         return self.rows.filter(has_text=text)
 
     def sort_by_column(self, column_name):
         """Hacer clic en un header para ordenar."""
+        # filter(has_text=...) requiere Playwright >= 1.44
         self.headers.filter(has_text=column_name).click()
         return self
 

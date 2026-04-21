@@ -171,7 +171,8 @@ class MockServer:
                         body=json.dumps(detail_data or {"id": 1})
                     )
             elif method == "POST":
-                body = json.loads(route.request.post_data or "{}")
+                post_data = route.request.post_data
+                body = json.loads(post_data) if post_data else {}
                 route.fulfill(
                     status=201,
                     content_type="application/json",
@@ -322,7 +323,9 @@ def test_checkout_exitoso(mock, page):
         page.click("[data-testid='place-order']")
 
     # Verificar datos enviados
-    body = req.value.post_data_json
+    # Nota: Playwright Python NO tiene post_data_json; se usa json.loads()
+    import json
+    body = json.loads(req.value.post_data)
     assert body["name"] == "Juan Reina"
     assert body["email"] == "juan@siesa.com"
 
