@@ -11,30 +11,30 @@ const LESSON_110 = {
     level: "advanced",
     section: "section-17",
     content: `
-        <h2>🐳 Playwright en Docker</h2>
-        <p>Docker es la herramienta estándar para empaquetar y ejecutar tests de Playwright en
-        entornos reproducibles. En esta lección aprenderás a construir imágenes Docker optimizadas
+        <h2>\u{1F433} Playwright en Docker</h2>
+        <p>Docker es la herramienta estandar para empaquetar y ejecutar tests de Playwright en
+        entornos reproducibles. En esta leccion aprenderas a construir imagenes Docker optimizadas
         para tus tests, usar Docker Compose para orquestar entornos completos y aplicar
-        las mejores prácticas para CI/CD con contenedores.</p>
+        las mejores practicas para CI/CD con contenedores.</p>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>🎯 Objetivos de aprendizaje</h4>
+            <h4>\u{1F3AF} Objetivos de aprendizaje</h4>
             <ul>
-                <li>Entender por qué Docker es esencial para testing con Playwright</li>
-                <li>Usar las imágenes oficiales de Playwright para Python</li>
+                <li>Entender por que Docker es esencial para testing con Playwright</li>
+                <li>Usar las imagenes oficiales de Playwright para Python</li>
                 <li>Crear Dockerfiles optimizados para tests</li>
                 <li>Orquestar entornos con Docker Compose</li>
-                <li>Montar volúmenes para resultados, screenshots y traces</li>
-                <li>Aplicar multi-stage builds y optimización de capas</li>
+                <li>Montar volumenes para resultados, screenshots y traces</li>
+                <li>Aplicar multi-stage builds y optimizacion de capas</li>
             </ul>
         </div>
 
-        <h3>🤔 ¿Por qué Docker para Playwright?</h3>
-        <p>Uno de los problemas más comunes en equipos de QA es la frase: <em>"En mi máquina funciona"</em>.
-        Docker elimina esta incertidumbre por completo al encapsular el entorno de ejecución.</p>
+        <h3>\u{1F914} \u00BFPor que Docker para Playwright?</h3>
+        <p>Uno de los problemas mas comunes en equipos de QA es la frase: <em>"En mi maquina funciona"</em>.
+        Docker elimina esta incertidumbre por completo al encapsular el entorno de ejecucion.</p>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>✅ Ventajas de Docker para testing</h4>
+            <h4>\u2705 Ventajas de Docker para testing</h4>
             <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
                 <tr style="background: #c8e6c9;">
                     <th style="padding: 8px; border: 1px solid #ddd;">Ventaja</th>
@@ -64,20 +64,31 @@ const LESSON_110 = {
         </div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>❌ Sin Docker: problemas comunes</h4>
+            <h4>\u274C Sin Docker: problemas comunes</h4>
             <ul>
                 <li><strong>Versiones diferentes de navegador</strong> entre desarrolladores y CI</li>
-                <li><strong>Dependencias del SO</strong> faltantes (librerías de Chromium en Linux)</li>
+                <li><strong>Dependencias del SO</strong> faltantes (librerias de Chromium en Linux)</li>
                 <li><strong>Configuraciones divergentes</strong> de Python, pip o entorno virtual</li>
                 <li><strong>Tests que pasan localmente</strong> pero fallan en CI (o viceversa)</li>
             </ul>
         </div>
 
-        <h3>📦 Imágenes oficiales de Playwright</h3>
-        <p>Microsoft mantiene imágenes Docker oficiales con todos los navegadores y dependencias
+        <h3>\u{1F4E6} Imagenes oficiales de Playwright</h3>
+        <p>Microsoft mantiene imagenes Docker oficiales con todos los navegadores y dependencias
         del sistema operativo preinstalados. Esta es la forma recomendada de ejecutar Playwright.</p>
 
-        <pre><code class="bash"># Imagen oficial de Playwright para Python
+        <div class="code-tabs" data-code-id="L110-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Imagen oficial de Playwright para Python
 # Formato: mcr.microsoft.com/playwright/python:v{version}
 # Ejemplo con Playwright 1.49:
 docker pull mcr.microsoft.com/playwright/python:v1.49.0-noble-amd64
@@ -88,16 +99,43 @@ docker pull mcr.microsoft.com/playwright/python:v1.49.0-noble-amd64
 
 # Para ver las tags disponibles:
 # https://mcr.microsoft.com/en-us/artifact/mar/playwright/python/tags</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">\u2139\uFE0F</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-typescript">// Imagen oficial de Playwright para TypeScript/Node
+// Formato: mcr.microsoft.com/playwright:v{version}
+// Ejemplo con Playwright 1.49:
+// docker pull mcr.microsoft.com/playwright:v1.49.0-noble-amd64
+
+// Variantes disponibles:
+// - noble (Ubuntu 24.04 LTS) - recomendada
+// - jammy (Ubuntu 22.04 LTS) - soporte extendido
+
+// Para ver las tags disponibles:
+// https://mcr.microsoft.com/en-us/artifact/mar/playwright/tags</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>💡 Tip SIESA</h4>
+            <h4>\u{1F4A1} Tip SIESA</h4>
             <p>Siempre fija una version especifica de la imagen (ej. <code>v1.49.0-noble-amd64</code>)
             en lugar de <code>latest</code>. Esto garantiza que tus tests usen exactamente la misma version
             de navegadores en desarrollo y en CI. En SIESA, mantenemos la version de la imagen
             alineada con la version de <code>playwright</code> en <code>requirements.txt</code>.</p>
         </div>
 
-        <pre><code class="bash"># Verificar que contiene en la imagen oficial:
+        <div class="code-tabs" data-code-id="L110-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Verificar que contiene en la imagen oficial:
 docker run --rm mcr.microsoft.com/playwright/python:v1.49.0-noble-amd64 \\
     python -c "
 import subprocess
@@ -114,8 +152,28 @@ subprocess.run(['python', '-m', 'playwright', 'install', '--dry-run'])
 # - Playwright para Python (version correspondiente al tag)
 # - Chromium, Firefox y WebKit preinstalados
 # - Todas las dependencias del SO (libnss3, libatk, fonts, etc.)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">\u2139\uFE0F</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-typescript">// Verificar que contiene la imagen oficial:
+// docker run --rm mcr.microsoft.com/playwright:v1.49.0-noble-amd64 \\
+//     node -e "
+//     console.log('=== Node ===');
+//     console.log(process.version);
+//     const { execSync } = require('child_process');
+//     console.log('=== Playwright ===');
+//     console.log(execSync('npx playwright --version').toString());
+//     "
 
-        <h3>🏗️ Dockerfile para tests de Playwright</h3>
+// La imagen ya incluye:
+// - Node.js
+// - Playwright para TypeScript/Node (version correspondiente al tag)
+// - Chromium, Firefox y WebKit preinstalados
+// - Todas las dependencias del SO (libnss3, libatk, fonts, etc.)</code></pre>
+            </div>
+        </div>
+
+        <h3>\u{1F3D7}\uFE0F Dockerfile para tests de Playwright</h3>
         <p>Aunque la imagen oficial ya tiene todo, normalmente necesitas agregar tu propio codigo
         de tests y dependencias adicionales.</p>
 
@@ -148,29 +206,40 @@ pytest-html==4.1.1
 python-dotenv==1.0.1</code></pre>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>📋 Estructura de proyecto recomendada</h4>
+            <h4>\u{1F4CB} Estructura de proyecto recomendada</h4>
             <pre><code class="text">mi-proyecto-tests/
-├── Dockerfile
-├── docker-compose.yml
-├── requirements.txt
-├── conftest.py
-├── pytest.ini
-├── pages/
-│   ├── __init__.py
-│   ├── login_page.py
-│   └── dashboard_page.py
-├── tests/
-│   ├── __init__.py
-│   ├── test_login.py
-│   └── test_dashboard.py
-└── test-results/          # Se crea al ejecutar (volume mount)
-    ├── screenshots/
-    ├── traces/
-    └── reports/</code></pre>
+\u251C\u2500\u2500 Dockerfile
+\u251C\u2500\u2500 docker-compose.yml
+\u251C\u2500\u2500 requirements.txt
+\u251C\u2500\u2500 conftest.py
+\u251C\u2500\u2500 pytest.ini
+\u251C\u2500\u2500 pages/
+\u2502   \u251C\u2500\u2500 __init__.py
+\u2502   \u251C\u2500\u2500 login_page.py
+\u2502   \u2514\u2500\u2500 dashboard_page.py
+\u251C\u2500\u2500 tests/
+\u2502   \u251C\u2500\u2500 __init__.py
+\u2502   \u251C\u2500\u2500 test_login.py
+\u2502   \u2514\u2500\u2500 test_dashboard.py
+\u2514\u2500\u2500 test-results/          # Se crea al ejecutar (volume mount)
+    \u251C\u2500\u2500 screenshots/
+    \u251C\u2500\u2500 traces/
+    \u2514\u2500\u2500 reports/</code></pre>
         </div>
 
-        <h3>🔨 Construir y ejecutar</h3>
-        <pre><code class="bash"># Construir la imagen
+        <h3>\u{1F528} Construir y ejecutar</h3>
+        <div class="code-tabs" data-code-id="L110-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Construir la imagen
 docker build -t mis-tests-playwright .
 
 # Ejecutar los tests
@@ -184,21 +253,51 @@ docker run --rm mis-tests-playwright pytest -m "smoke" -v
 
 # Ejecutar con mas detalle (output verbose)
 docker run --rm mis-tests-playwright pytest tests/ -v --tb=long</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">\u2139\uFE0F</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-typescript">// Construir la imagen
+// docker build -t mis-tests-playwright .
+
+// Ejecutar los tests
+// docker run --rm mis-tests-playwright
+
+// Ejecutar un archivo de test especifico
+// docker run --rm mis-tests-playwright npx playwright test tests/login.spec.ts
+
+// Ejecutar con un tag/grep especifico
+// docker run --rm mis-tests-playwright npx playwright test --grep "smoke"
+
+// Ejecutar con mas detalle (output verbose)
+// docker run --rm mis-tests-playwright npx playwright test --reporter=list</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>💡 Tip SIESA</h4>
+            <h4>\u{1F4A1} Tip SIESA</h4>
             <p>Usa <code>--rm</code> para eliminar automaticamente el contenedor al terminar. Esto evita
             acumular contenedores detenidos que consumen espacio en disco, algo critico en
             servidores de CI con espacio limitado.</p>
         </div>
 
-        <h3>📂 Volumenes: extraer resultados del contenedor</h3>
+        <h3>\u{1F4C2} Volumenes: extraer resultados del contenedor</h3>
         <p>Los tests generan artefactos valiosos: screenshots de fallos, traces de Playwright,
         reportes HTML. Para extraerlos del contenedor, usamos <strong>volume mounts</strong>.</p>
 
-        <pre><code class="bash"># Montar directorio local para resultados
+        <div class="code-tabs" data-code-id="L110-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Montar directorio local para resultados
 docker run --rm \\
-    -v "$(pwd)/test-results:/app/test-results" \\
+    -v "\$(pwd)/test-results:/app/test-results" \\
     mis-tests-playwright \\
     pytest tests/ -v \\
         --screenshot=on \\
@@ -206,16 +305,47 @@ docker run --rm \\
 
 # Montar multiples volumenes
 docker run --rm \\
-    -v "$(pwd)/test-results:/app/test-results" \\
-    -v "$(pwd)/reports:/app/reports" \\
+    -v "\$(pwd)/test-results:/app/test-results" \\
+    -v "\$(pwd)/reports:/app/reports" \\
     mis-tests-playwright \\
     pytest tests/ -v \\
         --screenshot=on \\
         --output=/app/test-results \\
         --html=/app/reports/report.html --self-contained-html</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">\u2139\uFE0F</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-typescript">// Montar directorio local para resultados
+// docker run --rm \\
+//     -v "\$(pwd)/test-results:/app/test-results" \\
+//     mis-tests-playwright \\
+//     npx playwright test \\
+//         --output=/app/test-results
+
+// Montar multiples volumenes
+// docker run --rm \\
+//     -v "\$(pwd)/test-results:/app/test-results" \\
+//     -v "\$(pwd)/reports:/app/reports" \\
+//     mis-tests-playwright \\
+//     npx playwright test \\
+//         --output=/app/test-results \\
+//         --reporter=html</code></pre>
+            </div>
+        </div>
 
         <h4>conftest.py para captura automatica de artefactos</h4>
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L110-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest
 from pathlib import Path
 from playwright.sync_api import Page
@@ -255,11 +385,46 @@ def pytest_runtest_makereport(item):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
 
-        <h3>🌍 Variables de entorno en Docker</h3>
+export default defineConfig({
+  outputDir: '/app/test-results',
+  use: {
+    // Captura automatica de screenshots y traces en fallos
+    screenshot: 'only-on-failure',
+    trace: 'retain-on-failure',
+    video: 'retain-on-failure',
+  },
+  reporter: [
+    ['list'],
+    ['html', { outputFolder: '/app/test-results/html-report' }],
+  ],
+});
+
+// En Playwright Test, la captura de screenshots y traces en fallo
+// se configura declarativamente en playwright.config.ts
+// No es necesario un hook manual como en pytest.</code></pre>
+            </div>
+        </div>
+
+        <h3>\u{1F30D} Variables de entorno en Docker</h3>
         <p>Usa variables de entorno para configurar tus tests sin modificar el codigo.</p>
 
-        <pre><code class="bash"># Pasar variables de entorno individuales
+        <div class="code-tabs" data-code-id="L110-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Pasar variables de entorno individuales
 docker run --rm \\
     -e BASE_URL="https://staging.miapp.com" \\
     -e HEADLESS=true \\
@@ -270,10 +435,37 @@ docker run --rm \\
 # Usar archivo .env
 docker run --rm \\
     --env-file .env.staging \\
-    -v "$(pwd)/test-results:/app/test-results" \\
+    -v "\$(pwd)/test-results:/app/test-results" \\
     mis-tests-playwright</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">\u2139\uFE0F</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-typescript">// Pasar variables de entorno individuales
+// docker run --rm \\
+//     -e BASE_URL="https://staging.miapp.com" \\
+//     -e BROWSER="chromium" \\
+//     mis-tests-playwright
 
-        <pre><code class="python"># conftest.py - Leer variables de entorno
+// Usar archivo .env
+// docker run --rm \\
+//     --env-file .env.staging \\
+//     -v "\$(pwd)/test-results:/app/test-results" \\
+//     mis-tests-playwright</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L110-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py - Leer variables de entorno
 import os
 import pytest
 from playwright.sync_api import sync_playwright
@@ -300,6 +492,31 @@ def browser(browser_config):
         )
         yield browser
         browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts - Leer variables de entorno
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  use: {
+    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    headless: process.env.HEADLESS !== 'false',
+    launchOptions: {
+      slowMo: parseInt(process.env.SLOW_MO || '0', 10),
+    },
+    actionTimeout: parseInt(process.env.TIMEOUT || '30000', 10),
+  },
+  projects: [
+    {
+      name: process.env.BROWSER || 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+      },
+    },
+  ],
+});</code></pre>
+            </div>
+        </div>
 
         <pre><code class="bash"># .env.staging
 BASE_URL=https://staging.miapp.com
@@ -309,7 +526,7 @@ SLOW_MO=0
 TIMEOUT=30000
 RETRIES=2</code></pre>
 
-        <h3>🐙 Docker Compose para entornos completos</h3>
+        <h3>\u{1F419} Docker Compose para entornos completos</h3>
         <p>Docker Compose permite levantar la aplicacion bajo prueba junto con los tests
         en un solo comando. Esto es fundamental para tests de integracion end-to-end.</p>
 
@@ -370,7 +587,18 @@ services:
         --html=/app/reports/report.html
         --self-contained-html</code></pre>
 
-        <pre><code class="bash"># Ejecutar todo el stack
+        <div class="code-tabs" data-code-id="L110-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Ejecutar todo el stack
 docker compose up --build --abort-on-container-exit --exit-code-from tests
 
 # Desglose del comando:
@@ -386,9 +614,25 @@ docker compose run --rm tests
 
 # Ejecutar un test especifico
 docker compose run --rm tests pytest tests/test_login.py -v -k "test_login_exitoso"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">\u2139\uFE0F</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-typescript">// Ejecutar todo el stack
+// docker compose up --build --abort-on-container-exit --exit-code-from tests
+
+// Limpiar despues de los tests
+// docker compose down -v
+
+// Ejecutar solo los tests (si la app ya esta corriendo)
+// docker compose run --rm tests
+
+// Ejecutar un test especifico
+// docker compose run --rm tests npx playwright test tests/login.spec.ts --grep "login exitoso"</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>💡 Tip SIESA</h4>
+            <h4>\u{1F4A1} Tip SIESA</h4>
             <p>El flag <code>--exit-code-from tests</code> es clave para CI/CD: hace que
             <code>docker compose</code> devuelva el mismo codigo de salida que el contenedor de tests.
             Si los tests fallan (exit code != 0), el pipeline de CI tambien fallara. En SIESA
@@ -396,7 +640,7 @@ docker compose run --rm tests pytest tests/test_login.py -v -k "test_login_exito
             correctamente.</p>
         </div>
 
-        <h3>🏗️ Multi-stage builds para imagenes mas pequenas</h3>
+        <h3>\u{1F3D7}\uFE0F Multi-stage builds para imagenes mas pequenas</h3>
         <p>Si tu proyecto tiene dependencias pesadas de compilacion (como <code>cryptography</code> o
         <code>lxml</code>), usa multi-stage builds para reducir el tamano final de la imagen.</p>
 
@@ -431,7 +675,7 @@ USER pwuser
 CMD ["pytest", "tests/", "-v", "--tb=short"]</code></pre>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>🔬 Avanzado: Optimizacion de capas Docker</h4>
+            <h4>\u{1F52C} Avanzado: Optimizacion de capas Docker</h4>
             <p>Docker cachea cada instruccion (<code>RUN</code>, <code>COPY</code>, etc.) como una capa.
             Si una capa no cambia, Docker reutiliza el cache. Ordena tu Dockerfile de
             <strong>menos a mas frecuente en cambios</strong>:</p>
@@ -456,12 +700,23 @@ CMD ["pytest", "tests/", "-v"]</code></pre>
             y solo reconstruye la capa 4. Esto reduce el build de minutos a segundos.</p>
         </div>
 
-        <h3>🖥️ Modo headed en Docker (con Xvfb)</h3>
+        <h3>\u{1F5A5}\uFE0F Modo headed en Docker (con Xvfb)</h3>
         <p>Por defecto, Docker no tiene servidor grafico. Si necesitas ejecutar tests en modo
         <strong>headed</strong> (por ejemplo, para depurar visualmente), debes usar Xvfb
         (X Virtual Framebuffer).</p>
 
-        <pre><code class="bash"># La imagen oficial de Playwright ya incluye xvfb-run
+        <div class="code-tabs" data-code-id="L110-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># La imagen oficial de Playwright ya incluye xvfb-run
 # Ejecutar tests en modo headed dentro de Docker:
 docker run --rm \\
     -e DISPLAY=:99 \\
@@ -471,11 +726,39 @@ docker run --rm \\
 
 # Grabar video de los tests (no requiere Xvfb, Playwright lo hace internamente)
 docker run --rm \\
-    -v "$(pwd)/test-results:/app/test-results" \\
+    -v "\$(pwd)/test-results:/app/test-results" \\
     mis-tests-playwright \\
     pytest tests/ -v --video=on --output=/app/test-results</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">\u2139\uFE0F</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-typescript">// Ejecutar tests en modo headed dentro de Docker:
+// docker run --rm \\
+//     -e DISPLAY=:99 \\
+//     mis-tests-playwright \\
+//     xvfb-run --auto-servernum --server-args="-screen 0 1920x1080x24" \\
+//     npx playwright test --headed
 
-        <pre><code class="python"># conftest.py - Configurar video y headed segun entorno
+// Grabar video de los tests
+// docker run --rm \\
+//     -v "\$(pwd)/test-results:/app/test-results" \\
+//     mis-tests-playwright \\
+//     npx playwright test --video=on --output=/app/test-results</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L110-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py - Configurar video y headed segun entorno
 import os
 import pytest
 
@@ -489,9 +772,25 @@ def browser_context_args(browser_context_args):
             "record_video_size": {"width": 1280, "height": 720},
         }
     return browser_context_args</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts - Configurar video y headed segun entorno
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  use: {
+    // Grabar video si la variable de entorno VIDEO=on
+    video: process.env.VIDEO === 'on' ? 'on' : 'off',
+    // Configurar tamanio del video
+    viewport: { width: 1280, height: 720 },
+  },
+  outputDir: '/app/test-results',
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>📋 Nota sobre modo headed</h4>
+            <h4>\u{1F4CB} Nota sobre modo headed</h4>
             <p>En la gran mayoria de los casos, <strong>no necesitas modo headed en Docker</strong>.
             Los traces de Playwright (<code>--tracing=on</code>) proporcionan una recreacion
             visual completa del test que puedes ver en <code>trace.playwright.dev</code>.
@@ -499,10 +798,10 @@ def browser_context_args(browser_context_args):
             reproduce en headless.</p>
         </div>
 
-        <h3>⚡ Tips de rendimiento</h3>
+        <h3>\u26A1 Tips de rendimiento</h3>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>✅ Optimizaciones recomendadas</h4>
+            <h4>\u2705 Optimizaciones recomendadas</h4>
             <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
                 <tr style="background: #c8e6c9;">
                     <th style="padding: 8px; border: 1px solid #ddd;">Tecnica</th>
@@ -562,13 +861,24 @@ DOCKER_BUILDKIT=1 docker build -t mis-tests-playwright .
 # RUN --mount=type=cache,target=/root/.cache/pip \\
 #     pip install -r requirements.txt</code></pre>
 
-        <h3>🔍 Depuracion de tests dentro de contenedores</h3>
+        <h3>\u{1F50D} Depuracion de tests dentro de contenedores</h3>
         <p>Cuando un test falla solo en Docker, necesitas herramientas para investigar
         dentro del contenedor.</p>
 
-        <pre><code class="bash"># 1. Entrar al contenedor interactivamente
+        <div class="code-tabs" data-code-id="L110-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># 1. Entrar al contenedor interactivamente
 docker run --rm -it \\
-    -v "$(pwd)/tests:/app/tests" \\
+    -v "\$(pwd)/tests:/app/tests" \\
     mis-tests-playwright \\
     /bin/bash
 
@@ -579,7 +889,7 @@ docker run --rm -it \\
 
 # 2. Ejecutar un test especifico con output detallado
 docker run --rm \\
-    -v "$(pwd)/test-results:/app/test-results" \\
+    -v "\$(pwd)/test-results:/app/test-results" \\
     mis-tests-playwright \\
     pytest tests/test_login.py::test_login_exitoso -v -s \\
         --tracing=on \\
@@ -594,9 +904,42 @@ docker run --rm \\
 docker run --rm -it \\
     mis-tests-playwright \\
     pytest tests/test_login.py -v -s --pdb</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">\u2139\uFE0F</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-typescript">// 1. Entrar al contenedor interactivamente
+// docker run --rm -it \\
+//     -v "\$(pwd)/tests:/app/tests" \\
+//     mis-tests-playwright \\
+//     /bin/bash
+
+// Dentro del contenedor:
+// $ npx playwright --version
+// $ npx playwright test tests/login.spec.ts --reporter=list
+// $ npx playwright install --dry-run
+
+// 2. Ejecutar un test especifico con output detallado
+// docker run --rm \\
+//     -v "\$(pwd)/test-results:/app/test-results" \\
+//     mis-tests-playwright \\
+//     npx playwright test tests/login.spec.ts --grep "login exitoso" \\
+//         --trace=on \\
+//         --reporter=list
+
+// 3. Ver los traces generados
+// npx playwright show-trace test-results/trace.zip
+// o abrir https://trace.playwright.dev
+
+// 4. Ejecutar con debug
+// docker run --rm -it \\
+//     -e PWDEBUG=1 \\
+//     mis-tests-playwright \\
+//     npx playwright test tests/login.spec.ts</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>💡 Tip SIESA</h4>
+            <h4>\u{1F4A1} Tip SIESA</h4>
             <p>Cuando un test falla solo en Docker pero pasa localmente, las causas mas comunes son:
             <strong>(1)</strong> diferencias de timing (el contenedor es mas lento),
             <strong>(2)</strong> resolucion de pantalla diferente,
@@ -606,7 +949,7 @@ docker run --rm -it \\
             que vio el navegador.</p>
         </div>
 
-        <h3>📋 Dockerfile completo de produccion</h3>
+        <h3>\u{1F4CB} Dockerfile completo de produccion</h3>
         <p>Este es un Dockerfile listo para usar en un proyecto real con todas las
         optimizaciones descritas en esta leccion.</p>
 
@@ -652,13 +995,24 @@ RUN mkdir -p /app/test-results/screenshots \\
 CMD ["pytest", "tests/", "-v", "--tb=short", \\
      "--screenshot=on", "--output=/app/test-results"]</code></pre>
 
-        <h3>🎯 Ejercicio practico</h3>
+        <h3>\u{1F3AF} Ejercicio practico</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>🏋️ Ejercicio: Dockerizar un proyecto de tests</h4>
+            <h4>\u{1F3CB}\uFE0F Ejercicio: Dockerizar un proyecto de tests</h4>
             <p>Crea la configuracion Docker completa para un proyecto de tests de Playwright.</p>
         </div>
 
-        <pre><code class="python"># === Paso 1: Crear la estructura del proyecto ===
+        <div class="code-tabs" data-code-id="L110-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># === Paso 1: Crear la estructura del proyecto ===
 # Crea estos archivos en tu directorio de trabajo:
 
 # requirements.txt
@@ -715,6 +1069,54 @@ def test_checkboxes(page: Page):
     checkboxes = page.locator("input[type='checkbox']")
     checkboxes.first.check()
     expect(checkboxes.first).to_be_checked()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// === Paso 1: Crear la estructura del proyecto ===
+
+// package.json
+// {
+//   "devDependencies": {
+//     "@playwright/test": "1.49.0"
+//   }
+// }
+
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  use: {
+    baseURL: process.env.BASE_URL || 'https://the-internet.herokuapp.com',
+    headless: process.env.HEADLESS !== 'false',
+    screenshot: 'only-on-failure',
+    trace: 'retain-on-failure',
+  },
+  outputDir: process.env.RESULTS_DIR || './test-results',
+});
+
+// tests/docker-demo.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('pagina carga correctamente', async ({ page }) => {
+  await page.goto('https://the-internet.herokuapp.com');
+  await expect(page.getByRole('heading', { name: 'Welcome to the-internet' })).toBeVisible();
+});
+
+test('login formulario', async ({ page }) => {
+  await page.goto('https://the-internet.herokuapp.com/login');
+  await page.getByLabel('Username').fill('tomsmith');
+  await page.getByLabel('Password').fill('SuperSecretPassword!');
+  await page.getByRole('button', { name: 'Login' }).click();
+  await expect(page.getByText('You logged into a secure area')).toBeVisible();
+});
+
+test('checkboxes', async ({ page }) => {
+  await page.goto('https://the-internet.herokuapp.com/checkboxes');
+  const checkboxes = page.locator("input[type='checkbox']");
+  await checkboxes.first().check();
+  await expect(checkboxes.first()).toBeChecked();
+});</code></pre>
+            </div>
+        </div>
 
         <pre><code class="dockerfile"># === Paso 2: Crear el Dockerfile ===
 # Dockerfile
@@ -734,22 +1136,33 @@ CMD ["pytest", "tests/", "-v", "--screenshot=on", \\
      "--output=/app/test-results", \\
      "--html=/app/reports/report.html", "--self-contained-html"]</code></pre>
 
-        <pre><code class="bash"># === Paso 3: Construir y ejecutar ===
+        <div class="code-tabs" data-code-id="L110-13">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F40D}</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">\u{1F537}</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">\u{1F4CB}</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># === Paso 3: Construir y ejecutar ===
 
 # Construir
 docker build -t ejercicio-pw-docker .
 
 # Ejecutar todos los tests
 docker run --rm \\
-    -v "$(pwd)/test-results:/app/test-results" \\
-    -v "$(pwd)/reports:/app/reports" \\
+    -v "\$(pwd)/test-results:/app/test-results" \\
+    -v "\$(pwd)/reports:/app/reports" \\
     ejercicio-pw-docker
 
 # Ejecutar con variables de entorno personalizadas
 docker run --rm \\
     -e HEADLESS=true \\
     -e TIMEOUT=60000 \\
-    -v "$(pwd)/test-results:/app/test-results" \\
+    -v "\$(pwd)/test-results:/app/test-results" \\
     ejercicio-pw-docker \\
     pytest tests/test_docker_demo.py -v
 
@@ -758,6 +1171,33 @@ ls -la test-results/screenshots/
 ls -la reports/
 
 # === Paso 4: Crear docker-compose.yml ===</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">\u2139\uFE0F</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-typescript">// === Paso 3: Construir y ejecutar ===
+
+// Construir
+// docker build -t ejercicio-pw-docker .
+
+// Ejecutar todos los tests
+// docker run --rm \\
+//     -v "\$(pwd)/test-results:/app/test-results" \\
+//     -v "\$(pwd)/reports:/app/reports" \\
+//     ejercicio-pw-docker
+
+// Ejecutar con variables de entorno personalizadas
+// docker run --rm \\
+//     -e HEADLESS=true \\
+//     -e TIMEOUT=60000 \\
+//     -v "\$(pwd)/test-results:/app/test-results" \\
+//     ejercicio-pw-docker \\
+//     npx playwright test tests/docker-demo.spec.ts --reporter=list
+
+// Verificar resultados
+// ls -la test-results/
+// ls -la reports/</code></pre>
+            </div>
+        </div>
 
         <pre><code class="yaml"># docker-compose.yml
 version: "3.9"
@@ -795,7 +1235,7 @@ echo "=== Reportes ==="
 ls -la reports/</code></pre>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>✅ Criterios de exito del ejercicio</h4>
+            <h4>\u2705 Criterios de exito del ejercicio</h4>
             <ul>
                 <li>La imagen Docker se construye sin errores</li>
                 <li>Los 3 tests pasan dentro del contenedor</li>
@@ -806,7 +1246,7 @@ ls -la reports/</code></pre>
             </ul>
         </div>
 
-        <h3>📊 Resumen de comandos clave</h3>
+        <h3>\u{1F4CA} Resumen de comandos clave</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <table style="width:100%; border-collapse: collapse; margin-top: 10px;">
                 <tr style="background: #ce93d8; color: white;">
@@ -845,7 +1285,7 @@ ls -la reports/</code></pre>
         </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <h4>✅ Resumen de la leccion</h4>
+            <h4>\u2705 Resumen de la leccion</h4>
             <ul>
                 <li><strong>Docker elimina el "funciona en mi maquina"</strong> al empaquetar SO, Python, navegadores y dependencias</li>
                 <li><strong>Imagen oficial:</strong> <code>mcr.microsoft.com/playwright/python:v1.49.0-noble-amd64</code> con todo preinstalado</li>
@@ -858,7 +1298,7 @@ ls -la reports/</code></pre>
             </ul>
         </div>
 
-        <h3>🚀 Siguiente: GitHub Actions con Playwright</h3>
+        <h3>\u{1F680} Siguiente: GitHub Actions con Playwright</h3>
         <p>En la proxima leccion integraremos Docker con <strong>GitHub Actions</strong> para crear
         pipelines de CI/CD que ejecuten tus tests de Playwright automaticamente en cada push
         y pull request.</p>

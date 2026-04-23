@@ -38,7 +38,18 @@ const LESSON_029 = {
                 </tr>
             </table>
         </div>
-        <pre><code class="python">from playwright.sync_api import Page
+        <div class="code-tabs" data-code-id="L029-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page
 
 def test_fill_vs_type(page: Page):
     page.goto("https://the-internet.herokuapp.com/login")
@@ -49,10 +60,37 @@ def test_fill_vs_type(page: Page):
     # type() — simula cada tecla individualmente
     # Útil si hay lógica onkeyup/onkeydown
     page.type("#password", "SuperSecretPassword!", delay=50)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test } from '@playwright/test';
+
+test('fill vs type', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/login');
+
+    // fill() — rápido, limpia primero y establece el valor
+    await page.fill('#username', 'tomsmith');
+
+    // type() — simula cada tecla individualmente
+    // Útil si hay lógica onkeyup/onkeydown
+    await page.locator('#password').pressSequentially('SuperSecretPassword!', { delay: 50 });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📄 Llenado de campos de texto</h3>
         <p>Con <code>page.fill()</code> puedes llenar inputs de texto, textareas y campos de contraseña:</p>
-        <pre><code class="python">def test_campos_texto(page: Page):
+        <div class="code-tabs" data-code-id="L029-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_campos_texto(page: Page):
     page.goto("https://ejemplo.com/registro")
 
     # Input de texto simple
@@ -69,13 +107,46 @@ def test_fill_vs_type(page: Page):
 
     # Campo de búsqueda
     page.fill("input[type='search']", "Playwright Python")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('campos texto', async ({ page }) => {
+    await page.goto('https://ejemplo.com/registro');
+
+    // Input de texto simple
+    await page.fill('#nombre', 'Juan Manuel');
+
+    // Campo de email
+    await page.fill("input[type='email']", 'juan@siesa.com');
+
+    // Campo de contraseña
+    await page.fill("input[type='password']", 'MiClave$egura123');
+
+    // Textarea (comentarios, descripciones)
+    await page.fill('textarea#comentarios', 'Este es un comentario\\nmultilínea');
+
+    // Campo de búsqueda
+    await page.fill("input[type='search']", 'Playwright Python');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>☑️ Checkboxes: check, uncheck y set_checked</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Playwright proporciona métodos específicos para checkboxes que son más expresivos
             y seguros que simplemente hacer <code>click()</code>.</p>
         </div>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L029-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_checkboxes(page: Page):
     page.goto("https://the-internet.herokuapp.com/checkboxes")
@@ -97,6 +168,33 @@ def test_checkboxes(page: Page):
 
     checkbox1.set_checked(True)
     expect(checkbox1).to_be_checked()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('checkboxes', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/checkboxes');
+
+    const checkbox1 = page.locator('#checkboxes input').first();
+    const checkbox2 = page.locator('#checkboxes input').last();
+
+    // check() — marca el checkbox (si ya está marcado, no hace nada)
+    await checkbox1.check();
+    await expect(checkbox1).toBeChecked();
+
+    // uncheck() — desmarca el checkbox
+    await checkbox2.uncheck();
+    await expect(checkbox2).not.toBeChecked();
+
+    // setChecked() — establece estado explícitamente (true/false)
+    await checkbox1.setChecked(false);
+    await expect(checkbox1).not.toBeChecked();
+
+    await checkbox1.setChecked(true);
+    await expect(checkbox1).toBeChecked();
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ check() vs click() en checkboxes</h4>
@@ -109,7 +207,18 @@ def test_checkboxes(page: Page):
 
         <h3>🔘 Radio buttons</h3>
         <p>Los radio buttons se manejan de la misma forma que los checkboxes, usando <code>check()</code>:</p>
-        <pre><code class="python">def test_radio_buttons(page: Page):
+        <div class="code-tabs" data-code-id="L029-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_radio_buttons(page: Page):
     page.goto("https://ejemplo.com/encuesta")
 
     # Seleccionar un radio button por su valor
@@ -125,11 +234,43 @@ def test_checkboxes(page: Page):
 
     # Usando label como localizador (más legible)
     page.get_by_label("Acepto los términos").check()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('radio buttons', async ({ page }) => {
+    await page.goto('https://ejemplo.com/encuesta');
+
+    // Seleccionar un radio button por su valor
+    await page.locator("input[type='radio'][value='opcion_a']").check();
+
+    // Verificar que está seleccionado
+    await expect(page.locator("input[type='radio'][value='opcion_a']")).toBeChecked();
+
+    // Al seleccionar otro, el anterior se deselecciona automáticamente
+    await page.locator("input[type='radio'][value='opcion_b']").check();
+    await expect(page.locator("input[type='radio'][value='opcion_b']")).toBeChecked();
+    await expect(page.locator("input[type='radio'][value='opcion_a']")).not.toBeChecked();
+
+    // Usando label como localizador (más legible)
+    await page.getByLabel('Acepto los términos').check();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📋 Dropdowns: page.select_option()</h3>
         <p>El método <code>select_option()</code> maneja elementos <code>&lt;select&gt;</code> nativos
         con múltiples formas de selección:</p>
-        <pre><code class="python">def test_dropdown(page: Page):
+        <div class="code-tabs" data-code-id="L029-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_dropdown(page: Page):
     page.goto("https://the-internet.herokuapp.com/dropdown")
 
     # Seleccionar por valor del atributo value
@@ -143,13 +284,43 @@ def test_checkboxes(page: Page):
 
     # Verificar la selección
     expect(page.locator("#dropdown")).to_have_value("1")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('dropdown', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/dropdown');
+
+    // Seleccionar por valor del atributo value
+    await page.selectOption('#dropdown', { value: '1' });
+
+    // Seleccionar por texto visible (label)
+    await page.selectOption('#dropdown', { label: 'Option 2' });
+
+    // Seleccionar por índice (0-based)
+    await page.selectOption('#dropdown', { index: 1 });
+
+    // Verificar la selección
+    await expect(page.locator('#dropdown')).toHaveValue('1');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📋 Multi-select</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Para elementos <code>&lt;select multiple&gt;</code>, puedes seleccionar varias opciones
             pasando una lista de valores:</p>
         </div>
-        <pre><code class="python">def test_multiselect(page: Page):
+        <div class="code-tabs" data-code-id="L029-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_multiselect(page: Page):
     page.goto("https://ejemplo.com/formulario-multi")
 
     # Seleccionar múltiples opciones por valor
@@ -166,9 +337,43 @@ def test_checkboxes(page: Page):
         "el => Array.from(el.selectedOptions).map(o => o.value)"
     )
     assert "python" in valores</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('multiselect', async ({ page }) => {
+    await page.goto('https://ejemplo.com/formulario-multi');
+
+    // Seleccionar múltiples opciones por valor
+    await page.selectOption('#lenguajes', [
+        { value: 'python' }, { value: 'javascript' }, { value: 'java' }
+    ]);
+
+    // Seleccionar múltiples opciones por label
+    await page.selectOption('#ciudades', [
+        { label: 'Bogotá' }, { label: 'Medellín' }, { label: 'Cali' }
+    ]);
+
+    // Verificar valores seleccionados
+    const valores = await page.locator('#lenguajes').evaluate(
+        (el: HTMLSelectElement) => Array.from(el.selectedOptions).map(o => o.value)
+    );
+    expect(valores).toContain('python');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧹 Limpiar campos antes de llenar</h3>
-        <pre><code class="python">def test_limpiar_campos(page: Page):
+        <div class="code-tabs" data-code-id="L029-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_limpiar_campos(page: Page):
     page.goto("https://ejemplo.com/editar-perfil")
 
     # fill() ya limpia automáticamente — no necesitas limpiar antes
@@ -184,12 +389,44 @@ def test_checkboxes(page: Page):
     # Alternativa: seleccionar todo y borrar con teclado
     page.locator("#campo").press("Control+a")
     page.locator("#campo").press("Backspace")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('limpiar campos', async ({ page }) => {
+    await page.goto('https://ejemplo.com/editar-perfil');
+
+    // fill() ya limpia automáticamente — no necesitas limpiar antes
+    await page.fill('#nombre', 'Nuevo Nombre');
+
+    // Pero si necesitas limpiar sin llenar:
+    await page.fill('#buscar', '');
+
+    // O si necesitas limpiar y luego usar pressSequentially():
+    await page.fill('#campo_autocompletado', '');
+    await page.locator('#campo_autocompletado').pressSequentially('Play', { delay: 100 });
+
+    // Alternativa: seleccionar todo y borrar con teclado
+    await page.locator('#campo').press('Control+a');
+    await page.locator('#campo').press('Backspace');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🚀 Envío de formularios</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Hay varias formas de enviar un formulario, dependiendo de cómo esté construida la aplicación:</p>
         </div>
-        <pre><code class="python">def test_enviar_formulario(page: Page):
+        <div class="code-tabs" data-code-id="L029-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_enviar_formulario(page: Page):
     page.goto("https://the-internet.herokuapp.com/login")
     page.fill("#username", "tomsmith")
     page.fill("#password", "SuperSecretPassword!")
@@ -202,9 +439,38 @@ def test_checkboxes(page: Page):
 
     # Opción 3: Usar locator con get_by_role
     # page.get_by_role("button", name="Login").click()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('enviar formulario', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/login');
+    await page.fill('#username', 'tomsmith');
+    await page.fill('#password', 'SuperSecretPassword!');
+
+    // Opción 1: Click en el botón submit (la más común)
+    await page.click("button[type='submit']");
+
+    // Opción 2: Presionar Enter en un campo del formulario
+    // await page.press('#password', 'Enter');
+
+    // Opción 3: Usar locator con getByRole
+    // await page.getByRole('button', { name: 'Login' }).click();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🏗️ Ejemplo completo: automatizar formulario de registro</h3>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L029-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_formulario_registro_completo(page: Page):
     """Automatiza un formulario con todos los tipos de campos."""
@@ -222,7 +488,41 @@ def test_formulario_registro_completo(page: Page):
     expect(page.locator("#flash")).to_contain_text(
         "You logged into a secure area!"
     )</code></pre>
-        <pre><code class="python"># Ejemplo más completo con checkbox, radio y dropdown
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('formulario registro completo', async ({ page }) => {
+    /** Automatiza un formulario con todos los tipos de campos. */
+    await page.goto('https://the-internet.herokuapp.com/login');
+
+    // --- Campos de texto ---
+    await page.fill('#username', 'tomsmith');
+    await page.fill('#password', 'SuperSecretPassword!');
+
+    // --- Enviar ---
+    await page.click("button[type='submit']");
+
+    // --- Verificar resultado ---
+    await expect(page).toHaveURL(/.*\\/secure/);
+    await expect(page.locator('#flash')).toContainText(
+        'You logged into a secure area!'
+    );
+});</code></pre>
+            </div>
+        </div>
+        <div class="code-tabs" data-code-id="L029-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Ejemplo más completo con checkbox, radio y dropdown
 def test_formulario_completo(page: Page):
     """Ejemplo de formulario con múltiples tipos de campos."""
     page.goto("https://ejemplo.com/registro")
@@ -253,6 +553,42 @@ def test_formulario_completo(page: Page):
     # Verificar éxito
     expect(page.locator(".mensaje-exito")).to_be_visible()
     expect(page.locator(".mensaje-exito")).to_contain_text("Registro exitoso")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Ejemplo más completo con checkbox, radio y dropdown
+test('formulario completo', async ({ page }) => {
+    /** Ejemplo de formulario con múltiples tipos de campos. */
+    await page.goto('https://ejemplo.com/registro');
+
+    // Texto
+    await page.fill('#nombre', 'Juan Manuel Reina');
+    await page.fill('#email', 'juan.reina@siesa.com');
+    await page.fill('#password', 'Clave$egura123');
+    await page.fill('#confirmar_password', 'Clave$egura123');
+
+    // Dropdown
+    await page.selectOption('#pais', { label: 'Colombia' });
+    await page.selectOption('#ciudad', { label: 'Cali' });
+
+    // Radio buttons
+    await page.locator("input[name='genero'][value='masculino']").check();
+
+    // Checkboxes
+    await page.getByLabel('Acepto términos y condiciones').check();
+    await page.getByLabel('Suscribirme al newsletter').check();
+
+    // Textarea
+    await page.fill('textarea#bio', 'Líder QA con experiencia en automatización');
+
+    // Enviar
+    await page.getByRole('button', { name: 'Registrarse' }).click();
+
+    // Verificar éxito
+    await expect(page.locator('.mensaje-exito')).toBeVisible();
+    await expect(page.locator('.mensaje-exito')).toContainText('Registro exitoso');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Tabla resumen de métodos para formularios</h3>
         <table style="width:100%; border-collapse: collapse;">

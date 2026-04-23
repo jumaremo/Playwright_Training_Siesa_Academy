@@ -17,7 +17,18 @@ const LESSON_019 = {
         los lentos. Es fundamental para organizar suites grandes.</p>
 
         <h3>📋 Marcadores básicos</h3>
-        <pre><code class="python"># test_login.py
+        <div class="code-tabs" data-code-id="L019-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_login.py
 import pytest
 from playwright.sync_api import Page, expect
 
@@ -50,9 +61,65 @@ def test_login_con_mfa(page: Page):
     page.fill("#codigo-mfa", "123456")
     page.click("#verificar")
     expect(page).to_have_url("**/dashboard")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_login.spec.ts
+import { test, expect } from '@playwright/test';
+
+// Playwright Test usa test.describe y tags con @tag en el título
+// o con test.describe.configure({ tag: '@smoke' })
+
+test.describe('Login - Smoke', { tag: '@smoke' }, () => {
+    test('login exitoso', async ({ page }) => {
+        // Test crítico: debe pasar siempre.
+        await page.goto('/login');
+        await page.fill('#email', 'admin@test.com');
+        await page.fill('#password', 'secreto');
+        await page.click('#btn-login');
+        await expect(page).toHaveURL('**/dashboard');
+    });
+});
+
+test.describe('Login - Regression', { tag: '@regression' }, () => {
+    test('login con espacios', async ({ page }) => {
+        // Test de regresión: caso borde.
+        await page.goto('/login');
+        await page.fill('#email', '  admin@test.com  ');
+        await page.fill('#password', 'secreto');
+        await page.click('#btn-login');
+        await expect(page).toHaveURL('**/dashboard');
+    });
+});
+
+test.describe('Login - Slow', { tag: '@slow' }, () => {
+    test('login con mfa', async ({ page }) => {
+        // Test lento: incluye verificación MFA.
+        await page.goto('/login');
+        await page.fill('#email', 'admin@test.com');
+        await page.fill('#password', 'secreto');
+        await page.click('#btn-login');
+        // Simular proceso MFA...
+        await page.fill('#codigo-mfa', '123456');
+        await page.click('#verificar');
+        await expect(page).toHaveURL('**/dashboard');
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🏃 Ejecutar por marcador</h3>
-        <pre><code class="bash"># Solo tests de smoke
+        <div class="code-tabs" data-code-id="L019-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Solo tests de smoke
 pytest -m smoke
 
 # Solo tests de regresión
@@ -65,9 +132,40 @@ pytest -m "not slow"
 pytest -m "smoke and not slow"
 pytest -m "smoke or regression"
 pytest -m "(smoke or regression) and not slow"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Solo tests con tag @smoke
+npx playwright test --grep @smoke
+
+# Solo tests con tag @regression
+npx playwright test --grep @regression
+
+# Excluir tests con tag @slow
+npx playwright test --grep-invert @slow
+
+# Combinaciones (regex)
+npx playwright test --grep "(?=.*@smoke)(?!.*@slow)"
+npx playwright test --grep "@smoke|@regression"</code></pre>
+            </div>
+        </div>
 
         <h3>📝 Registrar marcadores (buena práctica)</h3>
-        <pre><code class="python"># pytest.ini o pyproject.toml
+        <div class="code-tabs" data-code-id="L019-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># pytest.ini o pyproject.toml
 # Registrar marcadores evita warnings de "unknown marker"
 
 # pytest.ini:
@@ -78,16 +176,79 @@ pytest -m "(smoke or regression) and not slow"</code></pre>
 #     slow: Tests que tardan más de 30 segundos
 #     api: Tests que dependen de la API
 #     wip: Work in progress - tests en desarrollo</code></pre>
-        <pre><code class="python"># O en conftest.py:
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+// En Playwright Test, los tags se definen directamente
+// en los tests y se filtran con --grep/--grep-invert.
+// No es necesario registrarlos previamente.
+
+// Convención de tags recomendada:
+// @smoke   - Tests de humo críticos, deben pasar siempre
+// @regression - Tests de regresión
+// @slow    - Tests que tardan más de 30 segundos
+// @api     - Tests que dependen de la API
+// @wip     - Work in progress - tests en desarrollo
+
+// Ejemplo de uso en tests:
+// test('mi test @smoke @regression', ...)
+// O con describe:
+// test.describe('suite', { tag: ['@smoke', '@regression'] }, () => { ... })</code></pre>
+            </div>
+        </div>
+        <div class="code-tabs" data-code-id="L019-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># O en conftest.py:
 def pytest_configure(config):
     config.addinivalue_line("markers", "smoke: Tests de humo críticos")
     config.addinivalue_line("markers", "regression: Tests de regresión")
     config.addinivalue_line("markers", "slow: Tests lentos (>30s)")
     config.addinivalue_line("markers", "api: Tests que necesitan API")
     config.addinivalue_line("markers", "wip: Work in progress")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts - Configuración de proyectos por tag
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    projects: [
+        {
+            name: 'smoke',
+            grep: /@smoke/,
+            use: { /* config para smoke */ },
+        },
+        {
+            name: 'regression',
+            grep: /@regression/,
+            use: { /* config para regression */ },
+        },
+    ],
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔧 Marcadores built-in de pytest</h3>
-        <pre><code class="python">import pytest
+        <div class="code-tabs" data-code-id="L019-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import pytest
 import sys
 
 # skip: Saltar un test incondicionalmente
@@ -121,9 +282,60 @@ def test_login_multiples_usuarios(page, usuario, password, esperado):
     page.fill("#password", password)
     page.click("#btn-login")
     expect(page).to_have_url(f"**{esperado}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+// test.skip: Saltar un test incondicionalmente
+test.skip('nueva funcionalidad', async ({ page }) => {
+    // Feature aún no implementada
+});
+
+// test.skip condicional
+test('solo linux', async ({ page }) => {
+    test.skip(process.platform === 'win32', 'No funciona en Windows');
+    // ...
+});
+
+// test.fixme: Se espera que falle (equivalente a xfail)
+test.fixme('bug conocido', async ({ page }) => {
+    // Bug #1234 pendiente de corregir
+    await page.goto('/pagina-rota');
+    await expect(page.locator('#elemento')).toBeVisible();
+});
+
+// Parametrize: Ejecutar con múltiples datos
+const loginData = [
+    { usuario: 'admin', password: 'secreto', esperado: '/dashboard' },
+    { usuario: 'user', password: 'clave123', esperado: '/home' },
+    { usuario: 'guest', password: 'guest', esperado: '/welcome' },
+];
+
+for (const { usuario, password, esperado } of loginData) {
+    test('login con ' + usuario, async ({ page }) => {
+        await page.goto('/login');
+        await page.fill('#email', usuario);
+        await page.fill('#password', password);
+        await page.click('#btn-login');
+        await expect(page).toHaveURL('**' + esperado);
+    });
+}</code></pre>
+            </div>
+        </div>
 
         <h3>🏷️ Múltiples marcadores en un test</h3>
-        <pre><code class="python"># Un test puede tener varios marcadores
+        <div class="code-tabs" data-code-id="L019-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Un test puede tener varios marcadores
 @pytest.mark.smoke
 @pytest.mark.regression
 def test_pagina_principal(page: Page):
@@ -140,6 +352,28 @@ class TestDashboard:
     def test_widgets_visibles(self, page: Page):
         page.goto("/dashboard")
         expect(page.locator(".widget")).to_have_count(4)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Un test puede tener varios tags
+test('pagina principal @smoke @regression', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('h1')).toBeVisible();
+});
+
+// Tags en describe (aplican a todos los tests)
+test.describe('Dashboard', { tag: ['@smoke'] }, () => {
+    test('carga dashboard', async ({ page }) => {
+        await page.goto('/dashboard');
+        await expect(page).toHaveTitle('Dashboard');
+    });
+
+    test('widgets visibles', async ({ page }) => {
+        await page.goto('/dashboard');
+        await expect(page.locator('.widget')).toHaveCount(4);
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Estrategia de marcadores para QA</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">

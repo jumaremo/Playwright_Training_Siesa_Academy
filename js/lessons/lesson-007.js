@@ -52,7 +52,18 @@ const LESSON_007 = {
         </div>
 
         <h3>📋 Opciones de línea de comandos</h3>
-        <pre><code class="bash"># Ejecutar con navegador visible
+        <div class="code-tabs" data-code-id="L007-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Ejecutar con navegador visible
 pytest --headed
 
 # Elegir navegador
@@ -77,9 +88,53 @@ pytest --video on
 
 # Base URL para evitar repetir URLs
 pytest --base-url https://mi-app.com</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Ejecutar con navegador visible
+npx playwright test --headed
+
+# Elegir navegador (proyecto en playwright.config.ts)
+npx playwright test --project=chromium
+npx playwright test --project=firefox
+npx playwright test --project=webkit
+
+# Ejecutar en múltiples navegadores
+npx playwright test --project=chromium --project=firefox
+
+# Modo debug (equivalente a --headed --slowmo)
+npx playwright test --debug
+
+# Generar tracing para cada test
+npx playwright test --trace on
+
+# Capturar screenshots en fallos (configurar en playwright.config.ts)
+# screenshot: 'only-on-failure'
+
+# Capturar video en fallos (configurar en playwright.config.ts)
+# video: 'retain-on-failure'
+
+# Base URL (configurar en playwright.config.ts)
+# baseURL: 'https://mi-app.com'</code></pre>
+            </div>
+        </div>
 
         <h3>📝 conftest.py avanzado</h3>
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L007-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest
 from playwright.sync_api import Page
 
@@ -121,9 +176,56 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    // --- Configuración del navegador ---
+    use: {
+        viewport: { width: 1920, height: 1080 },
+        locale: 'es-CO',
+        timezoneId: 'America/Bogota',
+        permissions: ['geolocation'],
+        ignoreHTTPSErrors: true,
+
+        // --- Base URL centralizada ---
+        baseURL: process.env.BASE_URL || 'https://demo.playwright.dev/todomvc/',
+
+        // --- Screenshot en fallos ---
+        screenshot: 'only-on-failure',
+
+        // --- Trace en fallos ---
+        trace: 'retain-on-failure',
+    },
+
+    // --- Output directory para screenshots/videos ---
+    outputDir: 'test-results/',
+
+    // --- Proyectos (equivalente a multi-browser) ---
+    projects: [
+        { name: 'chromium', use: { browserName: 'chromium' } },
+        { name: 'firefox', use: { browserName: 'firefox' } },
+        { name: 'webkit', use: { browserName: 'webkit' } },
+    ],
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📄 pyproject.toml (alternativa moderna a pytest.ini)</h3>
-        <pre><code class="toml"># pyproject.toml
+        <div class="code-tabs" data-code-id="L007-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-toml"># pyproject.toml
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 addopts = "-v --tb=short"
@@ -136,6 +238,27 @@ markers = [
 # Variables de entorno para tests
 [tool.pytest.ini_options.env]
 BASE_URL = "https://demo.playwright.dev/todomvc/"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note info">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">En TypeScript, la configuración equivalente va en playwright.config.ts:</span>
+                </div>
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    testDir: './tests',
+    reporter: [['html'], ['list']],
+    // Tags: se usan con @tag en test.describe o --grep
+    // npx playwright test --grep @smoke
+    // npx playwright test --grep @regression
+    use: {
+        baseURL: process.env.BASE_URL || 'https://demo.playwright.dev/todomvc/',
+    },
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <ol>
@@ -146,9 +269,30 @@ BASE_URL = "https://demo.playwright.dev/todomvc/"</code></pre>
                 <br>- <code>pytest -v --screenshot on</code></li>
             <li>Agrega la base_url y modifica un test para usar rutas relativas:</li>
         </ol>
-        <pre><code class="python">def test_con_base_url(page: Page, base_url: str):
+        <div class="code-tabs" data-code-id="L007-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_con_base_url(page: Page, base_url: str):
     page.goto(base_url)  # Usa la URL de la fixture
     expect(page).to_have_title(re.compile("TodoMVC"))</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('con base url', async ({ page }) => {
+    await page.goto('/');  // Usa baseURL de playwright.config.ts
+    await expect(page).toHaveTitle(/TodoMVC/);
+});</code></pre>
+            </div>
+        </div>
         <ol start="4">
             <li>Haz que un test falle a propósito y verifica que se genera el screenshot</li>
         </ol>

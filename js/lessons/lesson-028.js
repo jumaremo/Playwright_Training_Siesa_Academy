@@ -26,7 +26,18 @@ const LESSON_028 = {
 
         <h3>🗂️ Paso 1: Estructura del proyecto</h3>
         <p>Vamos a crear una estructura profesional que separa configuración, utilidades y tests:</p>
-        <pre><code class="bash"># Crear toda la estructura del proyecto
+        <div class="code-tabs" data-code-id="L028-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Crear toda la estructura del proyecto
 mkdir -p proyecto_multiambiente/{config,utils,tests,data}
 cd proyecto_multiambiente
 
@@ -57,6 +68,40 @@ touch data/rutas.csv
 # Archivos raíz
 touch pytest.ini
 touch requirements.txt</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">ℹ️</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-bash"># Crear toda la estructura del proyecto
+mkdir -p proyecto_multiambiente/{config,utils,tests,data}
+cd proyecto_multiambiente
+npm init -y
+npm install -D @playwright/test
+
+# Archivos de configuración por ambiente
+touch config/settings.ts
+touch config/dev.env
+touch config/staging.env
+touch config/prod.env
+
+# Utilidades reutilizables
+touch utils/data-loader.ts
+touch utils/exceptions.ts
+touch utils/logger.ts
+
+# Tests y fixtures
+touch tests/login.spec.ts
+touch tests/navegacion.spec.ts
+
+# Datos de prueba
+touch data/usuarios_dev.json
+touch data/usuarios_staging.json
+touch data/rutas.csv
+
+# Archivos raíz
+touch playwright.config.ts
+touch tsconfig.json</code></pre>
+            </div>
+        </div>
         <pre><code>proyecto_multiambiente/
 ├── config/
 │   ├── __init__.py
@@ -84,7 +129,18 @@ touch requirements.txt</code></pre>
         <h3>📄 Paso 2: Archivos de configuración por ambiente</h3>
         <p>Cada archivo <code>.env</code> contiene las variables específicas de un ambiente.
         Usamos un formato simple <code>CLAVE=valor</code>:</p>
-        <pre><code class="bash"># config/dev.env
+        <div class="code-tabs" data-code-id="L028-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># config/dev.env
 BASE_URL=http://localhost:3000
 APP_NAME=MiApp (Desarrollo)
 BROWSER=chromium
@@ -98,7 +154,37 @@ DB_NAME=app_dev
 LOG_LEVEL=DEBUG
 SCREENSHOT_ON_FAILURE=true
 VIDEO_RECORDING=true</code></pre>
-        <pre><code class="bash"># config/staging.env
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">ℹ️</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-bash"># config/dev.env (mismo formato, compatible con dotenv)
+BASE_URL=http://localhost:3000
+APP_NAME=MiApp (Desarrollo)
+BROWSER=chromium
+HEADLESS=false
+TIMEOUT=30000
+NAV_TIMEOUT=15000
+ADMIN_USER=admin_dev
+ADMIN_PASS=dev123
+DB_HOST=localhost
+DB_NAME=app_dev
+LOG_LEVEL=DEBUG
+SCREENSHOT_ON_FAILURE=true
+VIDEO_RECORDING=true</code></pre>
+            </div>
+        </div>
+        <div class="code-tabs" data-code-id="L028-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># config/staging.env
 BASE_URL=https://staging.miapp.com
 APP_NAME=MiApp (Staging)
 BROWSER=chromium
@@ -112,7 +198,37 @@ DB_NAME=app_staging
 LOG_LEVEL=INFO
 SCREENSHOT_ON_FAILURE=true
 VIDEO_RECORDING=false</code></pre>
-        <pre><code class="bash"># config/prod.env
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">ℹ️</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-bash"># config/staging.env (mismo formato)
+BASE_URL=https://staging.miapp.com
+APP_NAME=MiApp (Staging)
+BROWSER=chromium
+HEADLESS=true
+TIMEOUT=15000
+NAV_TIMEOUT=10000
+ADMIN_USER=admin_staging
+ADMIN_PASS=staging_secreto_456
+DB_HOST=staging-db.miapp.com
+DB_NAME=app_staging
+LOG_LEVEL=INFO
+SCREENSHOT_ON_FAILURE=true
+VIDEO_RECORDING=false</code></pre>
+            </div>
+        </div>
+        <div class="code-tabs" data-code-id="L028-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># config/prod.env
 BASE_URL=https://www.miapp.com
 APP_NAME=MiApp (Producción)
 BROWSER=chromium
@@ -126,6 +242,25 @@ DB_NAME=app_prod
 LOG_LEVEL=WARNING
 SCREENSHOT_ON_FAILURE=true
 VIDEO_RECORDING=false</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">ℹ️</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-bash"># config/prod.env (mismo formato)
+BASE_URL=https://www.miapp.com
+APP_NAME=MiApp (Producción)
+BROWSER=chromium
+HEADLESS=true
+TIMEOUT=10000
+NAV_TIMEOUT=8000
+ADMIN_USER=admin_prod
+ADMIN_PASS=prod_ultra_secreto_789
+DB_HOST=prod-db.miapp.com
+DB_NAME=app_prod
+LOG_LEVEL=WARNING
+SCREENSHOT_ON_FAILURE=true
+VIDEO_RECORDING=false</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ff9800;">
             <strong>🔐 Seguridad:</strong> En un proyecto real, los archivos <code>.env</code>
@@ -137,7 +272,18 @@ VIDEO_RECORDING=false</code></pre>
         <h3>⚙️ Paso 3: Módulo de configuración con dataclasses</h3>
         <p>El corazón del sistema: un módulo Python que lee el <code>.env</code> correcto
         y expone la configuración como un objeto tipado:</p>
-        <pre><code class="python"># config/settings.py
+        <div class="code-tabs" data-code-id="L028-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># config/settings.py
 """
 Módulo de configuración multi-ambiente.
 Lee archivos .env y expone Settings como dataclass tipada.
@@ -276,9 +422,105 @@ def cargar_settings(env_name: str = "dev") -> Settings:
             variables.get("VIDEO_RECORDING", "false")
         ),
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// config/settings.ts
+import * as fs from 'fs';
+import * as path from 'path';
+
+/**
+ * Módulo de configuración multi-ambiente.
+ * Lee archivos .env y expone Settings como interfaz tipada.
+ */
+
+export interface Settings {
+  envName: string;
+  baseUrl: string;
+  appName: string;
+  browser: string;
+  headless: boolean;
+  timeout: number;
+  navTimeout: number;
+  adminUser: string;
+  adminPass: string;
+  dbHost: string;
+  dbName: string;
+  logLevel: string;
+  screenshotOnFailure: boolean;
+  videoRecording: boolean;
+}
+
+function isProduction(settings: Settings): boolean {
+  return settings.envName === 'prod';
+}
+
+function parseEnvFile(filepath: string): Record&lt;string, string&gt; {
+  if (!fs.existsSync(filepath)) {
+    throw new Error(\`Archivo de configuración no encontrado: \${filepath}\`);
+  }
+  const content = fs.readFileSync(filepath, 'utf-8');
+  const variables: Record&lt;string, string&gt; = {};
+
+  for (const linea of content.split('\\n')) {
+    const trimmed = linea.trim();
+    if (!trimmed || trimmed.startsWith('#') || !trimmed.includes('=')) {
+      continue;
+    }
+    const [clave, ...valorParts] = trimmed.split('=');
+    variables[clave.trim()] = valorParts.join('=').trim();
+  }
+  return variables;
+}
+
+function strToBool(valor: string): boolean {
+  return ['true', '1', 'yes', 'si', 'sí'].includes(valor.toLowerCase());
+}
+
+export function cargarSettings(envName: string = 'dev'): Settings {
+  const ambientesValidos = ['dev', 'staging', 'prod'];
+  if (!ambientesValidos.includes(envName)) {
+    throw new Error(
+      \`Ambiente '\${envName}' no válido. Opciones: \${ambientesValidos.join(', ')}\`
+    );
+  }
+
+  const configDir = path.join(__dirname);
+  const envFile = path.join(configDir, \`\${envName}.env\`);
+  const variables = parseEnvFile(envFile);
+
+  return {
+    envName,
+    baseUrl: variables['BASE_URL'] ?? 'http://localhost:3000',
+    appName: variables['APP_NAME'] ?? 'MiApp',
+    browser: variables['BROWSER'] ?? 'chromium',
+    headless: strToBool(variables['HEADLESS'] ?? 'false'),
+    timeout: parseInt(variables['TIMEOUT'] ?? '30000', 10),
+    navTimeout: parseInt(variables['NAV_TIMEOUT'] ?? '15000', 10),
+    adminUser: variables['ADMIN_USER'] ?? '',
+    adminPass: variables['ADMIN_PASS'] ?? '',
+    dbHost: variables['DB_HOST'] ?? 'localhost',
+    dbName: variables['DB_NAME'] ?? 'app_dev',
+    logLevel: variables['LOG_LEVEL'] ?? 'DEBUG',
+    screenshotOnFailure: strToBool(variables['SCREENSHOT_ON_FAILURE'] ?? 'true'),
+    videoRecording: strToBool(variables['VIDEO_RECORDING'] ?? 'false'),
+  };
+}</code></pre>
+            </div>
+        </div>
 
         <h3>🚨 Paso 4: Excepciones personalizadas</h3>
-        <pre><code class="python"># utils/exceptions.py
+        <div class="code-tabs" data-code-id="L028-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># utils/exceptions.py
 """Excepciones personalizadas del framework multi-ambiente."""
 
 
@@ -325,10 +567,77 @@ class PageLoadError(FrameworkError):
         if status_code:
             msg += f" (HTTP {status_code})"
         super().__init__(msg)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// utils/exceptions.ts
+
+export class FrameworkError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'FrameworkError';
+  }
+}
+
+export class ConfigurationError extends FrameworkError {
+  parametro: string;
+  constructor(parametro: string, mensaje: string = '') {
+    super(\`Error de configuración '\${parametro}': \${mensaje}\`);
+    this.name = 'ConfigurationError';
+    this.parametro = parametro;
+  }
+}
+
+export class EnvironmentNotAvailableError extends FrameworkError {
+  envName: string;
+  url: string;
+  constructor(envName: string, url: string, detalle: string = '') {
+    let msg = \`Ambiente '\${envName}' no disponible en \${url}\`;
+    if (detalle) msg += \` - \${detalle}\`;
+    super(msg);
+    this.name = 'EnvironmentNotAvailableError';
+    this.envName = envName;
+    this.url = url;
+  }
+}
+
+export class TestDataError extends FrameworkError {
+  archivo: string;
+  constructor(archivo: string, motivo: string = '') {
+    super(\`Error al cargar datos desde '\${archivo}': \${motivo}\`);
+    this.name = 'TestDataError';
+    this.archivo = archivo;
+  }
+}
+
+export class PageLoadError extends FrameworkError {
+  url: string;
+  statusCode: number | null;
+  constructor(url: string, statusCode: number | null = null) {
+    let msg = \`Error al cargar página '\${url}'\`;
+    if (statusCode) msg += \` (HTTP \${statusCode})\`;
+    super(msg);
+    this.name = 'PageLoadError';
+    this.url = url;
+    this.statusCode = statusCode;
+  }
+}</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Paso 5: Cargadores de datos</h3>
         <p>Utilidades para leer datos de prueba desde archivos JSON y CSV:</p>
-        <pre><code class="python"># utils/data_loader.py
+        <div class="code-tabs" data-code-id="L028-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># utils/data_loader.py
 """Utilidades para cargar datos de prueba desde archivos."""
 import json
 import csv
@@ -409,9 +718,74 @@ def cargar_usuarios(env_name: str) -> list:
     data_dir = Path(__file__).parent.parent / "data"
     archivo = data_dir / f"usuarios_{env_name}.json"
     return cargar_json(str(archivo))</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// utils/data-loader.ts
+import * as fs from 'fs';
+import * as path from 'path';
+import { TestDataError } from './exceptions';
+
+export function cargarJson&lt;T = any&gt;(ruta: string): T {
+  if (!fs.existsSync(ruta)) {
+    throw new TestDataError(ruta, 'archivo no encontrado');
+  }
+  try {
+    const content = fs.readFileSync(ruta, 'utf-8');
+    return JSON.parse(content) as T;
+  } catch (e) {
+    throw new TestDataError(ruta, \`JSON inválido: \${e}\`);
+  }
+}
+
+export function cargarCsv(
+  ruta: string,
+  comoDict: boolean = true
+): Record&lt;string, string&gt;[] | string[][] {
+  if (!fs.existsSync(ruta)) {
+    throw new TestDataError(ruta, 'archivo no encontrado');
+  }
+  const content = fs.readFileSync(ruta, 'utf-8');
+  const lines = content.trim().split('\\n');
+
+  if (lines.length === 0) {
+    throw new TestDataError(ruta, 'archivo CSV vacío');
+  }
+
+  const headers = lines[0].split(',').map(h => h.trim());
+  const rows = lines.slice(1);
+
+  if (comoDict) {
+    return rows.map(row => {
+      const values = row.split(',').map(v => v.trim());
+      const obj: Record&lt;string, string&gt; = {};
+      headers.forEach((h, i) => { obj[h] = values[i] ?? ''; });
+      return obj;
+    });
+  }
+  return rows.map(row => row.split(',').map(v => v.trim()));
+}
+
+export function cargarUsuarios(envName: string): any[] {
+  const dataDir = path.join(__dirname, '..', 'data');
+  const archivo = path.join(dataDir, \`usuarios_\${envName}.json\`);
+  return cargarJson&lt;any[]&gt;(archivo);
+}</code></pre>
+            </div>
+        </div>
 
         <h3>📝 Paso 6: Configuración de logging</h3>
-        <pre><code class="python"># utils/logger.py
+        <div class="code-tabs" data-code-id="L028-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># utils/logger.py
 """Configuración centralizada de logging para el framework."""
 import logging
 import sys
@@ -464,11 +838,73 @@ def configurar_logger(
     logger.addHandler(file_handler)
 
     return logger</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// utils/logger.ts
+// En Playwright Test (TypeScript) se usa el reporter integrado.
+// Para logging personalizado se puede usar console o winston.
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+type LogLevel = 'DEBUG' | 'INFO' | 'WARNING' | 'ERROR';
+
+const LEVELS: Record&lt;LogLevel, number&gt; = {
+  DEBUG: 0, INFO: 1, WARNING: 2, ERROR: 3,
+};
+
+export class Logger {
+  private name: string;
+  private level: LogLevel;
+  private logDir: string;
+
+  constructor(name: string = 'framework', level: string = 'DEBUG', logDir: string = 'logs') {
+    this.name = name;
+    this.level = (level.toUpperCase() as LogLevel) || 'DEBUG';
+    this.logDir = logDir;
+    if (!fs.existsSync(logDir)) {
+      fs.mkdirSync(logDir, { recursive: true });
+    }
+  }
+
+  private format(levelName: string, message: string): string {
+    const now = new Date().toISOString().replace('T', ' ').substring(0, 19);
+    return \`\${now} [\${levelName.padEnd(8)}] \${this.name}: \${message}\`;
+  }
+
+  info(message: string) { this.log('INFO', message); }
+  debug(message: string) { this.log('DEBUG', message); }
+  warning(message: string) { this.log('WARNING', message); }
+  error(message: string) { this.log('ERROR', message); }
+
+  private log(level: LogLevel, message: string) {
+    if (LEVELS[level] >= LEVELS[this.level]) {
+      const formatted = this.format(level, message);
+      console.log(formatted);
+      const fecha = new Date().toISOString().substring(0, 10).replace(/-/g, '');
+      const logFile = path.join(this.logDir, \`tests_\${fecha}.log\`);
+      fs.appendFileSync(logFile, formatted + '\\n', 'utf-8');
+    }
+  }
+}</code></pre>
+            </div>
+        </div>
 
         <h3>🧪 Paso 7: conftest.py - El corazón de la integración</h3>
         <p>Aquí se conecta todo: la opción <code>--env</code>, la carga de settings,
         fixtures para Playwright y el logger:</p>
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L028-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/conftest.py
 """
 Configuración central de tests con soporte multi-ambiente.
 Uso: pytest tests/ --env=staging -v
@@ -619,9 +1055,60 @@ def admin_user(settings) -> dict:
         "username": settings.admin_user,
         "password": settings.admin_pass
     }</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+// En Playwright Test, la configuración multi-ambiente
+// se maneja con playwright.config.ts + projects.
+import { defineConfig, devices } from '@playwright/test';
+import { cargarSettings } from './config/settings';
+
+const envName = process.env.TEST_ENV || 'dev';
+const settings = cargarSettings(envName);
+
+export default defineConfig({
+  testDir: './tests',
+  timeout: settings.timeout,
+  expect: { timeout: 5000 },
+  fullyParallel: true,
+  retries: 0,
+  reporter: [['html'], ['list']],
+
+  use: {
+    baseURL: settings.baseUrl,
+    viewport: { width: 1280, height: 720 },
+    screenshot: settings.screenshotOnFailure ? 'only-on-failure' : 'off',
+    video: settings.videoRecording ? 'retain-on-failure' : 'off',
+    trace: 'retain-on-failure',
+    navigationTimeout: settings.navTimeout,
+  },
+
+  projects: [
+    {
+      name: \`\${envName}-chromium\`,
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+});
+
+// Uso: TEST_ENV=staging npx playwright test
+// Uso: TEST_ENV=prod npx playwright test --grep @smoke</code></pre>
+            </div>
+        </div>
 
         <h3>📂 Paso 8: Datos de prueba por ambiente</h3>
-        <pre><code class="python"># data/usuarios_dev.json
+        <div class="code-tabs" data-code-id="L028-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># data/usuarios_dev.json
 [
     {
         "username": "tester_dev_01",
@@ -652,16 +1139,70 @@ def admin_user(settings) -> dict:
         "nombre": "Juan Pérez"
     }
 ]</code></pre>
-        <pre><code class="bash"># data/rutas.csv
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// data/usuarios_dev.json (mismo formato, JSON es universal)
+// [
+//   {
+//     "username": "tester_dev_01",
+//     "password": "Test1234!",
+//     "rol": "tester",
+//     "nombre": "Ana García"
+//   },
+//   {
+//     "username": "tester_dev_02",
+//     "password": "Test5678!",
+//     "rol": "viewer",
+//     "nombre": "Carlos López"
+//   }
+// ]
+// Los archivos JSON son idénticos en ambos stacks.</code></pre>
+            </div>
+        </div>
+        <div class="code-tabs" data-code-id="L028-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># data/rutas.csv
 ruta,titulo_esperado,requiere_auth
 /,Welcome,false
 /login,Login Page,false
 /secure,Secure Area,true
 /checkboxes,Checkboxes,false
 /dropdown,Dropdown List,false</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">ℹ️</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-bash"># data/rutas.csv (mismo formato, CSV es universal)
+ruta,titulo_esperado,requiere_auth
+/,Welcome,false
+/login,Login Page,false
+/secure,Secure Area,true
+/checkboxes,Checkboxes,false
+/dropdown,Dropdown List,false</code></pre>
+            </div>
+        </div>
 
         <h3>✅ Paso 9: Tests que usan el sistema de configuración</h3>
-        <pre><code class="python"># tests/test_login.py
+        <div class="code-tabs" data-code-id="L028-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_login.py
 """
 Tests de login que funcionan en cualquier ambiente.
 Uso: pytest tests/test_login.py --env=staging -v
@@ -727,8 +1268,70 @@ class TestLogin:
         logger.info(
             f"Campos vacíos manejados: user='{usuario['user']}'"
         )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/login.spec.ts
+import { test, expect } from '@playwright/test';
+import { cargarSettings } from '../config/settings';
 
-        <pre><code class="python"># tests/test_navegacion.py
+const envName = process.env.TEST_ENV || 'dev';
+const settings = cargarSettings(envName);
+
+test.describe('Tests de login multi-ambiente', () => {
+
+  test('página login carga', async ({ page }) => {
+    await page.goto('/login');
+    console.log(\`Navegando a \${settings.baseUrl}/login\`);
+    await expect(page.locator('h2')).toBeVisible();
+  });
+
+  test('login admin exitoso', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('#username', settings.adminUser);
+    await page.fill('#password', settings.adminPass);
+    await page.click("button[type='submit']");
+
+    console.log(\`Login como \${settings.adminUser} en \${envName}\`);
+    await expect(page).toHaveURL(/.*\\/secure/);
+  });
+
+  test('login fallido muestra error', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('#username', 'usuario_invalido');
+    await page.fill('#password', 'clave_incorrecta');
+    await page.click("button[type='submit']");
+
+    await expect(page.locator('#flash')).toBeVisible();
+  });
+
+  for (const usuario of [
+    { user: '', pass: 'algo' },
+    { user: 'algo', pass: '' },
+  ]) {
+    test(\`login campos vacíos: user='\${usuario.user}'\`, async ({ page }) => {
+      await page.goto('/login');
+      await page.fill('#username', usuario.user);
+      await page.fill('#password', usuario.pass);
+      await page.click("button[type='submit']");
+      await expect(page).not.toHaveURL(/.*\\/secure/);
+    });
+  }
+});</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L028-13">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_navegacion.py
 """
 Tests de navegación multi-ambiente.
 Verifica que las rutas principales funcionen.
@@ -799,6 +1402,53 @@ class TestNavegacion:
         )
         page.goto("/")
         # ... acciones que modifican datos ...</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/navegacion.spec.ts
+import { test, expect } from '@playwright/test';
+import { cargarSettings } from '../config/settings';
+import { cargarCsv } from '../utils/data-loader';
+
+const envName = process.env.TEST_ENV || 'dev';
+const settings = cargarSettings(envName);
+
+test.describe('Tests de navegación multi-ambiente', () => {
+
+  const rutasPublicas = (cargarCsv('data/rutas.csv') as Record&lt;string, string&gt;[])
+    .filter(r => r['requiere_auth'] === 'false');
+
+  test('página principal carga', async ({ page }) => {
+    await page.goto('/');
+    console.log(\`Verificando página principal: \${settings.baseUrl}\`);
+    await expect(page.locator('h1')).toBeVisible();
+  });
+
+  for (const ruta of rutasPublicas) {
+    test(\`ruta pública accesible: \${ruta['ruta']}\`, async ({ page }) => {
+      await page.goto(ruta['ruta']);
+      const title = await page.title();
+      expect(title).not.toContain('404');
+    });
+  }
+
+  test('navegación ida y vuelta', async ({ page }) => {
+    await page.goto('/');
+    await page.click("a[href='/login']");
+    await expect(page).toHaveURL(/.*\\/login/);
+
+    await page.goBack();
+    await expect(page).toHaveURL(\`\${settings.baseUrl}/\`);
+  });
+
+  test.skip(envName === 'prod', 'Test destructivo: no ejecutar en producción');
+  test('acción destructiva solo dev', async ({ page }) => {
+    console.log(\`Ejecutando test destructivo en \${envName}\`);
+    await page.goto('/');
+    // ... acciones que modifican datos ...
+  });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔧 Paso 10: Configuración de pytest</h3>
         <pre><code class="ini"># pytest.ini
@@ -833,7 +1483,18 @@ python-dotenv==1.0.1</code></pre>
         <h3>▶️ Paso 11: Ejecutar tests por ambiente</h3>
         <div style="background: #e8eaf6; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🖥️ Comandos de ejecución:</h4>
-            <pre><code class="bash"># Ejecutar en desarrollo (default)
+            <div class="code-tabs" data-code-id="L028-14">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-bash"># Ejecutar en desarrollo (default)
 pytest tests/ -v
 pytest tests/ --env=dev -v
 
@@ -856,9 +1517,46 @@ pytest tests/ --env=dev -v --tracing=retain-on-failure
 
 # Ejecución paralela (requiere pytest-xdist)
 pytest tests/ --env=staging -v -n 4</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <div class="code-note"><span class="code-note-icon">ℹ️</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                    <pre><code class="language-bash"># Ejecutar en desarrollo (default)
+npx playwright test
+TEST_ENV=dev npx playwright test
+
+# Ejecutar en staging
+TEST_ENV=staging npx playwright test
+
+# Ejecutar en producción (solo smoke)
+TEST_ENV=prod npx playwright test --grep @smoke
+
+# Ejecutar un archivo específico en staging
+TEST_ENV=staging npx playwright test tests/login.spec.ts
+
+# Con screenshots y reporte
+TEST_ENV=staging npx playwright test --reporter=html
+
+# Con trace para debugging
+npx playwright test --trace on
+
+# Ejecución paralela (built-in en Playwright Test)
+npx playwright test --workers=4</code></pre>
+                </div>
+            </div>
         </div>
 
-        <pre><code class="bash"># Ejemplo de salida en consola
+        <div class="code-tabs" data-code-id="L028-15">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Ejemplo de salida en consola
 $ pytest tests/ --env=staging -v
 
 ======================== test session starts ========================
@@ -881,6 +1579,26 @@ tests/test_navegacion.py::TestNavegacion::test_rutas_publicas PASSED
 tests/test_navegacion.py::TestNavegacion::test_navegacion_ida PASSED
 
 ====================== 8 passed in 12.34s =========================</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note"><span class="code-note-icon">ℹ️</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                <pre><code class="language-bash"># Ejemplo de salida en consola
+$ TEST_ENV=staging npx playwright test
+
+Running 8 tests using 1 worker
+
+  ✓ tests/login.spec.ts:8:3 › página login carga (1.2s)
+  ✓ tests/login.spec.ts:14:3 › login admin exitoso (2.1s)
+  ✓ tests/login.spec.ts:24:3 › login fallido muestra error (1.5s)
+  ✓ tests/login.spec.ts:33:5 › login campos vacíos: user='' (1.1s)
+  ✓ tests/login.spec.ts:33:5 › login campos vacíos: user='algo' (1.0s)
+  ✓ tests/navegacion.spec.ts:12:3 › página principal carga (0.8s)
+  ✓ tests/navegacion.spec.ts:18:5 › ruta pública accesible: / (0.5s)
+  ✓ tests/navegacion.spec.ts:24:3 › navegación ida y vuelta (1.3s)
+
+  8 passed (12.0s)</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Resumen de la Sección 3</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -961,13 +1679,36 @@ tests/test_navegacion.py::TestNavegacion::test_navegacion_ida PASSED
                 <li><strong>Crea <code>tests/conftest.py</code></strong> con la opción --env y todas las fixtures</li>
                 <li><strong>Escribe al menos 5 tests</strong> que utilicen la configuración del ambiente</li>
                 <li><strong>Ejecuta la suite en dos ambientes diferentes:</strong>
-                    <pre><code class="bash"># Primero en dev
+                    <div class="code-tabs" data-code-id="L028-16">
+                        <div class="code-tabs-header">
+                            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                                <span class="code-tab-icon">🐍</span> Python
+                            </button>
+                            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                                <span class="code-tab-icon">🔷</span> TypeScript
+                            </button>
+                            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                        </div>
+                        <div class="code-panel active" data-lang="python">
+                            <pre><code class="language-bash"># Primero en dev
 pytest tests/ --env=dev -v
 
 # Luego en staging
 pytest tests/ --env=staging -v
 
 # Compara los logs y resultados</code></pre>
+                        </div>
+                        <div class="code-panel" data-lang="typescript">
+                            <div class="code-note"><span class="code-note-icon">ℹ️</span><span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span></div>
+                            <pre><code class="language-bash"># Primero en dev
+TEST_ENV=dev npx playwright test
+
+# Luego en staging
+TEST_ENV=staging npx playwright test
+
+# Compara los reportes HTML</code></pre>
+                        </div>
+                    </div>
                 </li>
                 <li><strong>Bonus:</strong> Agrega un test que se omita automáticamente en producción usando <code>pytest.mark.skipif</code></li>
             </ol>

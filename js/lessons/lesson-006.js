@@ -16,7 +16,18 @@ const LESSON_006 = {
         un proyecto Playwright profesional.</p>
 
         <h3>📂 Estructura recomendada</h3>
-        <pre><code class="text">mi-proyecto-playwright/
+        <div class="code-tabs" data-code-id="L006-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-text">mi-proyecto-playwright/
 ├── tests/                      # Tests organizados por módulo
 │   ├── __init__.py
 │   ├── test_login.py
@@ -37,11 +48,48 @@ const LESSON_006 = {
 ├── requirements.txt            # Dependencias
 ├── .gitignore                  # Archivos a ignorar
 └── venv/                       # Entorno virtual (NO subir a git)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note info">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Estructura equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-text">mi-proyecto-playwright/
+├── tests/                      # Tests organizados por módulo
+│   ├── login.spec.ts
+│   ├── dashboard.spec.ts
+│   └── checkout.spec.ts
+├── pages/                      # Page Objects (lo veremos después)
+│   ├── login-page.ts
+│   └── dashboard-page.ts
+├── data/                       # Datos de prueba
+│   ├── users.json
+│   └── products.csv
+├── utils/                      # Utilidades compartidas
+│   └── helpers.ts
+├── playwright.config.ts        # Configuración de Playwright Test
+├── package.json                # Dependencias
+├── tsconfig.json               # Configuración de TypeScript
+├── .gitignore                  # Archivos a ignorar
+└── node_modules/               # Dependencias (NO subir a git)</code></pre>
+            </div>
+        </div>
 
         <h3>📄 Archivos clave</h3>
 
         <h4>conftest.py — Fixtures compartidas</h4>
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L006-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest
 from playwright.sync_api import Page
 
@@ -66,9 +114,50 @@ def authenticated_page(page: Page):
     page.get_by_role("button", name="Iniciar sesión").click()
     page.wait_for_url("**/dashboard")
     return page</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        /** Configuración base para todos los tests. */
+        viewport: { width: 1920, height: 1080 },
+        locale: 'es-CO',
+        timezoneId: 'America/Bogota',
+    },
+});
+
+// fixtures.ts (o dentro de cada test file)
+import { test as base, expect } from '@playwright/test';
+
+/** Fixture que provee una página ya autenticada. */
+export const test = base.extend&lt;{ authenticatedPage: any }&gt;({
+    authenticatedPage: async ({ page }, use) => {
+        await page.goto("https://mi-app.com/login");
+        await page.getByLabel("Email").fill("test@ejemplo.com");
+        await page.getByLabel("Contraseña").fill("password123");
+        await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+        await page.waitForURL('**/dashboard');
+        await use(page);
+    },
+});</code></pre>
+            </div>
+        </div>
 
         <h4>pytest.ini — Configuración de pytest</h4>
-        <pre><code class="ini"># pytest.ini
+        <div class="code-tabs" data-code-id="L006-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-ini"># pytest.ini
 [pytest]
 testpaths = tests
 addopts = -v --tb=short
@@ -76,9 +165,38 @@ markers =
     smoke: Tests de humo rápidos
     regression: Tests de regresión completa
     slow: Tests que toman más de 30 segundos</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note info">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">En TypeScript, la configuración equivalente va en playwright.config.ts:</span>
+                </div>
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    testDir: './tests',
+    reporter: [['list']],
+    // Equivalente a markers: se usan tags con @smoke, @regression
+    // en el nombre del test o con test.describe
+    grep: process.env.TAG ? new RegExp(process.env.TAG) : undefined,
+});</code></pre>
+            </div>
+        </div>
 
         <h4>.gitignore</h4>
-        <pre><code class="text"># .gitignore
+        <div class="code-tabs" data-code-id="L006-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-text"># .gitignore
 venv/
 __pycache__/
 *.pyc
@@ -88,6 +206,18 @@ playwright-report/
 allure-results/
 .env
 *.log</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-text"># .gitignore
+node_modules/
+dist/
+test-results/
+playwright-report/
+blob-report/
+.env
+*.log</code></pre>
+            </div>
+        </div>
 
         <h3>🔍 ¿Por qué esta estructura?</h3>
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -119,9 +249,34 @@ allure-results/
         <ol>
             <li>Crea la estructura de carpetas en tu proyecto:</li>
         </ol>
-        <pre><code class="bash">mkdir -p tests pages data utils
+        <div class="code-tabs" data-code-id="L006-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash">mkdir -p tests pages data utils
 touch tests/__init__.py pages/__init__.py utils/__init__.py
 touch conftest.py pytest.ini .gitignore</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Inicializar proyecto (crea estructura automáticamente)
+npm init playwright@latest
+
+# O crear manualmente
+mkdir -p tests pages data utils
+touch playwright.config.ts .gitignore</code></pre>
+            </div>
+        </div>
         <ol start="2">
             <li>Copia el contenido de <code>conftest.py</code>, <code>pytest.ini</code> y <code>.gitignore</code> mostrados arriba</li>
             <li>Mueve tu archivo <code>test_demo_store.py</code> a la carpeta <code>tests/</code></li>

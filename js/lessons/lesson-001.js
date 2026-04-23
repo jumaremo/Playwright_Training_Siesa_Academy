@@ -26,7 +26,18 @@ const LESSON_001 = {
 
         <h3>💻 Tu primer test con Playwright</h3>
         <p>Así se ve un test básico de Playwright con Python y pytest:</p>
-        <pre><code class="python"># test_ejemplo.py
+        <div class="code-tabs" data-code-id="L001-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_ejemplo.py
 import re
 from playwright.sync_api import Page, expect
 
@@ -46,6 +57,31 @@ def test_boton_get_started(page: Page):
 
     # Verificar que navegó a la página de instalación
     expect(page.get_by_role("heading", name="Installation")).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_ejemplo.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('titulo pagina', async ({ page }) => {
+    /** Verifica que la página principal tiene el título correcto. */
+    await page.goto("https://playwright.dev/");
+
+    // Playwright espera automáticamente a que el título coincida
+    await expect(page).toHaveTitle(/Playwright/);
+});
+
+test('boton get started', async ({ page }) => {
+    /** Verifica que el botón Get Started navega correctamente. */
+    await page.goto("https://playwright.dev/");
+
+    // Hacer click en el link "Get started"
+    await page.getByRole('link', { name: 'Get started' }).click();
+
+    // Verificar que navegó a la página de instalación
+    await expect(page.getByRole('heading', { name: 'Installation' })).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔑 Conceptos clave</h3>
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -115,7 +151,18 @@ def test_boton_get_started(page: Page):
 
         <h3>🎯 Ejercicio práctico</h3>
         <p>Analiza el siguiente código y responde las preguntas:</p>
-        <pre><code class="python"># test_mi_primer_test.py
+        <div class="code-tabs" data-code-id="L001-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_mi_primer_test.py
 from playwright.sync_api import Page, expect
 
 def test_busqueda_wikipedia(page: Page):
@@ -130,6 +177,26 @@ def test_busqueda_wikipedia(page: Page):
 
     # 4. Verificar que la página de resultados se cargó
     expect(page).to_have_title(re.compile("Playwright"))</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_mi_primer_test.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('busqueda wikipedia', async ({ page }) => {
+    // 1. Navegar a Wikipedia
+    await page.goto("https://es.wikipedia.org/");
+
+    // 2. Escribir en el campo de búsqueda
+    await page.getByRole('searchbox', { name: 'Buscar en Wikipedia' }).fill("Playwright");
+
+    // 3. Hacer click en el botón buscar
+    await page.getByRole('button', { name: 'Buscar' }).click();
+
+    // 4. Verificar que la página de resultados se cargó
+    await expect(page).toHaveTitle(/Playwright/);
+});</code></pre>
+            </div>
+        </div>
 
         <ol>
             <li>¿Qué hace <code>page.goto()</code> en la línea 6?</li>

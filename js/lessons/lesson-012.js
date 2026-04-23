@@ -16,7 +16,18 @@ const LESSON_012 = {
         para navegar, esperar carga y trabajar con múltiples páginas.</p>
 
         <h3>🚀 Navegación básica con goto()</h3>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L012-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_navegacion_basica(page: Page):
     # Navegar a una URL
@@ -25,9 +36,34 @@ def test_navegacion_basica(page: Page):
     # goto() espera automáticamente a que la página cargue
     # Por defecto espera el evento "load"
     expect(page).to_have_title("Example Domain")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('navegacion basica', async ({ page }) => {
+    // Navegar a una URL
+    await page.goto('https://example.com');
+
+    // goto() espera automáticamente a que la página cargue
+    // Por defecto espera el evento "load"
+    await expect(page).toHaveTitle('Example Domain');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⚙️ Opciones de goto()</h3>
-        <pre><code class="python">def test_opciones_goto(page: Page):
+        <div class="code-tabs" data-code-id="L012-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_opciones_goto(page: Page):
     # Timeout personalizado (en milisegundos)
     page.goto("https://sitio-lento.com", timeout=60000)
 
@@ -38,9 +74,36 @@ def test_navegacion_basica(page: Page):
     # "domcontentloaded" - DOM parseado, sin esperar recursos
     # "networkidle"      - Sin actividad de red por 500ms
     # "commit"           - Respuesta del servidor recibida</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('opciones goto', async ({ page }) => {
+    // Timeout personalizado (en milisegundos)
+    await page.goto('https://sitio-lento.com', { timeout: 60000 });
+
+    // Esperar diferentes estados de carga
+    await page.goto('https://example.com', { waitUntil: 'domcontentloaded' });
+    // Opciones de waitUntil:
+    // "load"             - Evento load completo (default)
+    // "domcontentloaded" - DOM parseado, sin esperar recursos
+    // "networkidle"      - Sin actividad de red por 500ms
+    // "commit"           - Respuesta del servidor recibida
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔄 Métodos de navegación</h3>
-        <pre><code class="python">def test_navegacion_completa(page: Page):
+        <div class="code-tabs" data-code-id="L012-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_navegacion_completa(page: Page):
     # Ir a una URL
     page.goto("https://example.com")
 
@@ -58,9 +121,43 @@ def test_navegacion_basica(page: Page):
     # Recargar la página
     page.reload()
     expect(page).to_have_url("https://example.com/about")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('navegacion completa', async ({ page }) => {
+    // Ir a una URL
+    await page.goto('https://example.com');
+
+    // Navegar a otra página (simula click en link)
+    await page.goto('https://example.com/about');
+
+    // Atrás (como el botón del navegador)
+    await page.goBack();
+    await expect(page).toHaveURL('https://example.com');
+
+    // Adelante
+    await page.goForward();
+    await expect(page).toHaveURL('https://example.com/about');
+
+    // Recargar la página
+    await page.reload();
+    await expect(page).toHaveURL('https://example.com/about');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔗 Obtener información de la página</h3>
-        <pre><code class="python">def test_info_pagina(page: Page):
+        <div class="code-tabs" data-code-id="L012-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_info_pagina(page: Page):
     page.goto("https://example.com")
 
     # Título de la página
@@ -74,9 +171,39 @@ def test_navegacion_basica(page: Page):
     # Contenido HTML completo
     html = page.content()
     assert "Example" in html</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('info pagina', async ({ page }) => {
+    await page.goto('https://example.com');
+
+    // Título de la página
+    const titulo = await page.title();
+    console.log('Título: ' + titulo);
+
+    // URL actual
+    const url = page.url();
+    console.log('URL: ' + url);
+
+    // Contenido HTML completo
+    const html = await page.content();
+    expect(html).toContain('Example');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📑 Esperar navegación</h3>
-        <pre><code class="python">def test_esperar_navegacion(page: Page):
+        <div class="code-tabs" data-code-id="L012-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_esperar_navegacion(page: Page):
     page.goto("https://example.com")
 
     # Esperar navegación después de una acción
@@ -89,9 +216,42 @@ def test_navegacion_basica(page: Page):
     # Esperar una URL específica
     with page.expect_navigation(url="**/dashboard"):
         page.click("#btn-ir-dashboard")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('esperar navegacion', async ({ page }) => {
+    await page.goto('https://example.com');
+
+    // Esperar navegación después de una acción
+    await Promise.all([
+        page.waitForNavigation(),
+        page.click("a[href='/about']"),
+    ]);
+
+    // Verificar que llegamos a la nueva página
+    await expect(page).toHaveURL('**/about');
+
+    // Esperar una URL específica
+    await Promise.all([
+        page.waitForURL('**/dashboard'),
+        page.click('#btn-ir-dashboard'),
+    ]);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🪟 Múltiples páginas (pestañas)</h3>
-        <pre><code class="python">def test_nueva_pestana(page: Page, context):
+        <div class="code-tabs" data-code-id="L012-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_nueva_pestana(page: Page, context):
     page.goto("https://example.com")
 
     # Capturar la nueva pestaña que se abre
@@ -107,16 +267,61 @@ def test_navegacion_basica(page: Page):
 
     # Cerrar la nueva pestaña
     nueva_pagina.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('nueva pestana', async ({ page, context }) => {
+    await page.goto('https://example.com');
+
+    // Capturar la nueva pestaña que se abre
+    const [nuevaPagina] = await Promise.all([
+        context.waitForEvent('page'),
+        page.click("a[target='_blank']"),  // Link que abre nueva pestaña
+    ]);
+
+    await nuevaPagina.waitForLoadState();
+
+    // Ahora puedes interactuar con ambas
+    console.log('Original: ' + page.url());
+    console.log('Nueva: ' + nuevaPagina.url());
+
+    // Cerrar la nueva pestaña
+    await nuevaPagina.close();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⏳ wait_for_load_state()</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python">def test_estados_carga(page: Page):
+            <div class="code-tabs" data-code-id="L012-7">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python">def test_estados_carga(page: Page):
     page.goto("https://example.com")
 
     # Esperar estados específicos después de acciones
     page.wait_for_load_state("networkidle")  # Sin tráfico de red
     page.wait_for_load_state("domcontentloaded")  # DOM listo
     page.wait_for_load_state("load")  # Todo cargado</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">test('estados carga', async ({ page }) => {
+    await page.goto('https://example.com');
+
+    // Esperar estados específicos después de acciones
+    await page.waitForLoadState('networkidle');  // Sin tráfico de red
+    await page.waitForLoadState('domcontentloaded');  // DOM listo
+    await page.waitForLoadState('load');  // Todo cargado
+});</code></pre>
+                </div>
+            </div>
             <p><strong>Tip:</strong> <code>goto()</code> ya espera "load" por defecto.
             Usa <code>wait_for_load_state()</code> después de acciones que
             disparan navegación, como clicks en links.</p>

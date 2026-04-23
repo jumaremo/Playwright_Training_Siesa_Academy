@@ -16,7 +16,18 @@ const LESSON_003 = {
         En esta lección instalaremos ambos.</p>
 
         <h3>📥 Paso 1: Instalar paquetes</h3>
-        <pre><code class="bash"># Asegúrate de tener el entorno virtual activado
+        <div class="code-tabs" data-code-id="L003-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Asegúrate de tener el entorno virtual activado
 # (venv) debe aparecer en tu terminal
 
 # Instalar Playwright y el plugin de pytest
@@ -24,10 +35,37 @@ pip install playwright pytest-playwright
 
 # O instalar desde requirements.txt
 pip install -r requirements.txt</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Inicializar un proyecto Playwright con TypeScript
+npm init playwright@latest
+
+# O instalar manualmente
+npm install -D @playwright/test
+
+# Instalar desde package.json existente
+npm install</code></pre>
+            </div>
+        </div>
 
         <h3>🌐 Paso 2: Instalar navegadores</h3>
         <p>Playwright descarga sus propios navegadores (no usa los instalados en tu sistema):</p>
-        <pre><code class="bash"># Instalar los 3 navegadores (Chromium, Firefox, WebKit)
+        <div class="code-tabs" data-code-id="L003-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Instalar los 3 navegadores (Chromium, Firefox, WebKit)
 playwright install
 
 # Output esperado:
@@ -37,6 +75,24 @@ playwright install
 
 # Si solo necesitas Chromium (más rápido):
 playwright install chromium</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Instalar los 3 navegadores (Chromium, Firefox, WebKit)
+npx playwright install
+
+# Output esperado:
+# Downloading Chromium 131.0.6778.33 ...
+# Downloading Firefox 132.0 ...
+# Downloading WebKit 18.2 ...
+
+# Si solo necesitas Chromium (más rápido):
+npx playwright install chromium</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔍 ¿Qué se instaló?</h4>
@@ -61,7 +117,18 @@ playwright install chromium</code></pre>
         </div>
 
         <h3>✅ Paso 3: Verificar la instalación</h3>
-        <pre><code class="bash"># Verificar que Playwright está instalado
+        <div class="code-tabs" data-code-id="L003-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Verificar que Playwright está instalado
 python -c "import playwright; print(playwright.__version__)"
 
 # Verificar pytest-playwright
@@ -81,15 +148,59 @@ with sync_playwright() as p:
     browser.close()
     print('¡Playwright funciona correctamente!')
 "</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Verificar que Playwright está instalado
+npx playwright --version
+
+# Listar navegadores instalados
+npx playwright install --help
+
+# Test rápido desde línea de comandos
+npx playwright test --list
+
+# Ejecutar el test de ejemplo generado al inicializar
+npx playwright test</code></pre>
+            </div>
+        </div>
 
         <h3>🐧 Dependencias del sistema (Linux)</h3>
         <p>En Linux, Playwright necesita algunas librerías del sistema:</p>
-        <pre><code class="bash"># Instalar dependencias del sistema automáticamente
+        <div class="code-tabs" data-code-id="L003-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Instalar dependencias del sistema automáticamente
 playwright install-deps
 
 # O manualmente en Ubuntu/Debian:
 sudo apt install libwoff1 libvpx7 libgstreamer-plugins-bad1.0-0 \\
     libenchant-2-2 libsecret-1-0 libhyphen0 libmanette-0.2-0</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Instalar dependencias del sistema automáticamente
+npx playwright install-deps
+
+# O manualmente en Ubuntu/Debian:
+sudo apt install libwoff1 libvpx7 libgstreamer-plugins-bad1.0-0 \\
+    libenchant-2-2 libsecret-1-0 libhyphen0 libmanette-0.2-0</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <ol>
@@ -98,12 +209,34 @@ sudo apt install libwoff1 libvpx7 libgstreamer-plugins-bad1.0-0 \\
             <li>Ejecuta el test rápido de verificación (código de arriba)</li>
             <li>Crea un archivo <code>test_verificacion.py</code> con este contenido:</li>
         </ol>
-        <pre><code class="python"># test_verificacion.py
+        <div class="code-tabs" data-code-id="L003-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_verificacion.py
 from playwright.sync_api import Page, expect
 
 def test_playwright_funciona(page: Page):
     page.goto("https://playwright.dev/python/")
     expect(page).to_have_title(re.compile("Playwright"))</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_verificacion.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('playwright funciona', async ({ page }) => {
+    await page.goto("https://playwright.dev/");
+    await expect(page).toHaveTitle(/Playwright/);
+});</code></pre>
+            </div>
+        </div>
         <ol start="5">
             <li>Ejecútalo con: <code>pytest test_verificacion.py -v</code></li>
             <li>Deberías ver un resultado verde: <code>PASSED</code></li>

@@ -25,13 +25,43 @@ const LESSON_020 = {
         </div>
 
         <h3>🗂️ Paso 1: Estructura del proyecto</h3>
-        <pre><code class="bash"># Crear la estructura
+        <div class="code-tabs" data-code-id="L020-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Crear la estructura
 mkdir -p tests/screenshots tests/traces
 touch tests/__init__.py
 touch tests/conftest.py
 touch tests/test_smoke.py
 touch tests/test_formularios.py
 touch tests/test_navegacion.py</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Crear la estructura
+mkdir -p tests/screenshots tests/traces
+# No se necesita __init__.py en TypeScript
+
+# Crear archivos de test
+touch tests/smoke.spec.ts
+touch tests/formularios.spec.ts
+touch tests/navegacion.spec.ts
+
+# Crear archivo de configuración
+touch playwright.config.ts</code></pre>
+            </div>
+        </div>
         <pre><code>tests/
 ├── conftest.py              # Fixtures y configuración
 ├── test_smoke.py            # Tests de humo
@@ -41,7 +71,18 @@ touch tests/test_navegacion.py</code></pre>
 └── traces/                  # Traces de debug</code></pre>
 
         <h3>🔧 Paso 2: conftest.py completo</h3>
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L020-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/conftest.py
 import pytest
 import logging
 from playwright.sync_api import Page
@@ -98,9 +139,54 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    testDir: './tests',
+    timeout: 10000,
+    expect: { timeout: 5000 },
+    use: {
+        baseURL: 'https://the-internet.herokuapp.com',
+        viewport: { width: 1280, height: 720 },
+        screenshot: 'only-on-failure',
+        trace: 'retain-on-failure',
+    },
+    outputDir: 'tests/screenshots',
+    reporter: [['list'], ['html', { open: 'never' }]],
+    projects: [
+        {
+            name: 'smoke',
+            grep: /@smoke/,
+        },
+        {
+            name: 'regression',
+            grep: /@regression/,
+        },
+    ],
+});
+
+// Nota: En Playwright Test, la configuración global reemplaza
+// a conftest.py. Las fixtures se definen con test.beforeEach,
+// test.afterEach, y test.extend.</code></pre>
+            </div>
+        </div>
 
         <h3>✅ Paso 3: Tests de humo (smoke)</h3>
-        <pre><code class="python"># tests/test_smoke.py
+        <div class="code-tabs" data-code-id="L020-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_smoke.py
 import pytest
 from playwright.sync_api import Page, expect
 
@@ -126,9 +212,47 @@ class TestSmoke:
         """Verificar que la página 404 funciona."""
         page.goto("/pagina-que-no-existe")
         expect(page.locator("h1")).to_have_text("Not Found")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/smoke.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Smoke Tests @smoke', { tag: '@smoke' }, () => {
+    test('pagina principal carga', async ({ page }) => {
+        await page.goto('/');
+        await expect(page).toHaveTitle('The Internet');
+        await expect(page.locator('h1')).toHaveText('Welcome to the-internet');
+    });
+
+    test('links principales visibles', async ({ page }) => {
+        await page.goto('/');
+        const links = page.locator('#content ul li a');
+        await expect(links.first()).toBeVisible();
+        const count = await links.count();
+        expect(count).toBeGreaterThan(10);
+    });
+
+    test('pagina 404', async ({ page }) => {
+        await page.goto('/pagina-que-no-existe');
+        await expect(page.locator('h1')).toHaveText('Not Found');
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📝 Paso 4: Tests de formularios</h3>
-        <pre><code class="python"># tests/test_formularios.py
+        <div class="code-tabs" data-code-id="L020-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_formularios.py
 import pytest
 from playwright.sync_api import Page, expect
 
@@ -177,9 +301,71 @@ class TestFormularios:
         expect(page.locator("#dropdown")).to_have_value(
             "1" if opcion == "Option 1" else "2"
         )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/formularios.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Formularios @regression', { tag: '@regression' }, () => {
+    test('login exitoso', async ({ page }) => {
+        await page.goto('/login');
+        await page.fill('#username', 'tomsmith');
+        await page.fill('#password', 'SuperSecretPassword!');
+        await page.click("button[type='submit']");
+
+        await expect(page).toHaveURL('**/secure');
+        await expect(page.locator('#flash')).toContainText('You logged into a secure area!');
+    });
+
+    test('login fallido', async ({ page }) => {
+        await page.goto('/login');
+        await page.fill('#username', 'usuario_malo');
+        await page.fill('#password', 'clave_mala');
+        await page.click("button[type='submit']");
+
+        await expect(page.locator('#flash')).toContainText('Your username is invalid!');
+    });
+
+    test('checkboxes', async ({ page }) => {
+        await page.goto('/checkboxes');
+        const checkbox1 = page.locator('#checkboxes input').first();
+        const checkbox2 = page.locator('#checkboxes input').last();
+
+        // El primero está desmarcado, el segundo marcado
+        await expect(checkbox1).not.toBeChecked();
+        await expect(checkbox2).toBeChecked();
+
+        // Marcar el primero
+        await checkbox1.check();
+        await expect(checkbox1).toBeChecked();
+    });
+
+    for (const opcion of ['Option 1', 'Option 2']) {
+        test('dropdown - ' + opcion, async ({ page }) => {
+            await page.goto('/dropdown');
+            await page.selectOption('#dropdown', { label: opcion });
+            await expect(page.locator('#dropdown')).toHaveValue(
+                opcion === 'Option 1' ? '1' : '2'
+            );
+        });
+    }
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧭 Paso 5: Tests de navegación</h3>
-        <pre><code class="python"># tests/test_navegacion.py
+        <div class="code-tabs" data-code-id="L020-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_navegacion.py
 import pytest
 from playwright.sync_api import Page, expect
 
@@ -221,9 +407,64 @@ class TestNavegacion:
                 path=f"tests/screenshots/{nombre}.png",
                 full_page=True
             )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/navegacion.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Navegación @regression', { tag: '@regression' }, () => {
+    test('navegar ida y vuelta', async ({ page }) => {
+        await page.goto('/');
+        await page.click("a[href='/login']");
+        await expect(page).toHaveURL('**/login');
+
+        await page.goBack();
+        await expect(page).toHaveURL('**/');
+        await expect(page.locator('h1')).toHaveText('Welcome to the-internet');
+    });
+
+    test('multiple paginas', async ({ page }) => {
+        const paginas = [
+            { url: '/login', titulo: 'Login Page' },
+            { url: '/checkboxes', titulo: 'Checkboxes' },
+            { url: '/dropdown', titulo: 'Dropdown List' },
+        ];
+
+        for (const { url, titulo } of paginas) {
+            await page.goto(url);
+            const heading = page.locator('h3').first();
+            await expect(heading).toHaveText(titulo);
+        }
+    });
+
+    test('screenshot multiples paginas @slow', { tag: '@slow' }, async ({ page }) => {
+        const paginas = ['login', 'checkboxes', 'dropdown', 'inputs'];
+
+        for (const nombre of paginas) {
+            await page.goto('/' + nombre);
+            await page.screenshot({
+                path: 'tests/screenshots/' + nombre + '.png',
+                fullPage: true,
+            });
+        }
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>▶️ Paso 6: Ejecutar la suite</h3>
-        <pre><code class="bash"># Ejecutar todos los tests
+        <div class="code-tabs" data-code-id="L020-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Ejecutar todos los tests
 pytest tests/ -v
 
 # Solo smoke tests
@@ -240,6 +481,31 @@ pytest tests/ -v --tracing=retain-on-failure
 
 # Reporte detallado
 pytest tests/ -v --tb=short 2>&1 | tee reporte.txt</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Ejecutar todos los tests
+npx playwright test
+
+# Solo smoke tests
+npx playwright test --grep @smoke
+
+# Solo regression (sin lentos)
+npx playwright test --grep @regression --grep-invert @slow
+
+# Con screenshots y trace (configurado en playwright.config.ts)
+npx playwright test --trace on
+
+# Con reporte HTML
+npx playwright test --reporter=html
+
+# Ver el reporte
+npx playwright show-report</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Resumen de la Sección 2</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">

@@ -16,7 +16,18 @@ const LESSON_008 = {
         Aprenderás a ejecutar exactamente los tests que necesitas.</p>
 
         <h3>🎯 Formas de ejecutar tests</h3>
-        <pre><code class="bash"># Ejecutar TODOS los tests
+        <div class="code-tabs" data-code-id="L008-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Ejecutar TODOS los tests
 pytest
 
 # Ejecutar un archivo específico
@@ -38,9 +49,47 @@ pytest -m regression
 # Ejecutar última selección de tests fallidos
 pytest --lf        # --last-failed
 pytest --ff        # --failed-first (fallidos primero, luego el resto)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Ejecutar TODOS los tests
+npx playwright test
+
+# Ejecutar un archivo específico
+npx playwright test tests/login.spec.ts
+
+# Ejecutar un test específico por nombre (--grep)
+npx playwright test --grep "login exitoso"
+
+# Ejecutar tests cuyo nombre contiene un texto (--grep)
+npx playwright test --grep "login"
+npx playwright test --grep "login" --grep-invert "admin"
+
+# Ejecutar tests por tag (@smoke en el nombre del test)
+npx playwright test --grep @smoke
+npx playwright test --grep @regression
+
+# Ejecutar última selección de tests fallidos
+npx playwright test --last-failed</code></pre>
+            </div>
+        </div>
 
         <h3>🏷️ Marcadores (markers)</h3>
-        <pre><code class="python"># tests/test_login.py
+        <div class="code-tabs" data-code-id="L008-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_login.py
 import pytest
 from playwright.sync_api import Page, expect
 
@@ -74,9 +123,54 @@ def test_multiples_operaciones(page: Page):
         page.get_by_placeholder("What needs to be done?").fill(f"Tarea {i+1}")
         page.get_by_placeholder("What needs to be done?").press("Enter")
     expect(page.get_by_test_id("todo-title")).to_have_count(5)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/login.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('@smoke login exitoso', async ({ page }) => {
+    /** Test crítico: flujo de login básico. */
+    await page.goto("https://demo.playwright.dev/todomvc/");
+    await page.getByPlaceholder("What needs to be done?").fill("Test smoke");
+    await page.getByPlaceholder("What needs to be done?").press("Enter");
+    await expect(page.getByTestId("todo-title")).toHaveText("Test smoke");
+});
+
+test('@regression login campos vacios', async ({ page }) => {
+    /** Regresión: validación con campos vacíos. */
+    await page.goto("https://demo.playwright.dev/todomvc/");
+    // Presionar Enter sin escribir nada
+    await page.getByPlaceholder("What needs to be done?").press("Enter");
+    // No debería agregar una tarea vacía
+    await expect(page.getByTestId("todo-title")).toHaveCount(0);
+});
+
+test('@slow @regression multiples operaciones', async ({ page }) => {
+    /** Test lento: operaciones CRUD completas. */
+    await page.goto("https://demo.playwright.dev/todomvc/");
+    // Agregar varias tareas
+    for (let i = 0; i &lt; 5; i++) {
+        await page.getByPlaceholder("What needs to be done?").fill(\`Tarea \${i + 1}\`);
+        await page.getByPlaceholder("What needs to be done?").press("Enter");
+    }
+    await expect(page.getByTestId("todo-title")).toHaveCount(5);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Opciones de output</h3>
-        <pre><code class="bash"># Verbose: muestra nombre de cada test
+        <div class="code-tabs" data-code-id="L008-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Verbose: muestra nombre de cada test
 pytest -v
 
 # Extra verbose: muestra parámetros y fixtures
@@ -101,9 +195,50 @@ pytest --maxfail=3
 pip install pytest-xdist
 pytest -n auto        # Usa todos los cores
 pytest -n 4           # Usa 4 workers</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Reporter list (equivalente a verbose)
+npx playwright test --reporter=list
+
+# Reporter dot (equivalente a silencioso)
+npx playwright test --reporter=dot
+
+# Reporter HTML (genera reporte visual)
+npx playwright test --reporter=html
+
+# Mostrar output de console.log()
+npx playwright test --reporter=list
+
+# Parar al primer fallo
+npx playwright test -x
+
+# Parar después de N fallos
+npx playwright test --max-failures=3
+
+# Ejecutar en paralelo (nativo, sin plugins)
+# Por defecto usa workers = 50% de CPUs
+npx playwright test --workers=4
+npx playwright test --workers=100%</code></pre>
+            </div>
+        </div>
 
         <h3>🔄 Combinando opciones</h3>
-        <pre><code class="bash"># Flujo típico de desarrollo
+        <div class="code-tabs" data-code-id="L008-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Flujo típico de desarrollo
 pytest tests/test_login.py -v --headed -x -s
 
 # Suite de smoke rápida
@@ -117,6 +252,28 @@ pytest tests/test_login.py::test_login_exitoso -v --headed --slowmo 1000 -s
 
 # CI/CD: todo, sin cabeza, con evidencia
 pytest -v --tracing on --screenshot on --video on</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Flujo típico de desarrollo
+npx playwright test tests/login.spec.ts --headed -x --reporter=list
+
+# Suite de smoke rápida
+npx playwright test --grep @smoke --reporter=list
+
+# Regresión completa multi-navegador
+npx playwright test --grep @regression --project=chromium --project=firefox
+
+# Debug: solo un test, con inspector
+npx playwright test --grep "login exitoso" --debug
+
+# CI/CD: todo, sin cabeza, con evidencia
+npx playwright test --trace on --reporter=html</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <ol>
