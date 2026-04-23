@@ -19,7 +19,18 @@ const LESSON_031 = {
         <h3>🏗️ Estructura de una tabla HTML</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Antes de automatizar, es importante entender la estructura estándar:</p>
-            <pre><code class="python"># Estructura HTML típica de una tabla:
+            <div class="code-tabs" data-code-id="L031-1">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># Estructura HTML típica de una tabla:
 # &lt;table&gt;
 #   &lt;thead&gt;
 #     &lt;tr&gt;&lt;th&gt;Nombre&lt;/th&gt;&lt;th&gt;Edad&lt;/th&gt;&lt;/tr&gt;
@@ -29,12 +40,37 @@ const LESSON_031 = {
 #     &lt;tr&gt;&lt;td&gt;Luis&lt;/td&gt;&lt;td&gt;35&lt;/td&gt;&lt;/tr&gt;
 #   &lt;/tbody&gt;
 # &lt;/table&gt;</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// Estructura HTML típica de una tabla:
+// &lt;table&gt;
+//   &lt;thead&gt;
+//     &lt;tr&gt;&lt;th&gt;Nombre&lt;/th&gt;&lt;th&gt;Edad&lt;/th&gt;&lt;/tr&gt;
+//   &lt;/thead&gt;
+//   &lt;tbody&gt;
+//     &lt;tr&gt;&lt;td&gt;Ana&lt;/td&gt;&lt;td&gt;28&lt;/td&gt;&lt;/tr&gt;
+//     &lt;tr&gt;&lt;td&gt;Luis&lt;/td&gt;&lt;td&gt;35&lt;/td&gt;&lt;/tr&gt;
+//   &lt;/tbody&gt;
+// &lt;/table&gt;</code></pre>
+                </div>
+            </div>
             <p><strong>Selectores clave:</strong> <code>table</code>, <code>thead</code>,
             <code>tbody</code>, <code>tr</code>, <code>td</code>, <code>th</code></p>
         </div>
 
         <h3>📖 Leer datos de celdas</h3>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L031-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_leer_celdas(page: Page):
     page.goto("https://the-internet.herokuapp.com/tables")
@@ -48,9 +84,41 @@ def test_leer_celdas(page: Page):
     headers = page.locator("table#table1 thead th")
     for i in range(headers.count()):
         print(f"Header {i}: {headers.nth(i).text_content()}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('leer celdas', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/tables');
+
+    // Leer texto de una celda específica
+    const celda = page.locator('table#table1 tbody tr:first-child td:first-child');
+    const texto = await celda.textContent();
+    console.log(\`Primera celda: \${texto}\`);
+
+    // Leer encabezados de la tabla
+    const headers = page.locator('table#table1 thead th');
+    const count = await headers.count();
+    for (let i = 0; i < count; i++) {
+        console.log(\`Header \${i}: \${await headers.nth(i).textContent()}\`);
+    }
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔄 Iterar filas y columnas con locator.all()</h3>
-        <pre><code class="python">def test_iterar_tabla(page: Page):
+        <div class="code-tabs" data-code-id="L031-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_iterar_tabla(page: Page):
     page.goto("https://the-internet.herokuapp.com/tables")
 
     # Obtener todas las filas del tbody
@@ -65,9 +133,43 @@ def test_leer_celdas(page: Page):
     # Resultado esperado:
     # Fila: ['Smith', 'John', 'jsmith@gmail.com', '$50.00', ...]
     # Fila: ['Bach', 'Frank', 'fbach@yahoo.com', '$51.00', ...]</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('iterar tabla', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/tables');
+
+    // Obtener todas las filas del tbody
+    const filas = await page.locator('table#table1 tbody tr').all();
+
+    for (const fila of filas) {
+        // Obtener todas las celdas de cada fila
+        const celdas = await fila.locator('td').all();
+        const datosFila = await Promise.all(
+            celdas.map(celda => celda.textContent())
+        );
+        console.log(\`Fila: \${JSON.stringify(datosFila)}\`);
+    }
+
+    // Resultado esperado:
+    // Fila: ["Smith","John","jsmith@gmail.com","$50.00",...]
+    // Fila: ["Bach","Frank","fbach@yahoo.com","$51.00",...]
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Obtener celda específica por fila y columna</h3>
-        <pre><code class="python">def test_celda_especifica(page: Page):
+        <div class="code-tabs" data-code-id="L031-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_celda_especifica(page: Page):
     page.goto("https://the-internet.herokuapp.com/tables")
 
     # Celda en fila 2, columna 3 (0-indexed)
@@ -85,9 +187,44 @@ def test_leer_celdas(page: Page):
 
     precio = obtener_celda("table#table1", 3, 4)
     print(f"Precio fila 3: {precio.text_content()}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('celda especifica', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/tables');
+
+    // Celda en fila 2, columna 3 (1-indexed en CSS)
+    const celda = page.locator('table#table1 tbody tr:nth-child(2) td:nth-child(3)');
+    await expect(celda).toHaveText('fbach@yahoo.com');
+
+    // Función helper para acceder por fila/columna
+    function obtenerCelda(tableSelector: string, fila: number, columna: number) {
+        return page.locator(
+            \`\${tableSelector} tbody tr:nth-child(\${fila}) td:nth-child(\${columna})\`
+        );
+    }
+
+    const email = obtenerCelda('table#table1', 1, 3);
+    await expect(email).toHaveText('jsmith@gmail.com');
+
+    const precio = obtenerCelda('table#table1', 3, 4);
+    console.log(\`Precio fila 3: \${await precio.textContent()}\`);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔢 Contar filas con locator.count()</h3>
-        <pre><code class="python">def test_contar_filas(page: Page):
+        <div class="code-tabs" data-code-id="L031-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_contar_filas(page: Page):
     page.goto("https://the-internet.herokuapp.com/tables")
 
     # Contar filas del cuerpo de la tabla
@@ -102,9 +239,40 @@ def test_leer_celdas(page: Page):
 
     # Verificar que la tabla no está vacía
     expect(filas.first).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('contar filas', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/tables');
+
+    // Contar filas del cuerpo de la tabla
+    const filas = page.locator('table#table1 tbody tr');
+    const total = await filas.count();
+    console.log(\`Total de filas: \${total}\`);
+    expect(total).toBe(4);
+
+    // Contar columnas (headers)
+    const columnas = page.locator('table#table1 thead th');
+    expect(await columnas.count()).toBe(6);
+
+    // Verificar que la tabla no está vacía
+    await expect(filas.first()).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔍 Verificar ordenamiento y filtrado de datos</h3>
-        <pre><code class="python">def test_verificar_orden_tabla(page: Page):
+        <div class="code-tabs" data-code-id="L031-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_verificar_orden_tabla(page: Page):
     page.goto("https://the-internet.herokuapp.com/tables")
 
     # Extraer datos de una columna (apellidos - columna 1)
@@ -124,13 +292,54 @@ def test_leer_celdas(page: Page):
     # Verificar que están en orden alfabético
     assert apellidos_ordenados == sorted(apellidos_ordenados), \
         "La tabla no está ordenada alfabéticamente"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('verificar orden tabla', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/tables');
+
+    // Extraer datos de una columna (apellidos - columna 1)
+    const apellidos = page.locator('table#table1 tbody tr td:nth-child(1)');
+    const count = await apellidos.count();
+    const listaApellidos: string[] = [];
+    for (let i = 0; i < count; i++) {
+        listaApellidos.push(await apellidos.nth(i).textContent() ?? '');
+    }
+    console.log(\`Apellidos: \${JSON.stringify(listaApellidos)}\`);
+
+    // Hacer clic en el header para ordenar
+    await page.locator('table#table1 thead th:nth-child(1) span').click();
+
+    // Re-leer después de ordenar
+    const apellidosOrdenados: string[] = [];
+    for (let i = 0; i < count; i++) {
+        apellidosOrdenados.push(await apellidos.nth(i).textContent() ?? '');
+    }
+    console.log(\`Ordenados: \${JSON.stringify(apellidosOrdenados)}\`);
+
+    // Verificar que están en orden alfabético
+    const sorted = [...apellidosOrdenados].sort();
+    expect(apellidosOrdenados).toEqual(sorted);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📄 Tablas dinámicas y paginadas</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p><strong>Nota:</strong> Muchas aplicaciones modernas usan tablas paginadas o que
             cargan datos dinámicamente. Aquí la estrategia cambia ligeramente.</p>
         </div>
-        <pre><code class="python">def test_tabla_paginada(page: Page):
+        <div class="code-tabs" data-code-id="L031-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_tabla_paginada(page: Page):
     page.goto("/mi-app/tabla-datos")
 
     todos_los_datos = []
@@ -154,9 +363,53 @@ def test_leer_celdas(page: Page):
         page.locator("table tbody tr").first.wait_for()
 
     print(f"Total de registros: {len(todos_los_datos)}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('tabla paginada', async ({ page }) => {
+    await page.goto('/mi-app/tabla-datos');
+
+    const todosLosDatos: string[][] = [];
+
+    while (true) {
+        // Leer datos de la página actual
+        const filas = await page.locator('table tbody tr').all();
+        for (const fila of filas) {
+            const celdas = await fila.locator('td').all();
+            const datos = await Promise.all(
+                celdas.map(celda => celda.textContent())
+            );
+            todosLosDatos.push(datos.map(d => d ?? ''));
+        }
+
+        // Verificar si hay página siguiente
+        const btnSiguiente = page.locator('button.next-page');
+        if (await btnSiguiente.isDisabled()) {
+            break;
+        }
+
+        await btnSiguiente.click();
+        // Esperar a que la tabla se actualice
+        await page.locator('table tbody tr').first().waitFor();
+    }
+
+    console.log(\`Total de registros: \${todosLosDatos.length}\`);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📋 Trabajar con listas ul/ol</h3>
-        <pre><code class="python">def test_listas_html(page: Page):
+        <div class="code-tabs" data-code-id="L031-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_listas_html(page: Page):
     page.goto("https://the-internet.herokuapp.com")
 
     # Obtener todos los items de una lista
@@ -177,9 +430,46 @@ def test_leer_celdas(page: Page):
     # Verificar el orden de items
     assert textos[0] == "A/B Testing"
     assert "Dropdown" in textos</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('listas html', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com');
+
+    // Obtener todos los items de una lista
+    const items = page.locator('#content ul li a');
+
+    // Contar elementos
+    const total = await items.count();
+    console.log(\`Total de links: \${total}\`);
+
+    // Obtener todos los textos como array
+    const textos = await items.allTextContents();
+    console.log(\`Items: \${JSON.stringify(textos)}\`);
+    // ['A/B Testing', 'Add/Remove Elements', 'Basic Auth', ...]
+
+    // Verificar que un item específico existe
+    await expect(page.locator('#content ul li a', { hasText: 'Checkboxes' })).toBeVisible();
+
+    // Verificar el orden de items
+    expect(textos[0]).toBe('A/B Testing');
+    expect(textos).toContain('Dropdown');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>✅ Verificar orden y contenido de listas</h3>
-        <pre><code class="python">def test_verificar_lista_ordenada(page: Page):
+        <div class="code-tabs" data-code-id="L031-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_verificar_lista_ordenada(page: Page):
     page.goto("/mi-app/lista-tareas")
 
     # Obtener textos de una lista ordenada
@@ -195,9 +485,41 @@ def test_leer_celdas(page: Page):
 
     # Verificar cantidad de items
     expect(items).to_have_count(3)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('verificar lista ordenada', async ({ page }) => {
+    await page.goto('/mi-app/lista-tareas');
+
+    // Obtener textos de una lista ordenada
+    const items = page.locator('ol.tareas li');
+    const textos = await items.allTextContents();
+
+    // Verificar contenido esperado
+    const esperado = ['Planificar sprint', 'Escribir tests', 'Ejecutar tests'];
+    expect(textos).toEqual(esperado);
+
+    // Verificar que NO contiene ciertos items
+    expect(textos).not.toContain('Deploy producción');
+
+    // Verificar cantidad de items
+    await expect(items).toHaveCount(3);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🌐 Ejemplo completo: Validar tabla en the-internet</h3>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L031-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_tabla_completa(page: Page):
     """Ejemplo integrador: validar tabla de datos en the-internet."""
@@ -232,6 +554,46 @@ def test_tabla_completa(page: Page):
     tabla.locator("thead th:nth-child(1) span").click()
     primer_apellido = tabla.locator("tbody tr:first-child td:first-child")
     expect(primer_apellido).to_have_text("Bach")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('tabla completa', async ({ page }) => {
+    // Ejemplo integrador: validar tabla de datos en the-internet
+    await page.goto('https://the-internet.herokuapp.com/tables');
+
+    const tabla = page.locator('table#table1');
+    await expect(tabla).toBeVisible();
+
+    // 1. Verificar encabezados
+    const headers = await tabla.locator('thead th').allTextContents();
+    expect(headers.slice(0, 4)).toEqual(['Last Name', 'First Name', 'Email', 'Due']);
+
+    // 2. Verificar cantidad de filas
+    const filas = tabla.locator('tbody tr');
+    await expect(filas).toHaveCount(4);
+
+    // 3. Buscar fila por contenido
+    const filaSmith = tabla.locator('tbody tr', { hasText: 'Smith' });
+    await expect(filaSmith).toBeVisible();
+
+    // 4. Extraer email de Smith
+    const emailSmith = filaSmith.locator('td:nth-child(3)');
+    await expect(emailSmith).toHaveText('jsmith@gmail.com');
+
+    // 5. Extraer todos los precios y validar formato
+    const precios = tabla.locator('tbody tr td:nth-child(4)');
+    const preciosCount = await precios.count();
+    for (let i = 0; i < preciosCount; i++) {
+        const texto = await precios.nth(i).textContent();
+        expect(texto?.startsWith('$'), \`Precio sin formato: \${texto}\`).toBe(true);
+    }
+
+    // 6. Ordenar por Last Name y verificar
+    await tabla.locator('thead th:nth-child(1) span').click();
+    const primerApellido = tabla.locator('tbody tr:first-child td:first-child');
+    await expect(primerApellido).toHaveText('Bach');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Patrones de locator útiles para tablas</h3>
         <table style="width:100%; border-collapse: collapse;">

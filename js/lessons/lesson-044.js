@@ -27,7 +27,18 @@ const LESSON_044 = {
         </div>
 
         <h3>🗂️ Paso 1: Estructura del proyecto</h3>
-        <pre><code class="bash"># Crear la estructura completa
+        <div class="code-tabs" data-code-id="L044-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Crear la estructura completa
 mkdir -p proyecto_localizadores/locators
 mkdir -p proyecto_localizadores/pages
 mkdir -p proyecto_localizadores/tests
@@ -49,6 +60,35 @@ touch proyecto_localizadores/tests/test_filtrado_encadenamiento.py
 touch proyecto_localizadores/tests/test_layout.py
 
 touch proyecto_localizadores/pytest.ini</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Crear la estructura completa
+mkdir -p proyecto_localizadores/locators
+mkdir -p proyecto_localizadores/pages
+mkdir -p proyecto_localizadores/tests
+mkdir -p proyecto_localizadores/test-results/screenshots
+
+# Inicializar proyecto TypeScript
+cd proyecto_localizadores
+npm init -y
+npm install -D @playwright/test
+npx playwright install
+
+# Crear archivos
+touch locators/selectors.ts
+touch pages/login-page.ts
+touch pages/tables-page.ts
+touch tests/localizadores-builtin.spec.ts
+touch tests/css-xpath.spec.ts
+touch tests/filtrado-encadenamiento.spec.ts
+touch tests/layout.spec.ts
+touch playwright.config.ts</code></pre>
+            </div>
+        </div>
         <pre><code>proyecto_localizadores/
 ├── pytest.ini                              # Configuración de pytest
 ├── locators/
@@ -69,7 +109,18 @@ touch proyecto_localizadores/pytest.ini</code></pre>
         └── screenshots/                    # Capturas de fallos</code></pre>
 
         <h3>⚙️ Paso 2: pytest.ini — Configuración</h3>
-        <pre><code class="bash"># pytest.ini
+        <div class="code-tabs" data-code-id="L044-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># pytest.ini
 [pytest]
 markers =
     builtin: Tests usando localizadores built-in de Playwright
@@ -81,11 +132,57 @@ markers =
 
 testpaths = tests
 addopts = -v --tb=short</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    testDir: './tests',
+    use: {
+        baseURL: 'https://the-internet.herokuapp.com',
+        viewport: { width: 1280, height: 720 },
+        screenshot: 'only-on-failure',
+        trace: 'retain-on-failure',
+    },
+    projects: [
+        {
+            name: 'builtin',
+            testMatch: /localizadores-builtin/,
+        },
+        {
+            name: 'css-xpath',
+            testMatch: /css-xpath/,
+        },
+        {
+            name: 'filtrado',
+            testMatch: /filtrado-encadenamiento/,
+        },
+        {
+            name: 'layout',
+            testMatch: /layout/,
+        },
+    ],
+    reporter: [['html'], ['list']],
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📦 Paso 3: locators/selectors.py — Localizadores centralizados</h3>
         <p>Centralizar los localizadores en un módulo permite cambiarlos en un solo lugar
         cuando la UI cambia. Esta es la <strong>base de cualquier framework mantenible</strong>.</p>
-        <pre><code class="python"># locators/selectors.py
+        <div class="code-tabs" data-code-id="L044-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># locators/selectors.py
 """
 Localizadores centralizados del proyecto.
 Cada sección agrupa los selectores por página/feature.
@@ -195,12 +292,92 @@ class HerokuAppSelectors:
     PAGE_FOOTER = "#page-footer"
 
     URL = "/"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// locators/selectors.ts
+
+export const LoginSelectors = {
+    // --- Localizadores semánticos (preferidos) ---
+    USERNAME_LABEL: 'Username',
+    PASSWORD_LABEL: 'Password',
+    LOGIN_BUTTON_NAME: 'Login',
+    LOGOUT_LINK_NAME: ' Logout',
+
+    // --- Localizadores CSS (fallback) ---
+    FLASH_MESSAGE: '#flash',
+    SECURE_AREA_HEADING: '.subheader',
+
+    // --- URLs ---
+    URL: '/login',
+    SECURE_URL: '/secure',
+} as const;
+
+export const TablesSelectors = {
+    TABLE_HEADER_ROLE: 'columnheader',
+    TABLE_ROW_ROLE: 'row',
+    TABLE_CELL_ROLE: 'cell',
+
+    TABLE_1: '#table1',
+    TABLE_2: '#table2',
+    TABLE_1_HEADERS: '#table1 thead th',
+    TABLE_1_ROWS: '#table1 tbody tr',
+    TABLE_1_SORT_HEADER: '#table1 thead th',
+
+    URL: '/tables',
+} as const;
+
+export const CheckboxSelectors = {
+    CHECKBOX_ROLE: 'checkbox',
+    CONTAINER: '#checkboxes',
+    ALL_CHECKBOXES: "#checkboxes input[type='checkbox']",
+    URL: '/checkboxes',
+} as const;
+
+export const DropdownSelectors = {
+    DROPDOWN_LABEL: 'Dropdown List',
+    DROPDOWN_CSS: '#dropdown',
+    OPTION_ROLE: 'option',
+    URL: '/dropdown',
+} as const;
+
+export const DynamicLoadingSelectors = {
+    START_BUTTON_NAME: 'Start',
+    RESULT_TEXT: '#finish h4',
+    URL_HIDDEN: '/dynamic_loading/1',
+    URL_RENDERED: '/dynamic_loading/2',
+} as const;
+
+export const InputsSelectors = {
+    NUMBER_INPUT: "input[type='number']",
+    URL: '/inputs',
+} as const;
+
+export const HerokuAppSelectors = {
+    MAIN_HEADING: 'h1',
+    SUB_HEADING: 'h3',
+    CONTENT_LINKS: '#content ul li a',
+    PAGE_FOOTER: '#page-footer',
+    URL: '/',
+} as const;</code></pre>
+            </div>
+        </div>
 
         <h3>🏗️ Paso 4: pages/login_page.py — Page class (vista previa de POM)</h3>
         <p>Una <strong>page class</strong> encapsula los localizadores y las acciones de una página.
         Esto es un anticipo del patrón <strong>Page Object Model</strong> que verás en profundidad
         en la Sección 7.</p>
-        <pre><code class="python"># pages/login_page.py
+        <div class="code-tabs" data-code-id="L044-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># pages/login_page.py
 """
 Page class para la página de Login.
 Encapsula localizadores y acciones del formulario de autenticación.
@@ -278,9 +455,82 @@ class LoginPage:
         expect(self.page).to_have_url("**/login")
         expect(self.flash_message).to_contain_text("You logged out of the secure area!")
         logger.info("Logout verificado")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// pages/login-page.ts
+import { type Page, type Locator, expect } from '@playwright/test';
+
+export class LoginPage {
+    readonly page: Page;
+    readonly usernameInput: Locator;
+    readonly passwordInput: Locator;
+    readonly loginButton: Locator;
+    readonly flashMessage: Locator;
+    readonly logoutLink: Locator;
+
+    static readonly URL = '/login';
+
+    constructor(page: Page) {
+        this.page = page;
+        this.usernameInput = page.getByLabel('Username');
+        this.passwordInput = page.getByLabel('Password');
+        this.loginButton = page.getByRole('button', { name: 'Login' });
+        this.flashMessage = page.locator('#flash');
+        this.logoutLink = page.getByRole('link', { name: ' Logout' });
+    }
+
+    async navigate() {
+        await this.page.goto(LoginPage.URL);
+        return this;
+    }
+
+    async login(username: string, password: string) {
+        await this.usernameInput.fill(username);
+        await this.passwordInput.fill(password);
+        await this.loginButton.click();
+        return this;
+    }
+
+    async logout() {
+        await this.logoutLink.click();
+        return this;
+    }
+
+    async getFlashMessage(): Promise&lt;string&gt; {
+        return (await this.flashMessage.textContent())?.trim() ?? '';
+    }
+
+    async assertLoginSuccess() {
+        await expect(this.page).toHaveURL(/\\/secure/);
+        await expect(this.flashMessage).toContainText('You logged into a secure area!');
+    }
+
+    async assertLoginFailed(expectedMsg = 'Your username is invalid!') {
+        await expect(this.flashMessage).toContainText(expectedMsg);
+        await expect(this.page).toHaveURL(/\\/login/);
+    }
+
+    async assertLoggedOut() {
+        await expect(this.page).toHaveURL(/\\/login/);
+        await expect(this.flashMessage).toContainText('You logged out of the secure area!');
+    }
+}</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Paso 5: pages/tables_page.py — Page class para tablas</h3>
-        <pre><code class="python"># pages/tables_page.py
+        <div class="code-tabs" data-code-id="L044-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># pages/tables_page.py
 """
 Page class para la página de tablas (Data Tables).
 Demuestra localizadores de filtrado, encadenamiento y extracción de datos.
@@ -398,9 +648,104 @@ class TablesPage:
         row = self.get_row_by_last_name(last_name)
         expect(row).to_contain_text(expected_text)
         logger.info(f"Fila '{last_name}' contiene '{expected_text}'")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// pages/tables-page.ts
+import { type Page, type Locator, expect } from '@playwright/test';
+
+export class TablesPage {
+    readonly page: Page;
+    readonly table1: Locator;
+    readonly table2: Locator;
+    readonly table1Headers: Locator;
+    readonly table1Rows: Locator;
+
+    static readonly URL = '/tables';
+
+    constructor(page: Page) {
+        this.page = page;
+        this.table1 = page.locator('#table1');
+        this.table2 = page.locator('#table2');
+        this.table1Headers = this.table1.locator('thead th');
+        this.table1Rows = this.table1.locator('tbody tr');
+    }
+
+    async navigate() {
+        await this.page.goto(TablesPage.URL);
+        return this;
+    }
+
+    async getHeaderNames(): Promise&lt;string[]&gt; {
+        return await this.table1Headers.allTextContents();
+    }
+
+    async getRowCount(): Promise&lt;number&gt; {
+        return await this.table1Rows.count();
+    }
+
+    getRowByLastName(lastName: string): Locator {
+        return this.table1Rows.filter({ hasText: lastName });
+    }
+
+    async getCellValue(rowLocator: Locator, columnIndex: number): Promise&lt;string&gt; {
+        return await rowLocator.locator('td').nth(columnIndex).textContent() ?? '';
+    }
+
+    async getAllEmails(): Promise&lt;string[]&gt; {
+        const emails: string[] = [];
+        const count = await this.table1Rows.count();
+        for (let i = 0; i &lt; count; i++) {
+            const email = await this.table1Rows.nth(i).locator('td').nth(2).textContent();
+            emails.push(email ?? '');
+        }
+        return emails;
+    }
+
+    async sortByColumn(columnName: string) {
+        await this.table1Headers.filter({ hasText: columnName }).click();
+    }
+
+    async getColumnValues(columnIndex: number): Promise&lt;string[]&gt; {
+        const values: string[] = [];
+        const count = await this.table1Rows.count();
+        for (let i = 0; i &lt; count; i++) {
+            const value = await this.table1Rows.nth(i).locator('td').nth(columnIndex).textContent();
+            values.push(value ?? '');
+        }
+        return values;
+    }
+
+    getRowsWithDue(amount: string): Locator {
+        return this.table1Rows.filter({
+            has: this.page.locator('td', { hasText: amount })
+        });
+    }
+
+    async assertTableHasRows(expectedCount: number) {
+        await expect(this.table1Rows).toHaveCount(expectedCount);
+    }
+
+    async assertRowContains(lastName: string, expectedText: string) {
+        const row = this.getRowByLastName(lastName);
+        await expect(row).toContainText(expectedText);
+    }
+}</code></pre>
+            </div>
+        </div>
 
         <h3>🔧 Paso 6: tests/conftest.py — Fixtures</h3>
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L044-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/conftest.py
 """
 Fixtures globales del proyecto de localizadores resilientes.
 """
@@ -512,12 +857,63 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/fixtures.ts — Fixtures personalizados para Playwright Test
+import { test as base } from '@playwright/test';
+import { LoginPage } from '../pages/login-page';
+import { TablesPage } from '../pages/tables-page';
+
+// Credenciales de prueba
+export const VALID_CREDENTIALS = {
+    username: 'tomsmith',
+    password: 'SuperSecretPassword!',
+};
+
+export const INVALID_CREDENTIALS = {
+    username: 'usuario_falso',
+    password: 'clave_incorrecta',
+};
+
+// Extender test con fixtures personalizados
+type MyFixtures = {
+    loginPage: LoginPage;
+    tablesPage: TablesPage;
+};
+
+export const test = base.extend&lt;MyFixtures&gt;({
+    loginPage: async ({ page }, use) => {
+        const loginPage = new LoginPage(page);
+        await loginPage.navigate();
+        await use(loginPage);
+    },
+    tablesPage: async ({ page }, use) => {
+        const tablesPage = new TablesPage(page);
+        await tablesPage.navigate();
+        await use(tablesPage);
+    },
+});
+
+export { expect } from '@playwright/test';</code></pre>
+            </div>
+        </div>
 
         <h3>📝 Paso 7: test_localizadores_builtin.py — Localizadores built-in</h3>
         <p>Este archivo demuestra el uso de los localizadores semánticos de Playwright:
         <code>get_by_role</code>, <code>get_by_text</code>, <code>get_by_label</code>,
         <code>get_by_placeholder</code> y <code>get_by_test_id</code>.</p>
-        <pre><code class="python"># tests/test_localizadores_builtin.py
+        <div class="code-tabs" data-code-id="L044-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_localizadores_builtin.py
 """
 Tests usando los localizadores built-in de Playwright.
 Demuestra: get_by_role, get_by_text, get_by_label, get_by_placeholder.
@@ -636,9 +1032,88 @@ class TestGetByText:
         # exact=True requiere coincidencia completa
         boton = page.get_by_text("Login", exact=True)
         expect(boton.first).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/localizadores-builtin.spec.ts
+import { test, expect, VALID_CREDENTIALS, INVALID_CREDENTIALS } from './fixtures';
+
+test.describe('GetByRole — la forma preferida', () => {
+    test('botón login por role', async ({ loginPage }) => {
+        const boton = loginPage.page.getByRole('button', { name: 'Login' });
+        await expect(boton).toBeVisible();
+        await expect(boton).toBeEnabled();
+    });
+
+    test('heading por role', async ({ page }) => {
+        await page.goto('/');
+        const heading = page.getByRole('heading', { name: 'Welcome to the-internet' });
+        await expect(heading).toBeVisible();
+    });
+
+    test('links por role', async ({ page }) => {
+        await page.goto('/');
+        const linkLogin = page.getByRole('link', { name: 'Form Authentication' });
+        await expect(linkLogin).toBeVisible();
+        await linkLogin.click();
+        await expect(page).toHaveURL(/\\/login/);
+    });
+
+    test('checkboxes por role', async ({ page }) => {
+        await page.goto('/checkboxes');
+        const checkboxes = page.getByRole('checkbox');
+        await expect(checkboxes).toHaveCount(2);
+        await expect(checkboxes.nth(1)).toBeChecked();
+    });
+});
+
+test.describe('GetByLabel — ideal para formularios', () => {
+    test('login con labels', async ({ loginPage }) => {
+        await loginPage.login(VALID_CREDENTIALS.username, VALID_CREDENTIALS.password);
+        await loginPage.assertLoginSuccess();
+    });
+
+    test('label username', async ({ loginPage }) => {
+        const campo = loginPage.page.getByLabel('Username');
+        await expect(campo).toBeVisible();
+        await expect(campo).toBeEditable();
+    });
+});
+
+test.describe('GetByText — para contenido visible', () => {
+    test('encontrar texto en pagina', async ({ page }) => {
+        await page.goto('/');
+        const titulo = page.getByText('Welcome to the-internet');
+        await expect(titulo).toBeVisible();
+    });
+
+    test('login fallido mensaje error', async ({ loginPage }) => {
+        await loginPage.login(INVALID_CREDENTIALS.username, INVALID_CREDENTIALS.password);
+        const error = loginPage.page.getByText('Your username is invalid!');
+        await expect(error).toBeVisible();
+    });
+
+    test('texto exacto', async ({ page }) => {
+        await page.goto('/login');
+        const boton = page.getByText('Login', { exact: true });
+        await expect(boton.first()).toBeVisible();
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎨 Paso 8: test_css_xpath.py — CSS y XPath cuando son necesarios</h3>
-        <pre><code class="python"># tests/test_css_xpath.py
+        <div class="code-tabs" data-code-id="L044-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_css_xpath.py
 """
 Tests demostrando cuándo CSS y XPath son necesarios.
 Aunque get_by_role/label/text son preferibles, hay escenarios
@@ -756,9 +1231,90 @@ class TestXPathSelectors:
             "xpath=//input[@type='text' or @type='password']"
         )
         assert campos.count() >= 2</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/css-xpath.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('CSS Selectors — cuándo son apropiados', () => {
+    test('selector por ID', async ({ page }) => {
+        await page.goto('/tables');
+        const tabla = page.locator('#table1');
+        await expect(tabla).toBeVisible();
+    });
+
+    test('selector por atributo', async ({ page }) => {
+        await page.goto('/inputs');
+        const campo = page.locator("input[type='number']");
+        await expect(campo).toBeVisible();
+        await campo.fill('42');
+        await expect(campo).toHaveValue('42');
+    });
+
+    test('selector combinado', async ({ page }) => {
+        await page.goto('/tables');
+        const emails = page.locator('#table1 tbody tr td:nth-child(3)');
+        expect(await emails.count()).toBeGreaterThan(0);
+        for (const email of await emails.all()) {
+            expect(await email.textContent()).toContain('@');
+        }
+    });
+
+    test('selector has-text', async ({ page }) => {
+        await page.goto('/tables');
+        const filaSmith = page.locator("#table1 tbody tr:has-text('Smith')");
+        await expect(filaSmith).toBeVisible();
+    });
+});
+
+test.describe('XPath Selectors — solo cuando es la mejor opción', () => {
+    test('xpath texto contiene', async ({ page }) => {
+        await page.goto('/');
+        const link = page.locator("xpath=//a[contains(@href, 'login')]");
+        await expect(link).toBeVisible();
+    });
+
+    test('xpath navegar al padre', async ({ page }) => {
+        await page.goto('/tables');
+        const fila = page.locator(
+            "xpath=//td[text()='jdoe@hotmail.com']/parent::tr"
+        );
+        await expect(fila).toBeVisible();
+        await expect(fila).toContainText('Doe');
+    });
+
+    test('xpath hermano siguiente', async ({ page }) => {
+        await page.goto('/tables');
+        const siguiente = page.locator(
+            "xpath=//th[text()='Last Name']/following-sibling::th[1]"
+        );
+        await expect(siguiente).toHaveText('First Name');
+    });
+
+    test('xpath OR condition', async ({ page }) => {
+        await page.goto('/login');
+        const campos = page.locator(
+            "xpath=//input[@type='text' or @type='password']"
+        );
+        expect(await campos.count()).toBeGreaterThanOrEqual(2);
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔗 Paso 9: test_filtrado_encadenamiento.py — filter(), chaining, and_(), or_()</h3>
-        <pre><code class="python"># tests/test_filtrado_encadenamiento.py
+        <div class="code-tabs" data-code-id="L044-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_filtrado_encadenamiento.py
 """
 Tests de filtrado y encadenamiento de localizadores.
 Demuestra: filter(), locator chaining, and_(), or_().
@@ -898,9 +1454,79 @@ class TestAndOr:
             page.locator("tr", has_text="John")
         )
         expect(fila).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/filtrado-encadenamiento.spec.ts
+import { test, expect } from './fixtures';
+
+test.describe('Filtrado con filter()', () => {
+    test('filtrar filas por texto', async ({ tablesPage }) => {
+        const fila = tablesPage.getRowByLastName('Smith');
+        await expect(fila).toBeVisible();
+        await expect(fila).toContainText('John');
+    });
+
+    test('filtrar con has', async ({ tablesPage }) => {
+        const fila = tablesPage.table1Rows.filter({
+            has: tablesPage.page.locator('td', { hasText: 'jdoe@hotmail.com' })
+        });
+        await expect(fila).toBeVisible();
+        await expect(fila).toContainText('Doe');
+    });
+
+    test('filtrar con hasNotText', async ({ tablesPage }) => {
+        const filasSinSmith = tablesPage.table1Rows.filter({ hasNotText: 'Smith' });
+        const total = await tablesPage.table1Rows.count();
+        const sinSmith = await filasSinSmith.count();
+        expect(sinSmith).toBeLessThan(total);
+    });
+});
+
+test.describe('Encadenamiento de localizadores', () => {
+    test('encadenar locator', async ({ tablesPage }) => {
+        const headers = tablesPage.table1.locator('thead th');
+        expect(await headers.count()).toBeGreaterThanOrEqual(4);
+    });
+
+    test('first y last', async ({ tablesPage }) => {
+        const primera = tablesPage.table1Rows.first();
+        await expect(primera).toBeVisible();
+        const ultima = tablesPage.table1Rows.last();
+        await expect(ultima).toBeVisible();
+    });
+});
+
+test.describe('and_() y or_()', () => {
+    test('and combinar condiciones', async ({ page }) => {
+        await page.goto('/login');
+        const boton = page.getByRole('button').and(page.getByText('Login'));
+        await expect(boton).toBeVisible();
+        await expect(boton).toHaveCount(1);
+    });
+
+    test('or alternativa', async ({ page }) => {
+        await page.goto('/');
+        const links = page.getByRole('link', { name: 'Form Authentication' })
+            .or(page.getByRole('link', { name: 'Checkboxes' }));
+        expect(await links.count()).toBe(2);
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📐 Paso 10: test_layout.py — Localizadores por layout</h3>
-        <pre><code class="python"># tests/test_layout.py
+        <div class="code-tabs" data-code-id="L044-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_layout.py
 """
 Tests usando localizadores basados en layout y posición relativa.
 Demuestra: above(), below(), left_of(), right_of(), near().
@@ -975,9 +1601,64 @@ class TestLayoutLocators:
         # Verificar que hay inputs arriba del botón
         inputs_arriba = page.locator("input").above(submit)
         assert inputs_arriba.count() >= 2  # Username y Password</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/layout.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Layout Locators', () => {
+    test('elemento above', async ({ page }) => {
+        await page.goto('/login');
+        const passwordField = page.getByLabel('Password');
+        await expect(page.getByLabel('Username')).toBeVisible();
+    });
+
+    test('elemento below', async ({ page }) => {
+        await page.goto('/login');
+        const usernameField = page.getByLabel('Username');
+        const belowUsername = page.locator('input').below(usernameField).first();
+        await expect(belowUsername).toBeVisible();
+    });
+
+    test('near elemento cercano', async ({ page }) => {
+        await page.goto('/login');
+        const password = page.getByLabel('Password');
+        const botonCercano = page.getByRole('button').near(password);
+        await expect(botonCercano).toBeVisible();
+    });
+
+    test('near con distancia personalizada', async ({ page }) => {
+        await page.goto('/login');
+        const password = page.getByLabel('Password');
+        const boton = page.getByRole('button').near(password, { maxDistance: 200 });
+        await expect(boton).toBeVisible();
+    });
+
+    test('layout en formulario', async ({ page }) => {
+        await page.goto('/login');
+        const submit = page.getByRole('button', { name: 'Login' });
+        await expect(submit).toBeVisible();
+
+        const inputsArriba = page.locator('input').above(submit);
+        expect(await inputsArriba.count()).toBeGreaterThanOrEqual(2);
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>▶️ Paso 11: Ejecutar y depurar</h3>
-        <pre><code class="bash"># Ejecutar todos los tests
+        <div class="code-tabs" data-code-id="L044-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Ejecutar todos los tests
 pytest tests/ -v
 
 # Solo tests de localizadores built-in
@@ -1019,8 +1700,52 @@ playwright codegen https://the-internet.herokuapp.com
 playwright codegen https://the-internet.herokuapp.com/tables
 
 # --- Highlight para visualizar localizadores ---</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Ejecutar todos los tests
+npx playwright test
 
-        <pre><code class="python"># Debugging con highlight() — resalta el elemento en el navegador
+# Solo un proyecto específico
+npx playwright test --project=builtin
+npx playwright test --project=css-xpath
+npx playwright test --project=filtrado
+npx playwright test --project=layout
+
+# Con reporter detallado
+npx playwright test --reporter=list
+
+# Con screenshots al fallar (configurado en playwright.config.ts)
+npx playwright test
+
+# --- Debugging con Inspector ---
+npx playwright test --debug
+npx playwright test tests/localizadores-builtin.spec.ts --debug
+
+# --- Usar codegen para descubrir localizadores ---
+npx playwright codegen https://the-internet.herokuapp.com
+npx playwright codegen https://the-internet.herokuapp.com/tables
+
+# --- Ver reporte HTML ---
+npx playwright show-report</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L044-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Debugging con highlight() — resalta el elemento en el navegador
 def test_debug_highlight(page: Page):
     """Usar highlight() para visualizar qué elemento encuentra el localizador."""
     page.goto("https://the-internet.herokuapp.com/tables")
@@ -1038,6 +1763,30 @@ def test_debug_highlight(page: Page):
 
     # Pausa para ver los resaltados
     page.pause()  # Abre el Inspector</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Debugging con highlight() — resalta el elemento en el navegador
+test('debug highlight', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/tables');
+
+    // Resaltar la tabla
+    await page.locator('#table1').highlight();
+
+    // Resaltar todas las filas
+    const filas = page.locator('#table1 tbody tr');
+    const count = await filas.count();
+    for (let i = 0; i < count; i++) {
+        await filas.nth(i).highlight();
+    }
+
+    // Resaltar una fila filtrada
+    await page.locator('#table1 tbody tr').filter({ hasText: 'Smith' }).highlight();
+
+    // Pausa para ver los resaltados
+    await page.pause();
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip: highlight() y pause() para depuración</h4>

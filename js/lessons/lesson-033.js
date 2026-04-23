@@ -19,7 +19,18 @@ const LESSON_033 = {
         <h3>📤 Upload con input[type="file"]</h3>
         <p>La forma más directa de subir archivos es mediante <code>set_input_files()</code>
         sobre un elemento <code>&lt;input type="file"&gt;</code>.</p>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L033-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_upload_archivo_unico(page: Page):
     """Subir un solo archivo usando set_input_files."""
@@ -33,9 +44,39 @@ def test_upload_archivo_unico(page: Page):
 
     # Verificar que el archivo se subió correctamente
     expect(page.locator("#uploaded-files")).to_have_text("reporte.pdf")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('upload archivo unico', async ({ page }) => {
+    // Subir un solo archivo usando setInputFiles
+    await page.goto('https://the-internet.herokuapp.com/upload');
+
+    // Localizar el input de archivo y asignar un archivo
+    await page.setInputFiles('#file-upload', 'datos/reporte.pdf');
+
+    // Hacer clic en el botón de subir
+    await page.click('#file-submit');
+
+    // Verificar que el archivo se subió correctamente
+    await expect(page.locator('#uploaded-files')).toHaveText('reporte.pdf');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📁 Upload de múltiples archivos</h3>
-        <pre><code class="python">def test_upload_multiples_archivos(page: Page):
+        <div class="code-tabs" data-code-id="L033-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_upload_multiples_archivos(page: Page):
     """Subir varios archivos a la vez."""
     page.goto("https://ejemplo.com/upload-multiple")
 
@@ -48,13 +89,42 @@ def test_upload_archivo_unico(page: Page):
 
     page.click("#btn-subir")
     expect(page.locator(".archivos-subidos")).to_contain_text("3 archivos")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('upload multiples archivos', async ({ page }) => {
+    // Subir varios archivos a la vez
+    await page.goto('https://ejemplo.com/upload-multiple');
+
+    // Pasar una lista de rutas de archivos
+    await page.setInputFiles('#file-input', [
+        'datos/imagen1.png',
+        'datos/imagen2.jpg',
+        'datos/documento.pdf'
+    ]);
+
+    await page.click('#btn-subir');
+    await expect(page.locator('.archivos-subidos')).toContainText('3 archivos');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>💾 Upload desde buffer (sin archivo en disco)</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p><strong>Caso de uso:</strong> Cuando necesitas generar un archivo dinámicamente
             en el test sin crearlo físicamente en disco.</p>
         </div>
-        <pre><code class="python">def test_upload_desde_buffer(page: Page):
+        <div class="code-tabs" data-code-id="L033-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_upload_desde_buffer(page: Page):
     """Subir un archivo generado en memoria."""
     page.goto("https://ejemplo.com/upload")
 
@@ -67,9 +137,38 @@ def test_upload_archivo_unico(page: Page):
 
     page.click("#btn-subir")
     expect(page.locator(".estado")).to_contain_text("Subido exitosamente")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('upload desde buffer', async ({ page }) => {
+    // Subir un archivo generado en memoria
+    await page.goto('https://ejemplo.com/upload');
+
+    // Crear archivo desde un buffer de bytes
+    await page.setInputFiles('#file-input', {
+        name: 'datos_test.csv',
+        mimeType: 'text/csv',
+        buffer: Buffer.from('nombre,edad\\nJuan,30\\nMaria,25')
+    });
+
+    await page.click('#btn-subir');
+    await expect(page.locator('.estado')).toContainText('Subido exitosamente');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧹 Limpiar el input de archivos</h3>
-        <pre><code class="python">def test_limpiar_input_archivos(page: Page):
+        <div class="code-tabs" data-code-id="L033-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_limpiar_input_archivos(page: Page):
     """Remover archivos seleccionados del input."""
     page.goto("https://ejemplo.com/upload")
 
@@ -82,12 +181,41 @@ def test_upload_archivo_unico(page: Page):
     # Verificar que no hay archivos seleccionados
     input_value = page.input_value("#file-input")
     assert input_value == ""</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('limpiar input archivos', async ({ page }) => {
+    // Remover archivos seleccionados del input
+    await page.goto('https://ejemplo.com/upload');
+
+    // Seleccionar un archivo
+    await page.setInputFiles('#file-input', 'datos/reporte.pdf');
+
+    // Limpiar la selección (pasar lista vacía)
+    await page.setInputFiles('#file-input', []);
+
+    // Verificar que no hay archivos seleccionados
+    const inputValue = await page.inputValue('#file-input');
+    expect(inputValue).toBe('');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🗂️ Upload sin input: File Chooser</h3>
         <p>Algunos sitios usan botones personalizados que abren el diálogo del sistema operativo
         en lugar de un <code>&lt;input type="file"&gt;</code> visible. Para estos casos,
         Playwright ofrece <code>expect_file_chooser()</code>.</p>
-        <pre><code class="python">def test_upload_con_file_chooser(page: Page):
+        <div class="code-tabs" data-code-id="L033-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_upload_con_file_chooser(page: Page):
     """Manejar uploads sin input visible (file chooser del OS)."""
     page.goto("https://ejemplo.com/upload-custom")
 
@@ -104,6 +232,28 @@ def test_upload_archivo_unico(page: Page):
     file_chooser.set_files("datos/imagen.png")
 
     expect(page.locator(".preview")).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('upload con file chooser', async ({ page }) => {
+    // Manejar uploads sin input visible (file chooser del OS)
+    await page.goto('https://ejemplo.com/upload-custom');
+
+    // Esperar el diálogo de selección de archivos y hacer clic
+    const [fileChooser] = await Promise.all([
+        page.waitForEvent('filechooser'),
+        page.click('#btn-upload-custom') // Botón que abre el file chooser
+    ]);
+
+    // Verificar si acepta múltiples archivos
+    console.log(\`Múltiples: \${fileChooser.isMultiple()}\`);
+
+    // Seleccionar archivos
+    await fileChooser.setFiles('datos/imagen.png');
+
+    await expect(page.locator('.preview')).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ ¿Cuándo usar File Chooser vs set_input_files?</h4>
@@ -116,7 +266,18 @@ def test_upload_archivo_unico(page: Page):
         <h3>📥 Descargar archivos</h3>
         <p>Para interceptar descargas, Playwright proporciona <code>expect_download()</code>
         que captura el evento de descarga del navegador.</p>
-        <pre><code class="python">def test_descargar_archivo(page: Page):
+        <div class="code-tabs" data-code-id="L033-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_descargar_archivo(page: Page):
     """Descargar un archivo y verificar su contenido."""
     page.goto("https://the-internet.herokuapp.com/download")
 
@@ -136,9 +297,45 @@ def test_upload_archivo_unico(page: Page):
     # Obtener la ruta temporal del archivo
     ruta_temporal = download.path()
     print(f"Ruta temporal: {ruta_temporal}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('descargar archivo', async ({ page }) => {
+    // Descargar un archivo y verificar su contenido
+    await page.goto('https://the-internet.herokuapp.com/download');
+
+    // Esperar la descarga al hacer clic en el enlace
+    const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.click("a[href*='some-file.txt']")
+    ]);
+
+    // Propiedades del objeto Download
+    console.log(\`Nombre sugerido: \${download.suggestedFilename()}\`);
+    console.log(\`URL de origen: \${download.url()}\`);
+
+    // Guardar el archivo en una ruta específica
+    await download.saveAs(\`descargas/\${download.suggestedFilename()}\`);
+
+    // Obtener la ruta temporal del archivo
+    const rutaTemporal = await download.path();
+    console.log(\`Ruta temporal: \${rutaTemporal}\`);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📋 Verificar contenido del archivo descargado</h3>
-        <pre><code class="python">import os
+        <div class="code-tabs" data-code-id="L033-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import os
 
 def test_verificar_contenido_descarga(page: Page):
     """Descargar un archivo y verificar su contenido."""
@@ -162,9 +359,50 @@ def test_verificar_contenido_descarga(page: Page):
 
     # Limpieza
     os.remove(ruta)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import * as fs from 'fs';
+import * as path from 'path';
+
+test('verificar contenido descarga', async ({ page }) => {
+    // Descargar un archivo y verificar su contenido
+    await page.goto('https://the-internet.herokuapp.com/download');
+
+    const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.click("a[href*='some-file.txt']")
+    ]);
+
+    const ruta = \`descargas/\${download.suggestedFilename()}\`;
+    await download.saveAs(ruta);
+
+    // Leer y verificar contenido
+    const contenido = fs.readFileSync(ruta, 'utf-8');
+    expect(contenido).toContain('texto esperado');
+
+    // Verificar tamaño del archivo
+    const stats = fs.statSync(ruta);
+    expect(stats.size).toBeGreaterThan(0);
+
+    // Limpieza
+    fs.unlinkSync(ruta);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⚙️ Configurar directorio de descargas</h3>
-        <pre><code class="python"># conftest.py — Configurar directorio de descargas en el contexto
+        <div class="code-tabs" data-code-id="L033-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py — Configurar directorio de descargas en el contexto
 import pytest
 import os
 
@@ -178,6 +416,22 @@ def browser_context_args(browser_context_args):
         **browser_context_args,
         "accept_downloads": True,  # Aceptar descargas automáticamente
     }</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts — Configurar directorio de descargas
+import { defineConfig } from '@playwright/test';
+import * as path from 'path';
+
+export default defineConfig({
+    use: {
+        // Aceptar descargas automáticamente
+        acceptDownloads: true,
+    },
+    // Directorio de salida para artefactos de test
+    outputDir: path.join(__dirname, 'test_downloads'),
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip: Esperar descarga completa</h4>
@@ -185,13 +439,42 @@ def browser_context_args(browser_context_args):
             espera automáticamente a que la descarga se complete. Si necesitas verificar
             el fallo de una descarga, usa <code>download.failure()</code> que retorna
             <code>None</code> si fue exitosa o un string con el error.</p>
-            <pre><code class="python"># Verificar que la descarga fue exitosa
+            <div class="code-tabs" data-code-id="L033-9">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># Verificar que la descarga fue exitosa
 error = download.failure()
 assert error is None, f"La descarga falló: {error}"</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// Verificar que la descarga fue exitosa
+const error = await download.failure();
+expect(error).toBeNull();</code></pre>
+                </div>
+            </div>
         </div>
 
         <h3>🔄 Ejemplo completo: Upload y Download</h3>
-        <pre><code class="python">import os
+        <div class="code-tabs" data-code-id="L033-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import os
 import pytest
 from playwright.sync_api import Page, expect
 
@@ -239,6 +522,62 @@ class TestArchivos:
 
         # Limpieza
         os.remove(ruta_destino)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+test.describe('TestArchivos', () => {
+    // Tests de upload y download en the-internet.herokuapp.com
+
+    test('upload y verificar', async ({ page }) => {
+        // Subir un archivo y verificar que aparece
+        await page.goto('https://the-internet.herokuapp.com/upload');
+
+        // Crear archivo temporal para el test
+        const rutaArchivo = 'test_upload.txt';
+        fs.writeFileSync(rutaArchivo, 'Contenido de prueba para upload');
+
+        try {
+            // Subir el archivo
+            await page.setInputFiles('#file-upload', rutaArchivo);
+            await page.click('#file-submit');
+
+            // Verificar resultado
+            await expect(page.locator('#uploaded-files')).toHaveText('test_upload.txt');
+        } finally {
+            fs.unlinkSync(rutaArchivo);
+        }
+    });
+
+    test('descargar y verificar', async ({ page }) => {
+        // Descargar un archivo y verificar que existe
+        await page.goto('https://the-internet.herokuapp.com/download');
+
+        // Obtener el primer enlace de descarga
+        const primerEnlace = page.locator('a').first();
+
+        const [download] = await Promise.all([
+            page.waitForEvent('download'),
+            primerEnlace.click()
+        ]);
+
+        const rutaDestino = \`descargas/\${download.suggestedFilename()}\`;
+
+        // Guardar y verificar
+        fs.mkdirSync('descargas', { recursive: true });
+        await download.saveAs(rutaDestino);
+
+        expect(fs.existsSync(rutaDestino)).toBeTruthy();
+        expect(fs.statSync(rutaDestino).size).toBeGreaterThan(0);
+
+        // Limpieza
+        fs.unlinkSync(rutaDestino);
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Resumen de métodos de Upload y Download</h3>
         <table style="width:100%; border-collapse: collapse;">

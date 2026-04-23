@@ -61,7 +61,18 @@ const LESSON_035 = {
         <h3>🔧 El evento page.on("dialog")</h3>
         <p>Para interceptar diálogos, registras un listener con <code>page.on("dialog")</code>.
         El objeto <code>dialog</code> expone propiedades y métodos para interactuar con él.</p>
-        <pre><code class="python">from playwright.sync_api import Page, Dialog
+        <div class="code-tabs" data-code-id="L035-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, Dialog
 
 def test_interceptar_alert(page: Page):
     # Registrar listener ANTES de disparar el diálogo
@@ -74,6 +85,24 @@ def test_interceptar_alert(page: Page):
     # Verificar el resultado en la página
     resultado = page.locator("#result")
     assert resultado.text_content() == "You successfully clicked an alert"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect, Dialog } from '@playwright/test';
+
+test('interceptar alert', async ({ page }) => {
+    // Registrar listener ANTES de disparar el diálogo
+    page.on('dialog', (dialog: Dialog) => dialog.accept());
+
+    // Ahora disparar la acción que genera el alert
+    await page.goto('https://the-internet.herokuapp.com/javascript_alerts');
+    await page.click("button:text('Click for JS Alert')");
+
+    // Verificar el resultado en la página
+    const resultado = page.locator('#result');
+    await expect(resultado).toHaveText('You successfully clicked an alert');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📖 Propiedades del objeto Dialog</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -118,7 +147,18 @@ def test_interceptar_alert(page: Page):
 
         <h3>✅ Manejo de alert</h3>
         <p>El diálogo <code>alert()</code> solo tiene un botón "OK". Se usa para mostrar información.</p>
-        <pre><code class="python">from playwright.sync_api import Page, Dialog
+        <div class="code-tabs" data-code-id="L035-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, Dialog
 
 def test_alert_con_verificacion(page: Page):
     mensajes_capturados = []
@@ -138,10 +178,44 @@ def test_alert_con_verificacion(page: Page):
     # Verificar que el mensaje fue el esperado
     assert mensajes_capturados[0] == "I am a JS Alert"
     assert page.locator("#result").text_content() == "You successfully clicked an alert"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('alert con verificacion', async ({ page }) => {
+    const mensajesCapturados: string[] = [];
+
+    page.on('dialog', async (dialog: Dialog) => {
+        // Verificar que es un alert
+        expect(dialog.type()).toBe('alert');
+        // Capturar el mensaje
+        mensajesCapturados.push(dialog.message());
+        // Aceptar el diálogo
+        await dialog.accept();
+    });
+
+    await page.goto('https://the-internet.herokuapp.com/javascript_alerts');
+    await page.click("button:text('Click for JS Alert')");
+
+    // Verificar que el mensaje fue el esperado
+    expect(mensajesCapturados[0]).toBe('I am a JS Alert');
+    await expect(page.locator('#result')).toHaveText('You successfully clicked an alert');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔄 Manejo de confirm</h3>
         <p>El diálogo <code>confirm()</code> tiene dos botones: "OK" (aceptar) y "Cancelar" (rechazar).</p>
-        <pre><code class="python">def test_confirm_aceptar(page: Page):
+        <div class="code-tabs" data-code-id="L035-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_confirm_aceptar(page: Page):
     """Aceptar un diálogo de confirmación."""
     page.on("dialog", lambda dialog: dialog.accept())
 
@@ -159,11 +233,46 @@ def test_confirm_rechazar(page: Page):
     page.click("button:text('Click for JS Confirm')")
 
     assert page.locator("#result").text_content() == "You clicked: Cancel"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('confirm aceptar', async ({ page }) => {
+    // Aceptar un diálogo de confirmación
+    page.on('dialog', (dialog) => dialog.accept());
+
+    await page.goto('https://the-internet.herokuapp.com/javascript_alerts');
+    await page.click("button:text('Click for JS Confirm')");
+
+    await expect(page.locator('#result')).toHaveText('You clicked: Ok');
+});
+
+
+test('confirm rechazar', async ({ page }) => {
+    // Rechazar un diálogo de confirmación
+    page.on('dialog', (dialog) => dialog.dismiss());
+
+    await page.goto('https://the-internet.herokuapp.com/javascript_alerts');
+    await page.click("button:text('Click for JS Confirm')");
+
+    await expect(page.locator('#result')).toHaveText('You clicked: Cancel');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>✏️ Manejo de prompt</h3>
         <p>El diálogo <code>prompt()</code> permite al usuario ingresar texto. Usa
         <code>dialog.accept("texto")</code> para enviarlo.</p>
-        <pre><code class="python">def test_prompt_con_texto(page: Page):
+        <div class="code-tabs" data-code-id="L035-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_prompt_con_texto(page: Page):
     """Enviar texto a un diálogo prompt."""
     def manejar_prompt(dialog: Dialog):
         assert dialog.type == "prompt"
@@ -187,12 +296,52 @@ def test_prompt_cancelar(page: Page):
     page.click("button:text('Click for JS Prompt')")
 
     assert page.locator("#result").text_content() == "You entered: null"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('prompt con texto', async ({ page }) => {
+    // Enviar texto a un diálogo prompt
+    page.on('dialog', async (dialog) => {
+        expect(dialog.type()).toBe('prompt');
+        expect(dialog.message()).toBe('I am a JS prompt');
+        // Enviar texto al prompt
+        await dialog.accept('Playwright es genial');
+    });
+
+    await page.goto('https://the-internet.herokuapp.com/javascript_alerts');
+    await page.click("button:text('Click for JS Prompt')");
+
+    await expect(page.locator('#result')).toHaveText('You entered: Playwright es genial');
+});
+
+
+test('prompt cancelar', async ({ page }) => {
+    // Cancelar un diálogo prompt (sin enviar texto)
+    page.on('dialog', (dialog) => dialog.dismiss());
+
+    await page.goto('https://the-internet.herokuapp.com/javascript_alerts');
+    await page.click("button:text('Click for JS Prompt')");
+
+    await expect(page.locator('#result')).toHaveText('You entered: null');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⏳ Usando expect_event("dialog") para esperar</h3>
         <p>En lugar de usar <code>page.on()</code>, puedes usar <code>page.expect_event("dialog")</code>
         para esperar explícitamente la aparición de un diálogo. Esto es útil cuando necesitas
         sincronizar acciones.</p>
-        <pre><code class="python">def test_expect_event_dialog(page: Page):
+        <div class="code-tabs" data-code-id="L035-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_expect_event_dialog(page: Page):
     page.goto("https://the-internet.herokuapp.com/javascript_alerts")
 
     # Esperar el diálogo y capturarlo
@@ -205,6 +354,25 @@ def test_prompt_cancelar(page: Page):
 
     # NOTA: con expect_event, el diálogo se acepta automáticamente
     # si no lo manejas explícitamente</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('expect event dialog', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/javascript_alerts');
+
+    // Esperar el diálogo y capturarlo
+    const [dialog] = await Promise.all([
+        page.waitForEvent('dialog'),
+        page.click("button:text('Click for JS Alert')")
+    ]);
+
+    expect(dialog.type()).toBe('alert');
+    expect(dialog.message()).toBe('I am a JS Alert');
+
+    // Aceptar el diálogo explícitamente
+    await dialog.accept();
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 ¿page.on() vs expect_event()?</h4>
@@ -219,7 +387,18 @@ def test_prompt_cancelar(page: Page):
         <h3>🔁 Manejo de múltiples diálogos secuenciales</h3>
         <p>Cuando una acción genera varios diálogos consecutivos, puedes manejarlos con
         una cola o un contador.</p>
-        <pre><code class="python">def test_multiples_dialogos(page: Page):
+        <div class="code-tabs" data-code-id="L035-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_multiples_dialogos(page: Page):
     """Manejar varios diálogos secuenciales."""
     respuestas = [
         ("alert", None),      # Primer diálogo: alert -> aceptar
@@ -252,11 +431,58 @@ def test_prompt_cancelar(page: Page):
     page.click("button:text('Click for JS Prompt')")
 
     assert indice["actual"] == 3  # Verificar que se manejaron todos</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('multiples dialogos', async ({ page }) => {
+    // Manejar varios diálogos secuenciales
+    const respuestas: [string, string | boolean | null][] = [
+        ['alert', null],      // Primer diálogo: alert -> aceptar
+        ['confirm', true],    // Segundo: confirm -> aceptar
+        ['prompt', 'Hola'],   // Tercero: prompt -> enviar texto
+    ];
+    let indiceActual = 0;
+
+    page.on('dialog', async (dialog) => {
+        const [tipoEsperado, accion] = respuestas[indiceActual];
+        expect(dialog.type()).toBe(tipoEsperado);
+
+        if (accion === null || accion === true) {
+            await dialog.accept();
+        } else if (accion === false) {
+            await dialog.dismiss();
+        } else if (typeof accion === 'string') {
+            await dialog.accept(accion);
+        }
+
+        indiceActual++;
+    });
+
+    // Disparar acciones que generan cada diálogo
+    await page.goto('https://the-internet.herokuapp.com/javascript_alerts');
+    await page.click("button:text('Click for JS Alert')");
+    await page.click("button:text('Click for JS Confirm')");
+    await page.click("button:text('Click for JS Prompt')");
+
+    expect(indiceActual).toBe(3); // Verificar que se manejaron todos
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🚪 Diálogos beforeunload</h3>
         <p>El evento <code>beforeunload</code> aparece cuando intentas salir de una página que tiene
         cambios sin guardar. Playwright también puede manejar este tipo.</p>
-        <pre><code class="python">def test_beforeunload_dialog(page: Page):
+        <div class="code-tabs" data-code-id="L035-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_beforeunload_dialog(page: Page):
     """Manejar diálogo beforeunload al navegar fuera."""
     page.goto("https://ejemplo.com/editor")
 
@@ -273,6 +499,27 @@ def test_prompt_cancelar(page: Page):
 
     # Intentar navegar fuera (dispara beforeunload)
     page.goto("https://ejemplo.com/otra-pagina")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('beforeunload dialog', async ({ page }) => {
+    // Manejar diálogo beforeunload al navegar fuera
+    await page.goto('https://ejemplo.com/editor');
+
+    // Simular cambios en un formulario
+    await page.fill('#contenido', 'Texto sin guardar');
+
+    // Registrar handler para beforeunload
+    page.on('dialog', async (dialog) => {
+        expect(dialog.type()).toBe('beforeunload');
+        // Aceptar = salir de la página
+        await dialog.accept();
+    });
+
+    // Intentar navegar fuera (dispara beforeunload)
+    await page.goto('https://ejemplo.com/otra-pagina');
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ Nota sobre beforeunload</h4>
@@ -285,16 +532,50 @@ def test_prompt_cancelar(page: Page):
         <h3>🚫 Error común: olvidar registrar el listener antes de la acción</h3>
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>❌ Incorrecto — listener después de la acción</h4>
-            <pre><code class="python"># MAL: El diálogo aparece y se auto-descarta antes de registrar el handler
+            <div class="code-tabs" data-code-id="L035-8a">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># MAL: El diálogo aparece y se auto-descarta antes de registrar el handler
 def test_dialog_mal(page: Page):
     page.goto("https://the-internet.herokuapp.com/javascript_alerts")
     page.click("button:text('Click for JS Alert')")
 
     # Demasiado tarde — el diálogo ya fue auto-descartado
     page.on("dialog", lambda d: d.accept())</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// MAL: El diálogo aparece y se auto-descarta antes de registrar el handler
+test('dialog mal', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/javascript_alerts');
+    await page.click("button:text('Click for JS Alert')");
+
+    // Demasiado tarde — el diálogo ya fue auto-descartado
+    page.on('dialog', (dialog) => dialog.accept());
+});</code></pre>
+                </div>
+            </div>
 
             <h4>✅ Correcto — listener antes de la acción</h4>
-            <pre><code class="python"># BIEN: Registrar el handler ANTES de la acción que dispara el diálogo
+            <div class="code-tabs" data-code-id="L035-8b">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># BIEN: Registrar el handler ANTES de la acción que dispara el diálogo
 def test_dialog_bien(page: Page):
     page.goto("https://the-internet.herokuapp.com/javascript_alerts")
 
@@ -303,10 +584,35 @@ def test_dialog_bien(page: Page):
 
     # Después: ejecutar la acción que dispara el diálogo
     page.click("button:text('Click for JS Alert')")</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// BIEN: Registrar el handler ANTES de la acción que dispara el diálogo
+test('dialog bien', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/javascript_alerts');
+
+    // Primero: registrar el handler
+    page.on('dialog', (dialog) => dialog.accept());
+
+    // Después: ejecutar la acción que dispara el diálogo
+    await page.click("button:text('Click for JS Alert')");
+});</code></pre>
+                </div>
+            </div>
         </div>
 
         <h3>🧪 Ejemplo completo: testeando los 3 tipos en the-internet</h3>
-        <pre><code class="python"># test_dialogs.py
+        <div class="code-tabs" data-code-id="L035-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_dialogs.py
 """
 Test suite completo para diálogos JavaScript.
 Sitio: https://the-internet.herokuapp.com/javascript_alerts
@@ -406,6 +712,115 @@ class TestDialogs:
         assert resultados[0]["tipo"] == "alert"
         assert resultados[1]["tipo"] == "confirm"
         assert resultados[2]["tipo"] == "prompt"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_dialogs.spec.ts
+// Test suite completo para diálogos JavaScript.
+// Sitio: https://the-internet.herokuapp.com/javascript_alerts
+import { test, expect, Dialog } from '@playwright/test';
+
+
+test.describe('TestDialogs', () => {
+    // Tests para los 3 tipos de diálogos JavaScript
+
+    const URL = 'https://the-internet.herokuapp.com/javascript_alerts';
+
+    test('alert muestra mensaje', async ({ page }) => {
+        // Verificar que el alert muestra el mensaje correcto
+        const mensajeCapturado: string[] = [];
+
+        page.on('dialog', async (dialog: Dialog) => {
+            expect(dialog.type()).toBe('alert');
+            mensajeCapturado.push(dialog.message());
+            await dialog.accept();
+        });
+
+        await page.goto(URL);
+        await page.click("button:text('Click for JS Alert')");
+
+        expect(mensajeCapturado[0]).toBe('I am a JS Alert');
+        await expect(page.locator('#result')).toHaveText(
+            'You successfully clicked an alert'
+        );
+    });
+
+    test('confirm aceptar', async ({ page }) => {
+        // Verificar resultado al aceptar confirm
+        page.on('dialog', (dialog) => dialog.accept());
+        await page.goto(URL);
+        await page.click("button:text('Click for JS Confirm')");
+
+        await expect(page.locator('#result')).toHaveText('You clicked: Ok');
+    });
+
+    test('confirm cancelar', async ({ page }) => {
+        // Verificar resultado al cancelar confirm
+        page.on('dialog', (dialog) => dialog.dismiss());
+        await page.goto(URL);
+        await page.click("button:text('Click for JS Confirm')");
+
+        await expect(page.locator('#result')).toHaveText('You clicked: Cancel');
+    });
+
+    test('prompt enviar texto', async ({ page }) => {
+        // Verificar que el prompt recibe el texto enviado
+        const texto = 'Automatizado con Playwright';
+
+        page.on('dialog', async (dialog) => {
+            expect(dialog.type()).toBe('prompt');
+            await dialog.accept(texto);
+        });
+
+        await page.goto(URL);
+        await page.click("button:text('Click for JS Prompt')");
+
+        await expect(page.locator('#result')).toHaveText(
+            \`You entered: \${texto}\`
+        );
+    });
+
+    test('prompt cancelar', async ({ page }) => {
+        // Verificar resultado al cancelar prompt
+        page.on('dialog', (dialog) => dialog.dismiss());
+        await page.goto(URL);
+        await page.click("button:text('Click for JS Prompt')");
+
+        await expect(page.locator('#result')).toHaveText('You entered: null');
+    });
+
+    test('todos los dialogos secuenciales', async ({ page }) => {
+        // Probar los 3 diálogos en secuencia
+        const resultados: { tipo: string; mensaje: string }[] = [];
+
+        page.on('dialog', async (dialog) => {
+            resultados.push({
+                tipo: dialog.type(),
+                mensaje: dialog.message()
+            });
+            if (dialog.type() === 'prompt') {
+                await dialog.accept('Test completo');
+            } else {
+                await dialog.accept();
+            }
+        });
+
+        await page.goto(URL);
+
+        // Alert
+        await page.click("button:text('Click for JS Alert')");
+        // Confirm
+        await page.click("button:text('Click for JS Confirm')");
+        // Prompt
+        await page.click("button:text('Click for JS Prompt')");
+
+        expect(resultados.length).toBe(3);
+        expect(resultados[0].tipo).toBe('alert');
+        expect(resultados[1].tipo).toBe('confirm');
+        expect(resultados[2].tipo).toBe('prompt');
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Resumen de manejo de diálogos</h3>
         <table style="width:100%; border-collapse: collapse; margin: 15px 0;">

@@ -20,7 +20,18 @@ const LESSON_057 = {
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Una <strong>fixture</strong> es una función decorada con <code>@pytest.fixture</code>
             que prepara algo antes del test y opcionalmente limpia después:</p>
-            <pre><code class="python">import pytest
+            <div class="code-tabs" data-code-id="L057-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import pytest
 
 @pytest.fixture
 def mi_fixture():
@@ -29,12 +40,39 @@ def mi_fixture():
     yield recurso  # Entregar al test
     # TEARDOWN: limpiar después
     recurso.cleanup()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test as base } from '@playwright/test';
+
+// En Playwright Test, las fixtures se definen extendiendo "test"
+const test = base.extend<{ miFixture: Recurso }>({
+    miFixture: async ({}, use) => {
+        // SETUP: preparar algo
+        const recurso = crearRecurso();
+        await use(recurso); // Entregar al test
+        // TEARDOWN: limpiar después
+        await recurso.cleanup();
+    },
+});</code></pre>
+            </div>
+        </div>
             <p>Las fixtures pueden depender unas de otras, creando una <strong>cadena de
             preparación</strong> automática.</p>
         </div>
 
         <h3>🏗️ Fixture básica de Page Object</h3>
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L057-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest
 from pages.login_page import LoginPage
 from pages.dashboard_page import DashboardPage
@@ -71,10 +109,68 @@ def products_page(page):
     page.wait_for_url("**/dashboard")
     page.goto("https://mi-app.com/products")
     return ProductsPage(page)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// fixtures.ts
+import { test as base, Page } from '@playwright/test';
+import { LoginPage } from './pages/login-page';
+import { DashboardPage } from './pages/dashboard-page';
+import { ProductsPage } from './pages/products-page';
+
+// ── En Playwright Test, page y browser ya están disponibles ──
+// Se extienden las fixtures con Page Objects personalizados
+
+type MyFixtures = {
+    loginPage: LoginPage;
+    dashboardPage: DashboardPage;
+    productsPage: ProductsPage;
+};
+
+export const test = base.extend&lt;MyFixtures&gt;({
+    loginPage: async ({ page }, use) => {
+        // LoginPage navegado y listo para interactuar
+        const lp = new LoginPage(page);
+        await lp.navigate();
+        await use(lp);
+    },
+
+    dashboardPage: async ({ page }, use) => {
+        // DashboardPage con login previo completado
+        // Cadena: login → dashboard
+        const login = new LoginPage(page);
+        await login.navigate();
+        await login.loginAsUser();
+        await page.waitForURL('**/dashboard');
+        await use(new DashboardPage(page));
+    },
+
+    productsPage: async ({ page }, use) => {
+        // ProductsPage con login y navegación completados
+        const login = new LoginPage(page);
+        await login.navigate();
+        await login.loginAsUser();
+        await page.waitForURL('**/dashboard');
+        await page.goto('https://mi-app.com/products');
+        await use(new ProductsPage(page));
+    },
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧪 Tests ultra-limpios con fixtures POM</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># test_login.py — solo lógica de test, cero setup
+            <div class="code-tabs" data-code-id="L057-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_login.py — solo lógica de test, cero setup
 def test_login_exitoso(login_page):
     login_page.login("usuario@test.com", "clave123")
     assert "dashboard" in login_page.page.url
@@ -95,10 +191,55 @@ def test_sidebar(dashboard_page):
 def test_buscar_producto(products_page):
     products_page.search("laptop")
     assert products_page.table.get_row_count() > 0</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_login.spec.ts — solo lógica de test, cero setup
+// Importar "test" extendido con las fixtures POM
+import { test } from './fixtures';
+import { expect } from '@playwright/test';
+
+test('login exitoso', async ({ loginPage }) => {
+    await loginPage.login('usuario@test.com', 'clave123');
+    expect(loginPage.page.url()).toContain('dashboard');
+});
+
+test('login invalido', async ({ loginPage }) => {
+    await loginPage.login('invalido@test.com', 'wrong');
+    expect(await loginPage.isErrorVisible()).toBeTruthy();
+});
+
+// test_dashboard.spec.ts — llega al dashboard sin código de login
+test('bienvenida', async ({ dashboardPage }) => {
+    expect(await dashboardPage.getWelcomeText()).toContain('Bienvenido');
+});
+
+test('sidebar', async ({ dashboardPage }) => {
+    const sections = await dashboardPage.getSidebarSections();
+    expect(sections).toContain('Productos');
+});
+
+// test_products.spec.ts — listo para trabajar con productos
+test('buscar producto', async ({ productsPage }) => {
+    await productsPage.search('laptop');
+    expect(await productsPage.table.getRowCount()).toBeGreaterThan(0);
+});</code></pre>
+            </div>
+        </div>
         </div>
 
         <h3>⚡ Fixtures con scope para optimizar rendimiento</h3>
-        <pre><code class="python"># conftest.py — fixtures optimizadas con scope
+        <div class="code-tabs" data-code-id="L057-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py — fixtures optimizadas con scope
 
 @pytest.fixture(scope="session")
 def auth_state(browser):
@@ -137,10 +278,60 @@ def admin_dashboard(authenticated_page):
     """Dashboard autenticado como admin."""
     authenticated_page.goto("https://mi-app.com/dashboard")
     return DashboardPage(authenticated_page)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// auth.setup.ts — autenticación reutilizable (proyecto global setup)
+import { test as setup } from '@playwright/test';
+
+// Autenticarse UNA VEZ para toda la sesión de tests.
+// En Playwright Test, el "global setup" reemplaza scope="session".
+// Guarda el estado de autenticación en un archivo JSON.
+setup('authenticate', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto('https://mi-app.com/login');
+    await page.fill('[data-testid="email"]', 'admin@test.com');
+    await page.fill('[data-testid="password"]', 'admin123');
+    await page.click('[data-testid="login-btn"]');
+    await page.waitForURL('**/dashboard');
+
+    // Guardar estado (cookies + localStorage)
+    await context.storageState({ path: '.auth/admin.json' });
+    await context.close();
+});
+
+// fixtures.ts — página autenticada que reutiliza la sesión
+import { test as base } from '@playwright/test';
+import { DashboardPage } from './pages/dashboard-page';
+
+export const test = base.extend&lt;{ adminDashboard: DashboardPage }&gt;({
+    // Cada test obtiene una página nueva pero con la sesión
+    // ya cargada — no repite el proceso de login.
+    storageState: '.auth/admin.json',
+
+    adminDashboard: async ({ page }, use) => {
+        // Dashboard autenticado como admin
+        await page.goto('https://mi-app.com/dashboard');
+        await use(new DashboardPage(page));
+    },
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎭 Fixtures parametrizadas para múltiples roles</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># conftest.py — fixtures por rol
+            <div class="code-tabs" data-code-id="L057-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py — fixtures por rol
 
 USERS = {
     "admin": {"email": "admin@test.com", "password": "admin123"},
@@ -171,10 +362,60 @@ def test_dashboard_accesible(role_page):
     dashboard = DashboardPage(page)
     assert dashboard.get_welcome_text() is not None
     print(f"Dashboard accesible como {role}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// fixtures.ts — fixtures por rol
+import { test as base, expect } from '@playwright/test';
+import { LoginPage } from './pages/login-page';
+import { DashboardPage } from './pages/dashboard-page';
+
+const USERS: Record&lt;string, { email: string; password: string }&gt; = {
+    admin:  { email: 'admin@test.com',  password: 'admin123' },
+    editor: { email: 'editor@test.com', password: 'editor123' },
+    viewer: { email: 'viewer@test.com', password: 'viewer123' },
+};
+
+// Fixture parametrizada: el test se ejecuta una vez por cada rol
+for (const [role, creds] of Object.entries(USERS)) {
+    test.describe(\`Rol: \${role}\`, () => {
+        test.use({
+            storageState: undefined, // contexto limpio por rol
+        });
+
+        test(\`dashboard accesible como \${role}\`, async ({ browser }) => {
+            const context = await browser.newContext();
+            const page = await context.newPage();
+
+            // Login con el rol correspondiente
+            const login = new LoginPage(page);
+            await login.navigate();
+            await login.login(creds.email, creds.password);
+
+            const dashboard = new DashboardPage(page);
+            expect(await dashboard.getWelcomeText()).not.toBeNull();
+            console.log(\`Dashboard accesible como \${role}\`);
+
+            await context.close();
+        });
+    });
+}</code></pre>
+            </div>
+        </div>
         </div>
 
         <h3>🔧 Fixtures con setup y teardown (yield)</h3>
-        <pre><code class="python"># conftest.py — fixtures con limpieza
+        <div class="code-tabs" data-code-id="L057-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py — fixtures con limpieza
 
 @pytest.fixture
 def product_page_with_test_data(page, api_helper):
@@ -211,11 +452,75 @@ def test_editar_producto(product_page_with_test_data):
     products_page.edit_product("Test_Product_E2E")
     # ... editar campos
     assert products_page.is_product_visible("Test_Product_E2E")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// fixtures.ts — fixtures con limpieza
+import { test as base } from '@playwright/test';
+import { LoginPage } from './pages/login-page';
+import { ProductsPage } from './pages/products-page';
+import { ApiHelper } from './helpers/api-helper';
+
+type ProductFixture = {
+    productPageWithTestData: { productsPage: ProductsPage; productId: string };
+};
+
+export const test = base.extend&lt;ProductFixture&gt;({
+    productPageWithTestData: async ({ page, request }, use) => {
+        // Fixture que crea datos de prueba y limpia después.
+        // 1. Crea un producto via API (rápido, sin UI)
+        // 2. Provee la página de productos al test
+        // 3. Elimina el producto al terminar
+
+        const apiHelper = new ApiHelper(request);
+
+        // SETUP: Crear producto de prueba via API
+        const product = await apiHelper.createProduct({
+            nombre: 'Test_Product_E2E',
+            precio: 99999,
+            stock: 10,
+        });
+        const productId = product.id;
+
+        // Login y navegar
+        const login = new LoginPage(page);
+        await login.navigate();
+        await login.loginAsUser();
+
+        const productsPage = new ProductsPage(page);
+        await productsPage.navigate();
+
+        await use({ productsPage, productId });
+
+        // TEARDOWN: Eliminar producto de prueba via API
+        await apiHelper.deleteProduct(productId);
+    },
+});
+
+// Uso en test:
+test('editar producto', async ({ productPageWithTestData }) => {
+    const { productsPage, productId } = productPageWithTestData;
+    await productsPage.editProduct('Test_Product_E2E');
+    // ... editar campos
+    expect(await productsPage.isProductVisible('Test_Product_E2E')).toBeTruthy();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📐 Patrón de fixture factory</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Cuando necesitas crear Page Objects con configuraciones diferentes:</p>
-            <pre><code class="python"># conftest.py — factory pattern
+            <div class="code-tabs" data-code-id="L057-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py — factory pattern
 
 @pytest.fixture
 def make_login_page(browser):
@@ -256,6 +561,66 @@ def test_login_tablet(make_login_page):
 def test_login_spanish(make_login_page):
     login = make_login_page(locale="es-CO")
     assert "Iniciar sesión" in login.page.title()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// fixtures.ts — factory pattern
+import { test as base, BrowserContext } from '@playwright/test';
+import { LoginPage } from './pages/login-page';
+
+type FactoryOptions = {
+    viewport?: { width: number; height: number };
+    locale?: string;
+};
+
+type FactoryFixtures = {
+    makeLoginPage: (options?: FactoryOptions) => Promise&lt;LoginPage&gt;;
+};
+
+export const test = base.extend&lt;FactoryFixtures&gt;({
+    makeLoginPage: async ({ browser }, use) => {
+        // Factory para crear LoginPage con diferentes contextos
+        const contextsToClose: BrowserContext[] = [];
+
+        const make = async (options?: FactoryOptions): Promise&lt;LoginPage&gt; => {
+            const context = await browser.newContext({
+                viewport: options?.viewport,
+                locale: options?.locale,
+            });
+            const page = await context.newPage();
+            const lp = new LoginPage(page);
+            await lp.navigate();
+            contextsToClose.push(context);
+            return lp;
+        };
+
+        await use(make);
+
+        // Teardown: cerrar todos los contextos creados
+        for (const ctx of contextsToClose) {
+            await ctx.close();
+        }
+    },
+});
+
+// Uso en tests:
+test('login mobile', async ({ makeLoginPage }) => {
+    const login = await makeLoginPage({ viewport: { width: 375, height: 812 } });
+    await login.loginAsUser();
+    expect(login.page.url()).toContain('dashboard');
+});
+
+test('login tablet', async ({ makeLoginPage }) => {
+    const login = await makeLoginPage({ viewport: { width: 768, height: 1024 } });
+    await login.loginAsUser();
+    expect(login.page.url()).toContain('dashboard');
+});
+
+test('login spanish', async ({ makeLoginPage }) => {
+    const login = await makeLoginPage({ locale: 'es-CO' });
+    expect(await login.page.title()).toContain('Iniciar sesión');
+});</code></pre>
+            </div>
+        </div>
         </div>
 
         <h3>📋 Resumen: Scopes de fixtures</h3>

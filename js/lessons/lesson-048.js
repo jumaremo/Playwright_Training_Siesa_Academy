@@ -23,7 +23,18 @@ const LESSON_048 = {
             <code>check()</code>, etc.) hacen scroll automático al elemento antes de interactuar.
             <strong>No necesitas scroll manual para acciones normales.</strong></p>
         </div>
-        <pre><code class="python">from playwright.sync_api import Page
+        <div class="code-tabs" data-code-id="L048-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page
 
 def test_auto_scroll(page: Page):
     page.goto("/pagina-larga")
@@ -34,9 +45,36 @@ def test_auto_scroll(page: Page):
     page.fill("#campo-abajo", "ok")  # Auto-scroll + fill
 
     # No necesitas hacer scroll manual para estas acciones</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('auto scroll', async ({ page }) => {
+    await page.goto('/pagina-larga');
+
+    // Playwright hace scroll automáticamente al botón
+    // aunque esté fuera de la vista actual
+    await page.click('#boton-al-final');    // Auto-scroll + click
+    await page.fill('#campo-abajo', 'ok');  // Auto-scroll + fill
+
+    // No necesitas hacer scroll manual para estas acciones
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🖱️ page.mouse.wheel() — Scroll por píxeles</h3>
-        <pre><code class="python"># Scroll con la rueda del mouse
+        <div class="code-tabs" data-code-id="L048-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Scroll con la rueda del mouse
 # wheel(delta_x, delta_y)
 # delta_y positivo = scroll hacia abajo
 # delta_y negativo = scroll hacia arriba
@@ -50,6 +88,25 @@ page.mouse.wheel(-200, 0)     # Scroll izquierda 200px
 for _ in range(5):
     page.mouse.wheel(0, 200)
     page.wait_for_timeout(500)  # Pausa entre scrolls</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Scroll con la rueda del mouse
+// wheel(deltaX, deltaY)
+// deltaY positivo = scroll hacia abajo
+// deltaY negativo = scroll hacia arriba
+
+await page.mouse.wheel(0, 300);      // Scroll abajo 300px
+await page.mouse.wheel(0, -300);     // Scroll arriba 300px
+await page.mouse.wheel(200, 0);      // Scroll derecha 200px
+await page.mouse.wheel(-200, 0);     // Scroll izquierda 200px
+
+// Scroll gradual (simular usuario)
+for (let i = 0; i < 5; i++) {
+    await page.mouse.wheel(0, 200);
+    await page.waitForTimeout(500);  // Pausa entre scrolls
+}</code></pre>
+            </div>
+        </div>
 
         <h3>👁️ scroll_into_view_if_needed() — Asegurar visibilidad</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -57,7 +114,18 @@ for _ in range(5):
             no está visible en el viewport. Es útil cuando necesitas que un elemento
             sea visible (por ejemplo, para verificar visualmente) sin hacer clic en él.</p>
         </div>
-        <pre><code class="python"># Scroll al elemento solo si no es visible
+        <div class="code-tabs" data-code-id="L048-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Scroll al elemento solo si no es visible
 page.locator("#seccion-contacto").scroll_into_view_if_needed()
 
 # Esperar que el elemento exista y luego hacer scroll
@@ -72,9 +140,39 @@ page.locator("#grafico-ventas").screenshot(path="grafico.png")
 page.locator("#elemento-dinamico").scroll_into_view_if_needed(
     timeout=5000
 )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Scroll al elemento solo si no es visible
+await page.locator('#seccion-contacto').scrollIntoViewIfNeeded();
+
+// Esperar que el elemento exista y luego hacer scroll
+const locator = page.locator('.ultimo-item');
+await locator.scrollIntoViewIfNeeded();
+
+// Útil antes de tomar screenshots parciales
+await page.locator('#grafico-ventas').scrollIntoViewIfNeeded();
+await page.locator('#grafico-ventas').screenshot({ path: 'grafico.png' });
+
+// También funciona con timeout
+await page.locator('#elemento-dinamico').scrollIntoViewIfNeeded({
+    timeout: 5000
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧪 Scroll con evaluate() — Control total</h3>
-        <pre><code class="python"># window.scrollTo() - Scroll absoluto
+        <div class="code-tabs" data-code-id="L048-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># window.scrollTo() - Scroll absoluto
 page.evaluate("window.scrollTo(0, 0)")          # Ir al tope
 page.evaluate("window.scrollTo(0, 500)")         # Ir a 500px
 page.evaluate(
@@ -105,6 +203,41 @@ page.evaluate("""
 # Obtener posición actual de scroll
 scroll_y = page.evaluate("window.scrollY")
 print(f"Posición actual: {scroll_y}px")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// window.scrollTo() - Scroll absoluto
+await page.evaluate(() => window.scrollTo(0, 0));          // Ir al tope
+await page.evaluate(() => window.scrollTo(0, 500));         // Ir a 500px
+await page.evaluate(
+    () => window.scrollTo(0, document.body.scrollHeight)   // Ir al final
+);
+
+// window.scrollBy() - Scroll relativo
+await page.evaluate(() => window.scrollBy(0, 300));         // Bajar 300px
+await page.evaluate(() => window.scrollBy(0, -300));        // Subir 300px
+
+// element.scrollIntoView() - Scroll a un elemento
+await page.evaluate(() => {
+    document.querySelector('#mi-seccion')!
+        .scrollIntoView({ behavior: 'smooth', block: 'center' });
+});
+
+// Scroll dentro de un contenedor con overflow
+await page.evaluate(() => {
+    const contenedor = document.querySelector('.lista-scroll')!;
+    contenedor.scrollTop = contenedor.scrollHeight;  // Al final
+});
+
+await page.evaluate(() => {
+    const contenedor = document.querySelector('.lista-scroll')!;
+    contenedor.scrollTop = 0;  // Al inicio
+});
+
+// Obtener posición actual de scroll
+const scrollY = await page.evaluate(() => window.scrollY);
+console.log(\`Posición actual: \${scrollY}px\`);</code></pre>
+            </div>
+        </div>
 
         <h3>♾️ Patrón: Infinite Scroll</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -112,7 +245,18 @@ print(f"Posición actual: {scroll_y}px")</code></pre>
             La estrategia es: hacer scroll, esperar nuevos elementos, repetir hasta
             alcanzar la condición deseada.</p>
         </div>
-        <pre><code class="python">import pytest
+        <div class="code-tabs" data-code-id="L048-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import pytest
 from playwright.sync_api import Page, expect
 
 def test_infinite_scroll_basico(page: Page):
@@ -163,9 +307,78 @@ def test_infinite_scroll_hasta_n_items(page: Page):
     expect(page.locator(".producto")).to_have_count(
         objetivo, timeout=0  # Ya sabemos que están
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('infinite scroll basico', async ({ page }) => {
+    // Recolectar items de una página con infinite scroll.
+    await page.goto('/infinite-scroll');
+
+    let itemsAnteriores = 0;
+    const maxIntentos = 20;
+    let intentos = 0;
+
+    while (intentos < maxIntentos) {
+        // Contar items actuales
+        const itemsActuales = await page.locator('.item').count();
+
+        // Si no hay nuevos items, hemos llegado al final
+        if (itemsActuales === itemsAnteriores) {
+            intentos += 1;
+        } else {
+            intentos = 0;  // Resetear si aparecieron nuevos
+        }
+
+        itemsAnteriores = itemsActuales;
+
+        // Scroll al final
+        await page.evaluate(
+            () => window.scrollTo(0, document.body.scrollHeight)
+        );
+
+        // Esperar que cargue nuevo contenido
+        await page.waitForTimeout(1000);
+    }
+
+    const totalItems = await page.locator('.item').count();
+    console.log(\`Total items recolectados: \${totalItems}\`);
+    expect(totalItems).toBeGreaterThan(0);
+});
+
+
+test('infinite scroll hasta n items', async ({ page }) => {
+    // Hacer scroll hasta tener al menos N items.
+    await page.goto('/productos');
+    const objetivo = 50;
+
+    while (await page.locator('.producto').count() < objetivo) {
+        // Scroll al final
+        await page.mouse.wheel(0, 500);
+
+        // Esperar carga
+        await page.waitForLoadState('networkidle');
+    }
+
+    // Verificar que tenemos suficientes
+    await expect(page.locator('.producto')).toHaveCount(objetivo);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🖼️ Lazy-loading: imágenes y contenido</h3>
-        <pre><code class="python">def test_lazy_loaded_images(page: Page):
+        <div class="code-tabs" data-code-id="L048-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_lazy_loaded_images(page: Page):
     """Cargar imágenes lazy-loaded haciendo scroll."""
     page.goto("/galeria")
 
@@ -219,6 +432,71 @@ def test_lazy_content_sections(page: Page):
         )
 
         expect(locator.locator(".contenido-cargado")).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('lazy loaded images', async ({ page }) => {
+    // Cargar imágenes lazy-loaded haciendo scroll.
+    await page.goto('/galeria');
+
+    // Las imágenes usan loading="lazy" o IntersectionObserver
+    // Solo se cargan cuando entran al viewport
+
+    const imagenes = page.locator('img.lazy');
+    const total = await imagenes.count();
+
+    for (let i = 0; i < total; i++) {
+        const img = imagenes.nth(i);
+
+        // Scroll al imagen
+        await img.scrollIntoViewIfNeeded();
+
+        // Esperar que la imagen se cargue (src cambia de placeholder)
+        await page.waitForFunction(
+            (index) => {
+                const imgs = document.querySelectorAll('img.lazy');
+                const img = imgs[index] as HTMLImageElement;
+                return img.complete && img.naturalHeight > 0;
+            },
+            i
+        );
+    }
+
+    // Verificar que todas las imágenes están cargadas
+    for (let i = 0; i < total; i++) {
+        const img = imagenes.nth(i);
+        const esVisible = await page.evaluate(
+            (el) => (el as HTMLImageElement).complete && (el as HTMLImageElement).naturalHeight > 0,
+            await img.elementHandle()
+        );
+        expect(esVisible, \`Imagen \${i} no se cargó\`).toBeTruthy();
+    }
+});
+
+
+test('lazy content sections', async ({ page }) => {
+    // Cargar secciones de contenido lazy-loaded.
+    await page.goto('/articulo-largo');
+
+    const secciones = ['intro', 'desarrollo', 'conclusion', 'comentarios'];
+
+    for (const seccion of secciones) {
+        const locator = page.locator(\`#seccion-\${seccion}\`);
+
+        // Scroll a la sección
+        await locator.scrollIntoViewIfNeeded();
+
+        // Esperar que el contenido dinámico se cargue
+        await page.waitForSelector(
+            \`#seccion-\${seccion} .contenido-cargado\`
+        );
+
+        await expect(locator.locator('.contenido-cargado')).toBeVisible();
+    }
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📦 Listas virtualizadas (React Virtualized, etc.)</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -228,7 +506,18 @@ def test_lazy_content_sections(page: Page):
             debes hacer scroll incrementalmente y recolectar información a medida que
             los elementos aparecen.</p>
         </div>
-        <pre><code class="python">def test_lista_virtualizada(page: Page):
+        <div class="code-tabs" data-code-id="L048-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_lista_virtualizada(page: Page):
     """Recolectar datos de una lista virtualizada."""
     page.goto("/tabla-virtual")
 
@@ -284,9 +573,84 @@ def test_lazy_content_sections(page: Page):
 
     print(f"Elementos recolectados: {len(datos_recolectados)}")
     assert len(datos_recolectados) > 0</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('lista virtualizada', async ({ page }) => {
+    // Recolectar datos de una lista virtualizada.
+    await page.goto('/tabla-virtual');
+
+    const datosRecolectados: { id: string; nombre: string; valor: string }[] = [];
+    const idsVistos = new Set&lt;string&gt;();
+
+    const contenedor = page.locator('.virtual-list-container');
+    const maxScrolls = 100;
+
+    for (let s = 0; s < maxScrolls; s++) {
+        // Obtener filas actualmente visibles
+        const filas = page.locator('.virtual-row');
+        const count = await filas.count();
+
+        for (let i = 0; i < count; i++) {
+            const fila = filas.nth(i);
+            const idFila = await fila.getAttribute('data-id');
+
+            // Solo procesar filas nuevas
+            if (idFila && !idsVistos.has(idFila)) {
+                idsVistos.add(idFila);
+                datosRecolectados.push({
+                    id: idFila,
+                    nombre: await fila.locator('.col-nombre')
+                                      .innerText(),
+                    valor: await fila.locator('.col-valor')
+                                     .innerText(),
+                });
+            }
+        }
+
+        // Verificar si llegamos al final
+        const scrollActual = await page.evaluate(() => {
+            const c = document.querySelector(
+                '.virtual-list-container'
+            )!;
+            return c.scrollTop + c.clientHeight
+                   >= c.scrollHeight - 10;
+        });
+
+        if (scrollActual) {
+            break;
+        }
+
+        // Scroll dentro del contenedor virtualizado
+        await page.evaluate(() => {
+            const c = document.querySelector(
+                '.virtual-list-container'
+            )!;
+            c.scrollTop += 300;
+        });
+        await page.waitForTimeout(200);  // Esperar re-render
+    }
+
+    console.log(\`Elementos recolectados: \${datosRecolectados.length}\`);
+    expect(datosRecolectados.length).toBeGreaterThan(0);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⏳ wait_for_function() — Esperar contenido por scroll</h3>
-        <pre><code class="python"># Esperar que el scroll dispare algún cambio en la página
+        <div class="code-tabs" data-code-id="L048-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Esperar que el scroll dispare algún cambio en la página
 
 # Esperar que aparezcan al menos N elementos
 page.wait_for_function("""
@@ -308,9 +672,45 @@ page.evaluate(
     "window.scrollTo({ top: 2000, behavior: 'smooth' })"
 )
 page.wait_for_function("() => window.scrollY >= 1900")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Esperar que el scroll dispare algún cambio en la página
+
+// Esperar que aparezcan al menos N elementos
+await page.waitForFunction(
+    (n) => document.querySelectorAll('.item').length >= n,
+    20
+);
+
+// Esperar que un elemento sea visible tras scroll
+await page.waitForFunction(() => {
+    const el = document.querySelector('#footer');
+    if (!el) return false;
+    const rect = el.getBoundingClientRect();
+    return rect.top < window.innerHeight;
+});
+
+// Esperar que el scroll llegue a cierta posición
+await page.evaluate(
+    () => window.scrollTo({ top: 2000, behavior: 'smooth' })
+);
+await page.waitForFunction(() => window.scrollY >= 1900);</code></pre>
+            </div>
+        </div>
 
         <h3>🔘 "Cargar más" vs Infinite Scroll</h3>
-        <pre><code class="python"># Patrón: botón "Cargar más"
+        <div class="code-tabs" data-code-id="L048-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Patrón: botón "Cargar más"
 def test_cargar_mas(page: Page):
     """Hacer clic en 'Cargar más' hasta obtener todos los items."""
     page.goto("/productos")
@@ -357,9 +757,80 @@ def test_scroll_paginacion(page: Page):
         items_previos = items_actuales
 
     print(f"Items en feed: {items_actuales}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+// Patrón: botón "Cargar más"
+test('cargar mas', async ({ page }) => {
+    // Hacer clic en 'Cargar más' hasta obtener todos los items.
+    await page.goto('/productos');
+
+    while (true) {
+        const boton = page.locator('button:has-text("Cargar más")');
+
+        // Si el botón no existe o no es visible, terminamos
+        if (!await boton.isVisible()) {
+            break;
+        }
+
+        // Scroll al botón y click
+        await boton.scrollIntoViewIfNeeded();
+        await boton.click();
+
+        // Esperar que carguen los nuevos items
+        await page.waitForLoadState('networkidle');
+    }
+
+    const total = await page.locator('.producto').count();
+    console.log(\`Total productos cargados: \${total}\`);
+});
+
+
+// Patrón: paginación por scroll (IntersectionObserver)
+test('scroll paginacion', async ({ page }) => {
+    // Scroll hasta un sentinel que dispara la carga.
+    await page.goto('/feed');
+
+    let itemsPrevios = 0;
+    let sinCambio = 0;
+
+    while (sinCambio < 3) {
+        // Scroll al sentinel (elemento al final de la lista)
+        const sentinel = page.locator('#scroll-sentinel');
+        if (await sentinel.isVisible()) {
+            await sentinel.scrollIntoViewIfNeeded();
+        }
+
+        await page.waitForTimeout(1500);
+
+        const itemsActuales = await page.locator('.feed-item').count();
+        if (itemsActuales === itemsPrevios) {
+            sinCambio += 1;
+        } else {
+            sinCambio = 0;
+        }
+        itemsPrevios = itemsActuales;
+    }
+
+    console.log(\`Items en feed: \${itemsPrevios}\`);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>💡 Ejemplo completo: scraping de infinite scroll</h3>
-        <pre><code class="python">import pytest
+        <div class="code-tabs" data-code-id="L048-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import pytest
 from playwright.sync_api import Page, expect
 
 def test_scraping_infinite_scroll(page: Page):
@@ -402,6 +873,60 @@ def test_scraping_infinite_scroll(page: Page):
         print(f"  {i}. {t}")
 
     assert len(titulos) > 10, "Se esperaban más de 10 artículos"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('scraping infinite scroll', async ({ page }) => {
+    // Extraer todos los títulos de un blog con infinite scroll.
+    await page.goto('https://ejemplo.com/blog');
+
+    const titulos: string[] = [];
+    let scrollPausas = 0;
+    const maxPausas = 5;  // Máximo intentos sin nuevos items
+
+    while (scrollPausas < maxPausas) {
+        // Recolectar títulos visibles
+        const elementos = page.locator('article h2');
+        let nuevos = 0;
+        const count = await elementos.count();
+
+        for (let i = 0; i < count; i++) {
+            const titulo = await elementos.nth(i).innerText();
+            if (!titulos.includes(titulo)) {
+                titulos.push(titulo);
+                nuevos += 1;
+            }
+        }
+
+        if (nuevos === 0) {
+            scrollPausas += 1;
+        } else {
+            scrollPausas = 0;
+        }
+
+        // Scroll al final de la página
+        await page.evaluate(
+            () => window.scrollTo(0, document.body.scrollHeight)
+        );
+
+        // Esperar posible carga de red
+        try {
+            await page.waitForLoadState('networkidle', { timeout: 3000 });
+        } catch {
+            // Timeout está OK, puede que no haya más
+        }
+    }
+
+    console.log(\`Total títulos recolectados: \${titulos.length}\`);
+    titulos.forEach((t, i) => {
+        console.log(\`  \${i + 1}. \${t}\`);
+    });
+
+    expect(titulos.length).toBeGreaterThan(10);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Tabla comparativa: técnicas de scroll</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -467,7 +992,18 @@ def test_scraping_infinite_scroll(page: Page):
                 </ul>
             </li>
         </ol>
-        <pre><code class="python">import pytest
+        <div class="code-tabs" data-code-id="L048-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import pytest
 from playwright.sync_api import Page, expect
 
 def test_ejercicio_infinite_scroll(page: Page):
@@ -519,6 +1055,67 @@ def test_ejercicio_lazy_gallery(page: Page):
     assert cargadas == total, (
         f"Solo {cargadas} de {total} imágenes cargaron"
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('ejercicio infinite scroll', async ({ page }) => {
+    // Parte A: Extraer items de infinite scroll.
+    await page.goto('https://the-internet.herokuapp.com/infinite_scroll');
+
+    const parrafos = new Set&lt;string&gt;();
+    const objetivo = 30;
+    const maxIntentos = 50;
+
+    for (let i = 0; i < maxIntentos; i++) {
+        // Recolectar párrafos visibles
+        const elementos = page.locator('.jscroll-added');
+        const count = await elementos.count();
+        for (let j = 0; j < count; j++) {
+            const texto = await elementos.nth(j).innerText();
+            parrafos.add(texto);
+        }
+
+        if (parrafos.size >= objetivo) {
+            break;
+        }
+
+        // Scroll al final
+        await page.evaluate(
+            () => window.scrollTo(0, document.body.scrollHeight)
+        );
+        await page.waitForTimeout(800);
+    }
+
+    console.log(\`Párrafos únicos: \${parrafos.size}\`);
+    expect(parrafos.size).toBeGreaterThanOrEqual(objetivo);
+});
+
+
+test('ejercicio lazy gallery', async ({ page }) => {
+    // Parte B: Cargar todas las imágenes lazy-loaded.
+    await page.goto('/galeria-lazy');
+
+    const imagenes = page.locator("img[loading='lazy']");
+    const total = await imagenes.count();
+    let cargadas = 0;
+
+    for (let i = 0; i < total; i++) {
+        const img = imagenes.nth(i);
+        await img.scrollIntoViewIfNeeded();
+        await page.waitForTimeout(300);
+
+        const src = await img.getAttribute('src');
+        if (src && !src.includes('placeholder')) {
+            cargadas += 1;
+        }
+    }
+
+    console.log(\`Imágenes cargadas: \${cargadas}/\${total}\`);
+    expect(cargadas, \`Solo \${cargadas} de \${total} imágenes cargaron\`).toBe(total);
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Objetivos de esta lección:</h4>

@@ -40,10 +40,29 @@ const LESSON_037 = {
             </table>
         </div>
 
-        <pre><code class="python"># Un localizador NO busca inmediatamente en el DOM.
+        <div class="code-tabs" data-code-id="L037-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Un localizador NO busca inmediatamente en el DOM.
 # Solo se resuelve cuando se ejecuta una acción o assertion.
 boton = page.get_by_role("button", name="Enviar")  # Solo crea la referencia
 boton.click()  # Aquí es donde busca, espera y hace click</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Un localizador NO busca inmediatamente en el DOM.
+// Solo se resuelve cuando se ejecuta una acción o assertion.
+const boton = page.getByRole('button', { name: 'Enviar' });  // Solo crea la referencia
+await boton.click();  // Aquí es donde busca, espera y hace click</code></pre>
+            </div>
+        </div>
 
         <h3>🏆 page.get_by_role() — El localizador recomendado #1</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -112,7 +131,18 @@ boton.click()  # Aquí es donde busca, espera y hace click</code></pre>
         </table>
 
         <h4>Opciones avanzadas de get_by_role()</h4>
-        <pre><code class="python"># name: texto accesible del elemento (coincidencia parcial por defecto)
+        <div class="code-tabs" data-code-id="L037-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># name: texto accesible del elemento (coincidencia parcial por defecto)
 page.get_by_role("button", name="Guardar")
 
 # exact: coincidencia exacta del nombre
@@ -132,6 +162,30 @@ page.get_by_role("heading", level=2)
 
 # pressed: estado de toggle buttons
 page.get_by_role("button", name="Negrita", pressed=True)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// name: texto accesible del elemento (coincidencia parcial por defecto)
+page.getByRole('button', { name: 'Guardar' });
+
+// exact: coincidencia exacta del nombre
+page.getByRole('button', { name: 'Guardar', exact: true });
+
+// checked: estado de checkbox/radio
+page.getByRole('checkbox', { checked: true });
+
+// disabled: elementos deshabilitados
+page.getByRole('button', { name: 'Enviar', disabled: true });
+
+// expanded: estado de elementos colapsables (accordion, dropdown)
+page.getByRole('button', { expanded: false });
+
+// level: nivel de heading (h1=1, h2=2, etc.)
+page.getByRole('heading', { level: 2 });
+
+// pressed: estado de toggle buttons
+page.getByRole('button', { name: 'Negrita', pressed: true });</code></pre>
+            </div>
+        </div>
 
         <h3>📝 page.get_by_text() — Localizar por texto visible</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -139,7 +193,18 @@ page.get_by_role("button", name="Negrita", pressed=True)</code></pre>
             spans, divs con texto y cualquier elemento que no tenga un rol semántico claro.</p>
         </div>
 
-        <pre><code class="python"># Coincidencia parcial (por defecto) - encuentra "Bienvenido a la plataforma"
+        <div class="code-tabs" data-code-id="L037-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Coincidencia parcial (por defecto) - encuentra "Bienvenido a la plataforma"
 page.get_by_text("Bienvenido")
 
 # Coincidencia exacta
@@ -151,6 +216,21 @@ page.get_by_text(re.compile(r"Total: \\$\\d+\\.\\d{2}"))  # "Total: $125.50"
 
 # Buscar texto en un contenedor específico
 page.locator(".tarjeta-producto").get_by_text("Agregar al carrito")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Coincidencia parcial (por defecto) - encuentra "Bienvenido a la plataforma"
+page.getByText('Bienvenido');
+
+// Coincidencia exacta
+page.getByText('Bienvenido', { exact: true });  // Solo "Bienvenido", no "Bienvenido a..."
+
+// Con expresiones regulares
+page.getByText(/Total: \\$\\d+\\.\\d{2}/);  // "Total: $125.50"
+
+// Buscar texto en un contenedor específico
+page.locator('.tarjeta-producto').getByText('Agregar al carrito');</code></pre>
+            </div>
+        </div>
 
         <h3>🏷️ page.get_by_label() — Formularios por etiqueta</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -158,7 +238,18 @@ page.locator(".tarjeta-producto").get_by_text("Agregar al carrito")</code></pre>
             Es la forma natural en que un usuario identifica un campo: "el campo que dice Email".</p>
         </div>
 
-        <pre><code class="python"># HTML: <label for="email">Correo electrónico</label><input id="email">
+        <div class="code-tabs" data-code-id="L037-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># HTML: <label for="email">Correo electrónico</label><input id="email">
 page.get_by_label("Correo electrónico").fill("user@example.com")
 
 # HTML: <label>Contraseña <input type="password"></label>
@@ -167,9 +258,33 @@ page.get_by_label("Contraseña").fill("mi_clave_segura")
 # Con exact para evitar ambigüedades
 # Si hay "Nombre" y "Nombre completo"
 page.get_by_label("Nombre", exact=True)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// HTML: <label for="email">Correo electrónico</label><input id="email">
+await page.getByLabel('Correo electrónico').fill('user@example.com');
+
+// HTML: <label>Contraseña <input type="password"></label>
+await page.getByLabel('Contraseña').fill('mi_clave_segura');
+
+// Con exact para evitar ambigüedades
+// Si hay "Nombre" y "Nombre completo"
+page.getByLabel('Nombre', { exact: true });</code></pre>
+            </div>
+        </div>
 
         <h3>💬 page.get_by_placeholder() — Inputs por placeholder</h3>
-        <pre><code class="python"># HTML: <input placeholder="Buscar productos...">
+        <div class="code-tabs" data-code-id="L037-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># HTML: <input placeholder="Buscar productos...">
 page.get_by_placeholder("Buscar productos").fill("laptop gaming")
 
 # HTML: <input placeholder="DD/MM/AAAA">
@@ -177,9 +292,32 @@ page.get_by_placeholder("DD/MM/AAAA").fill("15/03/2026")
 
 # Coincidencia parcial
 page.get_by_placeholder("Buscar")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// HTML: <input placeholder="Buscar productos...">
+await page.getByPlaceholder('Buscar productos').fill('laptop gaming');
+
+// HTML: <input placeholder="DD/MM/AAAA">
+await page.getByPlaceholder('DD/MM/AAAA').fill('15/03/2026');
+
+// Coincidencia parcial
+page.getByPlaceholder('Buscar');</code></pre>
+            </div>
+        </div>
 
         <h3>🖼️ page.get_by_alt_text() — Imágenes por texto alternativo</h3>
-        <pre><code class="python"># HTML: <img alt="Logo de la empresa" src="logo.png">
+        <div class="code-tabs" data-code-id="L037-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># HTML: <img alt="Logo de la empresa" src="logo.png">
 page.get_by_alt_text("Logo de la empresa").click()
 
 # HTML: <img alt="Producto: Laptop HP Pavilion" src="laptop.jpg">
@@ -188,9 +326,33 @@ page.get_by_alt_text("Laptop HP Pavilion")
 # También funciona con áreas de mapas de imagen
 # HTML: <area alt="Zona de contacto" href="/contacto"></area>
 page.get_by_alt_text("Zona de contacto").click()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// HTML: <img alt="Logo de la empresa" src="logo.png">
+await page.getByAltText('Logo de la empresa').click();
+
+// HTML: <img alt="Producto: Laptop HP Pavilion" src="laptop.jpg">
+page.getByAltText('Laptop HP Pavilion');
+
+// También funciona con áreas de mapas de imagen
+// HTML: <area alt="Zona de contacto" href="/contacto"></area>
+await page.getByAltText('Zona de contacto').click();</code></pre>
+            </div>
+        </div>
 
         <h3>ℹ️ page.get_by_title() — Elementos por atributo title</h3>
-        <pre><code class="python"># HTML: <button title="Cerrar ventana">X</button>
+        <div class="code-tabs" data-code-id="L037-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># HTML: <button title="Cerrar ventana">X</button>
 page.get_by_title("Cerrar ventana").click()
 
 # HTML: <abbr title="Sociedad de Ingenieros">SIESA</abbr>
@@ -198,6 +360,18 @@ page.get_by_title("Sociedad de Ingenieros")
 
 # HTML: <span title="3.5 de 5 estrellas">★★★☆☆</span>
 page.get_by_title("3.5 de 5 estrellas")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// HTML: <button title="Cerrar ventana">X</button>
+await page.getByTitle('Cerrar ventana').click();
+
+// HTML: <abbr title="Sociedad de Ingenieros">SIESA</abbr>
+page.getByTitle('Sociedad de Ingenieros');
+
+// HTML: <span title="3.5 de 5 estrellas">★★★☆☆</span>
+page.getByTitle('3.5 de 5 estrellas');</code></pre>
+            </div>
+        </div>
 
         <h3>🧪 page.get_by_test_id() — IDs personalizados para testing</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -205,7 +379,18 @@ page.get_by_title("3.5 de 5 estrellas")</code></pre>
             para facilitar la automatización. Es el último recurso antes de CSS/XPath.</p>
         </div>
 
-        <pre><code class="python"># HTML: <div data-testid="panel-resumen">...</div>
+        <div class="code-tabs" data-code-id="L037-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># HTML: <div data-testid="panel-resumen">...</div>
 page.get_by_test_id("panel-resumen")
 
 # HTML: <button data-testid="btn-checkout">Pagar</button>
@@ -221,6 +406,29 @@ def configurar_playwright(playwright: Playwright):
 # Ahora get_by_test_id busca en data-qa
 # HTML: <input data-qa="campo-busqueda">
 page.get_by_test_id("campo-busqueda")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// HTML: <div data-testid="panel-resumen">...</div>
+page.getByTestId('panel-resumen');
+
+// HTML: <button data-testid="btn-checkout">Pagar</button>
+await page.getByTestId('btn-checkout').click();
+
+// Configurar un atributo personalizado (en playwright.config.ts)
+// Si tu app usa "data-qa" en vez de "data-testid":
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+export default defineConfig({
+  use: {
+    testIdAttribute: 'data-qa',
+  },
+});
+
+// Ahora getByTestId busca en data-qa
+// HTML: <input data-qa="campo-busqueda">
+page.getByTestId('campo-busqueda');</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Tabla comparativa de todos los localizadores built-in</h3>
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -303,7 +511,18 @@ page.get_by_test_id("campo-busqueda")</code></pre>
             usando exclusivamente localizadores built-in:</p>
         </div>
 
-        <pre><code class="python"># test_login_locators.py
+        <div class="code-tabs" data-code-id="L037-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_login_locators.py
 from playwright.sync_api import Page, expect
 
 def test_login_con_localizadores_builtin(page: Page):
@@ -337,8 +556,56 @@ def test_login_con_localizadores_builtin(page: Page):
 
     # --- get_by_title: tooltip ---
     expect(page.get_by_title("Última conexión: hace 2 horas")).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_login_locators.spec.ts
+import { test, expect } from '@playwright/test';
 
-        <pre><code class="python"># Versión alternativa: mismo formulario usando get_by_placeholder
+test('login con localizadores built-in', async ({ page }) => {
+    // Demuestra el uso de TODOS los localizadores built-in
+    // en un formulario de login real.
+    await page.goto('https://mi-app.com/login');
+
+    // --- getByRole: heading ---
+    await expect(page.getByRole('heading', { name: 'Iniciar sesión', level: 1 })).toBeVisible();
+
+    // --- getByAltText: logo ---
+    await expect(page.getByAltText('Logo de Mi App')).toBeVisible();
+
+    // --- getByLabel: campos del formulario ---
+    await page.getByLabel('Correo electrónico').fill('usuario@empresa.com');
+    await page.getByLabel('Contraseña').fill('MiClave123!');
+
+    // --- getByRole: checkbox ---
+    await page.getByRole('checkbox', { name: 'Recordarme' }).check();
+
+    // --- getByRole: button ---
+    await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+
+    // --- getByText: mensaje de bienvenida ---
+    await expect(page.getByText('Bienvenido de vuelta')).toBeVisible();
+
+    // --- getByRole: link ---
+    await page.getByRole('link', { name: 'Mi perfil' }).click();
+
+    // --- getByTitle: tooltip ---
+    await expect(page.getByTitle('Última conexión: hace 2 horas')).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L037-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Versión alternativa: mismo formulario usando get_by_placeholder
 def test_login_con_placeholder(page: Page):
     page.goto("https://mi-app.com/login")
 
@@ -348,8 +615,34 @@ def test_login_con_placeholder(page: Page):
 
     page.get_by_role("button", name="Iniciar sesión").click()
     expect(page.get_by_text("Bienvenido")).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Versión alternativa: mismo formulario usando getByPlaceholder
+test('login con placeholder', async ({ page }) => {
+    await page.goto('https://mi-app.com/login');
 
-        <pre><code class="python"># Versión con get_by_test_id: cuando el frontend agrega data-testid
+    // Cuando no hay labels, usar placeholder
+    await page.getByPlaceholder('correo@ejemplo.com').fill('usuario@empresa.com');
+    await page.getByPlaceholder('Tu contraseña').fill('MiClave123!');
+
+    await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+    await expect(page.getByText('Bienvenido')).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L037-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Versión con get_by_test_id: cuando el frontend agrega data-testid
 def test_login_con_testid(page: Page):
     page.goto("https://mi-app.com/login")
 
@@ -358,6 +651,20 @@ def test_login_con_testid(page: Page):
     page.get_by_test_id("btn-login").click()
 
     expect(page.get_by_test_id("mensaje-bienvenida")).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Versión con getByTestId: cuando el frontend agrega data-testid
+test('login con testid', async ({ page }) => {
+    await page.goto('https://mi-app.com/login');
+
+    await page.getByTestId('input-email').fill('usuario@empresa.com');
+    await page.getByTestId('input-password').fill('MiClave123!');
+    await page.getByTestId('btn-login').click();
+
+    await expect(page.getByTestId('mensaje-bienvenida')).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -365,7 +672,18 @@ def test_login_con_testid(page: Page):
             usando <strong>únicamente</strong> localizadores built-in (sin CSS ni XPath).</p>
         </div>
 
-        <pre><code class="python"># HTML del formulario:
+        <div class="code-tabs" data-code-id="L037-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># HTML del formulario:
 # <h2>Registro de Usuario</h2>
 # <img alt="Icono de registro" src="register.png">
 # <form>
@@ -434,6 +752,46 @@ def test_formulario_registro(page: Page):
 
     # 10. Navegar a login (usa get_by_role link)
     # page.get_by_role("link", name="Inicia sesión").click()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// --- TU EJERCICIO: Completa cada localizador ---
+import { test, expect } from '@playwright/test';
+
+test('formulario de registro', async ({ page }) => {
+    await page.goto('/registro');
+
+    // 1. Verificar el heading
+    await expect(page.getByRole('heading', { name: 'Registro de Usuario' })).toBeVisible();
+
+    // 2. Verificar la imagen
+    await expect(page.getByAltText('Icono de registro')).toBeVisible();
+
+    // 3. Llenar "Nombre completo" (usa getByLabel)
+    await page.getByLabel('Nombre completo').fill('María García');
+
+    // 4. Llenar "Email" (usa getByLabel)
+    await page.getByLabel('Email').fill('maria@correo.com');
+
+    // 5. Llenar "Teléfono" (usa getByPlaceholder)
+    await page.getByPlaceholder('+57 300 123 4567').fill('+57 311 555 7890');
+
+    // 6. Seleccionar país (usa getByRole combobox)
+    await page.getByRole('combobox', { name: 'País' }).selectOption('Colombia');
+
+    // 7. Aceptar términos (usa getByRole checkbox)
+    await page.getByRole('checkbox', { name: 'Acepto los términos' }).check();
+
+    // 8. Seleccionar plan (usa getByRole radio)
+    await page.getByRole('radio', { name: 'Plan Profesional' }).check();
+
+    // 9. Enviar (usa getByRole button)
+    await page.getByRole('button', { name: 'Registrarse' }).click();
+
+    // 10. Navegar a login (usa getByRole link)
+    // await page.getByRole('link', { name: 'Inicia sesión' }).click();
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Objetivos de esta lección:</h4>

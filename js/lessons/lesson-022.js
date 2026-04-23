@@ -20,7 +20,18 @@ const LESSON_022 = {
         <h3>📐 Definir funciones con <code>def</code></h3>
         <p>Una función encapsula lógica reutilizable. En testing, las funciones son la base
         de helpers, page objects y utilidades:</p>
-        <pre><code class="python"># Función básica sin parámetros
+        <div class="code-tabs" data-code-id="L022-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Función básica sin parámetros
 def obtener_timestamp() -> str:
     """Retorna un timestamp formateado para nombres de archivo."""
     from datetime import datetime
@@ -39,11 +50,44 @@ url = construir_url("https://qa.siesa.com", "/api/v2/users")
 
 timestamp = obtener_timestamp()
 # "20260403_143022"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Función básica sin parámetros
+function obtenerTimestamp(): string {
+    return new Date().toISOString().replace(/[:.]/g, '').slice(0, 15);
+}
+
+// Función con parámetros y retorno
+function construirUrl(base: string, endpoint: string): string {
+    base = base.replace(/\\/+\$/, '');
+    endpoint = endpoint.replace(/^\\/+/, '');
+    return \`\${base}/\${endpoint}\`;
+}
+
+// Uso
+const url = construirUrl('https://qa.siesa.com', '/api/v2/users');
+// 'https://qa.siesa.com/api/v2/users'
+
+const timestamp = obtenerTimestamp();
+// '20260403T143022'</code></pre>
+            </div>
+        </div>
 
         <h3>🔧 Parámetros por defecto y keyword arguments</h3>
         <p>Los parámetros por defecto hacen tus funciones más flexibles sin complicar
         las llamadas simples:</p>
-        <pre><code class="python">from playwright.sync_api import Page
+        <div class="code-tabs" data-code-id="L022-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page
 
 def hacer_login(
     page: Page,
@@ -98,6 +142,62 @@ hacer_login(
 
 # Mezcla de posicionales y keyword
 hacer_login(page, "admin", "secreto123", timeout=5000)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { Page } from '@playwright/test';
+
+// En TS se usa un objeto de opciones para simular keyword arguments
+interface LoginOptions {
+    url?: string;
+    timeout?: number;
+    recordarSesion?: boolean;
+}
+
+async function hacerLogin(
+    page: Page,
+    usuario: string,
+    password: string,
+    options: LoginOptions = {}
+): Promise&lt;boolean&gt; {
+    const {
+        url = '/login',
+        timeout = 10000,
+        recordarSesion = false,
+    } = options;
+
+    await page.goto(url);
+    await page.fill('#usuario', usuario, { timeout });
+    await page.fill('#password', password, { timeout });
+
+    if (recordarSesion) {
+        await page.check('#recordarme');
+    }
+
+    await page.click("button[type='submit']");
+
+    try {
+        await page.waitForURL('**/dashboard', { timeout });
+        return true;
+    } catch {
+        return false;
+    }
+}
+
+// --- Diferentes formas de llamar la función ---
+
+// Solo argumentos obligatorios (usa defaults para el resto)
+await hacerLogin(page, 'admin', 'secreto123');
+
+// Con opciones explícitas (equivalente a keyword arguments)
+await hacerLogin(page, 'admin', 'secreto123', {
+    recordarSesion: true,
+    timeout: 15000,
+});
+
+// Con solo timeout
+await hacerLogin(page, 'admin', 'secreto123', { timeout: 5000 });</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #4caf50;">
             <h4>✅ Buena práctica</h4>
@@ -106,7 +206,18 @@ hacer_login(page, "admin", "secreto123", timeout=5000)</code></pre>
         </div>
 
         <h3>📦 Funciones que retornan múltiples valores</h3>
-        <pre><code class="python">from playwright.sync_api import Page
+        <div class="code-tabs" data-code-id="L022-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page
 import time
 
 def medir_carga_pagina(page: Page, url: str) -> tuple[float, str, int]:
@@ -139,11 +250,65 @@ def obtener_info_pagina(page: Page) -> dict:
 
 info = obtener_info_pagina(page)
 print(f"Estás en: {info['url']}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { Page } from '@playwright/test';
+
+interface PageLoadResult {
+    tiempo: number;
+    titulo: string;
+    status: number;
+}
+
+async function medirCargaPagina(page: Page, url: string): Promise&lt;PageLoadResult&gt; {
+    const inicio = Date.now();
+    const response = await page.goto(url);
+    const tiempo = (Date.now() - inicio) / 1000;
+    const titulo = await page.title();
+    const status = response?.status() ?? 0;
+
+    return { tiempo, titulo, status };
+}
+
+// Desestructurar los valores retornados
+const { tiempo, titulo, status } = await medirCargaPagina(page, 'https://qa.siesa.com');
+console.log(\`Carga: \${tiempo.toFixed(2)}s | Título: \${titulo} | Status: \${status}\`);
+
+// También puedes retornar un objeto
+interface PageInfo {
+    url: string;
+    titulo: string;
+    viewport: { width: number; height: number } | null;
+}
+
+async function obtenerInfoPagina(page: Page): Promise&lt;PageInfo&gt; {
+    return {
+        url: page.url(),
+        titulo: await page.title(),
+        viewport: page.viewportSize(),
+    };
+}
+
+const info = await obtenerInfoPagina(page);
+console.log(\`Estás en: \${info.url}\`);</code></pre>
+            </div>
+        </div>
 
         <h3>🌟 *args y **kwargs</h3>
         <p>Permiten que tus funciones acepten un número variable de argumentos.
         Son útiles para crear wrappers y funciones genéricas:</p>
-        <pre><code class="python"># *args - Acepta N argumentos posicionales como tupla
+        <div class="code-tabs" data-code-id="L022-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># *args - Acepta N argumentos posicionales como tupla
 def log_pasos(*pasos: str) -> None:
     """Imprime una serie de pasos de test numerados."""
     for i, paso in enumerate(pasos, 1):
@@ -192,11 +357,73 @@ ejecutar_test(
     headless=True,
     browser="chromium"
 )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Rest parameters (...args) - Equivalente a *args
+function logPasos(...pasos: string[]): void {
+    pasos.forEach((paso, i) => {
+        console.log(\`  Paso \${i + 1}: \${paso}\`);
+    });
+}
+
+logPasos(
+    'Navegar al login',
+    'Ingresar credenciales',
+    'Click en Enviar',
+    'Verificar dashboard'
+);
+
+// Objeto de opciones - Equivalente a **kwargs
+interface UserOptions {
+    nombre?: string;
+    email?: string;
+    password?: string;
+    rol?: string;
+    activo?: boolean;
+}
+
+function crearUsuario(datos: UserOptions = {}): Record&lt;string, any&gt; {
+    return {
+        nombre: datos.nombre ?? 'Usuario Test',
+        email: datos.email ?? 'test@siesa.com',
+        password: datos.password ?? 'Test2026!',
+        rol: datos.rol ?? 'viewer',
+        activo: datos.activo ?? true,
+    };
+}
+
+// Crear con diferentes combinaciones
+const admin = crearUsuario({ nombre: 'Carlos Diaz', rol: 'admin', email: 'cdiaz@siesa.com' });
+const viewer = crearUsuario({ nombre: 'José Bravo' });
+const defaultUser = crearUsuario();  // Todos los valores por defecto
+
+// Combinación de rest params + opciones
+interface TestConfig {
+    timeout?: number;
+    headless?: boolean;
+    browser?: string;
+}
+
+function ejecutarTest(nombreTest: string, tags: string[], config: TestConfig = {}): void {
+    console.log(\`Test: \${nombreTest}\`);
+    console.log(\`  Tags: \${tags.join(', ')}\`);
+    for (const [clave, valor] of Object.entries(config)) {
+        console.log(\`  \${clave}: \${valor}\`);
+    }
+}
+
+ejecutarTest(
+    'test_login',
+    ['smoke', 'regression', 'login'],
+    { timeout: 5000, headless: true, browser: 'chromium' }
+);</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ff9800;">
             <h4>💡 Orden de parámetros</h4>
             <p>El orden obligatorio de parámetros en Python es:</p>
-            <pre><code class="python">def funcion(posicionales, *args, keyword_con_default=valor, **kwargs):
+            <pre><code class="language-python">def funcion(posicionales, *args, keyword_con_default=valor, **kwargs):
     pass</code></pre>
             <p>En la práctica, rara vez necesitarás mezclar todos. Lo más común es usar
             parámetros normales + defaults, o <code>**kwargs</code> para configuración flexible.</p>
@@ -205,7 +432,18 @@ ejecutar_test(
         <h3>🔀 Funciones lambda</h3>
         <p>Las lambdas son funciones anónimas de una sola línea. Son útiles para
         ordenar, filtrar y transformar datos de prueba:</p>
-        <pre><code class="python"># Sintaxis: lambda parámetros: expresión
+        <div class="code-tabs" data-code-id="L022-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Sintaxis: lambda parámetros: expresión
 
 # --- Ordenar datos de prueba ---
 resultados_test = [
@@ -241,12 +479,63 @@ generar_email = lambda nombre: f"{nombre.lower().replace(' ', '.')}@siesa.com"
 nombres_prueba = ["Carlos Diaz", "José Bravo", "Ana López"]
 emails_esperados = list(map(generar_email, nombres_prueba))
 # ["carlos.diaz@siesa.com", "josé.bravo@siesa.com", "ana.lópez@siesa.com"]</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Sintaxis: (params) => expresión  o  (params) => { ... }
+
+// --- Ordenar datos de prueba ---
+const resultadosTest = [
+    { nombre: 'test_login', duracion: 3.2, estado: 'pass' },
+    { nombre: 'test_dashboard', duracion: 1.5, estado: 'fail' },
+    { nombre: 'test_perfil', duracion: 5.1, estado: 'pass' },
+    { nombre: 'test_reportes', duracion: 0.8, estado: 'skip' },
+];
+
+// Ordenar por duración (más lentos primero)
+const porDuracion = [...resultadosTest].sort((a, b) => b.duracion - a.duracion);
+// test_perfil (5.1), test_login (3.2), test_dashboard (1.5), test_reportes (0.8)
+
+// --- Filtrar tests fallidos ---
+const fallidos = resultadosTest.filter((t) => t.estado === 'fail');
+// [{ nombre: 'test_dashboard', ... }]
+
+// --- Transformar datos ---
+const nombres = resultadosTest.map((t) => t.nombre);
+// ['test_login', 'test_dashboard', 'test_perfil', 'test_reportes']
+
+// --- Uso práctico: ordenar locators por texto ---
+const textosMenu = ['Reportes', 'Dashboard', 'Ajustes', 'Perfil'];
+const textosOrdenados = [...textosMenu].sort((a, b) =>
+    a.toLowerCase().localeCompare(b.toLowerCase())
+);
+// ['Ajustes', 'Dashboard', 'Perfil', 'Reportes']
+
+// --- Arrow function para generar emails ---
+const generarEmail = (nombre: string): string =>
+    \`\${nombre.toLowerCase().replace(/ /g, '.')}@siesa.com\`;
+
+const nombresPrueba = ['Carlos Diaz', 'José Bravo', 'Ana López'];
+const emailsEsperados = nombresPrueba.map(generarEmail);
+// ['carlos.diaz@siesa.com', 'josé.bravo@siesa.com', 'ana.lópez@siesa.com']</code></pre>
+            </div>
+        </div>
 
         <h3>📁 Crear y usar módulos</h3>
         <p>Un módulo es simplemente un archivo <code>.py</code> que contiene funciones,
         clases y variables reutilizables. En testing, los módulos organizan tu código
         en utilidades separadas:</p>
-        <pre><code class="python"># --- tests/utils/helpers.py ---
+        <div class="code-tabs" data-code-id="L022-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># --- tests/utils/helpers.py ---
 """Módulo de utilidades para tests de Playwright."""
 
 from datetime import datetime
@@ -281,8 +570,58 @@ def llenar_formulario(page: Page, campos: dict[str, str]) -> None:
     """Llena un formulario a partir de un diccionario selector -> valor."""
     for selector, valor in campos.items():
         page.fill(selector, valor)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// --- tests/utils/helpers.ts ---
+import { Page } from '@playwright/test';
 
-        <pre><code class="python"># --- tests/utils/config.py ---
+export function timestamp(): string {
+    return new Date().toISOString().replace(/[:.]/g, '').slice(0, 15);
+}
+
+export async function screenshotConNombre(page: Page, nombre: string): Promise&lt;string&gt; {
+    const path = \`evidencias/\${nombre}_\${timestamp()}.png\`;
+    await page.screenshot({ path });
+    return path;
+}
+
+export async function esperarYClick(
+    page: Page,
+    selector: string,
+    timeout: number = 5000
+): Promise&lt;void&gt; {
+    await page.waitForSelector(selector, { state: 'visible', timeout });
+    await page.click(selector);
+}
+
+export async function obtenerTextoLimpio(page: Page, selector: string): Promise&lt;string&gt; {
+    const texto = await page.textContent(selector) ?? '';
+    return texto.trim();
+}
+
+export async function llenarFormulario(
+    page: Page,
+    campos: Record&lt;string, string&gt;
+): Promise&lt;void&gt; {
+    for (const [selector, valor] of Object.entries(campos)) {
+        await page.fill(selector, valor);
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L022-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># --- tests/utils/config.py ---
 """Módulo de configuración centralizada."""
 
 # Ambientes disponibles
@@ -311,9 +650,52 @@ USUARIOS = {
     "viewer": {"email": "viewer@siesa.com", "password": "View2026!"},
     "editor": {"email": "editor@siesa.com", "password": "Edit2026!"},
 }</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// --- tests/utils/config.ts ---
+
+// Ambientes disponibles
+export const AMBIENTES: Record&lt;string, string&gt; = {
+    dev: 'https://dev.siesa.com',
+    qa: 'https://qa.siesa.com',
+    staging: 'https://staging.siesa.com',
+    prod: 'https://app.siesa.com',
+};
+
+// Ambiente activo (cambiar según necesidad)
+export const AMBIENTE_ACTIVO = 'qa';
+export const BASE_URL = AMBIENTES[AMBIENTE_ACTIVO];
+
+// Timeouts en milisegundos
+export const TIMEOUTS = {
+    default: 10000,
+    navegacion: 15000,
+    cargaLenta: 30000,
+    animacion: 2000,
+};
+
+// Usuarios de prueba
+export const USUARIOS = {
+    admin: { email: 'admin@siesa.com', password: 'Admin2026!' },
+    viewer: { email: 'viewer@siesa.com', password: 'View2026!' },
+    editor: { email: 'editor@siesa.com', password: 'Edit2026!' },
+};</code></pre>
+            </div>
+        </div>
 
         <h3>📂 Importar módulos propios</h3>
-        <pre><code class="python"># Estructura del proyecto
+        <div class="code-tabs" data-code-id="L022-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Estructura del proyecto
 # tests/
 # ├── utils/
 # │   ├── __init__.py       # Hace que utils sea un paquete
@@ -359,6 +741,55 @@ def test_login_con_helpers(page: Page):
 
     # Screenshot de evidencia
     screenshot_con_nombre(page, "login_exitoso")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Estructura del proyecto
+// tests/
+// ├── utils/
+// │   ├── helpers.ts          # Funciones helper
+// │   ├── config.ts           # Configuración
+// │   └── index.ts            # Re-exportar (equivalente a __init__.py)
+// ├── playwright.config.ts
+// └── test_ejemplo.spec.ts
+
+// --- tests/utils/index.ts ---
+// Re-exportar funciones clave:
+export { screenshotConNombre, esperarYClick } from './helpers';
+export { BASE_URL, TIMEOUTS, USUARIOS } from './config';
+
+// --- tests/test_ejemplo.spec.ts ---
+import { test, expect } from '@playwright/test';
+
+// Importar desde el módulo específico
+import { llenarFormulario, obtenerTextoLimpio } from './utils/helpers';
+import { BASE_URL, USUARIOS, TIMEOUTS } from './utils/config';
+
+// O importar desde el barrel export (index.ts)
+import { screenshotConNombre, esperarYClick } from './utils';
+
+
+test('login con helpers', async ({ page }) => {
+    await page.goto(\`\${BASE_URL}/login\`);
+
+    // Llenar formulario con helper
+    const admin = USUARIOS.admin;
+    await llenarFormulario(page, {
+        '#email': admin.email,
+        '#password': admin.password,
+    });
+
+    // Click con espera
+    await esperarYClick(page, "button[type='submit']");
+
+    // Verificar con texto limpio
+    const bienvenida = await obtenerTextoLimpio(page, '.welcome-message');
+    expect(bienvenida.toLowerCase()).toContain('bienvenido');
+
+    // Screenshot de evidencia
+    await screenshotConNombre(page, 'login_exitoso');
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0;">
             <h4>📦 Estructura recomendada de módulos para QA</h4>
@@ -381,7 +812,18 @@ def test_login_con_helpers(page: Page):
         <h3>🎯 El patrón <code>__name__ == "__main__"</code></h3>
         <p>Este patrón permite que un archivo funcione tanto como módulo importable
         como script ejecutable directamente:</p>
-        <pre><code class="python"># --- tests/utils/data_factory.py ---
+        <div class="code-tabs" data-code-id="L022-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># --- tests/utils/data_factory.py ---
 """Generador de datos de prueba."""
 
 import random
@@ -397,7 +839,7 @@ def generar_email(nombre: str, dominio: str = "siesa.com") -> str:
 
 def generar_password(longitud: int = 12) -> str:
     """Genera un password aleatorio seguro."""
-    caracteres = string.ascii_letters + string.digits + "!@#$%"
+    caracteres = string.ascii_letters + string.digits + "!@#\$%"
     return ''.join(random.choices(caracteres, k=longitud))
 
 
@@ -439,6 +881,62 @@ if __name__ == "__main__":
 # Como módulo importado:
 #   from utils.data_factory import generar_usuario_prueba
 #   -> El bloque if __name__ NO se ejecuta</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// --- tests/utils/dataFactory.ts ---
+// En TypeScript no existe __name__ == "__main__" nativo,
+// pero se puede usar require.main === module o simplemente
+// separar en funciones exportadas.
+
+import { randomBytes } from 'crypto';
+
+export function generarEmail(nombre: string, dominio = 'siesa.com'): string {
+    const nombreLimpio = nombre.toLowerCase().replace(/ /g, '.');
+    return \`\${nombreLimpio}@\${dominio}\`;
+}
+
+export function generarPassword(longitud = 12): string {
+    const caracteres = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$%';
+    let password = '';
+    for (let i = 0; i &lt; longitud; i++) {
+        password += caracteres.charAt(Math.floor(Math.random() * caracteres.length));
+    }
+    return password;
+}
+
+export function generarFechaFutura(dias = 30): string {
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() + dias);
+    return fecha.toISOString().slice(0, 10);
+}
+
+export function generarUsuarioPrueba(rol = 'viewer'): Record&lt;string, string&gt; {
+    const nombres = ['Ana García', 'Carlos López', 'María Torres', 'José Ruiz'];
+    const nombre = nombres[Math.floor(Math.random() * nombres.length)];
+    return {
+        nombre,
+        email: generarEmail(nombre),
+        password: generarPassword(),
+        rol,
+        fechaCreacion: new Date().toISOString().slice(0, 10),
+    };
+}
+
+// Equivalente a if __name__ == "__main__":
+// Ejecutar con: npx ts-node tests/utils/dataFactory.ts
+if (require.main === module) {
+    console.log('=== Generador de datos de prueba ===');
+    console.log(\`Email: \${generarEmail('Juan Reina')}\`);
+    console.log(\`Password: \${generarPassword()}\`);
+    console.log(\`Fecha futura: \${generarFechaFutura(7)}\`);
+    console.log('\\nUsuario completo:');
+    const usuario = generarUsuarioPrueba('admin');
+    for (const [clave, valor] of Object.entries(usuario)) {
+        console.log(\`  \${clave}: \${valor}\`);
+    }
+}</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2196f3;">
             <h4>📌 ¿Cuándo usar <code>__name__ == "__main__"</code>?</h4>
@@ -472,7 +970,18 @@ if __name__ == "__main__":
         </div>
 
         <h3>🎭 Ejemplo integrador: módulo de helpers para Playwright</h3>
-        <pre><code class="python"># --- tests/utils/pw_helpers.py ---
+        <div class="code-tabs" data-code-id="L022-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># --- tests/utils/pw_helpers.py ---
 """Helpers específicos para Playwright - proyecto SIESA."""
 
 from playwright.sync_api import Page, expect, Locator
@@ -557,6 +1066,97 @@ def esperar_toast(page: Page, texto: str, timeout: int = 5000) -> Locator:
 #         columnas_esperadas=["Nombre", "Email", "Rol"]
 #     )
 #     print(f"Tabla tiene {info['filas']} usuarios")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// --- tests/utils/pwHelpers.ts ---
+import { Page, expect, Locator } from '@playwright/test';
+
+export async function login(
+    page: Page,
+    email: string,
+    password: string,
+    baseUrl = ''
+): Promise&lt;boolean&gt; {
+    await page.goto(\`\${baseUrl}/login\`);
+    await page.fill('#email', email);
+    await page.fill('#password', password);
+    await page.click("button[type='submit']");
+    try {
+        await page.waitForURL('**/dashboard', { timeout: 10000 });
+        console.log(\`[INFO] Login exitoso: \${email}\`);
+        return true;
+    } catch (e) {
+        console.error(\`[ERROR] Login fallido: \${email} - \${e}\`);
+        return false;
+    }
+}
+
+interface TablaInfo {
+    filas: number;
+    columnas: number;
+    headers: string[];
+    datosPrimeraFila: string[];
+}
+
+export async function verificarTabla(
+    page: Page,
+    selectorTabla: string,
+    filasMinimas = 1,
+    columnasEsperadas?: string[],
+): Promise&lt;TablaInfo&gt; {
+    const tabla = page.locator(selectorTabla);
+    await expect(tabla).toBeVisible();
+
+    const headers = await tabla.locator('thead th').allTextContents();
+    const filas = tabla.locator('tbody tr');
+    const numFilas = await filas.count();
+
+    expect(numFilas).toBeGreaterThanOrEqual(filasMinimas);
+
+    if (columnasEsperadas) {
+        const headersLimpios = headers.map(h => h.trim().toLowerCase());
+        for (const col of columnasEsperadas) {
+            expect(headersLimpios).toContain(col.toLowerCase());
+        }
+    }
+
+    const primeraFila = await filas.first().locator('td').allTextContents();
+
+    return {
+        filas: numFilas,
+        columnas: headers.length,
+        headers,
+        datosPrimeraFila: primeraFila,
+    };
+}
+
+export async function esperarToast(
+    page: Page,
+    texto: string,
+    timeout = 5000
+): Promise&lt;Locator&gt; {
+    const toast = page.locator(
+        \`.toast:has-text('\${texto}'), .notification:has-text('\${texto}')\`
+    );
+    await expect(toast.first()).toBeVisible({ timeout });
+    return toast.first();
+}
+
+// --- Uso en tests ---
+// import { login, verificarTabla, esperarToast } from './utils/pwHelpers';
+//
+// test('tabla usuarios', async ({ page }) => {
+//     await login(page, 'admin@siesa.com', 'Admin2026!', BASE_URL);
+//     await page.goto(\`\${BASE_URL}/admin/usuarios\`);
+//     const info = await verificarTabla(
+//         page, 'table.usuarios',
+//         5,
+//         ['Nombre', 'Email', 'Rol']
+//     );
+//     console.log(\`Tabla tiene \${info.filas} usuarios\`);
+// });</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <div style="background: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e91e63;">

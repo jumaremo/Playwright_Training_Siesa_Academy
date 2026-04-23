@@ -26,7 +26,18 @@ const LESSON_036 = {
         </div>
 
         <h3>🗂️ Paso 1: Estructura del proyecto</h3>
-        <pre><code class="bash"># Crear la estructura completa
+        <div class="code-tabs" data-code-id="L036-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Crear la estructura completa
 mkdir -p proyecto_seccion4/tests/screenshots
 mkdir -p proyecto_seccion4/tests/downloads
 mkdir -p proyecto_seccion4/helpers
@@ -47,6 +58,38 @@ touch proyecto_seccion4/pytest.ini
 
 # Crear un archivo de ejemplo para upload
 echo "Archivo de prueba para upload" > proyecto_seccion4/uploads/test_upload.txt</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Crear la estructura completa para Playwright Test (TypeScript)
+mkdir -p proyecto_seccion4/tests/screenshots
+mkdir -p proyecto_seccion4/tests/downloads
+mkdir -p proyecto_seccion4/helpers
+mkdir -p proyecto_seccion4/data
+mkdir -p proyecto_seccion4/uploads
+
+# Inicializar proyecto Node.js con Playwright
+cd proyecto_seccion4
+npm init -y
+npm install -D @playwright/test
+npx playwright install
+
+# Crear archivos
+touch playwright.config.ts
+touch tests/registro.spec.ts
+touch tests/interacciones.spec.ts
+touch tests/navegacion-avanzada.spec.ts
+touch helpers/form-helpers.ts
+touch helpers/data-generators.ts
+touch data/usuarios.json
+
+# Crear un archivo de ejemplo para upload
+echo "Archivo de prueba para upload" > uploads/test_upload.txt</code></pre>
+            </div>
+        </div>
         <pre><code>proyecto_seccion4/
 ├── pytest.ini                      # Configuración pytest
 ├── data/
@@ -68,7 +111,18 @@ echo "Archivo de prueba para upload" > proyecto_seccion4/uploads/test_upload.txt
 
         <h3>📄 Paso 2: Datos de prueba — data/usuarios.json</h3>
         <p>Externalizar los datos de prueba permite reutilizarlos y modificarlos sin tocar el código.</p>
-        <pre><code class="python"># data/usuarios.json
+        <div class="code-tabs" data-code-id="L036-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># data/usuarios.json
 {
     "usuario_valido": {
         "username": "tomsmith",
@@ -96,9 +150,57 @@ echo "Archivo de prueba para upload" > proyecto_seccion4/uploads/test_upload.txt
         {"texto": "", "esperado": "You entered: "}
     ]
 }</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// data/usuarios.json — Mismo archivo, se importa directamente en TypeScript
+// import usuarios from '../data/usuarios.json';
+// O se lee con fs:
+// const usuarios = JSON.parse(fs.readFileSync('data/usuarios.json', 'utf-8'));
+
+// El mismo JSON funciona sin cambios para ambos lenguajes:
+{
+    "usuario_valido": {
+        "username": "tomsmith",
+        "password": "SuperSecretPassword!",
+        "nombre": "Tom Smith",
+        "email": "tom@example.com"
+    },
+    "usuario_invalido": {
+        "username": "usuario_falso",
+        "password": "clave_incorrecta",
+        "nombre": "Falso",
+        "email": "falso@test.com"
+    },
+    "escenarios_dropdown": [
+        { "label": "Option 1", "value": "1" },
+        { "label": "Option 2", "value": "2" }
+    ],
+    "escenarios_checkboxes": [
+        { "checkbox_index": 0, "estado_inicial": false, "accion": "check" },
+        { "checkbox_index": 1, "estado_inicial": true, "accion": "uncheck" }
+    ],
+    "datos_prompt": [
+        { "texto": "Playwright QA", "esperado": "You entered: Playwright QA" },
+        { "texto": "Test Automatizado", "esperado": "You entered: Test Automatizado" },
+        { "texto": "", "esperado": "You entered: " }
+    ]
+}</code></pre>
+            </div>
+        </div>
 
         <h3>⚙️ Paso 3: Configuración — pytest.ini</h3>
-        <pre><code class="bash"># pytest.ini
+        <div class="code-tabs" data-code-id="L036-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># pytest.ini
 [pytest]
 markers =
     smoke: Tests de humo (críticos)
@@ -110,9 +212,52 @@ markers =
 
 testpaths = tests
 addopts = -v --tb=short</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+    testDir: './tests',
+    fullyParallel: true,
+    forbidOnly: !!process.env.CI,
+    retries: process.env.CI ? 2 : 0,
+    workers: process.env.CI ? 1 : undefined,
+    reporter: [['html'], ['list']],
+    use: {
+        baseURL: 'https://the-internet.herokuapp.com',
+        viewport: { width: 1280, height: 720 },
+        trace: 'on-first-retry',
+        screenshot: 'only-on-failure',
+        acceptDownloads: true,
+    },
+    projects: [
+        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    ],
+});
+
+// Tags en Playwright Test se definen con @tag en el nombre del test:
+// test('login exitoso @smoke @formulario', async ({ page }) => { ... });</code></pre>
+            </div>
+        </div>
 
         <h3>🔧 Paso 4: conftest.py — Fixtures profesionales</h3>
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L036-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/conftest.py
 """
 Configuración global del proyecto: fixtures, hooks y utilidades compartidas.
 """
@@ -231,9 +376,78 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/fixtures.ts — Fixtures personalizadas para Playwright Test
+import { test as base, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// --- Rutas del proyecto ---
+const PROJECT_ROOT = path.resolve(__dirname, '..');
+const DATA_DIR = path.join(PROJECT_ROOT, 'data');
+const UPLOADS_DIR = path.join(PROJECT_ROOT, 'uploads');
+const DOWNLOADS_DIR = path.join(PROJECT_ROOT, 'tests', 'downloads');
+
+// --- Cargar datos de prueba ---
+const datosPrueba = JSON.parse(
+    fs.readFileSync(path.join(DATA_DIR, 'usuarios.json'), 'utf-8')
+);
+
+// --- Definir fixtures personalizadas ---
+type TestFixtures = {
+    usuarioValido: typeof datosPrueba.usuario_valido;
+    usuarioInvalido: typeof datosPrueba.usuario_invalido;
+    archivoUpload: string;
+    dirDescargas: string;
+};
+
+export const test = base.extend<TestFixtures>({
+    usuarioValido: async ({}, use) => {
+        await use(datosPrueba.usuario_valido);
+    },
+
+    usuarioInvalido: async ({}, use) => {
+        await use(datosPrueba.usuario_invalido);
+    },
+
+    archivoUpload: async ({}, use) => {
+        const ruta = path.join(UPLOADS_DIR, 'test_upload.txt');
+        expect(fs.existsSync(ruta)).toBeTruthy();
+        await use(ruta);
+    },
+
+    dirDescargas: async ({}, use) => {
+        fs.mkdirSync(DOWNLOADS_DIR, { recursive: true });
+        await use(DOWNLOADS_DIR);
+    },
+});
+
+export { expect };
+
+// --- Configurar timeouts por defecto ---
+// Se configura en playwright.config.ts con:
+// use: { actionTimeout: 10000, navigationTimeout: 15000 }
+
+// --- Screenshots automáticos ---
+// Playwright Test soporta screenshots en fallo nativamente:
+// playwright.config.ts → use: { screenshot: 'only-on-failure' }</code></pre>
+            </div>
+        </div>
 
         <h3>🛠️ Paso 5: Helpers — form_helpers.py</h3>
-        <pre><code class="python"># helpers/form_helpers.py
+        <div class="code-tabs" data-code-id="L036-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># helpers/form_helpers.py
 """
 Utilidades reutilizables para interacción con formularios.
 """
@@ -318,9 +532,90 @@ def obtener_datos_tabla(page: Page, tabla_selector: str):
 
     logger.info(f"Tabla extraída: {len(datos)} filas, {len(headers)} columnas")
     return datos</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// helpers/form-helpers.ts
+// Utilidades reutilizables para interacción con formularios.
+import { Page, Dialog, expect } from '@playwright/test';
+
+export async function llenarLogin(page: Page, username: string, password: string) {
+    // Llena el formulario de login y hace submit
+    await page.fill('#username', username);
+    await page.fill('#password', password);
+    await page.click("button[type='submit']");
+}
+
+export async function seleccionarDropdown(page: Page, selector: string, label: string) {
+    // Selecciona una opción de dropdown por su label
+    await page.selectOption(selector, { label });
+}
+
+export async function marcarCheckbox(page: Page, locatorStr: string, marcar: boolean = true) {
+    // Marca o desmarca un checkbox según el parámetro
+    const checkbox = page.locator(locatorStr);
+    if (marcar) {
+        await checkbox.check();
+    } else {
+        await checkbox.uncheck();
+    }
+}
+
+export async function subirArchivo(page: Page, inputSelector: string, rutaArchivo: string) {
+    // Sube un archivo a un input de tipo file
+    await page.setInputFiles(inputSelector, rutaArchivo);
+}
+
+export function crearHandlerDialog(
+    tipoEsperado: string,
+    accion: 'accept' | 'dismiss' = 'accept',
+    texto?: string
+): (dialog: Dialog) => Promise<void> {
+    // Crea un handler de diálogo reutilizable
+    return async (dialog: Dialog) => {
+        expect(dialog.type()).toBe(tipoEsperado);
+        if (accion === 'accept') {
+            await dialog.accept(texto);
+        } else {
+            await dialog.dismiss();
+        }
+    };
+}
+
+export async function obtenerDatosTabla(
+    page: Page,
+    tablaSelector: string
+): Promise<Record<string, string>[]> {
+    // Extrae los datos de una tabla HTML como lista de objetos
+    const headers = await page.locator(\`\${tablaSelector} thead th\`).allTextContents();
+    const filas = page.locator(\`\${tablaSelector} tbody tr\`);
+    const datos: Record<string, string>[] = [];
+
+    const count = await filas.count();
+    for (let i = 0; i < count; i++) {
+        const celdas = await filas.nth(i).locator('td').allTextContents();
+        const filaObj: Record<string, string> = {};
+        headers.forEach((h, idx) => { filaObj[h] = celdas[idx]; });
+        datos.push(filaObj);
+    }
+
+    return datos;
+}</code></pre>
+            </div>
+        </div>
 
         <h3>🎲 Paso 6: Helpers — data_generators.py</h3>
-        <pre><code class="python"># helpers/data_generators.py
+        <div class="code-tabs" data-code-id="L036-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># helpers/data_generators.py
 """
 Generadores de datos aleatorios para pruebas.
 """
@@ -364,11 +659,77 @@ def generar_texto(palabras: int = 5) -> str:
         "integración", "verificación", "dato", "resultado"
     ]
     return ' '.join(random.choices(vocabulario, k=palabras))</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// helpers/data-generators.ts
+// Generadores de datos aleatorios para pruebas.
+
+function randomChars(length: number, chars: string): string {
+    return Array.from({ length }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+const LOWERCASE = 'abcdefghijklmnopqrstuvwxyz';
+const UPPERCASE = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const DIGITS = '0123456789';
+const SYMBOLS = '!@#$%';
+const ALL_CHARS = LOWERCASE + UPPERCASE + DIGITS + SYMBOLS;
+
+export function generarUsername(prefijo: string = 'user'): string {
+    // Genera un username único con timestamp
+    const now = new Date();
+    const timestamp = \`\${String(now.getHours()).padStart(2, '0')}\${String(now.getMinutes()).padStart(2, '0')}\${String(now.getSeconds()).padStart(2, '0')}\`;
+    const sufijo = randomChars(4, LOWERCASE);
+    return \`\${prefijo}_\${timestamp}_\${sufijo}\`;
+}
+
+export function generarEmail(dominio: string = 'test.com'): string {
+    // Genera un email aleatorio
+    const nombre = randomChars(8, LOWERCASE);
+    return \`\${nombre}@\${dominio}\`;
+}
+
+export function generarPassword(longitud: number = 12): string {
+    // Genera una contraseña aleatoria con mayúsculas, minúsculas, números y símbolos
+    const password = [
+        randomChars(1, UPPERCASE),
+        randomChars(1, LOWERCASE),
+        randomChars(1, DIGITS),
+        randomChars(1, SYMBOLS),
+        randomChars(longitud - 4, ALL_CHARS),
+    ].join('');
+    // Mezclar caracteres
+    return password.split('').sort(() => Math.random() - 0.5).join('');
+}
+
+export function generarTexto(palabras: number = 5): string {
+    // Genera texto aleatorio de N palabras
+    const vocabulario = [
+        'prueba', 'automatización', 'playwright', 'formulario',
+        'calidad', 'software', 'testing', 'validación',
+        'integración', 'verificación', 'dato', 'resultado'
+    ];
+    return Array.from({ length: palabras },
+        () => vocabulario[Math.floor(Math.random() * vocabulario.length)]
+    ).join(' ');
+}</code></pre>
+            </div>
+        </div>
 
         <h3>📝 Paso 7: test_registro.py — Formularios completos</h3>
         <p>Este archivo cubre: <code>fill</code>, <code>check</code>, <code>select_option</code>,
         <code>set_input_files</code>, radio buttons y validación de formularios.</p>
-        <pre><code class="python"># tests/test_registro.py
+        <div class="code-tabs" data-code-id="L036-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_registro.py
 """
 Tests de registro y formularios.
 Cubre: fill, check, select, radio, file upload, validación.
@@ -509,11 +870,125 @@ class TestFileUpload:
         page.click("#file-submit")
 
         expect(page.locator("h1")).to_have_text("Internal Server Error")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/registro.spec.ts
+// Tests de registro y formularios.
+import { test, expect } from './fixtures';
+import { llenarLogin, seleccionarDropdown, marcarCheckbox, subirArchivo } from '../helpers/form-helpers';
+
+test.describe('TestLoginFormulario', () => {
+
+    test('login exitoso @smoke @formulario', async ({ page, usuarioValido }) => {
+        await page.goto('/login');
+        await llenarLogin(page, usuarioValido.username, usuarioValido.password);
+
+        await expect(page).toHaveURL(/\\/secure/);
+        await expect(page.locator('#flash')).toContainText('You logged into a secure area!');
+    });
+
+    test('login fallido @formulario', async ({ page, usuarioInvalido }) => {
+        await page.goto('/login');
+        await llenarLogin(page, usuarioInvalido.username, usuarioInvalido.password);
+
+        await expect(page.locator('#flash')).toContainText('Your username is invalid!');
+        await expect(page).toHaveURL(/\\/login/);
+    });
+
+    test('login password incorrecto @formulario', async ({ page, usuarioValido }) => {
+        await page.goto('/login');
+        await llenarLogin(page, usuarioValido.username, 'password_incorrecto');
+
+        await expect(page.locator('#flash')).toContainText('Your password is invalid!');
+    });
+
+    test('logout @formulario', async ({ page, usuarioValido }) => {
+        await page.goto('/login');
+        await llenarLogin(page, usuarioValido.username, usuarioValido.password);
+        await expect(page).toHaveURL(/\\/secure/);
+
+        await page.click("a[href='/logout']");
+        await expect(page).toHaveURL(/\\/login/);
+        await expect(page.locator('#flash')).toContainText('You logged out of the secure area!');
+    });
+});
+
+test.describe('TestCheckboxes', () => {
+
+    test('estado inicial checkboxes @formulario', async ({ page }) => {
+        await page.goto('/checkboxes');
+        const checkboxes = page.locator("#checkboxes input[type='checkbox']");
+
+        await expect(checkboxes.nth(0)).not.toBeChecked();
+        await expect(checkboxes.nth(1)).toBeChecked();
+    });
+
+    test('marcar checkbox @formulario', async ({ page }) => {
+        await page.goto('/checkboxes');
+        const primerCheckbox = page.locator("#checkboxes input[type='checkbox']").first();
+
+        await marcarCheckbox(page, "#checkboxes input[type='checkbox']:first-of-type", true);
+        await expect(primerCheckbox).toBeChecked();
+    });
+
+    test('desmarcar checkbox @formulario', async ({ page }) => {
+        await page.goto('/checkboxes');
+        const segundoCheckbox = page.locator("#checkboxes input[type='checkbox']").last();
+
+        await marcarCheckbox(page, "#checkboxes input[type='checkbox']:last-of-type", false);
+        await expect(segundoCheckbox).not.toBeChecked();
+    });
+});
+
+test.describe('TestDropdown', () => {
+
+    for (const { label, value } of [
+        { label: 'Option 1', value: '1' },
+        { label: 'Option 2', value: '2' },
+    ]) {
+        test(\`seleccionar opcion \${label} @formulario\`, async ({ page }) => {
+            await page.goto('/dropdown');
+            await seleccionarDropdown(page, '#dropdown', label);
+            await expect(page.locator('#dropdown')).toHaveValue(value);
+        });
+    }
+});
+
+test.describe('TestFileUpload', () => {
+
+    test('upload archivo @formulario', async ({ page, archivoUpload }) => {
+        await page.goto('/upload');
+        await subirArchivo(page, '#file-upload', archivoUpload);
+        await page.click('#file-submit');
+
+        await expect(page.locator('#uploaded-files')).toHaveText('test_upload.txt');
+    });
+
+    test('upload sin archivo @formulario', async ({ page }) => {
+        await page.goto('/upload');
+        await page.click('#file-submit');
+
+        await expect(page.locator('h1')).toHaveText('Internal Server Error');
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔗 Paso 8: test_interacciones.py — Tablas, diálogos e iframes</h3>
         <p>Este archivo cubre las interacciones más complejas: extracción de datos de tablas,
         manejo de diálogos y trabajo con iframes.</p>
-        <pre><code class="python"># tests/test_interacciones.py
+        <div class="code-tabs" data-code-id="L036-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_interacciones.py
 """
 Tests de interacciones web: tablas, diálogos, iframes, descargas.
 """
@@ -690,11 +1165,148 @@ class TestDescargas:
 
         assert ruta_destino.exists(), f"Archivo no descargado: {ruta_destino}"
         assert ruta_destino.stat().st_size > 0, "Archivo vacío"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/interacciones.spec.ts
+// Tests de interacciones web: tablas, diálogos, iframes, descargas.
+import { test, expect } from './fixtures';
+import * as fs from 'fs';
+import * as path from 'path';
+import { crearHandlerDialog, obtenerDatosTabla } from '../helpers/form-helpers';
+
+test.describe('TestTablas', () => {
+
+    test('tabla tiene datos @interaccion', async ({ page }) => {
+        await page.goto('/tables');
+        const filas = page.locator('#table1 tbody tr');
+        await expect(filas).not.toHaveCount(0);
+    });
+
+    test('extraer datos tabla @interaccion', async ({ page }) => {
+        await page.goto('/tables');
+        const datos = await obtenerDatosTabla(page, '#table1');
+
+        expect(datos.length).toBe(4);
+        for (const fila of datos) {
+            expect(fila).toHaveProperty('Last Name');
+            expect(fila).toHaveProperty('First Name');
+            expect(fila).toHaveProperty('Email');
+        }
+    });
+
+    test('buscar en tabla @interaccion', async ({ page }) => {
+        await page.goto('/tables');
+        const datos = await obtenerDatosTabla(page, '#table1');
+
+        const smiths = datos.filter(f => f['Last Name'] === 'Smith');
+        expect(smiths.length).toBe(1);
+        expect(smiths[0]['First Name']).toBe('John');
+    });
+
+    test('ordenar tabla @interaccion', async ({ page }) => {
+        await page.goto('/tables');
+        await page.click('#table1 thead th:first-child');
+
+        const celdas = page.locator('#table1 tbody tr td:first-child');
+        const nombres = await celdas.allTextContents();
+        expect(nombres).toEqual([...nombres].sort());
+    });
+});
+
+test.describe('TestDialogos', () => {
+    const URL_DIALOGS = '/javascript_alerts';
+
+    test('alert aceptar @interaccion', async ({ page }) => {
+        page.on('dialog', crearHandlerDialog('alert', 'accept'));
+        await page.goto(URL_DIALOGS);
+        await page.click("button:text('Click for JS Alert')");
+
+        await expect(page.locator('#result')).toHaveText('You successfully clicked an alert');
+    });
+
+    test('confirm aceptar @interaccion', async ({ page }) => {
+        page.on('dialog', crearHandlerDialog('confirm', 'accept'));
+        await page.goto(URL_DIALOGS);
+        await page.click("button:text('Click for JS Confirm')");
+
+        await expect(page.locator('#result')).toHaveText('You clicked: Ok');
+    });
+
+    test('confirm rechazar @interaccion', async ({ page }) => {
+        page.on('dialog', crearHandlerDialog('confirm', 'dismiss'));
+        await page.goto(URL_DIALOGS);
+        await page.click("button:text('Click for JS Confirm')");
+
+        await expect(page.locator('#result')).toHaveText('You clicked: Cancel');
+    });
+
+    test('prompt con texto @interaccion', async ({ page }) => {
+        const texto = 'Automatizado con Playwright';
+        page.on('dialog', crearHandlerDialog('prompt', 'accept', texto));
+        await page.goto(URL_DIALOGS);
+        await page.click("button:text('Click for JS Prompt')");
+
+        await expect(page.locator('#result')).toHaveText(\`You entered: \${texto}\`);
+    });
+});
+
+test.describe('TestIframes', () => {
+
+    test('escribir en iframe @interaccion', async ({ page }) => {
+        await page.goto('/tinymce');
+        const frame = page.frameLocator('#mce_0_ifr');
+        const editor = frame.locator('#tinymce');
+        await editor.clear();
+        await editor.fill('Texto escrito desde Playwright');
+        await expect(editor).toHaveText('Texto escrito desde Playwright');
+    });
+
+    test('iframe nested @interaccion', async ({ page }) => {
+        await page.goto('/nested_frames');
+        const frameTop = page.frameLocator("frame[name='frame-top']");
+        const frameLeft = frameTop.frameLocator("frame[name='frame-left']");
+        await expect(frameLeft.locator('body')).toContainText('LEFT');
+
+        const frameBottom = page.frameLocator("frame[name='frame-bottom']");
+        await expect(frameBottom.locator('body')).toContainText('BOTTOM');
+    });
+});
+
+test.describe('TestDescargas', () => {
+
+    test('descargar archivo @interaccion', async ({ page, dirDescargas }) => {
+        await page.goto('/download');
+
+        const [download] = await Promise.all([
+            page.waitForEvent('download'),
+            page.click("a[href='download/some-file.txt']")
+        ]);
+
+        const rutaDestino = path.join(dirDescargas, download.suggestedFilename());
+        await download.saveAs(rutaDestino);
+
+        expect(fs.existsSync(rutaDestino)).toBeTruthy();
+        expect(fs.statSync(rutaDestino).size).toBeGreaterThan(0);
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧭 Paso 9: test_navegacion_avanzada.py — Multi-tab, links, botones</h3>
         <p>Este archivo cubre la navegación avanzada: abrir nuevas pestanas, manejar múltiples
         ventanas, interacciones con botones y verificación de links.</p>
-        <pre><code class="python"># tests/test_navegacion_avanzada.py
+        <div class="code-tabs" data-code-id="L036-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_navegacion_avanzada.py
 """
 Tests de navegación avanzada: multi-tab, links, botones, ventanas.
 """
@@ -826,9 +1438,133 @@ class TestBotones:
         campo.fill("")
         campo.type("100")
         expect(campo).to_have_value("100")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/navegacion-avanzada.spec.ts
+// Tests de navegación avanzada: multi-tab, links, botones, ventanas.
+import { test, expect } from '@playwright/test';
+
+test.describe('TestMultiTab', () => {
+
+    test('abrir nueva pestana @navegacion', async ({ page, context }) => {
+        await page.goto('/windows');
+
+        const [nuevaPagina] = await Promise.all([
+            context.waitForEvent('page'),
+            page.click("a[href='/windows/new']")
+        ]);
+        await nuevaPagina.waitForLoadState();
+
+        await expect(nuevaPagina.locator('h3')).toHaveText('New Window');
+        expect(context.pages().length).toBe(2);
+
+        await nuevaPagina.close();
+        expect(context.pages().length).toBe(1);
+    });
+
+    test('interactuar entre pestanas @navegacion', async ({ page, context }) => {
+        await page.goto('/windows');
+
+        const [nuevaPagina] = await Promise.all([
+            context.waitForEvent('page'),
+            page.click("a[href='/windows/new']")
+        ]);
+        await nuevaPagina.waitForLoadState();
+
+        await expect(nuevaPagina.locator('h3')).toHaveText('New Window');
+
+        await page.bringToFront();
+        await expect(page.locator('h3')).toHaveText('Opening a new window');
+
+        await nuevaPagina.close();
+    });
+});
+
+test.describe('TestLinks', () => {
+
+    test('links principales @navegacion', async ({ page }) => {
+        await page.goto('/');
+        const links = page.locator('#content ul li a');
+        const totalLinks = await links.count();
+        expect(totalLinks).toBeGreaterThan(10);
+    });
+
+    for (const { href, tituloEsperado } of [
+        { href: '/login', tituloEsperado: 'Login Page' },
+        { href: '/checkboxes', tituloEsperado: 'Checkboxes' },
+        { href: '/dropdown', tituloEsperado: 'Dropdown List' },
+        { href: '/inputs', tituloEsperado: 'Inputs' },
+        { href: '/tables', tituloEsperado: 'Data Tables' },
+    ]) {
+        test(\`navegar a \${href} @navegacion\`, async ({ page }) => {
+            await page.goto(href);
+            await expect(page.locator('h3').first()).toHaveText(tituloEsperado);
+        });
+    }
+
+    test('navegacion ida y vuelta @navegacion', async ({ page }) => {
+        await page.goto('/');
+        await page.click("a[href='/login']");
+        await expect(page).toHaveURL(/\\/login/);
+
+        await page.goBack();
+        await expect(page).toHaveURL(/\\/$/);
+        await expect(page.locator('h1')).toHaveText('Welcome to the-internet');
+    });
+});
+
+test.describe('TestBotones', () => {
+
+    test('boton add remove @navegacion', async ({ page }) => {
+        await page.goto('/add_remove_elements/');
+
+        for (let i = 0; i < 3; i++) {
+            await page.click("button:text('Add Element')");
+        }
+
+        const botonesDelete = page.locator('.added-manually');
+        await expect(botonesDelete).toHaveCount(3);
+
+        await botonesDelete.first().click();
+        await expect(page.locator('.added-manually')).toHaveCount(2);
+    });
+
+    test('boton dynamically loaded @navegacion', async ({ page }) => {
+        await page.goto('/dynamic_loading/1');
+        await page.click('#start button');
+
+        const resultado = page.locator('#finish h4');
+        await expect(resultado).toHaveText('Hello World!', { timeout: 10000 });
+    });
+
+    test('inputs numericos @navegacion', async ({ page }) => {
+        await page.goto('/inputs');
+        const campo = page.locator("input[type='number']");
+
+        await campo.fill('42');
+        await expect(campo).toHaveValue('42');
+
+        await campo.fill('');
+        await campo.type('100');
+        await expect(campo).toHaveValue('100');
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>▶️ Paso 10: Ejecutar la suite completa</h3>
-        <pre><code class="bash"># Ejecutar todos los tests
+        <div class="code-tabs" data-code-id="L036-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Ejecutar todos los tests
 pytest tests/ -v
 
 # Solo tests de formulario
@@ -858,6 +1594,46 @@ pytest tests/ -v -n auto
 
 # Generar reporte
 pytest tests/ -v --tb=short --junitxml=report.xml</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Ejecutar todos los tests
+npx playwright test
+
+# Solo tests de formulario (por tag)
+npx playwright test --grep @formulario
+
+# Solo tests de interacciones
+npx playwright test --grep @interaccion
+
+# Solo tests de navegación
+npx playwright test --grep @navegacion
+
+# Smoke tests (los más críticos)
+npx playwright test --grep @smoke
+
+# Excluir tests lentos
+npx playwright test --grep-invert @slow
+
+# Con screenshots y videos automáticos (configurado en playwright.config.ts)
+npx playwright test --reporter=html
+
+# Con trace para debugging
+npx playwright test --trace on
+
+# Ejecutar en paralelo (por defecto en Playwright Test)
+npx playwright test --workers=4
+
+# Generar reporte JUnit
+npx playwright test --reporter=junit > report.xml
+
+# Abrir el reporte HTML
+npx playwright show-report</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip: Orden de ejecución recomendado</h4>

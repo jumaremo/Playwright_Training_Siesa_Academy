@@ -39,7 +39,18 @@ const LESSON_042 = {
             no se puede usar como referencia ni será encontrado por estos localizadores.</p>
         </div>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L042-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_concepto_layout(page: Page):
     """
@@ -57,10 +68,44 @@ def test_concepto_layout(page: Page):
     que está debajo del label, o el error que está debajo del input.
     """
     pass  # Ejemplo conceptual</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('concepto layout', async ({ page }) => {
+    /*
+    Imagina esta disposición visual:
+
+    +-----------------------------------+
+    |          [Label: Email]           |
+    |   +---------------------------+   |
+    |   |   [Input de Email]        |   |  ← below("Label: Email")
+    |   +---------------------------+   |
+    |   [Error: Email inválido]         |  ← below("Input de Email")
+    +-----------------------------------+
+
+    Con localizadores de layout, puedes encontrar el input
+    que está debajo del label, o el error que está debajo del input.
+    */
+    // Ejemplo conceptual
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⬆️ above() — Elemento visualmente arriba</h3>
         <p>Encuentra elementos que están visualmente <strong>por encima</strong> del elemento de referencia.</p>
-        <pre><code class="python">def test_above(page: Page):
+        <div class="code-tabs" data-code-id="L042-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_above(page: Page):
     page.goto("https://example.com/formulario")
 
     # Encontrar el label que está arriba del input de email
@@ -75,10 +120,41 @@ def test_concepto_layout(page: Page):
     # El título (h2) que está arriba del formulario
     titulo = page.locator("h2").above(formulario)
     expect(titulo).to_contain_text("Registro")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('above', async ({ page }) => {
+    await page.goto('https://example.com/formulario');
+
+    // Encontrar el label que está arriba del input de email
+    const inputEmail = page.getByLabel('Email');
+    const labelArriba = page.locator('label').filter({
+        hasText: 'Email'
+    });
+
+    // Alternativa usando layout: encontrar el heading arriba de un formulario
+    const formulario = page.locator('#formulario-registro');
+
+    // El título (h2) que está arriba del formulario
+    const titulo = page.locator('h2').above(formulario);
+    await expect(titulo).toContainText('Registro');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⬇️ below() — Elemento visualmente abajo</h3>
         <p>Encuentra elementos que están visualmente <strong>por debajo</strong> del elemento de referencia.</p>
-        <pre><code class="python">def test_below(page: Page):
+        <div class="code-tabs" data-code-id="L042-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_below(page: Page):
     page.goto("https://example.com/formulario")
 
     # Encontrar el mensaje de error debajo del campo de email
@@ -90,9 +166,37 @@ def test_concepto_layout(page: Page):
     header = page.locator("header")
     seccion_principal = page.locator("section").below(header).first
     expect(seccion_principal).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('below', async ({ page }) => {
+    await page.goto('https://example.com/formulario');
+
+    // Encontrar el mensaje de error debajo del campo de email
+    const campoEmail = page.locator('#email');
+    const errorEmail = page.locator('.error-message').below(campoEmail);
+    await expect(errorEmail).toHaveText('El email es obligatorio');
+
+    // Encontrar la sección que está debajo del header
+    const header = page.locator('header');
+    const seccionPrincipal = page.locator('section').below(header).first();
+    await expect(seccionPrincipal).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⬅️ left_of() — Elemento a la izquierda</h3>
-        <pre><code class="python">def test_left_of(page: Page):
+        <div class="code-tabs" data-code-id="L042-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_left_of(page: Page):
     page.goto("https://example.com/dashboard")
 
     # Encontrar el label que está a la izquierda de un input
@@ -105,9 +209,38 @@ def test_concepto_layout(page: Page):
     panel_central = page.locator(".panel-central")
     panel_lateral = page.locator(".panel").left_of(panel_central)
     expect(panel_lateral).to_contain_text("Menú")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('left of', async ({ page }) => {
+    await page.goto('https://example.com/dashboard');
+
+    // Encontrar el label que está a la izquierda de un input
+    // (formularios con layout horizontal label-input)
+    const inputNombre = page.locator('#nombre');
+    const labelNombre = page.locator('label').leftOf(inputNombre);
+    await expect(labelNombre).toHaveText('Nombre:');
+
+    // En un dashboard con columnas, encontrar el panel izquierdo
+    const panelCentral = page.locator('.panel-central');
+    const panelLateral = page.locator('.panel').leftOf(panelCentral);
+    await expect(panelLateral).toContainText('Menú');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>➡️ right_of() — Elemento a la derecha</h3>
-        <pre><code class="python">def test_right_of(page: Page):
+        <div class="code-tabs" data-code-id="L042-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_right_of(page: Page):
     page.goto("https://example.com/tabla-precios")
 
     # Encontrar el precio que está a la derecha del nombre del plan
@@ -119,11 +252,39 @@ def test_concepto_layout(page: Page):
     usuario = page.locator(".nombre-usuario", has_text="carlos.diaz")
     boton_editar = page.locator("button").right_of(usuario).first
     boton_editar.click()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('right of', async ({ page }) => {
+    await page.goto('https://example.com/tabla-precios');
+
+    // Encontrar el precio que está a la derecha del nombre del plan
+    const planBasico = page.locator('td', { hasText: 'Plan Básico' });
+    const precioBasico = page.locator('td').rightOf(planBasico).first();
+    await expect(precioBasico).toContainText('$9.99');
+
+    // Encontrar el botón de acción a la derecha de un nombre de usuario
+    const usuario = page.locator('.nombre-usuario', { hasText: 'carlos.diaz' });
+    const botonEditar = page.locator('button').rightOf(usuario).first();
+    await botonEditar.click();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📍 near() — Elemento en proximidad</h3>
         <p><code>near()</code> encuentra elementos dentro de un radio de distancia (en píxeles) del elemento
         de referencia. Es útil cuando la relación no es estrictamente arriba/abajo/izquierda/derecha.</p>
-        <pre><code class="python">def test_near(page: Page):
+        <div class="code-tabs" data-code-id="L042-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_near(page: Page):
     page.goto("https://example.com/mapa-tiendas")
 
     # Encontrar el texto de dirección cerca del marcador de la tienda
@@ -136,6 +297,24 @@ def test_concepto_layout(page: Page):
     # Sin especificar max_distance, usa un valor por defecto (50px)
     info_cercana = page.locator(".info-tienda").near(marcador)
     expect(info_cercana).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('near', async ({ page }) => {
+    await page.goto('https://example.com/mapa-tiendas');
+
+    // Encontrar el texto de dirección cerca del marcador de la tienda
+    const marcador = page.locator('.marcador-tienda', { hasText: 'Sucursal Norte' });
+
+    // Buscar la dirección dentro de 100px del marcador
+    const direccion = page.locator('.direccion').near(marcador, { maxDistance: 100 });
+    await expect(direccion).toContainText('Calle 123');
+
+    // Sin especificar maxDistance, usa un valor por defecto (50px)
+    const infoCercana = page.locator('.info-tienda').near(marcador);
+    await expect(infoCercana).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Parámetros de los localizadores de layout</h4>
@@ -176,7 +355,18 @@ def test_concepto_layout(page: Page):
         <h3>🔀 Combinando layout con otros locators</h3>
         <p>Los localizadores de layout se pueden combinar con encadenamiento, filtrado y locators
         semánticos para crear selecciones muy precisas.</p>
-        <pre><code class="python">def test_layout_combinado(page: Page):
+        <div class="code-tabs" data-code-id="L042-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_layout_combinado(page: Page):
     page.goto("https://example.com/formulario-complejo")
 
     # Encontrar el input de tipo text que está debajo del label "Nombre completo"
@@ -205,6 +395,34 @@ def test_concepto_layout(page: Page):
         .near(texto_terminos, max_distance=50)
     )
     checkbox_terminos.check()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('layout combinado', async ({ page }) => {
+    await page.goto('https://example.com/formulario-complejo');
+
+    // Encontrar el input de tipo text que está debajo del label "Nombre completo"
+    const labelNombre = page.getByText('Nombre completo');
+    const inputNombre = page.getByRole('textbox')
+        .below(labelNombre)
+        .first();
+    await inputNombre.fill('Juan Manuel Reina');
+
+    // Encontrar el botón "Guardar" que está debajo del formulario
+    // y que además tiene la clase "primary"
+    const formulario = page.locator('#form-principal');
+    const botonGuardar = page.locator('button.primary')
+        .below(formulario)
+        .filter({ hasText: 'Guardar' });
+    await botonGuardar.click();
+
+    // Encontrar el checkbox más cercano a un texto descriptivo
+    const textoTerminos = page.getByText('Acepto los términos y condiciones');
+    const checkboxTerminos = page.locator("input[type='checkbox']")
+        .near(textoTerminos, { maxDistance: 50 });
+    await checkboxTerminos.check();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Casos de uso ideales</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -246,7 +464,18 @@ def test_concepto_layout(page: Page):
         <h3>🏗️ Alternativas: Navegación por estructura DOM</h3>
         <p>Antes de recurrir a localizadores de layout, considera si la <strong>estructura del DOM</strong>
         te ofrece una ruta más confiable.</p>
-        <pre><code class="python">def test_navegacion_dom(page: Page):
+        <div class="code-tabs" data-code-id="L042-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_navegacion_dom(page: Page):
     """
     Alternativas basadas en estructura DOM, más robustas que layout.
     """
@@ -275,17 +504,64 @@ def test_concepto_layout(page: Page):
     # El + selecciona el hermano siguiente inmediato
     error_password = page.locator("#password + .error-message")
     expect(error_password).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('navegacion DOM', async ({ page }) => {
+    // Alternativas basadas en estructura DOM, más robustas que layout.
+    await page.goto('https://example.com/formulario');
+
+    // --- Usando XPath para navegar al padre ---
+    const padreEmail = page.locator("//input[@id='email']/..");
+    await expect(padreEmail).toHaveClass('form-group');
+
+    // --- Usando locator("..") para subir al padre ---
+    const inputEmail = page.locator('#email');
+    const contenedor = inputEmail.locator('..');  // Elemento padre
+    const error = contenedor.locator('.error-message');
+    await expect(error).toHaveText('Campo requerido');
+
+    // --- Hermanos: navegar al padre y luego al hermano ---
+    const label = page.locator("label[for='nombre']");
+    const inputHermano = label.locator('..').locator('input');
+    await inputHermano.fill('Carlos Felipe');
+
+    // --- Usando CSS: selector de hermano adyacente ---
+    const errorPassword = page.locator('#password + .error-message');
+    await expect(errorPassword).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 locator("..") para navegar al padre</h4>
             <p>Playwright permite usar <code>".."</code> como selector en <code>locator()</code>
             para subir un nivel en el DOM. Esto es extremadamente útil para encontrar elementos
             hermanos sin recurrir a XPath completo.</p>
-            <pre><code class="python"># Patrón: encontrar hermano via padre
+            <div class="code-tabs" data-code-id="L042-9">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># Patrón: encontrar hermano via padre
 input_campo = page.locator("#mi-input")
 padre = input_campo.locator("..")           # Subir al padre
 error_hermano = padre.locator(".error")     # Bajar al hermano
 expect(error_hermano).to_have_text("Error")</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// Patrón: encontrar hermano via padre
+const inputCampo = page.locator('#mi-input');
+const padre = inputCampo.locator('..');           // Subir al padre
+const errorHermano = padre.locator('.error');      // Bajar al hermano
+await expect(errorHermano).toHaveText('Error');</code></pre>
+                </div>
+            </div>
         </div>
 
         <h3>📊 Comparativa: DOM vs Layout</h3>
@@ -355,7 +631,18 @@ expect(error_hermano).to_have_text("Error")</code></pre>
 
         <h3>🏥 Ejemplo completo: Validación de formulario</h3>
         <p>Encontrar mensajes de error relativos a los campos de un formulario de registro.</p>
-        <pre><code class="python">"""
+        <div class="code-tabs" data-code-id="L042-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">"""
 Ejemplo completo: validación de formulario.
 Encontrar mensajes de error relativos a cada campo input.
 """
@@ -450,6 +737,67 @@ def test_formulario_alternativa_dom(page: Page):
     )
     error_password = grupo_password.locator(".error-message")
     expect(error_password).to_have_text("Mínimo 8 caracteres")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('validacion formulario layout', async ({ page }) => {
+    await page.goto('https://example.com/registro');
+
+    // Enviar el formulario vacío para forzar errores
+    await page.getByRole('button', { name: 'Registrarse' }).click();
+
+    // --- Verificar error del campo nombre usando layout ---
+    const campoNombre = page.locator('#nombre');
+    const errorNombre = page.locator('.error-message')
+        .below(campoNombre).first();
+    await expect(errorNombre).toHaveText('El nombre es obligatorio');
+
+    // --- Verificar error del campo email usando layout ---
+    const campoEmail = page.locator('#email');
+    const errorEmail = page.locator('.error-message')
+        .below(campoEmail).first();
+    await expect(errorEmail).toHaveText('Ingrese un email válido');
+
+    // --- Verificar error del campo password usando layout ---
+    const campoPassword = page.locator('#password');
+    const errorPassword = page.locator('.error-message')
+        .below(campoPassword).first();
+    await expect(errorPassword).toHaveText('Mínimo 8 caracteres');
+
+    // --- Corregir y verificar que los errores desaparecen ---
+    await campoNombre.fill('Juan Reina');
+    await campoEmail.fill('juan@siesa.com');
+    await campoPassword.fill('Password123!');
+
+    await page.getByRole('button', { name: 'Registrarse' }).click();
+
+    const errores = page.locator('.error-message');
+    await expect(errores).toHaveCount(0);
+});
+
+test('formulario alternativa DOM', async ({ page }) => {
+    await page.goto('https://example.com/registro');
+    await page.getByRole('button', { name: 'Registrarse' }).click();
+
+    // Usando ".." para subir al padre y encontrar el error hermano
+    const errorNombre = page.locator('#nombre')
+        .locator('..')
+        .locator('.error-message');
+    await expect(errorNombre).toHaveText('El nombre es obligatorio');
+
+    // Usando CSS sibling selector
+    const errorEmail = page.locator('#email ~ .error-message');
+    await expect(errorEmail).toHaveText('Ingrese un email válido');
+
+    // Usando filter con el form-group padre
+    const grupoPassword = page.locator('.form-group')
+        .filter({ has: page.locator('#password') });
+    const errorPassword = grupoPassword.locator('.error-message');
+    await expect(errorPassword).toHaveText('Mínimo 8 caracteres');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio</h3>
         <p>Practica los localizadores de layout con el siguiente ejercicio basado en un dashboard:</p>
@@ -463,7 +811,18 @@ def test_formulario_alternativa_dom(page: Page):
             <li>Combina layout y filtrado: encuentra el botón con clase <code>"button"</code> que está arriba de la tabla y contiene texto "foo"</li>
             <li><strong>Bonus:</strong> Compara el rendimiento de ambos enfoques ejecutando con <code>--headed --slowmo=200</code></li>
         </ol>
-        <pre><code class="python"># Solución del ejercicio
+        <div class="code-tabs" data-code-id="L042-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Solución del ejercicio
 from playwright.sync_api import Page, expect
 
 
@@ -519,6 +878,61 @@ def test_dashboard_dom_alternativo(page: Page):
     # Canvas
     canvas = page.locator("#canvas canvas")
     expect(canvas).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('dashboard layout', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/challenging_dom');
+
+    // Referencia: la tabla
+    const tabla = page.locator('table');
+    await expect(tabla).toBeVisible();
+
+    // Botones arriba de la tabla
+    const botonesArriba = page.locator('a.button').above(tabla);
+    console.log(\`Botones arriba de la tabla: \${await botonesArriba.count()}\`);
+
+    // Canvas debajo de la tabla
+    const canvas = page.locator('canvas').below(tabla);
+    await expect(canvas).toBeVisible();
+
+    // Alternativa DOM: desde una celda, subir al tr padre
+    const primeraCelda = page.locator('table tbody tr td').first();
+    const filaPadre = primeraCelda.locator('..');
+    const celdasFila = filaPadre.locator('td');
+    console.log(\`Celdas en la fila: \${await celdasFila.count()}\`);
+
+    // Layout + filtrado: botón "foo" arriba de la tabla
+    const botonFoo = page.locator('a.button')
+        .above(tabla)
+        .filter({ hasText: 'foo' });
+
+    // Imprimir todos los textos de botones para debug
+    for (const boton of await page.locator('a.button').above(tabla).all()) {
+        console.log(\`  Botón: '\${(await boton.textContent())?.trim()}'\`);
+    }
+});
+
+test('dashboard DOM alternativo', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/challenging_dom');
+
+    // Los botones están en un div antes de la tabla
+    const contenedor = page.locator('.large-2.columns');
+    const botones = contenedor.locator('a.button');
+    console.log(\`Botones (via DOM): \${await botones.count()}\`);
+
+    // Tabla: obtener datos de la primera fila
+    const primeraFila = page.locator('table tbody tr').first();
+    const valores = await primeraFila.locator('td').allTextContents();
+    console.log(\`Primera fila: \${valores}\`);
+
+    // Canvas
+    const canvas = page.locator('#canvas canvas');
+    await expect(canvas).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Objetivos de esta lección:</h4>

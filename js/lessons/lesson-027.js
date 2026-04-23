@@ -19,7 +19,18 @@ const LESSON_027 = {
         <h3>🏗️ Jerarquía de excepciones en Python</h3>
         <p>Python organiza todas las excepciones en una jerarquía de clases. Entenderla te permite
         capturar exactamente lo que necesitas:</p>
-        <pre><code class="python"># Jerarquía simplificada de excepciones en Python
+        <div class="code-tabs" data-code-id="L027-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Jerarquía simplificada de excepciones en Python
 BaseException
 ├── SystemExit              # sys.exit()
 ├── KeyboardInterrupt       # Ctrl+C
@@ -41,6 +52,28 @@ BaseException
     ├── RuntimeError
     ├── TimeoutError          # ← Importante en Playwright
     └── AssertionError        # ← Lo que lanza assert/pytest</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Jerarquía de errores en TypeScript / JavaScript
+// JavaScript tiene una jerarquía más simple:
+
+Error                        // ← Clase base de todos los errores
+├── RangeError               // Valor fuera de rango
+├── ReferenceError           // Variable no definida
+├── SyntaxError              // Error de sintaxis
+├── TypeError                // Tipo incorrecto
+├── URIError                 // URI malformada
+└── (Errores personalizados) // extends Error
+
+// Errores específicos de Playwright:
+// - TimeoutError             → import { errors } from '@playwright/test'
+// - errors.TimeoutError      → Cuando una acción excede el timeout
+// - Error                    → Errores generales de Playwright
+
+// En TypeScript, los errores NO tienen jerarquía de herencia
+// tan rica como Python. Se usa instanceof para distinguirlos.</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #ff9800;">
             <strong>🔑 Regla de oro:</strong> Nunca captures <code>BaseException</code>.
@@ -51,7 +84,18 @@ BaseException
 
         <h3>🧱 Bloques try / except / else / finally</h3>
         <p>Python ofrece cuatro bloques para gestionar excepciones. Cada uno tiene un propósito claro:</p>
-        <pre><code class="python"># Estructura completa de manejo de excepciones
+        <div class="code-tabs" data-code-id="L027-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Estructura completa de manejo de excepciones
 def realizar_login(page, usuario, clave):
     """Intenta hacer login y maneja posibles fallos."""
     try:
@@ -81,6 +125,48 @@ def realizar_login(page, usuario, clave):
     finally:
         # Se ejecuta SIEMPRE, haya o no excepción
         print("🔄 Bloque finally: limpieza completada")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { Page } from '@playwright/test';
+
+// Estructura completa de manejo de excepciones en TypeScript
+async function realizarLogin(
+    page: Page, usuario: string, clave: string
+): Promise<boolean> {
+    let loginExitoso = false;
+
+    try {
+        // Código que puede lanzar excepciones
+        await page.goto('/login', { timeout: 5000 });
+        await page.fill('#username', usuario);
+        await page.fill('#password', clave);
+        await page.click("button[type='submit']");
+        await page.waitForURL('**/secure', { timeout: 5000 });
+        loginExitoso = true;
+
+    } catch (error) {
+        // TypeScript usa un solo catch (no múltiples como Python)
+        if (error instanceof Error && error.message.includes('Timeout')) {
+            console.log(\`⏱️ Timeout al intentar login con '\${usuario}'\`);
+            await page.screenshot({ path: 'error_login_timeout.png' });
+        } else {
+            console.log(\`❌ Error inesperado en login: \${error}\`);
+        }
+        return false;
+
+    } finally {
+        // Se ejecuta SIEMPRE, haya o no excepción
+        console.log('🔄 Bloque finally: limpieza completada');
+    }
+
+    // Equivalente al bloque "else" de Python (solo se alcanza si no hubo error)
+    if (loginExitoso) {
+        console.log(\`✅ Login exitoso para '\${usuario}'\`);
+    }
+    return loginExitoso;
+}</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>📋 Resumen de bloques:</h4>
@@ -116,7 +202,18 @@ def realizar_login(page, usuario, clave):
         <h3>🎯 Capturar excepciones específicas vs genéricas</h3>
         <p>Siempre prefiere capturar excepciones específicas. Esto te da control preciso
         sobre cómo reaccionar ante cada tipo de error:</p>
-        <pre><code class="python"># ❌ MAL: Captura genérica - oculta bugs reales
+        <div class="code-tabs" data-code-id="L027-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># ❌ MAL: Captura genérica - oculta bugs reales
 try:
     page.click("#boton-pago")
 except Exception:
@@ -150,6 +247,48 @@ except ValueError as e:
 except Exception as e:
     print(f"❓ Error inesperado: {type(e).__name__}: {e}")
     raise  # Re-lanzar para que pytest lo reporte</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { Page, errors } from '@playwright/test';
+
+// ❌ MAL: Captura genérica - oculta bugs reales
+try {
+    await page.click('#boton-pago');
+} catch (e) {
+    console.log('Algo falló'); // ¿Qué falló? No sabes.
+}
+
+// ✅ BIEN: Captura específica con instanceof
+try {
+    await page.click('#boton-pago');
+} catch (error) {
+    if (error instanceof errors.TimeoutError) {
+        // El elemento no apareció a tiempo
+        console.log('El botón de pago no apareció en el tiempo esperado');
+        await page.screenshot({ path: 'debug_boton_pago.png' });
+    } else if (error instanceof Error) {
+        // Error general de Playwright
+        console.log(\`Error de Playwright: \${error.message}\`);
+    }
+}
+
+// ✅ MEJOR: Distinguir múltiples tipos con instanceof
+try {
+    await page.fill('#email', 'test@ejemplo.com');
+    await page.click('#enviar');
+    await page.waitForSelector('.confirmacion', { timeout: 3000 });
+} catch (error) {
+    if (error instanceof errors.TimeoutError) {
+        console.log('⏱️ Timeout: la confirmación no apareció');
+    } else if (error instanceof TypeError) {
+        console.log(\`📝 Tipo inválido: \${error.message}\`);
+    } else if (error instanceof Error) {
+        console.log(\`❓ Error inesperado: \${error.constructor.name}: \${error.message}\`);
+        throw error; // Re-lanzar para que Playwright Test lo reporte
+    }
+}</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #e53935;">
             <strong>⚠️ Cuidado:</strong> En tests, capturar <code>AssertionError</code> genéricamente
@@ -159,7 +298,18 @@ except Exception as e:
 
         <h3>🚀 Lanzar excepciones con raise</h3>
         <p>Usa <code>raise</code> para señalar errores explícitamente en tu código de testing:</p>
-        <pre><code class="python"># Lanzar una excepción nueva
+        <div class="code-tabs" data-code-id="L027-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Lanzar una excepción nueva
 def verificar_ambiente(ambiente):
     """Valida que el ambiente sea correcto antes de ejecutar tests."""
     ambientes_validos = ["dev", "staging", "prod"]
@@ -185,10 +335,55 @@ except FileNotFoundError as original:
         "No se encontró el archivo de configuración. "
         "Ejecuta 'setup.py' primero."
     ) from original  # Preserva la causa raíz</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Lanzar un error nuevo
+function verificarAmbiente(ambiente: string): void {
+    const ambientesValidos = ['dev', 'staging', 'prod'];
+    if (!ambientesValidos.includes(ambiente)) {
+        throw new Error(
+            \`Ambiente '\${ambiente}' no válido. \` +
+            \`Opciones: \${ambientesValidos.join(', ')}\`
+        );
+    }
+}
+
+// Re-lanzar el error actual (preserva el stack trace)
+try {
+    await page.goto(url);
+} catch (error) {
+    console.log(\`No se pudo acceder a \${url}\`);
+    await page.screenshot({ path: 'error_navegacion.png' });
+    throw error; // Re-lanza el error original
+}
+
+// Encadenar errores con cause (ES2022+)
+try {
+    const datos = cargarConfiguracion('config.json');
+} catch (original) {
+    throw new Error(
+        'No se encontró el archivo de configuración. ' +
+        "Ejecuta 'setup' primero.",
+        { cause: original } // Preserva la causa raíz
+    );
+}</code></pre>
+            </div>
+        </div>
 
         <h3>🏭 Excepciones personalizadas para frameworks de test</h3>
         <p>Crear excepciones propias hace tu framework más expresivo y fácil de depurar:</p>
-        <pre><code class="python"># exceptions.py - Excepciones personalizadas del framework
+        <div class="code-tabs" data-code-id="L027-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># exceptions.py - Excepciones personalizadas del framework
 
 class TestFrameworkError(Exception):
     """Excepción base del framework de testing."""
@@ -228,8 +423,72 @@ class ElementNotReadyError(TestFrameworkError):
 class TestDataError(TestFrameworkError):
     """Error al cargar o procesar datos de prueba."""
     pass</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// errors.ts - Errores personalizados del framework
 
-        <pre><code class="python"># Uso de excepciones personalizadas en tests
+export class TestFrameworkError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'TestFrameworkError';
+    }
+}
+
+export class ConfigurationError extends TestFrameworkError {
+    parametro: string;
+    constructor(parametro: string, mensaje: string = '') {
+        super(\`Error de configuración en '\${parametro}': \${mensaje}\`);
+        this.name = 'ConfigurationError';
+        this.parametro = parametro;
+    }
+}
+
+export class EnvironmentError extends TestFrameworkError {
+    ambiente: string;
+    url: string;
+    constructor(ambiente: string, url: string = '') {
+        super(\`Ambiente '\${ambiente}' no disponible (URL: \${url})\`);
+        this.name = 'EnvironmentError';
+        this.ambiente = ambiente;
+        this.url = url;
+    }
+}
+
+export class ElementNotReadyError extends TestFrameworkError {
+    selector: string;
+    intentos: number;
+    constructor(selector: string, intentos: number = 0) {
+        super(
+            \`Elemento '\${selector}' no listo después de \` +
+            \`\${intentos} intentos\`
+        );
+        this.name = 'ElementNotReadyError';
+        this.selector = selector;
+        this.intentos = intentos;
+    }
+}
+
+export class TestDataError extends TestFrameworkError {
+    constructor(message: string) {
+        super(message);
+        this.name = 'TestDataError';
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L027-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Uso de excepciones personalizadas en tests
 from exceptions import (
     ConfigurationError,
     EnvironmentError,
@@ -263,11 +522,63 @@ def verificar_ambiente(request):
         setup_ambiente(cargar_config())
     except TestFrameworkError as e:
         pytest.exit(f"Error fatal del framework: {e}", returncode=1)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Uso de errores personalizados en tests
+import { ConfigurationError, EnvironmentError } from './errors';
+
+async function setupAmbiente(config: Record<string, any>): Promise<void> {
+    if (!config.baseUrl) {
+        throw new ConfigurationError('baseUrl', 'URL base es obligatoria');
+    }
+
+    const url = config.baseUrl;
+    try {
+        const response = await fetch(url, { signal: AbortSignal.timeout(10000) });
+        if (!response.ok) {
+            throw new EnvironmentError(config.nombre, url);
+        }
+    } catch (error) {
+        if (error instanceof EnvironmentError) throw error;
+        throw new EnvironmentError(config.nombre, url);
+    }
+}
+
+// En globalSetup.ts (equivalente a conftest.py session-scoped)
+import { FullConfig } from '@playwright/test';
+import { TestFrameworkError } from './errors';
+
+async function globalSetup(config: FullConfig): Promise<void> {
+    try {
+        await setupAmbiente(cargarConfig());
+    } catch (error) {
+        if (error instanceof TestFrameworkError) {
+            console.error(\`Error fatal del framework: \${error.message}\`);
+            process.exit(1);
+        }
+        throw error;
+    }
+}
+
+export default globalSetup;</code></pre>
+            </div>
+        </div>
 
         <h3>🧪 pytest.raises() - Verificar excepciones esperadas</h3>
         <p>En testing, a veces necesitas verificar que tu código <strong>lanza</strong>
         la excepción correcta. <code>pytest.raises()</code> es la herramienta para esto:</p>
-        <pre><code class="python">import pytest
+        <div class="code-tabs" data-code-id="L027-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import pytest
 from exceptions import ConfigurationError, EnvironmentError
 
 # Uso básico: verificar que se lanza la excepción
@@ -318,6 +629,60 @@ def test_elemento_inexistente_lanza_timeout(page):
 
     with pytest.raises(PlaywrightTimeout):
         page.click("#elemento-que-no-existe", timeout=1000)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect, errors } from '@playwright/test';
+import { ConfigurationError } from './errors';
+
+// Uso básico: verificar que se lanza el error
+test('config sin url lanza error', async () => {
+    const configInvalida = { nombre: 'dev' };
+
+    // En Playwright Test, usa expect(...).toThrow() o try/catch
+    expect(() => setupAmbiente(configInvalida)).rejects.toThrow(ConfigurationError);
+});
+
+// Inspeccionar el mensaje del error
+test('config error tiene mensaje descriptivo', async () => {
+    const configInvalida = { nombre: 'dev' };
+
+    try {
+        await setupAmbiente(configInvalida);
+        // Si no lanza error, forzar fallo
+        expect(true, 'Debería haber lanzado ConfigurationError').toBe(false);
+    } catch (error) {
+        expect(error).toBeInstanceOf(ConfigurationError);
+        expect(error.message).toContain('baseUrl');
+        expect((error as ConfigurationError).parametro).toBe('baseUrl');
+    }
+});
+
+// Verificar con toThrow y regex
+test('ambiente invalido mensaje', async () => {
+    expect(() => verificarAmbiente('produccion_vieja'))
+        .toThrow(/Ambiente '.*' no válido/);
+});
+
+// Verificar que NO se lanza error (patrón implícito)
+test('config valida no lanza error', async () => {
+    const configValida = {
+        nombre: 'dev',
+        baseUrl: 'http://localhost:3000',
+    };
+    // Si lanza error, el test falla automáticamente
+    await setupAmbiente(configValida);
+});
+
+// Combinar con errores de Playwright
+test('elemento inexistente lanza timeout', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com');
+
+    await expect(async () => {
+        await page.click('#elemento-que-no-existe', { timeout: 1000 });
+    }).rejects.toThrow(errors.TimeoutError);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎭 Excepciones comunes de Playwright</h3>
         <p>Playwright lanza excepciones específicas que debes conocer para manejar
@@ -353,7 +718,18 @@ def test_elemento_inexistente_lanza_timeout(page):
             </table>
         </div>
 
-        <pre><code class="python"># Importar excepciones de Playwright correctamente
+        <div class="code-tabs" data-code-id="L027-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Importar excepciones de Playwright correctamente
 from playwright.sync_api import (
     TimeoutError as PlaywrightTimeout,
     Error as PlaywrightError
@@ -372,11 +748,47 @@ def test_manejar_timeout_playwright(page):
             "El contenido dinámico no cargó en 15 segundos. "
             "Posible problema de rendimiento del servidor."
         )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect, errors } from '@playwright/test';
+
+test('manejar timeout playwright', async ({ page }) => {
+    // Ejemplo de manejo de TimeoutError de Playwright
+    await page.goto('https://the-internet.herokuapp.com/dynamic_loading/1');
+    await page.click('#start button');
+
+    try {
+        // Esperar a que aparezca el resultado (puede ser lento)
+        await page.waitForSelector('#finish h4', { timeout: 15000 });
+    } catch (error) {
+        if (error instanceof errors.TimeoutError) {
+            test.fail(
+                true,
+                'El contenido dinámico no cargó en 15 segundos. ' +
+                'Posible problema de rendimiento del servidor.'
+            );
+        }
+        throw error;
+    }
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔄 Patrón de reintentos para tests inestables</h3>
         <p>Algunos elementos web son inestables (aparecen/desaparecen, tardan en renderizar).
         Un patrón de reintentos ayuda a manejar esto sin ocultar errores reales:</p>
-        <pre><code class="python">import time
+        <div class="code-tabs" data-code-id="L027-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import time
 from playwright.sync_api import TimeoutError as PlaywrightTimeout
 
 def reintentar_accion(page, accion, max_intentos=3, espera=1):
@@ -428,6 +840,56 @@ def test_boton_flaky(page):
 
     texto = reintentar_accion(page, hacer_click_y_esperar)
     assert texto == "Hello World!"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect, Page, errors } from '@playwright/test';
+
+// Playwright Test tiene reintentos nativos en el config:
+// playwright.config.ts → retries: 2
+
+// Para reintentos a nivel de acción:
+async function reintentarAccion<T>(
+    page: Page,
+    accion: (p: Page) => Promise<T>,
+    maxIntentos: number = 3,
+    espera: number = 1000
+): Promise<T> {
+    let ultimoError: Error | null = null;
+
+    for (let intento = 1; intento <= maxIntentos; intento++) {
+        try {
+            return await accion(page);
+        } catch (error) {
+            ultimoError = error as Error;
+            console.log(
+                \`⚠️ Intento \${intento}/\${maxIntentos} falló: \` +
+                \`\${error instanceof Error ? error.message : error}\`
+            );
+            if (intento < maxIntentos) {
+                await page.waitForTimeout(espera);
+            }
+        }
+    }
+
+    throw new Error(
+        \`Acción falló después de \${maxIntentos} intentos: \${ultimoError?.message}\`,
+        { cause: ultimoError }
+    );
+}
+
+// Uso en tests
+test('boton flaky', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/dynamic_loading/2');
+
+    const texto = await reintentarAccion(page, async (p) => {
+        await p.click('#start button');
+        await p.waitForSelector('#finish h4', { timeout: 5000 });
+        return await p.innerText('#finish h4');
+    });
+    expect(texto).toBe('Hello World!');
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #9c27b0;">
             <strong>💡 Consejo profesional:</strong> Antes de agregar reintentos,
@@ -438,7 +900,18 @@ def test_boton_flaky(page):
 
         <h3>🛡️ Patrón: Context Manager para limpieza segura</h3>
         <p>Combina <code>try/finally</code> con context managers para garantizar limpieza:</p>
-        <pre><code class="python">import pytest
+        <div class="code-tabs" data-code-id="L027-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import pytest
 from contextlib import contextmanager
 
 @contextmanager
@@ -467,6 +940,45 @@ def test_perfil_usuario(page):
 
         # Si este assert falla, el usuario se limpia de todas formas
         assert page.inner_text(".profile-name") == "test_user_027"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect, Page } from '@playwright/test';
+
+// Patrón equivalente usando try/finally en TypeScript
+async function conUsuarioTemporal<T>(
+    page: Page,
+    nombre: string,
+    clave: string,
+    accion: (user: { nombre: string; clave: string }) => Promise<T>
+): Promise<T> {
+    // Setup: crear usuario
+    await crearUsuario(nombre, clave);
+    try {
+        return await accion({ nombre, clave });
+    } finally {
+        // Teardown: siempre limpiar, incluso si el test falla
+        try {
+            await eliminarUsuario(nombre);
+        } catch (error) {
+            console.log(\`⚠️ No se pudo eliminar usuario '\${nombre}': \${error}\`);
+        }
+    }
+}
+
+// Uso en test
+test('perfil usuario', async ({ page }) => {
+    await conUsuarioTemporal(page, 'test_user_027', 'Clave123!', async (user) => {
+        await page.goto('/login');
+        await page.fill('#username', user.nombre);
+        await page.fill('#password', user.clave);
+        await page.click("button[type='submit']");
+
+        // Si este expect falla, el usuario se limpia de todas formas
+        await expect(page.locator('.profile-name')).toHaveText('test_user_027');
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <div style="background: #e3f2fd; padding: 20px; border-radius: 8px; margin: 15px 0;">
@@ -497,7 +1009,18 @@ def test_perfil_usuario(page):
                 </li>
             </ol>
         </div>
-        <pre><code class="python"># Estructura esperada del ejercicio
+        <div class="code-tabs" data-code-id="L027-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Estructura esperada del ejercicio
 mi_proyecto/
 ├── exceptions.py            # Excepciones personalizadas
 ├── utils/
@@ -544,6 +1067,68 @@ def test_page_load_error_con_status():
     error = PageLoadError("https://ejemplo.com/api", 500)
     assert "HTTP 500" in str(error)
     assert error.status_code == 500</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Estructura equivalente en TypeScript
+// mi-proyecto/
+// ├── errors.ts              # Errores personalizados
+// ├── utils/retry.ts         # Utilidad de reintentos
+// └── tests/
+//     └── excepciones.spec.ts
+
+// --- errors.ts ---
+export class TestFrameworkError extends Error {
+    constructor(message: string) {
+        super(message);
+        this.name = 'TestFrameworkError';
+    }
+}
+
+export class ConfigurationError extends TestFrameworkError {
+    parametro: string;
+    constructor(parametro: string, mensaje: string = '') {
+        super(\`Config error en '\${parametro}': \${mensaje}\`);
+        this.name = 'ConfigurationError';
+        this.parametro = parametro;
+    }
+}
+
+export class PageLoadError extends TestFrameworkError {
+    url: string;
+    statusCode: number | null;
+    constructor(url: string, statusCode: number | null = null) {
+        let msg = \`No se pudo cargar '\${url}'\`;
+        if (statusCode) msg += \` (HTTP \${statusCode})\`;
+        super(msg);
+        this.name = 'PageLoadError';
+        this.url = url;
+        this.statusCode = statusCode;
+    }
+}
+
+// --- tests/excepciones.spec.ts ---
+import { test, expect } from '@playwright/test';
+import { ConfigurationError, PageLoadError } from '../errors';
+
+test('config error parametro vacio', () => {
+    expect(() => {
+        throw new ConfigurationError('', 'no puede estar vacío');
+    }).toThrow(ConfigurationError);
+});
+
+test('page load error contiene url', () => {
+    expect(() => {
+        throw new PageLoadError('https://sitio-caido.com', 503);
+    }).toThrow(/sitio-caido/);
+});
+
+test('page load error con status', () => {
+    const error = new PageLoadError('https://ejemplo.com/api', 500);
+    expect(error.message).toContain('HTTP 500');
+    expect(error.statusCode).toBe(500);
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Objetivos de esta lección:</h4>

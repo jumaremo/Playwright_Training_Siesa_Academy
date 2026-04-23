@@ -57,7 +57,18 @@ const LESSON_050 = {
             pero puedes usar <code>evaluate()</code> para acceder a ellos a través del
             API del navegador.</p>
         </div>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L050-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_local_storage(page: Page):
     page.goto("https://ejemplo.com")
@@ -102,9 +113,66 @@ def test_local_storage(page: Page):
     """)
     assert usuario["nombre"] == "María"
     assert "admin" == usuario["rol"]</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('local storage', async ({ page }) => {
+    await page.goto('https://ejemplo.com');
+
+    // --- Leer valores de localStorage ---
+    const token = await page.evaluate(() => localStorage.getItem('auth_token'));
+    console.log(\`Token actual: \${token}\`);
+
+    // Leer todos los items de localStorage
+    const todos = await page.evaluate(() => {
+        const items: Record&lt;string, string | null&gt; = {};
+        for (let i = 0; i &lt; localStorage.length; i++) {
+            const key = localStorage.key(i)!;
+            items[key] = localStorage.getItem(key);
+        }
+        return items;
+    });
+    console.log(\`localStorage completo: \${JSON.stringify(todos)}\`);
+
+    // --- Escribir valores en localStorage ---
+    await page.evaluate(() => localStorage.setItem('idioma', 'es'));
+    await page.evaluate(() => localStorage.setItem('tema', 'oscuro'));
+
+    // Verificar que se guardó correctamente
+    const idioma = await page.evaluate(() => localStorage.getItem('idioma'));
+    expect(idioma).toBe('es');
+
+    // --- Guardar objetos (como JSON) ---
+    await page.evaluate(() => localStorage.setItem('usuario', JSON.stringify({
+        nombre: 'María',
+        rol: 'admin',
+        permisos: ['leer', 'escribir', 'borrar']
+    })));
+
+    // Leer y parsear el objeto
+    const usuario = await page.evaluate(() =>
+        JSON.parse(localStorage.getItem('usuario')!)
+    );
+    expect(usuario.nombre).toBe('María');
+    expect(usuario.rol).toBe('admin');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🗑️ Limpiar storage</h3>
-        <pre><code class="python">def test_limpiar_storage(page: Page):
+        <div class="code-tabs" data-code-id="L050-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_limpiar_storage(page: Page):
     page.goto("https://ejemplo.com")
 
     # Limpiar un item específico
@@ -119,13 +187,44 @@ def test_local_storage(page: Page):
     # Verificar que está vacío
     cantidad = page.evaluate("() => localStorage.length")
     assert cantidad == 0</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('limpiar storage', async ({ page }) => {
+    await page.goto('https://ejemplo.com');
+
+    // Limpiar un item específico
+    await page.evaluate(() => localStorage.removeItem('auth_token'));
+
+    // Limpiar todo el localStorage
+    await page.evaluate(() => localStorage.clear());
+
+    // Limpiar sessionStorage
+    await page.evaluate(() => sessionStorage.clear());
+
+    // Verificar que está vacío
+    const cantidad = await page.evaluate(() => localStorage.length);
+    expect(cantidad).toBe(0);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🍪 Cookies: Lectura con context.cookies()</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Playwright proporciona métodos nativos en el <strong>contexto del navegador</strong>
             para manejar cookies. No necesitas <code>evaluate()</code> para esto.</p>
         </div>
-        <pre><code class="python">def test_leer_cookies(page: Page, context):
+        <div class="code-tabs" data-code-id="L050-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_leer_cookies(page: Page, context):
     page.goto("https://ejemplo.com/login")
 
     # Hacer login para que el servidor establezca cookies
@@ -150,9 +249,48 @@ def test_local_storage(page: Page):
     )
     assert session_cookie is not None
     print(f"Session ID: {session_cookie['value']}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('leer cookies', async ({ page, context }) => {
+    await page.goto('https://ejemplo.com/login');
+
+    // Hacer login para que el servidor establezca cookies
+    await page.fill('#usuario', 'admin');
+    await page.fill('#password', 'secreto123');
+    await page.click('#btn-login');
+
+    // Leer TODAS las cookies del contexto
+    const cookies = await context.cookies();
+    for (const cookie of cookies) {
+        console.log(\`  \${cookie.name}: \${cookie.value}\`);
+        console.log(\`    domain=\${cookie.domain}, path=\${cookie.path}\`);
+        console.log(\`    httpOnly=\${cookie.httpOnly}, secure=\${cookie.secure}\`);
+    }
+
+    // Leer cookies de un dominio específico
+    const cookiesDominio = await context.cookies(['https://ejemplo.com']);
+
+    // Buscar una cookie específica
+    const sessionCookie = cookies.find(c => c.name === 'session_id');
+    expect(sessionCookie).toBeDefined();
+    console.log(\`Session ID: \${sessionCookie!.value}\`);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>➕ Establecer cookies con context.add_cookies()</h3>
-        <pre><code class="python">def test_agregar_cookies(page: Page, context):
+        <div class="code-tabs" data-code-id="L050-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_agregar_cookies(page: Page, context):
     # Agregar cookies ANTES de navegar
     context.add_cookies([
         {
@@ -184,9 +322,57 @@ def test_local_storage(page: Page):
 
     # Si las cookies son válidas, estaremos autenticados
     expect(page.locator("h1")).to_have_text("Dashboard")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('agregar cookies', async ({ page, context }) => {
+    // Agregar cookies ANTES de navegar
+    await context.addCookies([
+        {
+            name: 'session_id',
+            value: 'abc123xyz',
+            domain: 'ejemplo.com',
+            path: '/',
+        },
+        {
+            name: 'idioma',
+            value: 'es',
+            domain: 'ejemplo.com',
+            path: '/',
+            expires: -1,  // Cookie de sesión (sin expiración fija)
+        },
+        {
+            name: 'auth_token',
+            value: 'eyJhbGciOiJIUzI1NiJ9...',
+            domain: 'ejemplo.com',
+            path: '/',
+            httpOnly: true,
+            secure: true,
+            sameSite: 'Strict',
+        }
+    ]);
+
+    // Ahora navegar — las cookies se enviarán automáticamente
+    await page.goto('https://ejemplo.com/dashboard');
+
+    // Si las cookies son válidas, estaremos autenticados
+    await expect(page.locator('h1')).toHaveText('Dashboard');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧹 Limpiar cookies con context.clear_cookies()</h3>
-        <pre><code class="python">def test_limpiar_cookies(page: Page, context):
+        <div class="code-tabs" data-code-id="L050-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_limpiar_cookies(page: Page, context):
     page.goto("https://ejemplo.com")
 
     # Verificar que hay cookies
@@ -204,6 +390,29 @@ def test_local_storage(page: Page):
     page.reload()
     # Probablemente nos redirigirá al login
     expect(page).to_have_url("**/login")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('limpiar cookies', async ({ page, context }) => {
+    await page.goto('https://ejemplo.com');
+
+    // Verificar que hay cookies
+    const cookiesAntes = await context.cookies();
+    console.log(\`Cookies antes: \${cookiesAntes.length}\`);
+
+    // Limpiar TODAS las cookies
+    await context.clearCookies();
+
+    // Verificar que se limpiaron
+    const cookiesDespues = await context.cookies();
+    expect(cookiesDespues.length).toBe(0);
+
+    // Al recargar, el servidor no recibirá cookies
+    await page.reload();
+    // Probablemente nos redirigirá al login
+    await expect(page).toHaveURL('**/login');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📋 Propiedades de una cookie</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -264,7 +473,18 @@ def test_local_storage(page: Page):
         </div>
 
         <h4>Paso 1: Guardar el estado de autenticación</h4>
-        <pre><code class="python"># auth_setup.py - Ejecutar una vez para guardar el estado
+        <div class="code-tabs" data-code-id="L050-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># auth_setup.py - Ejecutar una vez para guardar el estado
 from playwright.sync_api import sync_playwright
 
 def guardar_estado_auth():
@@ -289,9 +509,49 @@ def guardar_estado_auth():
         browser.close()
 
 guardar_estado_auth()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// auth_setup.ts - Ejecutar una vez para guardar el estado
+import { chromium } from 'playwright';
+
+async function guardarEstadoAuth() {
+    const browser = await chromium.launch();
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    // Hacer login normalmente
+    await page.goto('https://ejemplo.com/login');
+    await page.fill('#usuario', 'admin');
+    await page.fill('#password', 'secreto123');
+    await page.click('#btn-login');
+
+    // Esperar a que el login complete
+    await page.waitForURL('**/dashboard');
+
+    // GUARDAR el estado completo (cookies + localStorage)
+    await context.storageState({ path: 'auth_state.json' });
+    console.log('Estado de autenticación guardado en auth_state.json');
+
+    await browser.close();
+}
+
+guardarEstadoAuth();</code></pre>
+            </div>
+        </div>
 
         <h4>Paso 2: Reutilizar el estado en tests</h4>
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L050-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest
 
 @pytest.fixture(scope="session")
@@ -301,7 +561,31 @@ def browser_context_args(browser_context_args):
         # Cargar el estado de autenticación guardado
         "storage_state": "auth_state.json",
     }</code></pre>
-        <pre><code class="python"># test_dashboard.py - Ya NO necesita hacer login
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        // Cargar el estado de autenticación guardado
+        storageState: 'auth_state.json',
+    },
+});</code></pre>
+            </div>
+        </div>
+        <div class="code-tabs" data-code-id="L050-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_dashboard.py - Ya NO necesita hacer login
 from playwright.sync_api import Page, expect
 
 def test_dashboard_carga(page: Page):
@@ -316,9 +600,41 @@ def test_perfil_usuario(page: Page):
     """También arranca autenticado."""
     page.goto("https://ejemplo.com/perfil")
     expect(page.locator(".nombre")).to_have_text("Administrador")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_dashboard.spec.ts - Ya NO necesita hacer login
+import { test, expect } from '@playwright/test';
+
+test('dashboard carga', async ({ page }) => {
+    // Este test arranca ya autenticado.
+    await page.goto('https://ejemplo.com/dashboard');
+
+    // Ya estamos logueados gracias a storageState
+    await expect(page.locator('h1')).toHaveText('Dashboard');
+    await expect(page.locator('.user-name')).toHaveText('admin');
+});
+
+test('perfil usuario', async ({ page }) => {
+    // También arranca autenticado.
+    await page.goto('https://ejemplo.com/perfil');
+    await expect(page.locator('.nombre')).toHaveText('Administrador');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔄 Patrón completo con pytest-playwright</h3>
-        <pre><code class="python"># conftest.py - Patrón de autenticación profesional
+        <div class="code-tabs" data-code-id="L050-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py - Patrón de autenticación profesional
 import pytest
 import os
 from playwright.sync_api import Page, BrowserContext
@@ -354,11 +670,65 @@ def browser_context_args(browser_context_args, auth_state):
         **browser_context_args,
         "storage_state": auth_state,
     }</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// auth.setup.ts - Patrón de autenticación profesional
+import { test as setup, expect } from '@playwright/test';
+import fs from 'fs';
+
+const AUTH_STATE_FILE = 'auth_state.json';
+
+setup('authenticate', async ({ browser }) => {
+    // Si ya existe el estado, no repetir login
+    if (fs.existsSync(AUTH_STATE_FILE)) return;
+
+    // Crear contexto temporal para login
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    // Login
+    await page.goto('https://ejemplo.com/login');
+    await page.fill('#usuario', process.env.TEST_USER ?? 'admin');
+    await page.fill('#password', process.env.TEST_PASS ?? 'secreto123');
+    await page.click('#btn-login');
+    await page.waitForURL('**/dashboard');
+
+    // Guardar estado
+    await context.storageState({ path: AUTH_STATE_FILE });
+    await browser.close();
+});
+
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    projects: [
+        { name: 'setup', testMatch: /auth\\.setup\\.ts/ },
+        {
+            name: 'tests',
+            dependencies: ['setup'],
+            use: { storageState: AUTH_STATE_FILE },
+        },
+    ],
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📂 Contenido del archivo auth_state.json</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>El archivo generado por <code>storage_state()</code> contiene:</p>
-            <pre><code class="python"># Estructura del auth_state.json
+            <div class="code-tabs" data-code-id="L050-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Estructura del auth_state.json
 {
     "cookies": [
         {
@@ -388,10 +758,55 @@ def browser_context_args(browser_context_args, auth_state):
         }
     ]
 }</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Estructura del auth_state.json (idéntica en ambos lenguajes)
+{
+    "cookies": [
+        {
+            "name": "session_id",
+            "value": "abc123xyz",
+            "domain": "ejemplo.com",
+            "path": "/",
+            "expires": 1735689600,
+            "httpOnly": true,
+            "secure": true,
+            "sameSite": "Lax"
+        }
+    ],
+    "origins": [
+        {
+            "origin": "https://ejemplo.com",
+            "localStorage": [
+                {
+                    "name": "auth_token",
+                    "value": "eyJhbGciOiJIUzI1NiJ9..."
+                },
+                {
+                    "name": "user_preferences",
+                    "value": "{\\"theme\\":\\"dark\\"}"
+                }
+            ]
+        }
+    ]
+}</code></pre>
+            </div>
+        </div>
         </div>
 
         <h3>🗃️ IndexedDB: Acceso vía evaluate()</h3>
-        <pre><code class="python">def test_indexeddb(page: Page):
+        <div class="code-tabs" data-code-id="L050-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_indexeddb(page: Page):
     page.goto("https://ejemplo.com/app")
 
     # Leer datos de IndexedDB
@@ -419,9 +834,49 @@ def browser_context_args(browser_context_args, auth_state):
             request.onsuccess = () => resolve(true);
         })
     """)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('indexeddb', async ({ page }) => {
+    await page.goto('https://ejemplo.com/app');
+
+    // Leer datos de IndexedDB
+    const datos = await page.evaluate(() => new Promise&lt;any[]&gt;((resolve) => {
+        const request = indexedDB.open('miBaseDatos', 1);
+        request.onsuccess = () => {
+            const db = request.result;
+            const tx = db.transaction('productos', 'readonly');
+            const store = tx.objectStore('productos');
+            const getAll = store.getAll();
+            getAll.onsuccess = () => resolve(getAll.result);
+        };
+    }));
+    console.log(\`Productos en IndexedDB: \${datos.length}\`);
+
+    // Verificar un registro específico
+    expect(datos.some(d => d.nombre === 'Laptop')).toBe(true);
+
+    // Limpiar IndexedDB
+    await page.evaluate(() => new Promise&lt;boolean&gt;((resolve) => {
+        const request = indexedDB.deleteDatabase('miBaseDatos');
+        request.onsuccess = () => resolve(true);
+    }));
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧪 Ejemplo completo: autenticación persistente en una suite</h3>
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L050-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/conftest.py
 import pytest
 import os
 
@@ -480,6 +935,82 @@ def test_verificar_cookies(page, context):
     import time
     if session.get("expires", -1) > 0:
         assert session["expires"] > time.time(), "Cookie expirada"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/auth.setup.ts
+import { test as setup } from '@playwright/test';
+import fs from 'fs';
+
+const AUTH_FILE = 'tests/.auth/state.json';
+
+setup('authenticate', async ({ browser }) => {
+    // Login una vez, reutilizar en todos los tests.
+    fs.mkdirSync('tests/.auth', { recursive: true });
+
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    // Login
+    await page.goto('https://ejemplo.com/login');
+    await page.fill('#email', 'qa@siesa.com');
+    await page.fill('#password', 'Test2024!');
+    await page.click("button:has-text('Ingresar')");
+    await page.waitForSelector('.dashboard-header');
+
+    // Guardar estado (cookies + localStorage)
+    await context.storageState({ path: AUTH_FILE });
+    await browser.close();
+});
+
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+const AUTH_FILE = 'tests/.auth/state.json';
+
+export default defineConfig({
+    projects: [
+        { name: 'setup', testMatch: /auth\\.setup\\.ts/ },
+        {
+            name: 'tests',
+            dependencies: ['setup'],
+            use: { storageState: AUTH_FILE },
+        },
+    ],
+});
+
+// --- Tests ya autenticados ---
+
+// tests/test_productos.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('listar productos', async ({ page }) => {
+    await page.goto('/productos');
+    await expect(page.locator('.producto-card').first()).toBeVisible();
+});
+
+test('crear producto', async ({ page }) => {
+    await page.goto('/productos/nuevo');
+    await page.fill('#nombre', 'Producto Test');
+    await page.fill('#precio', '99.99');
+    await page.click("button:has-text('Guardar')");
+    await expect(page.locator('.toast-success')).toHaveText('Producto creado');
+});
+
+test('verificar cookies', async ({ page, context }) => {
+    // Verificar que las cookies de autenticación están presentes.
+    await page.goto('/dashboard');
+    const cookies = await context.cookies();
+
+    const session = cookies.find(c => c.name === 'session_id');
+    expect(session).toBeDefined();
+
+    // Verificar que no ha expirado
+    if (session!.expires > 0) {
+        expect(session!.expires).toBeGreaterThan(Date.now() / 1000);
+    }
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -487,7 +1018,18 @@ def test_verificar_cookies(page, context):
         </div>
         <ol>
             <li>Crea un <code>conftest.py</code> que haga login una vez y guarde el estado:
-                <pre><code class="python"># conftest.py
+                <div class="code-tabs" data-code-id="L050-13">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest, os
 
 AUTH_FILE = ".auth/state.json"
@@ -511,11 +1053,70 @@ def setup_auth(browser_type, browser_type_launch_args):
 @pytest.fixture(scope="session")
 def browser_context_args(browser_context_args):
     return {**browser_context_args, "storage_state": AUTH_FILE}</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// auth.setup.ts
+import { test as setup } from '@playwright/test';
+import fs from 'fs';
+
+const AUTH_FILE = '.auth/state.json';
+
+setup('authenticate', async ({ browser }) => {
+    fs.mkdirSync('.auth', { recursive: true });
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto('https://the-internet.herokuapp.com/login');
+    await page.fill('#username', 'tomsmith');
+    await page.fill('#password', 'SuperSecretPassword!');
+    await page.click("button[type='submit']");
+    await page.waitForURL('**/secure');
+
+    await context.storageState({ path: AUTH_FILE });
+    await browser.close();
+});
+
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    projects: [
+        { name: 'setup', testMatch: /auth\\.setup\\.ts/ },
+        {
+            name: 'tests',
+            dependencies: ['setup'],
+            use: { storageState: '.auth/state.json' },
+        },
+    ],
+});</code></pre>
+            </div>
+        </div>
             </li>
             <li>Escribe un test que verifique que arranca autenticado:
-                <pre><code class="python">def test_ya_autenticado(page):
+                <div class="code-tabs" data-code-id="L050-14">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_ya_autenticado(page):
     page.goto("https://the-internet.herokuapp.com/secure")
     expect(page.locator("#flash")).to_contain_text("secure area")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('ya autenticado', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/secure');
+    await expect(page.locator('#flash')).toContainText('secure area');
+});</code></pre>
+            </div>
+        </div>
             </li>
             <li>Agrega un test que lea y verifique las cookies presentes</li>
             <li>Prueba a manipular localStorage con <code>evaluate()</code></li>

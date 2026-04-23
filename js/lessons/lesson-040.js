@@ -38,7 +38,18 @@ const LESSON_040 = {
         el árbol de accesibilidad del navegador, no el DOM directamente.</p>
 
         <h4>Roles implícitos vs explícitos</h4>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L040-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_roles_implicitos_vs_explicitos(page: Page):
     # Rol IMPLÍCITO — el elemento HTML ya tiene un rol por defecto
@@ -51,6 +62,24 @@ def test_roles_implicitos_vs_explicitos(page: Page):
 
     # Playwright no distingue entre implícito y explícito:
     # busca en el árbol de accesibilidad, donde ambos son "button"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('roles implícitos vs explícitos', async ({ page }) => {
+    // Rol IMPLÍCITO — el elemento HTML ya tiene un rol por defecto
+    // <button>Guardar</button> → rol "button" implícito
+    page.getByRole('button', { name: 'Guardar' });
+
+    // Rol EXPLÍCITO — asignado con atributo role=""
+    // <div role="button">Guardar</div> → rol "button" explícito
+    page.getByRole('button', { name: 'Guardar' });  // Ambos se encuentran igual
+
+    // Playwright no distingue entre implícito y explícito:
+    // busca en el árbol de accesibilidad, donde ambos son "button"
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📋 Roles ARIA comunes</h3>
         <p>Esta tabla lista los roles más usados en testing web, organizados por categoría.</p>
@@ -202,7 +231,18 @@ def test_roles_implicitos_vs_explicitos(page: Page):
         <p><code>get_by_role()</code> es el localizador semántico principal de Playwright. Acepta
         múltiples filtros opcionales que lo hacen extremadamente preciso.</p>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L040-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_get_by_role_opciones(page: Page):
     page.goto("https://the-internet.herokuapp.com/login")
@@ -245,6 +285,50 @@ def test_get_by_role_opciones(page: Page):
     # --- Incluir elementos ocultos ---
     # Por defecto, get_by_role excluye aria-hidden="true"
     oculto = page.get_by_role("button", include_hidden=True)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('get_by_role opciones', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/login');
+
+    // --- Filtro básico: solo rol ---
+    const todosLosBotones = page.getByRole('button');
+
+    // --- Filtro por nombre accesible (name) ---
+    const botonLogin = page.getByRole('button', { name: 'Login' });
+
+    // --- name con coincidencia exacta (exact: true) ---
+    const botonExacto = page.getByRole('button', { name: 'Login', exact: true });
+
+    // --- Filtro por estado: checked ---
+    const checkboxMarcado = page.getByRole('checkbox', { checked: true });
+    const checkboxDesmarcado = page.getByRole('checkbox', { checked: false });
+
+    // --- Filtro por estado: expanded ---
+    const menuAbierto = page.getByRole('button', { expanded: true });
+    const menuCerrado = page.getByRole('button', { expanded: false });
+
+    // --- Filtro por estado: disabled ---
+    const botonDeshabilitado = page.getByRole('button', { disabled: true });
+    const botonHabilitado = page.getByRole('button', { disabled: false });
+
+    // --- Filtro por estado: selected ---
+    const tabActiva = page.getByRole('tab', { selected: true });
+
+    // --- Filtro por nivel (solo para headings) ---
+    const h1 = page.getByRole('heading', { level: 1 });
+    const h2 = page.getByRole('heading', { level: 2 });
+    const h3Bienvenida = page.getByRole('heading', { level: 3, name: 'Login Page' });
+
+    // --- Filtro por estado: pressed (toggle buttons) ---
+    const botonActivo = page.getByRole('button', { pressed: true });
+
+    // --- Incluir elementos ocultos ---
+    const oculto = page.getByRole('button', { includeHidden: true });
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ ¿Cómo se calcula el "name" accesible?</h4>
@@ -367,7 +451,18 @@ def test_get_by_role_opciones(page: Page):
         <p>Playwright permite verificar atributos ARIA directamente con assertions, lo que
         te permite validar accesibilidad como parte de tus tests funcionales.</p>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L040-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_verificar_atributos_aria(page: Page):
     page.goto("https://the-internet.herokuapp.com/checkboxes")
@@ -411,12 +506,72 @@ def test_verificar_heading_level(page: Page):
     h2 = page.get_by_role("heading", level=2)
     expect(h2).to_be_visible()
     expect(h2).to_have_text("Login Page")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('verificar atributos ARIA', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/checkboxes');
+
+    // Verificar que un checkbox tiene el rol correcto
+    const checkboxes = page.getByRole('checkbox');
+    await expect(checkboxes).toHaveCount(2);
+
+    // Verificar estado checked con getByRole
+    const checkboxMarcado = page.getByRole('checkbox', { checked: true });
+    await expect(checkboxMarcado).toHaveCount(1);
+
+    // Verificar atributos ARIA con toHaveAttribute
+    const checkbox = checkboxes.first();
+    await checkbox.check();
+    await expect(checkbox).toBeChecked();
+});
+
+test('verificar aria-label', async ({ page }) => {
+    await page.goto('https://ejemplo.com/formulario');
+
+    // Verificar aria-label
+    const botonCerrar = page.getByRole('button', { name: 'Cerrar' });
+    await expect(botonCerrar).toHaveAttribute('aria-label', 'Cerrar');
+
+    // Verificar aria-expanded
+    const menu = page.getByRole('button', { name: 'Menú' });
+    await expect(menu).toHaveAttribute('aria-expanded', 'false');
+    await menu.click();
+    await expect(menu).toHaveAttribute('aria-expanded', 'true');
+
+    // Verificar aria-disabled
+    const botonEnviar = page.getByRole('button', { name: 'Enviar' });
+    await expect(botonEnviar).toHaveAttribute('aria-disabled', 'true');
+});
+
+test('verificar heading level', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/login');
+
+    // Verificar que existe un heading nivel 2
+    const h2 = page.getByRole('heading', { level: 2 });
+    await expect(h2).toBeVisible();
+    await expect(h2).toHaveText('Login Page');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📸 Accessibility Snapshots</h3>
         <p>Playwright puede capturar una representación del árbol de accesibilidad de la página,
         útil para debugging y para entender cómo el navegador "ve" tu aplicación.</p>
 
-        <pre><code class="python">def test_accessibility_snapshot(page: Page):
+        <div class="code-tabs" data-code-id="L040-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_accessibility_snapshot(page: Page):
     page.goto("https://the-internet.herokuapp.com/login")
 
     # Capturar el snapshot de accesibilidad
@@ -448,6 +603,46 @@ def test_verificar_heading_level(page: Page):
 
     # Snapshot con interesante=True filtra solo elementos relevantes
     snapshot_filtrado = page.accessibility.snapshot(interesting_only=True)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('accessibility snapshot', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/login');
+
+    // Capturar el snapshot de accesibilidad
+    const snapshot = await page.accessibility.snapshot();
+
+    // El snapshot es un objeto con la estructura del árbol
+    console.log(\`Rol raíz: \${snapshot!.role}\`);
+    console.log(\`Nombre: \${snapshot!.name || 'Sin nombre'}\`);
+
+    // Recorrer hijos para inspeccionar la estructura
+    for (const hijo of snapshot!.children || []) {
+        console.log(\`  - \${hijo.role}: \${hijo.name || ''}\`);
+    }
+
+    // Filtrar por rol específico
+    function buscarPorRol(nodo: any, rolBuscado: string, resultados: any[] = []): any[] {
+        if (nodo.role === rolBuscado) {
+            resultados.push(nodo);
+        }
+        for (const hijo of nodo.children || []) {
+            buscarPorRol(hijo, rolBuscado, resultados);
+        }
+        return resultados;
+    }
+
+    // Encontrar todos los textbox en la página
+    const textboxes = buscarPorRol(snapshot!, 'textbox');
+    console.log(\`Textboxes encontrados: \${textboxes.length}\`);
+    for (const tb of textboxes) {
+        console.log(\`  - \${tb.name || 'Sin nombre'}\`);
+    }
+
+    // Snapshot con interestingOnly filtra solo elementos relevantes
+    const snapshotFiltrado = await page.accessibility.snapshot({ interestingOnly: true });
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip: Usar snapshot para encontrar roles</h4>
@@ -494,23 +689,76 @@ def test_verificar_heading_level(page: Page):
         <h3>✅ Mejores prácticas</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>1. Usa HTML semántico primero</h4>
-            <pre><code class="python"># MAL — div genérico con rol explícito
+            <div class="code-tabs" data-code-id="L040-5">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># MAL — div genérico con rol explícito
 # &lt;div role="button" onclick="enviar()"&gt;Enviar&lt;/div&gt;
 
 # BIEN — elemento HTML semántico (rol implícito)
 # &lt;button onclick="enviar()"&gt;Enviar&lt;/button&gt;</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// MAL — div genérico con rol explícito
+// <div role="button" onclick="enviar()">Enviar</div>
+
+// BIEN — elemento HTML semántico (rol implícito)
+// <button onclick="enviar()">Enviar</button></code></pre>
+                </div>
+            </div>
 
             <h4>2. Agrega aria-label para componentes custom</h4>
-            <pre><code class="python"># El icono no tiene texto visible — necesita aria-label
+            <div class="code-tabs" data-code-id="L040-6">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># El icono no tiene texto visible — necesita aria-label
 # &lt;button class="icon-btn" aria-label="Cerrar modal"&gt;
 #   &lt;svg&gt;...&lt;/svg&gt;
 # &lt;/button&gt;
 
 # Ahora Playwright puede encontrarlo:
 page.get_by_role("button", name="Cerrar modal")</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// El icono no tiene texto visible — necesita aria-label
+// <button class="icon-btn" aria-label="Cerrar modal">
+//   <svg>...</svg>
+// </button>
+
+// Ahora Playwright puede encontrarlo:
+page.getByRole('button', { name: 'Cerrar modal' });</code></pre>
+                </div>
+            </div>
 
             <h4>3. Asocia labels con inputs</h4>
-            <pre><code class="python"># MAL — input sin label asociado
+            <div class="code-tabs" data-code-id="L040-7">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># MAL — input sin label asociado
 # &lt;input type="email" placeholder="tu@email.com"&gt;
 
 # BIEN — label explícito con for/id
@@ -519,9 +767,33 @@ page.get_by_role("button", name="Cerrar modal")</code></pre>
 
 # Playwright lo encuentra por el label:
 page.get_by_label("Correo electrónico")</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// MAL — input sin label asociado
+// <input type="email" placeholder="tu@email.com">
+
+// BIEN — label explícito con for/id
+// <label for="email">Correo electrónico</label>
+// <input id="email" type="email">
+
+// Playwright lo encuentra por el label:
+page.getByLabel('Correo electrónico');</code></pre>
+                </div>
+            </div>
 
             <h4>4. Prefiere get_by_role sobre CSS para interacción</h4>
-            <pre><code class="python"># ❌ Frágil — depende de clase CSS
+            <div class="code-tabs" data-code-id="L040-8">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># ❌ Frágil — depende de clase CSS
 page.locator(".submit-btn").click()
 
 # ❌ Mejor, pero depende de data-testid
@@ -529,9 +801,32 @@ page.locator("[data-testid='submit']").click()
 
 # ✅ Ideal — semántico y resiliente
 page.get_by_role("button", name="Enviar").click()</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// ❌ Frágil — depende de clase CSS
+await page.locator('.submit-btn').click();
+
+// ❌ Mejor, pero depende de data-testid
+await page.locator("[data-testid='submit']").click();
+
+// ✅ Ideal — semántico y resiliente
+await page.getByRole('button', { name: 'Enviar' }).click();</code></pre>
+                </div>
+            </div>
 
             <h4>5. Verifica estados ARIA en assertions</h4>
-            <pre><code class="python"># No solo verificar visibilidad, también el estado accesible
+            <div class="code-tabs" data-code-id="L040-9">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># No solo verificar visibilidad, también el estado accesible
 def test_toggle_menu(page: Page):
     menu = page.get_by_role("button", name="Menú")
 
@@ -546,12 +841,42 @@ def test_toggle_menu(page: Page):
     # Verificar que el panel es visible
     panel = page.get_by_role("menu")
     expect(panel).to_be_visible()</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">test('toggle menu', async ({ page }) => {
+    const menu = page.getByRole('button', { name: 'Menú' });
+
+    // Verificar estado cerrado
+    await expect(menu).toHaveAttribute('aria-expanded', 'false');
+
+    await menu.click();
+
+    // Verificar estado abierto
+    await expect(menu).toHaveAttribute('aria-expanded', 'true');
+
+    // Verificar que el panel es visible
+    const panel = page.getByRole('menu');
+    await expect(panel).toBeVisible();
+});</code></pre>
+                </div>
+            </div>
         </div>
 
         <h3>🔄 Otros localizadores semánticos de Playwright</h3>
         <p>Además de <code>get_by_role()</code>, Playwright ofrece otros localizadores semánticos:</p>
 
-        <pre><code class="python">def test_otros_localizadores_semanticos(page: Page):
+        <div class="code-tabs" data-code-id="L040-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_otros_localizadores_semanticos(page: Page):
     page.goto("https://the-internet.herokuapp.com/login")
 
     # get_by_label() — Busca por el texto del label asociado
@@ -572,12 +897,49 @@ def test_toggle_menu(page: Page):
 
     # Todos estos son más robustos que selectores CSS
     # porque se basan en el contenido semántico, no la estructura</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('otros localizadores semánticos', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/login');
+
+    // getByLabel() — Busca por el texto del label asociado
+    const username = page.getByLabel('Username');
+    await username.fill('tomsmith');
+
+    // getByPlaceholder() — Busca por placeholder
+    const campo = page.getByPlaceholder('Escribe tu nombre');
+
+    // getByText() — Busca por texto visible
+    const mensaje = page.getByText('You logged into a secure area!');
+
+    // getByAltText() — Busca imágenes por alt text
+    const logo = page.getByAltText('Logo de la empresa');
+
+    // getByTitle() — Busca por atributo title
+    const tooltip = page.getByTitle('Información adicional');
+
+    // Todos estos son más robustos que selectores CSS
+    // porque se basan en el contenido semántico, no la estructura
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico: refactorizar de CSS a semántico</h3>
         <p>Dado el siguiente test que usa CSS selectors, refactorízalo a localizadores semánticos y ARIA.</p>
 
         <h4>Test original con CSS (frágil)</h4>
-        <pre><code class="python"># test_login_css.py — Version con CSS selectors
+        <div class="code-tabs" data-code-id="L040-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_login_css.py — Version con CSS selectors
 def test_login_con_css(page: Page):
     page.goto("https://the-internet.herokuapp.com/login")
 
@@ -591,9 +953,39 @@ def test_login_con_css(page: Page):
     assert page.locator("#flash").is_visible()
     page.locator("a.button").click()
     assert "login" in page.url</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_login_css.spec.ts — Version con CSS selectors
+test('login con CSS', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/login');
+
+    // CSS selectors — frágiles
+    await page.locator('#username').fill('tomsmith');
+    await page.locator('#password').fill('SuperSecretPassword!');
+    await page.locator('button.radius').click();
+
+    // Verificar con CSS
+    expect(page.url()).toContain('secure');
+    expect(await page.locator('#flash').isVisible()).toBeTruthy();
+    await page.locator('a.button').click();
+    expect(page.url()).toContain('login');
+});</code></pre>
+            </div>
+        </div>
 
         <h4>Test refactorizado con localizadores semánticos</h4>
-        <pre><code class="python"># test_login_semantico.py — Version con localizadores semánticos
+        <div class="code-tabs" data-code-id="L040-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_login_semantico.py — Version con localizadores semánticos
 from playwright.sync_api import Page, expect
 
 def test_login_semantico(page: Page):
@@ -619,6 +1011,37 @@ def test_login_semantico(page: Page):
     # 6. Verificar que volvemos al login
     expect(page).to_have_url("**/login")
     expect(page.get_by_role("heading", level=2)).to_have_text("Login Page")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_login_semantico.spec.ts — Version con localizadores semánticos
+import { test, expect } from '@playwright/test';
+
+test('login semántico', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/login');
+
+    // 1. Verificar que estamos en la página de login
+    await expect(page.getByRole('heading', { level: 2 })).toHaveText('Login Page');
+
+    // 2. Llenar formulario con getByLabel
+    await page.getByLabel('Username').fill('tomsmith');
+    await page.getByLabel('Password').fill('SuperSecretPassword!');
+
+    // 3. Click en botón por rol
+    await page.getByRole('button', { name: 'Login' }).click();
+
+    // 4. Verificar login exitoso
+    await expect(page).toHaveURL('**/secure');
+    await expect(page.getByText('You logged into a secure area!')).toBeVisible();
+
+    // 5. Logout con link semántico
+    await page.getByRole('link', { name: 'Logout' }).click();
+
+    // 6. Verificar que volvemos al login
+    await expect(page).toHaveURL('**/login');
+    await expect(page.getByRole('heading', { level: 2 })).toHaveText('Login Page');
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔍 Comparación lado a lado</h4>

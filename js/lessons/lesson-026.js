@@ -21,7 +21,18 @@ const LESSON_026 = {
         <p>Python accede a las variables de entorno a través del módulo <code>os</code>.
         Hay dos formas principales de leerlas:</p>
 
-        <pre><code class="python">import os
+        <div class="code-tabs" data-code-id="L026-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import os
 
 # --- os.environ: diccionario con TODAS las variables de entorno ---
 # Acceso directo (lanza KeyError si no existe)
@@ -45,6 +56,34 @@ print(f"URL: {base_url}")
 print(f"Navegador: {browser}")
 print(f"Headless: {headless}")
 print(f"Timeout: {timeout}ms")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// TypeScript / Node.js accede a las variables con process.env
+
+// Acceso directo (puede ser undefined)
+const baseUrlDirect = process.env.BASE_URL;
+if (!baseUrlDirect) {
+    console.log('ERROR: BASE_URL no está definida');
+}
+
+// Acceso con valor por defecto (patrón recomendado)
+const baseUrl = process.env.BASE_URL ?? 'http://localhost:3000';
+const browser = process.env.BROWSER ?? 'chromium';
+const headless = (process.env.HEADLESS ?? 'true').toLowerCase() === 'true';
+const timeout = parseInt(process.env.TIMEOUT ?? '30000', 10);
+
+console.log(\`URL: \${baseUrl}\`);
+console.log(\`Navegador: \${browser}\`);
+console.log(\`Headless: \${headless}\`);
+console.log(\`Timeout: \${timeout}ms\`);
+
+// En playwright.config.ts puedes usar directamente:
+// import { defineConfig } from '@playwright/test';
+// export default defineConfig({
+//     use: { baseURL: process.env.BASE_URL ?? 'http://localhost:3000' },
+// });</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>📌 os.environ vs os.getenv()</h4>
@@ -70,7 +109,18 @@ print(f"Timeout: {timeout}ms")</code></pre>
         <h3>💻 Definir variables de entorno por sistema operativo</h3>
         <p>Las variables de entorno se definen de forma diferente según el sistema operativo.</p>
 
-        <pre><code class="bash"># ============================================
+        <div class="code-tabs" data-code-id="L026-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># ============================================
 # Linux / macOS (Terminal)
 # ============================================
 
@@ -91,8 +141,41 @@ echo $BASE_URL
 
 # Eliminar una variable
 unset BASE_URL</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 0.9em;">
+                    <strong>Nota:</strong> En TypeScript/Playwright, la forma de definir variables de entorno en la terminal es la misma. Cambia el comando de ejecución.
+                </div>
+                <pre><code class="language-bash"># ============================================
+# Linux / macOS (Terminal) - Playwright Test
+# ============================================
 
-        <pre><code class="bash"># ============================================
+# Definir para el comando actual
+BASE_URL=https://staging.mi-app.com npx playwright test --reporter=list
+
+# Definir para la sesión actual del terminal
+export BASE_URL=https://staging.mi-app.com
+export BROWSER=firefox
+export HEADLESS=true
+npx playwright test
+
+# Definir múltiples en una sola línea
+BASE_URL=https://staging.mi-app.com BROWSER=firefox npx playwright test</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L026-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># ============================================
 # Windows (PowerShell)
 # ============================================
 
@@ -107,8 +190,41 @@ echo $env:BASE_URL
 
 # Eliminar
 Remove-Item Env:BASE_URL</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 0.9em;">
+                    <strong>Nota:</strong> Misma sintaxis de PowerShell; cambia el comando de ejecución.
+                </div>
+                <pre><code class="language-bash"># ============================================
+# Windows (PowerShell) - Playwright Test
+# ============================================
 
-        <pre><code class="bash"># ============================================
+# Definir temporalmente (sesión actual)
+$env:BASE_URL = "https://staging.mi-app.com"
+$env:BROWSER = "firefox"
+$env:HEADLESS = "true"
+npx playwright test
+
+# Ver una variable
+echo $env:BASE_URL
+
+# Eliminar
+Remove-Item Env:BASE_URL</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L026-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># ============================================
 # Windows (CMD)
 # ============================================
 
@@ -116,6 +232,21 @@ set BASE_URL=https://staging.mi-app.com
 set BROWSER=firefox
 set HEADLESS=true
 pytest tests/ -v</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 0.9em;">
+                    <strong>Nota:</strong> Misma sintaxis de CMD; cambia el comando de ejecución.
+                </div>
+                <pre><code class="language-bash"># ============================================
+# Windows (CMD) - Playwright Test
+# ============================================
+
+set BASE_URL=https://staging.mi-app.com
+set BROWSER=firefox
+set HEADLESS=true
+npx playwright test</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ Problema con variables de entorno manuales</h4>
@@ -127,10 +258,41 @@ pytest tests/ -v</code></pre>
         <p><code>python-dotenv</code> carga variables de entorno desde un archivo <code>.env</code>
         al inicio de tu programa. Es el estándar en proyectos Python modernos.</p>
 
-        <pre><code class="bash"># Instalar python-dotenv
+        <div class="code-tabs" data-code-id="L026-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Instalar python-dotenv
 pip install python-dotenv</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 0.9em;">
+                    <strong>Nota:</strong> En Playwright Test, el archivo <code>.env</code> no se carga automáticamente. Usa <code>dotenv</code> o configúralo en <code>playwright.config.ts</code>.
+                </div>
+                <pre><code class="language-bash"># Instalar dotenv para TypeScript
+npm install dotenv</code></pre>
+            </div>
+        </div>
 
-        <pre><code class="bash"># Archivo: .env (en la raíz del proyecto)
+        <div class="code-tabs" data-code-id="L026-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Archivo: .env (en la raíz del proyecto)
 # Configuración del entorno de pruebas
 # NOTA: sin comillas alrededor de los valores (salvo que tengan espacios)
 
@@ -155,8 +317,50 @@ NAVIGATION_TIMEOUT=60000
 # Reportes
 REPORT_DIR=./test-results
 SCREENSHOT_ON_FAILURE=true</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 0.9em;">
+                    <strong>Nota:</strong> El archivo <code>.env</code> es idéntico para Python y TypeScript. El formato es estándar.
+                </div>
+                <pre><code class="language-bash"># Archivo: .env (en la raíz del proyecto)
+# Idéntico formato para Python y TypeScript
 
-        <pre><code class="python"># config.py - Cargar variables de entorno con python-dotenv
+# URLs
+BASE_URL=https://staging.mi-app.com
+API_URL=https://api.staging.mi-app.com
+
+# Navegador
+BROWSER=chromium
+HEADLESS=true
+SLOW_MO=0
+
+# Credenciales (NUNCA subir este archivo a Git)
+ADMIN_EMAIL=admin@miempresa.com
+ADMIN_PASSWORD=SuperSecreto2024!
+API_TOKEN=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Timeouts (en milisegundos)
+DEFAULT_TIMEOUT=30000
+NAVIGATION_TIMEOUT=60000
+
+# Reportes
+REPORT_DIR=./test-results
+SCREENSHOT_ON_FAILURE=true</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L026-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># config.py - Cargar variables de entorno con python-dotenv
 import os
 from dotenv import load_dotenv
 
@@ -173,8 +377,46 @@ print(f"Configuración cargada:")
 print(f"  URL: {base_url}")
 print(f"  Browser: {browser}")
 print(f"  Headless: {headless}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts - Cargar .env con dotenv
+import { defineConfig } from '@playwright/test';
+import dotenv from 'dotenv';
 
-        <pre><code class="python"># Opciones avanzadas de load_dotenv()
+// Cargar el archivo .env
+dotenv.config();
+
+// Ahora process.env lee las variables del .env
+const baseUrl = process.env.BASE_URL ?? 'http://localhost:3000';
+const browserName = process.env.BROWSER ?? 'chromium';
+const headless = (process.env.HEADLESS ?? 'true').toLowerCase() === 'true';
+
+console.log('Configuración cargada:');
+console.log(\`  URL: \${baseUrl}\`);
+console.log(\`  Browser: \${browserName}\`);
+console.log(\`  Headless: \${headless}\`);
+
+export default defineConfig({
+    use: {
+        baseURL: baseUrl,
+        headless: headless,
+    },
+});</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L026-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Opciones avanzadas de load_dotenv()
 from dotenv import load_dotenv
 from pathlib import Path
 
@@ -189,6 +431,26 @@ load_dotenv(override=True)
 
 # Cargar desde una ruta absoluta
 load_dotenv(dotenv_path="/home/qa/proyecto/.env.produccion")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Opciones avanzadas de dotenv en TypeScript
+import dotenv from 'dotenv';
+import path from 'path';
+
+// Cargar un .env específico
+dotenv.config({ path: path.resolve('config', '.env.staging') });
+
+// Cargar sin sobrescribir variables ya definidas
+// (dotenv NO sobrescribe por defecto en TypeScript)
+dotenv.config();
+
+// Cargar y sobrescribir las del sistema
+dotenv.config({ override: true });
+
+// Cargar desde una ruta absoluta
+dotenv.config({ path: '/home/qa/proyecto/.env.produccion' });</code></pre>
+            </div>
+        </div>
 
         <h3>🔒 Mantener secretos fuera del código</h3>
         <p>El archivo <code>.env</code> contiene información sensible que <strong>nunca</strong>
@@ -235,7 +497,18 @@ SCREENSHOT_ON_FAILURE=true</code></pre>
         <p>Un patrón muy común en automatización es usar variables de entorno para
         controlar el comportamiento de los tests sin modificar código.</p>
 
-        <pre><code class="python"># config.py - Módulo de configuración centralizado
+        <div class="code-tabs" data-code-id="L026-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># config.py - Módulo de configuración centralizado
 import os
 from dotenv import load_dotenv
 from dataclasses import dataclass
@@ -275,8 +548,79 @@ config = TestConfig()
 # Uso en cualquier parte del proyecto:
 # from config import config
 # print(config.base_url)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts - Configuración centralizada
+import { defineConfig } from '@playwright/test';
+import dotenv from 'dotenv';
 
-        <pre><code class="python"># conftest.py - Usar la configuración con fixtures de Playwright
+dotenv.config();
+
+// Interface para tipado fuerte de la configuración
+interface TestConfig {
+    baseUrl: string;
+    apiUrl: string;
+    browser: string;
+    headless: boolean;
+    slowMo: number;
+    viewportWidth: number;
+    viewportHeight: number;
+    adminEmail: string;
+    adminPassword: string;
+    apiToken: string;
+    defaultTimeout: number;
+    navigationTimeout: number;
+    reportDir: string;
+    screenshotOnFailure: boolean;
+}
+
+const config: TestConfig = {
+    baseUrl: process.env.BASE_URL ?? 'http://localhost:3000',
+    apiUrl: process.env.API_URL ?? 'http://localhost:3001',
+    browser: process.env.BROWSER ?? 'chromium',
+    headless: (process.env.HEADLESS ?? 'true').toLowerCase() === 'true',
+    slowMo: parseInt(process.env.SLOW_MO ?? '0', 10),
+    viewportWidth: parseInt(process.env.VIEWPORT_WIDTH ?? '1280', 10),
+    viewportHeight: parseInt(process.env.VIEWPORT_HEIGHT ?? '720', 10),
+    adminEmail: process.env.ADMIN_EMAIL ?? '',
+    adminPassword: process.env.ADMIN_PASSWORD ?? '',
+    apiToken: process.env.API_TOKEN ?? '',
+    defaultTimeout: parseInt(process.env.DEFAULT_TIMEOUT ?? '30000', 10),
+    navigationTimeout: parseInt(process.env.NAVIGATION_TIMEOUT ?? '60000', 10),
+    reportDir: process.env.REPORT_DIR ?? './test-results',
+    screenshotOnFailure: (process.env.SCREENSHOT_ON_FAILURE ?? 'true').toLowerCase() === 'true',
+};
+
+export default defineConfig({
+    use: {
+        baseURL: config.baseUrl,
+        headless: config.headless,
+        viewport: { width: config.viewportWidth, height: config.viewportHeight },
+        actionTimeout: config.defaultTimeout,
+        navigationTimeout: config.navigationTimeout,
+        screenshot: config.screenshotOnFailure ? 'only-on-failure' : 'off',
+        launchOptions: { slowMo: config.slowMo },
+    },
+    outputDir: config.reportDir,
+});
+
+// Exportar config para usar en tests:
+// export { config };</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L026-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py - Usar la configuración con fixtures de Playwright
 import pytest
 from config import config
 
@@ -319,6 +663,41 @@ def credenciales_admin():
         "email": config.admin_email,
         "password": config.admin_password
     }</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// La configuración en Playwright Test se centraliza en playwright.config.ts
+// No necesitas conftest.py — todo queda en el config + fixtures
+
+import { test as base, expect } from '@playwright/test';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+// Fixture personalizada para credenciales
+type AuthFixtures = {
+    credencialesAdmin: { email: string; password: string };
+};
+
+export const test = base.extend<AuthFixtures>({
+    credencialesAdmin: async ({}, use) => {
+        const email = process.env.ADMIN_EMAIL;
+        const password = process.env.ADMIN_PASSWORD;
+        expect(email, 'ADMIN_EMAIL no está definida en .env').toBeTruthy();
+        expect(password, 'ADMIN_PASSWORD no está definida en .env').toBeTruthy();
+        await use({ email: email!, password: password! });
+    },
+});
+
+// Los timeouts y viewport se configuran en playwright.config.ts:
+// use: {
+//     actionTimeout: parseInt(process.env.DEFAULT_TIMEOUT ?? '30000'),
+//     navigationTimeout: parseInt(process.env.NAVIGATION_TIMEOUT ?? '60000'),
+//     viewport: { width: 1280, height: 720 },
+//     locale: 'es-CO',
+//     timezoneId: 'America/Bogota',
+// }</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Ventajas de la configuración centralizada</h4>
@@ -418,7 +797,18 @@ timeout = 120</code></pre>
         <code>pytest.ini</code> para opciones de pytest, y fixtures para inyectar todo
         en los tests.</p>
 
-        <pre><code class="python"># conftest.py - Patrón completo de configuración
+        <div class="code-tabs" data-code-id="L026-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py - Patrón completo de configuración
 import pytest
 import os
 from dotenv import load_dotenv
@@ -458,11 +848,70 @@ def test_eliminar_usuario(pagina_limpia):
     """Este test se salta automáticamente en producción."""
     pagina_limpia.click("text=Eliminar cuenta")
     pagina_limpia.click("#confirmar")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts - Patrón completo con ambientes
+import { defineConfig } from '@playwright/test';
+import dotenv from 'dotenv';
+import * as fs from 'fs';
 
-        <pre><code class="bash"># Ejecutar en diferentes ambientes cambiando solo la variable
+// Cargar .env base
+dotenv.config();
+
+// Determinar el ambiente
+const ENV = process.env.TEST_ENV ?? 'staging';
+
+// Cargar .env específico del ambiente si existe
+const envFile = \`.env.\${ENV}\`;
+if (fs.existsSync(envFile)) {
+    dotenv.config({ path: envFile, override: true });
+    console.log(\`\\nCargado: \${envFile}\`);
+}
+
+const esProduccion = ENV === 'production';
+
+export default defineConfig({
+    use: {
+        baseURL: process.env.BASE_URL,
+    },
+    // En producción, excluir tests destructivos con grep
+    grep: esProduccion ? /^(?!.*@destructive)/ : undefined,
+});
+
+// En los tests, usa tags para marcar tests destructivos:
+// test('eliminar usuario @destructive', async ({ page }) => {
+//     await page.click('text=Eliminar cuenta');
+//     await page.click('#confirmar');
+// });</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L026-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Ejecutar en diferentes ambientes cambiando solo la variable
 TEST_ENV=staging pytest tests/ -v
 TEST_ENV=production pytest tests/ -v -m "not destructive"
 TEST_ENV=development pytest tests/ -v --headed</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 0.9em;">
+                    <strong>Nota:</strong> En Playwright Test, se usa la misma variable de entorno con <code>npx playwright test</code>.
+                </div>
+                <pre><code class="language-bash"># Ejecutar en diferentes ambientes cambiando solo la variable
+TEST_ENV=staging npx playwright test
+TEST_ENV=production npx playwright test --grep-invert "@destructive"
+TEST_ENV=development npx playwright test --headed</code></pre>
+            </div>
+        </div>
 
         <h3>📂 Estructura completa de un proyecto con configuración</h3>
         <pre><code>mi-proyecto-tests/
@@ -511,7 +960,18 @@ TEST_USER=tu_usuario
 TEST_PASSWORD=tu_password</code></pre>
 
             <p><strong>Paso 3:</strong> Crea <code>config.py</code> con una dataclass</p>
-            <pre><code class="python"># config.py
+            <div class="code-tabs" data-code-id="L026-13">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># config.py
 import os
 from dotenv import load_dotenv
 from dataclasses import dataclass
@@ -531,9 +991,43 @@ class Config:
     test_password: str = os.getenv("TEST_PASSWORD", "")
 
 config = Config()</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+import dotenv from 'dotenv';
+
+dotenv.config();
+
+export default defineConfig({
+    use: {
+        baseURL: process.env.BASE_URL ?? 'http://localhost:3000',
+        headless: (process.env.HEADLESS ?? 'true').toLowerCase() === 'true',
+        screenshot: (process.env.SCREENSHOT_ON_FAILURE ?? 'true').toLowerCase() === 'true'
+            ? 'only-on-failure' : 'off',
+        actionTimeout: parseInt(process.env.DEFAULT_TIMEOUT ?? '30000', 10),
+        launchOptions: {
+            slowMo: parseInt(process.env.SLOW_MO ?? '0', 10),
+        },
+    },
+    outputDir: process.env.REPORT_DIR ?? './test-results',
+});</code></pre>
+                </div>
+            </div>
 
             <p><strong>Paso 4:</strong> Crea <code>conftest.py</code> que use la configuración</p>
-            <pre><code class="python"># conftest.py
+            <div class="code-tabs" data-code-id="L026-14">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># conftest.py
 import pytest
 from config import config
 
@@ -563,9 +1057,41 @@ def credenciales():
         "user": config.test_user,
         "password": config.test_password
     }</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// fixtures/auth.ts — Fixture de credenciales
+import { test as base, expect } from '@playwright/test';
+
+type Fixtures = {
+    credenciales: { user: string; password: string };
+};
+
+export const test = base.extend<Fixtures>({
+    credenciales: async ({}, use) => {
+        await use({
+            user: process.env.TEST_USER ?? '',
+            password: process.env.TEST_PASSWORD ?? '',
+        });
+    },
+});
+
+export { expect };</code></pre>
+                </div>
+            </div>
 
             <p><strong>Paso 5:</strong> Escribe un test que utilice todo el sistema</p>
-            <pre><code class="python"># tests/test_login_config.py
+            <div class="code-tabs" data-code-id="L026-15">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># tests/test_login_config.py
 from playwright.sync_api import Page, expect
 
 def test_login_con_config(page: Page, credenciales):
@@ -580,9 +1106,41 @@ def test_verificar_base_url(page: Page):
     """Verifica que la base_url del .env se aplica correctamente."""
     page.goto("/")
     expect(page).to_have_title("The Internet")</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// tests/login-config.spec.ts
+import { test, expect } from '../fixtures/auth';
+
+test('login con config', async ({ page, credenciales }) => {
+    // Test que usa las credenciales del .env
+    await page.goto('/login');
+    await page.fill('#username', credenciales.user);
+    await page.fill('#password', credenciales.password);
+    await page.click("button[type='submit']");
+    await expect(page).toHaveURL('**/secure');
+});
+
+test('verificar base url', async ({ page }) => {
+    // Verifica que la baseURL del .env se aplica correctamente
+    await page.goto('/');
+    await expect(page).toHaveTitle('The Internet');
+});</code></pre>
+                </div>
+            </div>
 
             <p><strong>Paso 6:</strong> Ejecuta los tests</p>
-            <pre><code class="bash"># Ejecutar con la configuración del .env
+            <div class="code-tabs" data-code-id="L026-16">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-bash"># Ejecutar con la configuración del .env
 pytest tests/test_login_config.py -v
 
 # Sobrescribir una variable para esta ejecución
@@ -591,6 +1149,21 @@ HEADLESS=false pytest tests/test_login_config.py -v
 # Usar otro archivo .env
 # (crear .env.local con BASE_URL diferente)
 # Modificar config.py para cargar load_dotenv(".env.local", override=True)</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <div style="background: #e3f2fd; padding: 10px; border-radius: 4px; margin-bottom: 8px; font-size: 0.9em;">
+                        <strong>Nota:</strong> En Playwright Test se usa <code>npx playwright test</code>.
+                    </div>
+                    <pre><code class="language-bash"># Ejecutar con la configuración del .env
+npx playwright test tests/login-config.spec.ts
+
+# Sobrescribir una variable para esta ejecución
+HEADLESS=false npx playwright test tests/login-config.spec.ts
+
+# Ejecutar con headed mode
+npx playwright test tests/login-config.spec.ts --headed</code></pre>
+                </div>
+            </div>
         </div>
 
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">

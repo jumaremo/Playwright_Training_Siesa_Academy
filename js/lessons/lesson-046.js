@@ -19,7 +19,18 @@ const LESSON_046 = {
 
         <h3>🔀 page.drag_and_drop() — La API simple</h3>
         <p>El método más directo para arrastrar y soltar. Recibe el selector del origen y del destino:</p>
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L046-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch(headless=False)
@@ -35,10 +46,38 @@ with sync_playwright() as p:
     print(f"Columna A: {header_a}, Columna B: {header_b}")
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('drag and drop simple', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/drag_and_drop');
+
+    // Drag and drop simple: de columna A a columna B
+    await page.dragAndDrop('#column-a', '#column-b');
+
+    // Verificar que los elementos se intercambiaron
+    const headerA = await page.locator('#column-a header').textContent();
+    const headerB = await page.locator('#column-b header').textContent();
+    console.log(\`Columna A: \${headerA}, Columna B: \${headerB}\`);
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚙️ Opciones de drag_and_drop</h4>
-            <pre><code class="python"># Especificar posiciones exactas dentro de los elementos
+            <div class="code-tabs" data-code-id="L046-2">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># Especificar posiciones exactas dentro de los elementos
 page.drag_and_drop("#origen", "#destino",
     source_position={"x": 10, "y": 10},   # Punto dentro del origen
     target_position={"x": 50, "y": 50},   # Punto dentro del destino
@@ -49,12 +88,38 @@ page.drag_and_drop("#origen", "#destino", force=True)
 
 # Con timeout personalizado
 page.drag_and_drop("#origen", "#destino", timeout=10000)</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// Especificar posiciones exactas dentro de los elementos
+await page.dragAndDrop('#origen', '#destino', {
+    sourcePosition: { x: 10, y: 10 },   // Punto dentro del origen
+    targetPosition: { x: 50, y: 50 },   // Punto dentro del destino
+});
+
+// Forzar el drag sin esperar actionability checks
+await page.dragAndDrop('#origen', '#destino', { force: true });
+
+// Con timeout personalizado
+await page.dragAndDrop('#origen', '#destino', { timeout: 10000 });</code></pre>
+                </div>
+            </div>
         </div>
 
         <h3>🔧 Drag manual: mouse.down(), mouse.move(), mouse.up()</h3>
         <p>Para escenarios complejos donde <code>drag_and_drop()</code> no funciona
         (como librerías de drag personalizadas), puedes controlar el mouse paso a paso:</p>
-        <pre><code class="python"># Drag manual paso a paso
+        <div class="code-tabs" data-code-id="L046-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Drag manual paso a paso
 source = page.locator("#column-a")
 target = page.locator("#column-b")
 
@@ -82,12 +147,54 @@ page.wait_for_timeout(200)        # Pausa breve
 page.mouse.move(tgt_x, tgt_y, steps=20)
 page.wait_for_timeout(200)
 page.mouse.up()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Drag manual paso a paso
+const source = page.locator('#column-a');
+const target = page.locator('#column-b');
+
+// Obtener las coordenadas centrales de cada elemento
+const sourceBox = (await source.boundingBox())!;
+const targetBox = (await target.boundingBox())!;
+
+// Calcular centros
+const srcX = sourceBox.x + sourceBox.width / 2;
+const srcY = sourceBox.y + sourceBox.height / 2;
+const tgtX = targetBox.x + targetBox.width / 2;
+const tgtY = targetBox.y + targetBox.height / 2;
+
+// Ejecutar drag manual
+await page.mouse.move(srcX, srcY);    // Mover al origen
+await page.mouse.down();               // Presionar botón
+await page.mouse.move(tgtX, tgtY, { steps: 10 }); // Mover suave
+await page.mouse.up();                 // Soltar botón
+
+// Drag con pausa intermedia
+await page.mouse.move(srcX, srcY);
+await page.mouse.down();
+await page.waitForTimeout(200);
+await page.mouse.move(tgtX, tgtY, { steps: 20 });
+await page.waitForTimeout(200);
+await page.mouse.up();</code></pre>
+            </div>
+        </div>
 
         <h3>⚠️ Cuando drag_and_drop no funciona (HTML5 DnD)</h3>
         <p>Algunos sitios usan la API HTML5 Drag and Drop con listeners de JavaScript que
         no responden bien al drag sintético de Playwright. En esos casos, usa <code>evaluate()</code>
         para disparar los eventos manualmente:</p>
-        <pre><code class="python"># Workaround con evaluate para HTML5 drag events
+        <div class="code-tabs" data-code-id="L046-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Workaround con evaluate para HTML5 drag events
 page.evaluate("""
     () => {
         const source = document.querySelector('#column-a');
@@ -120,6 +227,37 @@ page.evaluate("""
 """)
 # Esperar a que la UI se actualice
 page.wait_for_timeout(500)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Workaround con evaluate para HTML5 drag events
+await page.evaluate(() => {
+    const source = document.querySelector('#column-a')!;
+    const target = document.querySelector('#column-b')!;
+
+    const dataTransfer = new DataTransfer();
+
+    source.dispatchEvent(new DragEvent('dragstart', {
+        dataTransfer, bubbles: true
+    }));
+
+    target.dispatchEvent(new DragEvent('dragenter', {
+        dataTransfer, bubbles: true
+    }));
+    target.dispatchEvent(new DragEvent('dragover', {
+        dataTransfer, bubbles: true
+    }));
+    target.dispatchEvent(new DragEvent('drop', {
+        dataTransfer, bubbles: true
+    }));
+
+    source.dispatchEvent(new DragEvent('dragend', {
+        dataTransfer, bubbles: true
+    }));
+});
+// Esperar a que la UI se actualice
+await page.waitForTimeout(500);</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Consejo: ¿Cuál método usar?</h4>
@@ -133,7 +271,18 @@ page.wait_for_timeout(500)</code></pre>
         <h3>🎯 page.hover() — Revelar elementos ocultos</h3>
         <p>Muchas aplicaciones muestran menús, tooltips o acciones solo cuando pasas el cursor
         sobre un elemento. <code>page.hover()</code> simula esta interacción:</p>
-        <pre><code class="python"># Ejemplo con the-internet: /hovers
+        <div class="code-tabs" data-code-id="L046-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Ejemplo con the-internet: /hovers
 page.goto("https://the-internet.herokuapp.com/hovers")
 
 # Hay 3 imágenes, al hacer hover aparece el nombre de usuario
@@ -155,11 +304,48 @@ assert nombre2.is_visible()
 # Hover sobre la tercera y hacer click en el link
 figuras.nth(2).hover()
 page.locator(".figure:nth-child(3) .figcaption a").click()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Ejemplo con the-internet: /hovers
+await page.goto('https://the-internet.herokuapp.com/hovers');
+
+// Hay 3 imágenes, al hacer hover aparece el nombre de usuario
+const figuras = page.locator('.figure');
+
+// Hover sobre la primera imagen
+await figuras.nth(0).hover();
+
+// Ahora el texto oculto es visible
+const nombre = page.locator('.figure:nth-child(1) .figcaption h5');
+expect(await nombre.isVisible()).toBe(true);
+console.log(\`Usuario 1: \${await nombre.textContent()}\`);
+
+// Hover sobre la segunda imagen
+await figuras.nth(1).hover();
+const nombre2 = page.locator('.figure:nth-child(2) .figcaption h5');
+expect(await nombre2.isVisible()).toBe(true);
+
+// Hover sobre la tercera y hacer click en el link
+await figuras.nth(2).hover();
+await page.locator('.figure:nth-child(3) .figcaption a').click();</code></pre>
+            </div>
+        </div>
 
         <h3>📂 Secuencias hover: menú padre → submenú hijo</h3>
         <p>Un patrón común es hacer hover sobre un menú para que aparezca un submenú,
         y luego hacer click en una opción:</p>
-        <pre><code class="python"># Patrón: hover en menú padre → click en hijo
+        <div class="code-tabs" data-code-id="L046-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Patrón: hover en menú padre → click en hijo
 # Ejemplo genérico (ajustar selectores a tu app)
 page.locator("nav .menu-item").hover()        # Hover abre el submenú
 page.locator("nav .submenu .opcion-1").click() # Click en subopción
@@ -175,9 +361,39 @@ page.locator(".mi-elemento").hover(
     force=True,                    # Forzar sin checks de visibilidad
     timeout=5000                   # Timeout personalizado
 )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Patrón: hover en menú padre → click en hijo
+await page.locator('nav .menu-item').hover();
+await page.locator('nav .submenu .opcion-1').click();
+
+// Con espera explícita si el submenú tarda en aparecer
+await page.locator('.dropdown-trigger').hover();
+await page.locator('.dropdown-menu').waitFor({ state: 'visible' });
+await page.locator('.dropdown-menu .item-3').click();
+
+// Hover con opciones
+await page.locator('.mi-elemento').hover({
+    position: { x: 5, y: 5 },   // Posición relativa dentro del elemento
+    force: true,                  // Forzar sin checks de visibilidad
+    timeout: 5000                 // Timeout personalizado
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🖲️ Right-click: clic derecho y menús contextuales</h3>
-        <pre><code class="python"># Ejemplo con the-internet: /context_menu
+        <div class="code-tabs" data-code-id="L046-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Ejemplo con the-internet: /context_menu
 page.goto("https://the-internet.herokuapp.com/context_menu")
 
 # Clic derecho en el área designada
@@ -198,6 +414,30 @@ menu.wait_for(state="visible")
 
 # 3. Hacer click en la opción deseada
 menu.locator("text=Eliminar").click()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Ejemplo con the-internet: /context_menu
+await page.goto('https://the-internet.herokuapp.com/context_menu');
+
+// Clic derecho en el área designada
+await page.locator('#hot-spot').click({ button: 'right' });
+
+// El sitio muestra un alert de JavaScript al hacer clic derecho
+page.on('dialog', async dialog => await dialog.accept());
+await page.locator('#hot-spot').click({ button: 'right' });
+
+// En una app real con menú contextual custom:
+// 1. Clic derecho para abrir el menú
+await page.locator('.elemento').click({ button: 'right' });
+
+// 2. Esperar que aparezca el menú contextual
+const menu = page.locator('.context-menu');
+await menu.waitFor({ state: 'visible' });
+
+// 3. Hacer click en la opción deseada
+await menu.locator('text=Eliminar').click();</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>📝 Nota sobre menús contextuales</h4>
@@ -209,7 +449,18 @@ menu.locator("text=Eliminar").click()</code></pre>
 
         <h3>🖱️ Métodos del mouse: control total</h3>
         <p>Playwright expone el objeto <code>page.mouse</code> con control completo del puntero:</p>
-        <pre><code class="python"># page.mouse — métodos disponibles
+        <div class="code-tabs" data-code-id="L046-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># page.mouse — métodos disponibles
 
 # click: clic en coordenadas absolutas
 page.mouse.click(100, 200)                    # Click izquierdo
@@ -239,11 +490,56 @@ page.mouse.move(300, 300, steps=10)
 page.mouse.move(100, 300, steps=10)
 page.mouse.move(100, 100, steps=10)
 page.mouse.up()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// page.mouse — métodos disponibles
+
+// click: clic en coordenadas absolutas
+await page.mouse.click(100, 200);                           // Click izquierdo
+await page.mouse.click(100, 200, { button: 'right' });     // Click derecho
+await page.mouse.click(100, 200, { button: 'middle' });    // Click del medio
+await page.mouse.click(100, 200, { clickCount: 2 });       // Doble click
+
+// move: mover cursor a coordenadas
+await page.mouse.move(300, 400);
+await page.mouse.move(300, 400, { steps: 5 });  // Movimiento gradual
+
+// down / up: presionar / soltar botón
+await page.mouse.down();                          // Presionar izquierdo
+await page.mouse.down({ button: 'right' });      // Presionar derecho
+await page.mouse.up();                            // Soltar
+
+// wheel: scroll con la rueda del mouse
+await page.mouse.wheel(0, 300);    // Scroll down 300px
+await page.mouse.wheel(0, -300);   // Scroll up 300px
+await page.mouse.wheel(100, 0);    // Scroll horizontal derecha
+
+// Ejemplo: dibujar un rectángulo (canvas o similar)
+await page.mouse.move(100, 100);
+await page.mouse.down();
+await page.mouse.move(300, 100, { steps: 10 });
+await page.mouse.move(300, 300, { steps: 10 });
+await page.mouse.move(100, 300, { steps: 10 });
+await page.mouse.move(100, 100, { steps: 10 });
+await page.mouse.up();</code></pre>
+            </div>
+        </div>
 
         <h3>📱 Touch events: page.touchscreen</h3>
         <p>Para probar aplicaciones móviles o tactiles, Playwright ofrece
         <code>page.touchscreen</code>:</p>
-        <pre><code class="python"># Configurar contexto con emulación de dispositivo móvil
+        <div class="code-tabs" data-code-id="L046-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Configurar contexto con emulación de dispositivo móvil
 context = browser.new_context(
     **p.devices["iPhone 13"]
 )
@@ -258,6 +554,27 @@ page.locator("button.submit").tap()
 
 # Nota: para swipe, usa touchscreen combinado con evaluate
 # o usa los métodos de mouse con el dispositivo móvil emulado</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { devices } from '@playwright/test';
+
+// Configurar contexto con emulación de dispositivo móvil
+const context = await browser.newContext({
+    ...devices['iPhone 13'],
+});
+const page = await context.newPage();
+await page.goto('https://ejemplo.com');
+
+// Tap: equivalente a tocar la pantalla
+await page.touchscreen.tap(200, 300);  // Tap en coordenadas absolutas
+
+// También puedes usar locator.tap()
+await page.locator('button.submit').tap();
+
+// Nota: para swipe, usa touchscreen combinado con evaluate
+// o usa los métodos de mouse con el dispositivo móvil emulado</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Tabla resumen: métodos de interacción del mouse</h3>
         <table style="width:100%; border-collapse: collapse; margin: 15px 0;">
@@ -319,7 +636,18 @@ page.locator("button.submit").tap()
         </table>
 
         <h3>🚀 Ejemplo completo: the-internet.herokuapp.com</h3>
-        <pre><code class="python"># tests/test_interacciones_avanzadas.py
+        <div class="code-tabs" data-code-id="L046-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_interacciones_avanzadas.py
 """Tests de drag and drop, hover y right-click."""
 import pytest
 from playwright.sync_api import Page, expect
@@ -424,6 +752,82 @@ class TestRightClick:
         # Verificar que se disparó el alert
         assert len(mensajes) > 0
         assert "You selected a context menu" in mensajes[0]</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/interacciones-avanzadas.spec.ts
+import { test, expect } from '@playwright/test';
+
+test.describe('Drag and Drop', () => {
+    test('drag and drop basico', async ({ page }) => {
+        await page.goto('https://the-internet.herokuapp.com/drag_and_drop');
+
+        await expect(page.locator('#column-a header')).toHaveText('A');
+        await expect(page.locator('#column-b header')).toHaveText('B');
+
+        await page.dragAndDrop('#column-a', '#column-b');
+    });
+
+    test('drag and drop con evaluate', async ({ page }) => {
+        await page.goto('https://the-internet.herokuapp.com/drag_and_drop');
+
+        await page.evaluate(() => {
+            const source = document.querySelector('#column-a')!;
+            const target = document.querySelector('#column-b')!;
+            const dt = new DataTransfer();
+            source.dispatchEvent(new DragEvent('dragstart', { dataTransfer: dt, bubbles: true }));
+            target.dispatchEvent(new DragEvent('dragenter', { dataTransfer: dt, bubbles: true }));
+            target.dispatchEvent(new DragEvent('dragover', { dataTransfer: dt, bubbles: true }));
+            target.dispatchEvent(new DragEvent('drop', { dataTransfer: dt, bubbles: true }));
+            source.dispatchEvent(new DragEvent('dragend', { dataTransfer: dt, bubbles: true }));
+        });
+
+        await expect(page.locator('#column-a header')).toHaveText('B');
+        await expect(page.locator('#column-b header')).toHaveText('A');
+    });
+});
+
+test.describe('Hover', () => {
+    test('hover revela informacion', async ({ page }) => {
+        await page.goto('https://the-internet.herokuapp.com/hovers');
+
+        const figuras = page.locator('.figure');
+        expect(await figuras.count()).toBe(3);
+
+        for (let i = 0; i < 3; i++) {
+            await figuras.nth(i).hover();
+            const caption = figuras.nth(i).locator('.figcaption');
+            await expect(caption).toBeVisible();
+            const nombre = await caption.locator('h5').textContent();
+            console.log(\`Usuario \${i + 1}: \${nombre}\`);
+        }
+    });
+
+    test('hover y click', async ({ page }) => {
+        await page.goto('https://the-internet.herokuapp.com/hovers');
+        await page.locator('.figure').first().hover();
+        await page.locator('.figure:nth-child(1) .figcaption a').click();
+        await expect(page).toHaveURL(/\\/users\\/1/);
+    });
+});
+
+test.describe('Right Click', () => {
+    test('context menu', async ({ page }) => {
+        await page.goto('https://the-internet.herokuapp.com/context_menu');
+
+        const mensajes: string[] = [];
+        page.on('dialog', async dialog => {
+            mensajes.push(dialog.message());
+            await dialog.accept();
+        });
+
+        await page.locator('#hot-spot').click({ button: 'right' });
+
+        expect(mensajes.length).toBeGreaterThan(0);
+        expect(mensajes[0]).toContain('You selected a context menu');
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio</h3>
         <ol>

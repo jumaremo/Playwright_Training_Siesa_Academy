@@ -56,12 +56,33 @@ const LESSON_049 = {
                 </tr>
             </table>
         </div>
-        <pre><code class="python"># Así se crean shadow roots en JavaScript (para entender el contexto)
+        <div class="code-tabs" data-code-id="L049-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Así se crean shadow roots en JavaScript (para entender el contexto)
 # Open: accesible desde fuera
 # element.attachShadow({ mode: 'open' })
 
 # Closed: inaccesible desde fuera
 # element.attachShadow({ mode: 'closed' })</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Así se crean shadow roots en JavaScript (para entender el contexto)
+// Open: accesible desde fuera
+// element.attachShadow({ mode: 'open' })
+
+// Closed: inaccesible desde fuera
+// element.attachShadow({ mode: 'closed' })</code></pre>
+            </div>
+        </div>
 
         <h3>✨ Playwright y Shadow DOM: Penetración automática</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -69,7 +90,18 @@ const LESSON_049 = {
             el Shadow DOM abierto de forma automática. No necesitas hacer nada especial
             en la mayoría de los casos.</p>
         </div>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L049-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_shadow_dom_automatico(page: Page):
     page.goto("https://ejemplo.com/con-web-components")
@@ -83,9 +115,39 @@ def test_shadow_dom_automatico(page: Page):
 
     # Y con assertions
     expect(page.locator(".resultado")).to_have_text("Búsqueda completada")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('shadow dom automatico', async ({ page }) => {
+    await page.goto("https://ejemplo.com/con-web-components");
+
+    // Playwright busca DENTRO del Shadow DOM automáticamente
+    // No importa si el input está dentro de un shadow root
+    await page.locator("input.search-field").fill("Playwright");
+
+    // También funciona con click
+    await page.locator("button.submit-btn").click();
+
+    // Y con assertions
+    await expect(page.locator(".resultado")).toHaveText("Búsqueda completada");
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Selectores que penetran el Shadow DOM</h3>
-        <pre><code class="python">def test_selectores_shadow(page: Page):
+        <div class="code-tabs" data-code-id="L049-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_selectores_shadow(page: Page):
     page.goto("/componentes")
 
     # CSS selector - penetra shadow DOM por defecto
@@ -102,11 +164,44 @@ def test_shadow_dom_automatico(page: Page):
 
     # Placeholder - penetra shadow DOM
     page.get_by_placeholder("Escribe tu nombre").fill("Juan")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('selectores shadow', async ({ page }) => {
+    await page.goto("/componentes");
+
+    // CSS selector - penetra shadow DOM por defecto
+    await page.locator("my-component input").fill("valor");
+
+    // Texto - también penetra shadow DOM
+    await page.locator("text=Enviar formulario").click();
+
+    // Role - penetra shadow DOM
+    await page.getByRole("button", { name: "Guardar" }).click();
+
+    // Test ID - penetra shadow DOM
+    await page.getByTestId("campo-email").fill("test@ejemplo.com");
+
+    // Placeholder - penetra shadow DOM
+    await page.getByPlaceholder("Escribe tu nombre").fill("Juan");
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔧 Penetración explícita con >> css=</h3>
         <p>En casos donde necesitas ser explícito sobre la cadena de shadow roots,
         Playwright ofrece la sintaxis <code>&gt;&gt; css=</code> para selectores encadenados:</p>
-        <pre><code class="python">def test_penetracion_explicita(page: Page):
+        <div class="code-tabs" data-code-id="L049-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_penetracion_explicita(page: Page):
     page.goto("/app-con-componentes")
 
     # Sintaxis de penetración explícita:
@@ -121,6 +216,26 @@ def test_shadow_dom_automatico(page: Page):
 
     # Combinar con otros selectores
     page.locator("my-dialog >> css=.footer >> css=button:has-text('Aceptar')").click()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('penetracion explicita', async ({ page }) => {
+    await page.goto("/app-con-componentes");
+
+    // Sintaxis de penetración explícita:
+    // host >> css=selector-dentro-del-shadow
+
+    // Buscar un input dentro del shadow root de my-form
+    await page.locator("my-form >> css=input.email").fill("user@test.com");
+
+    // Encadenar múltiples niveles de shadow DOM
+    // app-shell >> shadow >> nav-bar >> shadow >> button
+    await page.locator("app-shell >> css=nav-bar >> css=button.menu").click();
+
+    // Combinar con otros selectores
+    await page.locator("my-dialog >> css=.footer >> css=button:has-text('Aceptar')").click();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧩 Web Components: Elementos personalizados</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -134,7 +249,18 @@ def test_shadow_dom_automatico(page: Page):
                 <li><strong>Templates:</strong> fragmentos de HTML reutilizables</li>
             </ul>
         </div>
-        <pre><code class="python">def test_web_components(page: Page):
+        <div class="code-tabs" data-code-id="L049-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_web_components(page: Page):
     page.goto("/app")
 
     # Interactuar con un custom element
@@ -150,6 +276,27 @@ def test_shadow_dom_automatico(page: Page):
 
     # Verificar atributos del custom element
     expect(page.locator("my-input[label='Email']")).to_have_attribute("required", "")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('web components', async ({ page }) => {
+    await page.goto("/app");
+
+    // Interactuar con un custom element
+    // <my-input label="Email" required>
+    await page.locator("my-input[label='Email'] >> css=input").fill("test@mail.com");
+
+    // Interactuar con un slot
+    // <my-card>
+    //   <span slot="title">Mi Título</span>   <-- contenido slotted
+    //   <p slot="body">Contenido...</p>
+    // </my-card>
+    await expect(page.locator("my-card span[slot='title']")).toHaveText("Mi Título");
+
+    // Verificar atributos del custom element
+    await expect(page.locator("my-input[label='Email']")).toHaveAttribute("required", "");
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📚 Librerías de Web Components populares</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -194,7 +341,18 @@ def test_shadow_dom_automatico(page: Page):
             <p><strong>Solución:</strong> Usar <code>evaluate()</code> para acceder programáticamente
             cuando el componente expone alguna referencia interna.</p>
         </div>
-        <pre><code class="python">def test_shadow_dom_cerrado(page: Page):
+        <div class="code-tabs" data-code-id="L049-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_shadow_dom_cerrado(page: Page):
     page.goto("/app-con-closed-shadow")
 
     # Si el componente guarda una referencia interna al shadow root,
@@ -220,9 +378,49 @@ def test_shadow_dom_automatico(page: Page):
             return originalAttachShadow.call(this, { ...options, mode: 'open' });
         };
     """)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('shadow dom cerrado', async ({ page }) => {
+    await page.goto("/app-con-closed-shadow");
+
+    // Si el componente guarda una referencia interna al shadow root,
+    // podemos acceder vía evaluate()
+    await page.evaluate(() => {
+        // Algunos componentes guardan _shadowRoot internamente
+        const host = document.querySelector('closed-component');
+
+        // Opción 1: Si el componente expone una API
+        (host as any).setValue('nuevo valor');
+
+        // Opción 2: Monkey-patch attachShadow antes de cargar
+        // (útil en setup del test)
+    });
+
+    // Alternativa: interceptar attachShadow antes de que el componente cargue
+    await page.addInitScript(() => {
+        const originalAttachShadow = Element.prototype.attachShadow;
+        Element.prototype.attachShadow = function(options) {
+            // Forzar modo 'open' para testing
+            return originalAttachShadow.call(this, { ...options, mode: 'open' });
+        };
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🛠️ Acceso programático con evaluate()</h3>
-        <pre><code class="python">def test_evaluate_shadow_root(page: Page):
+        <div class="code-tabs" data-code-id="L049-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_evaluate_shadow_root(page: Page):
     page.goto("/app")
 
     # Leer contenido dentro del shadow DOM
@@ -255,9 +453,52 @@ def test_shadow_dom_automatico(page: Page):
         }
     """)
     assert cantidad == 5</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('evaluate shadow root', async ({ page }) => {
+    await page.goto("/app");
+
+    // Leer contenido dentro del shadow DOM
+    const texto = await page.evaluate(() => {
+        const host = document.querySelector('my-component');
+        const shadow = host!.shadowRoot;
+        return shadow!.querySelector('.mensaje')!.textContent;
+    });
+    expect(texto).toBe("Bienvenido");
+
+    // Modificar un valor dentro del shadow DOM
+    await page.evaluate(() => {
+        const host = document.querySelector('my-input');
+        const shadow = host!.shadowRoot;
+        const input = shadow!.querySelector('input')!;
+        input.value = 'nuevo valor';
+        input.dispatchEvent(new Event('input', { bubbles: true }));
+    });
+
+    // Contar elementos dentro del shadow DOM
+    const cantidad = await page.evaluate(() => {
+        const host = document.querySelector('my-list');
+        const shadow = host!.shadowRoot;
+        return shadow!.querySelectorAll('li').length;
+    });
+    expect(cantidad).toBe(5);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧪 Ejemplo completo: testing de una página con Web Components</h3>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L049-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 import pytest
 
 class TestWebComponents:
@@ -324,6 +565,81 @@ class TestWebComponents:
         # Playwright maneja el anidamiento automáticamente
         page.locator("app-layout app-sidebar a:has-text('Dashboard')").click()
         expect(page).to_have_url("**/dashboard")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test.describe('Web Components', () => {
+    // Suite de tests para una aplicación con Web Components.
+
+    test('custom input', async ({ page }) => {
+        // Verificar interacción con un input personalizado.
+        await page.goto("/formulario-custom");
+
+        // <custom-input label="Nombre" placeholder="Tu nombre">
+        //   #shadow-root (open)
+        //     <label>Nombre</label>
+        //     <input placeholder="Tu nombre">
+        // </custom-input>
+
+        // Playwright penetra el shadow DOM automáticamente
+        const nombre = page.locator("custom-input[label='Nombre'] input");
+        await nombre.fill("María García");
+        await expect(nombre).toHaveValue("María García");
+    });
+
+    test('custom dropdown', async ({ page }) => {
+        // Verificar interacción con un dropdown personalizado.
+        await page.goto("/formulario-custom");
+
+        // Abrir el dropdown custom
+        await page.locator("custom-select >> css=.trigger").click();
+
+        // Seleccionar una opción dentro del shadow DOM
+        await page.locator("custom-select >> css=.option[data-value='colombia']").click();
+
+        // Verificar la selección
+        const valor = page.locator("custom-select >> css=.selected-text");
+        await expect(valor).toHaveText("Colombia");
+    });
+
+    test('custom modal', async ({ page }) => {
+        // Verificar un modal implementado como Web Component.
+        await page.goto("/dashboard");
+
+        // Abrir modal
+        await page.getByRole("button", { name: "Abrir configuración" }).click();
+
+        // El modal es un Web Component con shadow DOM
+        const modal = page.locator("custom-modal");
+        await expect(modal).toBeVisible();
+
+        // Interactuar con contenido del modal
+        await page.locator("custom-modal >> css=input.config-name").fill("Mi Config");
+        await page.locator("custom-modal >> css=button.save").click();
+
+        // Verificar que el modal se cerró
+        await expect(modal).toBeHidden();
+    });
+
+    test('componentes anidados', async ({ page }) => {
+        // Verificar componentes Web anidados (shadow DOM dentro de shadow DOM).
+        await page.goto("/app");
+
+        // <app-layout>
+        //   #shadow-root
+        //     <app-sidebar>
+        //       #shadow-root
+        //         <nav>
+        //           <a href="/dashboard">Dashboard</a>
+
+        // Playwright maneja el anidamiento automáticamente
+        await page.locator("app-layout app-sidebar a:has-text('Dashboard')").click();
+        await expect(page).toHaveURL("**/dashboard");
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Comparación: Shadow DOM en diferentes frameworks de testing</h3>
         <table style="width:100%; border-collapse: collapse; margin: 15px 0;">
@@ -380,22 +696,64 @@ class TestWebComponents:
                 o cualquier app con Shoelace/Lit)</li>
             <li>Identifica elementos dentro de Shadow DOM con DevTools (busca <code>#shadow-root</code>)</li>
             <li>Escribe un test que interactúe con un input dentro de un Web Component:
-                <pre><code class="python">def test_shadow_dom_input(page: Page):
+                <div class="code-tabs" data-code-id="L049-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_shadow_dom_input(page: Page):
     page.goto("URL_CON_WEB_COMPONENTS")
 
     # Localizar el input dentro del shadow DOM
     campo = page.locator("nombre-del-componente input")
     campo.fill("Texto de prueba")
     expect(campo).to_have_value("Texto de prueba")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('shadow dom input', async ({ page }) => {
+    await page.goto("URL_CON_WEB_COMPONENTS");
+
+    // Localizar el input dentro del shadow DOM
+    const campo = page.locator("nombre-del-componente input");
+    await campo.fill("Texto de prueba");
+    await expect(campo).toHaveValue("Texto de prueba");
+});</code></pre>
+            </div>
+        </div>
             </li>
             <li>Prueba la sintaxis explícita <code>&gt;&gt; css=</code> para un componente anidado</li>
             <li>Usa <code>evaluate()</code> para leer un valor del shadow root:
-                <pre><code class="python">valor = page.evaluate("""
+                <div class="code-tabs" data-code-id="L049-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">valor = page.evaluate("""
     () => {
         const host = document.querySelector('mi-componente');
         return host.shadowRoot.querySelector('.valor').textContent;
     }
 """)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">const valor = await page.evaluate(() => {
+    const host = document.querySelector('mi-componente');
+    return host!.shadowRoot!.querySelector('.valor')!.textContent;
+});</code></pre>
+            </div>
+        </div>
             </li>
             <li>Experimenta con <code>add_init_script()</code> para forzar shadow roots abiertos</li>
         </ol>

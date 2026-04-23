@@ -29,7 +29,18 @@ const LESSON_024 = {
         </div>
 
         <h3>📦 Anatomía de una clase en Python</h3>
-        <pre><code class="python">class Usuario:
+        <div class="code-tabs" data-code-id="L024-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">class Usuario:
     """Representa un usuario del sistema bajo prueba."""
 
     def __init__(self, username, password, rol="usuario"):
@@ -61,6 +72,46 @@ tester = Usuario("jperez", "Test456!")
 print(admin)          # Usuario(admin, rol=administrador, desconectado)
 print(admin.login())  # admin ha iniciado sesión como administrador
 print(admin)          # Usuario(admin, rol=administrador, conectado)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">class Usuario {
+    username: string;
+    password: string;
+    rol: string;
+    estaLogueado: boolean;
+
+    constructor(username: string, password: string, rol = 'usuario') {
+        this.username = username;
+        this.password = password;
+        this.rol = rol;
+        this.estaLogueado = false;  // Estado inicial
+    }
+
+    login(): string {
+        this.estaLogueado = true;
+        return \`\${this.username} ha iniciado sesión como \${this.rol}\`;
+    }
+
+    logout(): string {
+        this.estaLogueado = false;
+        return \`\${this.username} ha cerrado sesión\`;
+    }
+
+    toString(): string {
+        const estado = this.estaLogueado ? 'conectado' : 'desconectado';
+        return \`Usuario(\${this.username}, rol=\${this.rol}, \${estado})\`;
+    }
+}
+
+// --- Uso ---
+const admin = new Usuario('admin', 'Admin123!', 'administrador');
+const tester = new Usuario('jperez', 'Test456!');
+
+console.log(admin.toString());  // Usuario(admin, rol=administrador, desconectado)
+console.log(admin.login());     // admin ha iniciado sesión como administrador
+console.log(admin.toString());  // Usuario(admin, rol=administrador, conectado)</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔍 Conceptos clave</h4>
@@ -101,7 +152,18 @@ print(admin)          # Usuario(admin, rol=administrador, conectado)</code></pre
         <h3>🔒 Properties: control de acceso a atributos</h3>
         <p>El decorador <code>@property</code> permite definir atributos calculados
         y controlar cómo se accede o modifica un valor:</p>
-        <pre><code class="python">class TestEnvironment:
+        <div class="code-tabs" data-code-id="L024-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">class TestEnvironment:
     """Configuración de un ambiente de pruebas."""
 
     def __init__(self, nombre, base_url, headless=True):
@@ -140,11 +202,69 @@ staging.registrar_test()
 print(staging.resumen)     # [staging] https://staging.miapp.com (headless) - 2 tests
 
 # staging.base_url = "otra_url"  # Error: no tiene setter, es de solo lectura</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">class TestEnvironment {
+    nombre: string;
+    private _baseUrl: string;       // private = "privado"
+    headless: boolean;
+    private _testCount = 0;
+
+    constructor(nombre: string, baseUrl: string, headless = true) {
+        this.nombre = nombre;
+        this._baseUrl = baseUrl;
+        this.headless = headless;
+    }
+
+    // Getter: obtener la URL base (solo lectura)
+    get baseUrl(): string {
+        return this._baseUrl;
+    }
+
+    // Getter: número de tests ejecutados
+    get testCount(): number {
+        return this._testCount;
+    }
+
+    // Propiedad calculada: genera un resumen dinámico
+    get resumen(): string {
+        const modo = this.headless ? 'headless' : 'headed';
+        return \`[\${this.nombre}] \${this._baseUrl} (\${modo}) - \${this._testCount} tests\`;
+    }
+
+    registrarTest(): void {
+        this._testCount++;
+    }
+}
+
+// --- Uso ---
+const staging = new TestEnvironment('staging', 'https://staging.miapp.com');
+console.log(staging.baseUrl);   // https://staging.miapp.com
+console.log(staging.resumen);   // [staging] https://staging.miapp.com (headless) - 0 tests
+
+staging.registrarTest();
+staging.registrarTest();
+console.log(staging.resumen);   // [staging] https://staging.miapp.com (headless) - 2 tests
+
+// staging.baseUrl = 'otra_url';  // Error: no tiene setter, es de solo lectura</code></pre>
+            </div>
+        </div>
 
         <h3>🧬 Herencia: reutilizar y extender clases</h3>
         <p>La herencia permite crear clases especializadas a partir de una clase base.
         Esto es fundamental para Page Objects y helpers reutilizables:</p>
-        <pre><code class="python">class BasePage:
+        <div class="code-tabs" data-code-id="L024-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">class BasePage:
     """Clase base para todas las páginas (Page Object base)."""
 
     def __init__(self, page, base_url):
@@ -203,6 +323,82 @@ class DashboardPage(BasePage):
 #     login_page.login("admin", "Admin123!")     # Método propio
 #     dashboard = DashboardPage(page)
 #     assert dashboard.obtener_nombre_usuario() == "admin"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { Page, Locator } from '@playwright/test';
+
+class BasePage {
+    protected page: Page;
+    protected baseUrl: string;
+
+    constructor(page: Page, baseUrl: string) {
+        this.page = page;
+        this.baseUrl = baseUrl;
+    }
+
+    async navegar(): Promise&lt;void&gt; {
+        await this.page.goto(this.baseUrl);
+    }
+
+    async obtenerTitulo(): Promise&lt;string&gt; {
+        return await this.page.title();
+    }
+
+    async tomarScreenshot(nombre: string): Promise&lt;void&gt; {
+        await this.page.screenshot({ path: \`screenshots/\${nombre}.png\` });
+    }
+}
+
+class LoginPage extends BasePage {
+    readonly inputUsuario: Locator;
+    readonly inputPassword: Locator;
+    readonly btnLogin: Locator;
+    readonly msgError: Locator;
+
+    constructor(page: Page) {
+        super(page, '/login');  // Llama al constructor padre
+        this.inputUsuario = page.locator('#username');
+        this.inputPassword = page.locator('#password');
+        this.btnLogin = page.locator("button[type='submit']");
+        this.msgError = page.locator('.error-message');
+    }
+
+    async login(username: string, password: string): Promise&lt;void&gt; {
+        await this.inputUsuario.fill(username);
+        await this.inputPassword.fill(password);
+        await this.btnLogin.click();
+    }
+
+    async obtenerError(): Promise&lt;string&gt; {
+        return (await this.msgError.textContent()) ?? '';
+    }
+}
+
+class DashboardPage extends BasePage {
+    readonly titulo: Locator;
+    readonly menuUsuario: Locator;
+
+    constructor(page: Page) {
+        super(page, '/dashboard');
+        this.titulo = page.locator('h1');
+        this.menuUsuario = page.locator('#user-menu');
+    }
+
+    async obtenerNombreUsuario(): Promise&lt;string&gt; {
+        return (await this.menuUsuario.textContent()) ?? '';
+    }
+}
+
+// --- Uso en un test ---
+// test('login exitoso', async ({ page }) => {
+//     const loginPage = new LoginPage(page);
+//     await loginPage.navegar();                       // Heredado de BasePage
+//     await loginPage.login('admin', 'Admin123!');     // Método propio
+//     const dashboard = new DashboardPage(page);
+//     expect(await dashboard.obtenerNombreUsuario()).toBe('admin');
+// });</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ super().__init__() es obligatorio</h4>
@@ -215,7 +411,18 @@ class DashboardPage(BasePage):
         <p>Las <code>dataclasses</code> (Python 3.7+) eliminan el código repetitivo
         al crear clases que principalmente almacenan datos. Son ideales para
         representar datos de test:</p>
-        <pre><code class="python">from dataclasses import dataclass, field
+        <div class="code-tabs" data-code-id="L024-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from dataclasses import dataclass, field
 from typing import Optional
 
 @dataclass
@@ -254,8 +461,74 @@ print(admin)
 admin2 = UserData("admin", "Admin123!", "admin@empresa.com", "administrador",
                   True, ["crear", "editar", "eliminar"])
 print(admin == admin2)  # True (compara todos los campos)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// En TypeScript se usan interfaces o clases.
+// Para modelos de datos, las interfaces son lo más común:
 
-        <pre><code class="python"># --- Dataclasses para diferentes modelos de test ---
+interface UserData {
+    username: string;
+    password: string;
+    email: string;
+    rol?: string;        // Opcional, default 'usuario'
+    activo?: boolean;    // Opcional, default true
+    permisos?: string[]; // Opcional, default []
+}
+
+// Factory function (equivalente al constructor auto-generado)
+function createUserData(data: UserData): Required&lt;UserData&gt; {
+    return {
+        username: data.username,
+        password: data.password,
+        email: data.email,
+        rol: data.rol ?? 'usuario',
+        activo: data.activo ?? true,
+        permisos: data.permisos ?? [],
+    };
+}
+
+const admin = createUserData({
+    username: 'admin',
+    password: 'Admin123!',
+    email: 'admin@empresa.com',
+    rol: 'administrador',
+    permisos: ['crear', 'editar', 'eliminar'],
+});
+
+const tester = createUserData({
+    username: 'jperez',
+    password: 'Test456!',
+    email: 'jperez@empresa.com',
+    // rol: 'usuario' (valor por defecto)
+    // activo: true (valor por defecto)
+    // permisos: [] (valor por defecto)
+});
+
+console.log(admin);
+// { username: 'admin', password: 'Admin123!', ... }
+
+// Comparación: usar JSON.stringify o librería como lodash.isEqual
+const admin2 = createUserData({
+    username: 'admin', password: 'Admin123!',
+    email: 'admin@empresa.com', rol: 'administrador',
+    activo: true, permisos: ['crear', 'editar', 'eliminar'],
+});
+console.log(JSON.stringify(admin) === JSON.stringify(admin2));  // true</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L024-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># --- Dataclasses para diferentes modelos de test ---
 from dataclasses import dataclass
 from typing import Optional
 
@@ -322,6 +595,72 @@ def test_login(page, escenario: LoginScenario):
     page.fill("#password", escenario.password)
     page.click("#btn-login")
     # ... assertions según escenario.resultado_esperado</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+// --- Interfaces para diferentes modelos de test ---
+interface ProductData {
+    nombre: string;
+    precio: number;
+    categoria: string;
+    stock?: number;
+    descuento?: number;
+}
+
+// Helpers para propiedades calculadas
+function precioFinal(product: ProductData): number {
+    return product.precio * (1 - (product.descuento ?? 0));
+}
+
+function disponible(product: ProductData): boolean {
+    return (product.stock ?? 0) > 0;
+}
+
+interface LoginScenario {
+    descripcion: string;
+    username: string;
+    password: string;
+    resultadoEsperado: string;  // 'exitoso', 'error_credenciales', 'error_campos'
+    mensajeEsperado?: string;
+}
+
+// --- Crear escenarios de test ---
+const escenariosLogin: LoginScenario[] = [
+    {
+        descripcion: 'Login exitoso con admin',
+        username: 'admin',
+        password: 'Admin123!',
+        resultadoEsperado: 'exitoso',
+    },
+    {
+        descripcion: 'Login con contraseña incorrecta',
+        username: 'admin',
+        password: 'mala_clave',
+        resultadoEsperado: 'error_credenciales',
+        mensajeEsperado: 'Credenciales inválidas',
+    },
+    {
+        descripcion: 'Login con campos vacíos',
+        username: '',
+        password: '',
+        resultadoEsperado: 'error_campos',
+        mensajeEsperado: 'Los campos son obligatorios',
+    },
+];
+
+// Usar en Playwright Test (equivalente a parametrize)
+for (const escenario of escenariosLogin) {
+    test(\`login - \${escenario.descripcion}\`, async ({ page }) => {
+        await page.goto('/login');
+        await page.fill('#username', escenario.username);
+        await page.fill('#password', escenario.password);
+        await page.click('#btn-login');
+        // ... assertions según escenario.resultadoEsperado
+    });
+}</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 ¿Cuándo usar <code>@dataclass</code> vs clase normal?</h4>
@@ -351,7 +690,18 @@ def test_login(page, escenario: LoginScenario):
 
         <h3>🛠️ Métodos estáticos y de clase</h3>
         <p>Python ofrece dos tipos especiales de métodos que no necesitan una instancia:</p>
-        <pre><code class="python">import json
+        <div class="code-tabs" data-code-id="L024-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import json
 import csv
 from pathlib import Path
 
@@ -371,7 +721,7 @@ class TestHelper:
         """Genera una contraseña aleatoria para tests."""
         import random
         import string
-        chars = string.ascii_letters + string.digits + "!@#$"
+        chars = string.ascii_letters + string.digits + "!@#\$"
         return ''.join(random.choices(chars, k=longitud))
 
     @classmethod
@@ -390,9 +740,59 @@ class TestHelper:
 # --- Uso ---
 # No se necesita crear una instancia (no hay TestHelper())
 email = TestHelper.generar_email("Juan Reina")       # juan.reina@test.com
-password = TestHelper.generar_password()              # "aK3$mP9xLq2!"
+password = TestHelper.generar_password()              # "aK3\$mP9xLq2!"
 usuarios = TestHelper.cargar_json("usuarios.json")    # [{...}, {...}]
 productos = TestHelper.cargar_csv("productos.csv")    # [{...}, {...}]</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import * as fs from 'fs';
+import * as path from 'path';
+
+class TestHelper {
+    // Atributo estático de clase
+    static readonly DATA_DIR = path.join(__dirname, 'test_data');
+
+    // static = equivalente a @staticmethod
+    static generarEmail(nombre: string, dominio = 'test.com'): string {
+        const nombreLimpio = nombre.toLowerCase().replace(/ /g, '.');
+        return \`\${nombreLimpio}@\${dominio}\`;
+    }
+
+    static generarPassword(longitud = 12): string {
+        const chars = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#\$';
+        let password = '';
+        for (let i = 0; i &lt; longitud; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return password;
+    }
+
+    // En TS no hay @classmethod, se usa static con this/nombre de clase
+    static cargarJson(nombreArchivo: string): any {
+        const ruta = path.join(TestHelper.DATA_DIR, nombreArchivo);
+        return JSON.parse(fs.readFileSync(ruta, 'utf-8'));
+    }
+
+    static cargarCsv(nombreArchivo: string): Record&lt;string, string&gt;[] {
+        const ruta = path.join(TestHelper.DATA_DIR, nombreArchivo);
+        const content = fs.readFileSync(ruta, 'utf-8');
+        const lines = content.trim().split('\\n');
+        const headers = lines[0].split(',');
+        return lines.slice(1).map(line => {
+            const valores = line.split(',');
+            return Object.fromEntries(headers.map((h, i) => [h, valores[i]]));
+        });
+    }
+}
+
+// --- Uso ---
+// No se necesita crear una instancia (no hay new TestHelper())
+const email = TestHelper.generarEmail('Juan Reina');       // 'juan.reina@test.com'
+const password = TestHelper.generarPassword();              // 'aK3\$mP9xLq2!'
+const usuarios = TestHelper.cargarJson('usuarios.json');    // [{...}, {...}]
+const productos = TestHelper.cargarCsv('productos.csv');    // [{...}, {...}]</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔑 @staticmethod vs @classmethod</h4>
@@ -421,7 +821,18 @@ productos = TestHelper.cargar_csv("productos.csv")    # [{...}, {...}]</code></p
         <h3>🎭 Clases en tests con pytest</h3>
         <p>pytest permite agrupar tests en clases para mejor organización.
         Nota: en pytest <strong>no</strong> necesitas heredar de ninguna clase base:</p>
-        <pre><code class="python"># test_usuarios.py
+        <div class="code-tabs" data-code-id="L024-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_usuarios.py
 from playwright.sync_api import Page, expect
 from dataclasses import dataclass
 
@@ -463,9 +874,71 @@ class TestLoginUsuarios:
         page.click("#btn-login")
         page.click("#btn-logout")
         expect(page).to_have_url("**/login")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_usuarios.spec.ts
+import { test, expect } from '@playwright/test';
+
+interface UserData {
+    username: string;
+    password: string;
+    nombreCompleto: string;
+    rol: string;
+}
+
+// En Playwright Test se usa test.describe para agrupar tests
+test.describe('Login Usuarios', () => {
+    // Datos compartidos por todos los tests del grupo
+    const admin: UserData = {
+        username: 'admin', password: 'Admin123!',
+        nombreCompleto: 'Administrador', rol: 'admin',
+    };
+    const tester: UserData = {
+        username: 'tester', password: 'Test456!',
+        nombreCompleto: 'QA Tester', rol: 'usuario',
+    };
+
+    test('admin puede hacer login y ver panel de administración', async ({ page }) => {
+        await page.goto('/login');
+        await page.fill('#username', admin.username);
+        await page.fill('#password', admin.password);
+        await page.click('#btn-login');
+        await expect(page).toHaveURL('**/admin/dashboard');
+    });
+
+    test('tester puede hacer login y ver dashboard estándar', async ({ page }) => {
+        await page.goto('/login');
+        await page.fill('#username', tester.username);
+        await page.fill('#password', tester.password);
+        await page.click('#btn-login');
+        await expect(page).toHaveURL('**/dashboard');
+    });
+
+    test('cualquier usuario puede hacer logout', async ({ page }) => {
+        await page.goto('/login');
+        await page.fill('#username', tester.username);
+        await page.fill('#password', tester.password);
+        await page.click('#btn-login');
+        await page.click('#btn-logout');
+        await expect(page).toHaveURL('**/login');
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔗 Juntando todo: patrón completo para Playwright</h3>
-        <pre><code class="python"># models/user.py
+        <div class="code-tabs" data-code-id="L024-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># models/user.py
 from dataclasses import dataclass, field
 
 @dataclass
@@ -489,8 +962,65 @@ class UserData:
 # admin = UserData.admin()
 # tester = UserData.tester()
 # custom = UserData("juanm", "Pass789!", "juan@empresa.com")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// models/user.ts
 
-        <pre><code class="python"># helpers/test_helper.py
+interface UserDataProps {
+    username: string;
+    password: string;
+    email: string;
+    rol?: string;
+}
+
+class UserData {
+    readonly username: string;
+    readonly password: string;
+    readonly email: string;
+    readonly rol: string;
+
+    constructor(props: UserDataProps) {
+        this.username = props.username;
+        this.password = props.password;
+        this.email = props.email;
+        this.rol = props.rol ?? 'usuario';
+    }
+
+    // Factory methods (equivalente a @classmethod)
+    static admin(): UserData {
+        return new UserData({
+            username: 'admin', password: 'Admin123!',
+            email: 'admin@empresa.com', rol: 'administrador',
+        });
+    }
+
+    static tester(): UserData {
+        return new UserData({
+            username: 'qa_tester', password: 'Test456!',
+            email: 'tester@empresa.com', rol: 'tester',
+        });
+    }
+}
+
+// --- Uso elegante en tests ---
+// const admin = UserData.admin();
+// const tester = UserData.tester();
+// const custom = new UserData({ username: 'juanm', password: 'Pass789!', email: 'juan@empresa.com' });</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L024-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># helpers/test_helper.py
 from pathlib import Path
 import json
 
@@ -525,6 +1055,46 @@ def setup_ambiente():
     TestHelper.setup_dirs()
     yield
     # Cleanup después de la suite si es necesario</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// helpers/testHelper.ts
+import * as path from 'path';
+import * as fs from 'fs';
+
+export class TestHelper {
+    static readonly ROOT = path.resolve(__dirname, '..');
+    static readonly DATA_DIR = path.join(TestHelper.ROOT, 'test_data');
+    static readonly SCREENSHOTS_DIR = path.join(TestHelper.ROOT, 'screenshots');
+
+    static setupDirs(): void {
+        fs.mkdirSync(TestHelper.SCREENSHOTS_DIR, { recursive: true });
+    }
+
+    static generarEmail(nombre: string): string {
+        return \`\${nombre.toLowerCase().replace(/ /g, '.')}@test.com\`;
+    }
+
+    static cargarDatos(archivo: string): any {
+        const ruta = path.join(TestHelper.DATA_DIR, archivo);
+        return JSON.parse(fs.readFileSync(ruta, 'utf-8'));
+    }
+}
+
+// playwright.config.ts (equivalente a conftest.py globalSetup)
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    globalSetup: './global-setup.ts',
+});
+
+// global-setup.ts
+import { TestHelper } from './helpers/testHelper';
+
+export default async function globalSetup() {
+    TestHelper.setupDirs();
+}</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">

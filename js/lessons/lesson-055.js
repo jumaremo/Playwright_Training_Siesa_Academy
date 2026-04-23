@@ -20,7 +20,18 @@ const LESSON_055 = {
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Imagina que tu aplicación tiene un <strong>header</strong> con menú de usuario
             que aparece en todas las páginas. Sin components:</p>
-            <pre><code class="python"># ❌ Sin components — locators del header duplicados
+            <div class="code-tabs" data-code-id="L055-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># ❌ Sin components — locators del header duplicados
 class DashboardPage(BasePage):
     def __init__(self, page):
         super().__init__(page)
@@ -38,6 +49,45 @@ class SettingsPage(BasePage):
         super().__init__(page)
         self.user_menu = page.locator(".header .user-menu")  # ← Duplicado
         self.logout_btn = page.locator(".header .logout")     # ← Duplicado</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// ❌ Sin components — locators del header duplicados
+import { type Page, type Locator } from '@playwright/test';
+
+class DashboardPage extends BasePage {
+    readonly userMenu: Locator;
+    readonly logoutBtn: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.userMenu = page.locator('.header .user-menu');  // ← Duplicado
+        this.logoutBtn = page.locator('.header .logout');     // ← Duplicado
+    }
+}
+
+class ProductsPage extends BasePage {
+    readonly userMenu: Locator;
+    readonly logoutBtn: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.userMenu = page.locator('.header .user-menu');  // ← Duplicado
+        this.logoutBtn = page.locator('.header .logout');     // ← Duplicado
+    }
+}
+
+class SettingsPage extends BasePage {
+    readonly userMenu: Locator;
+    readonly logoutBtn: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.userMenu = page.locator('.header .user-menu');  // ← Duplicado
+        this.logoutBtn = page.locator('.header .logout');     // ← Duplicado
+    }
+}</code></pre>
+            </div>
+        </div>
             <p>Si cambia el selector del header, hay que modificar <strong>todas</strong> las páginas.</p>
         </div>
 
@@ -45,7 +95,18 @@ class SettingsPage(BasePage):
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Un Component es una clase que encapsula un fragmento de la UI, similar a un
             Page Object pero para una <strong>sección</strong> de la página, no la página completa.</p>
-            <pre><code class="python"># components/header_component.py
+            <div class="code-tabs" data-code-id="L055-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># components/header_component.py
 class HeaderComponent:
     """Component para el header/navbar de la aplicación."""
 
@@ -86,10 +147,85 @@ class HeaderComponent:
         if badge.is_visible():
             return int(badge.text_content())
         return 0</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// components/header-component.ts
+import { type Page, type Locator } from '@playwright/test';
+
+export class HeaderComponent {
+    // Component para el header/navbar de la aplicación.
+    readonly page: Page;
+    readonly root: Locator;
+    readonly logo: Locator;
+    readonly userMenu: Locator;
+    readonly logoutButton: Locator;
+    readonly notifications: Locator;
+    readonly searchInput: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        // Scope: solo elementos dentro del header
+        this.root = page.locator('header.main-header');
+        this.logo = this.root.locator('.logo');
+        this.userMenu = this.root.locator('[data-testid="user-menu"]');
+        this.logoutButton = this.root.locator('[data-testid="logout"]');
+        this.notifications = this.root.locator('[data-testid="notifications"]');
+        this.searchInput = this.root.locator('[data-testid="global-search"]');
+    }
+
+    async openUserMenu(): Promise&lt;this&gt; {
+        // Abrir el menú desplegable del usuario.
+        await this.userMenu.click();
+        return this;
+    }
+
+    async logout(): Promise&lt;this&gt; {
+        // Cerrar sesión desde el header.
+        await this.openUserMenu();
+        await this.logoutButton.click();
+        return this;
+    }
+
+    async search(query: string): Promise&lt;this&gt; {
+        // Realizar una búsqueda global.
+        await this.searchInput.fill(query);
+        await this.searchInput.press('Enter');
+        return this;
+    }
+
+    async getUsername(): Promise&lt;string&gt; {
+        // Obtener el nombre del usuario logueado.
+        const text = await this.userMenu.textContent();
+        return (text ?? '').trim();
+    }
+
+    async getNotificationCount(): Promise&lt;number&gt; {
+        // Obtener cantidad de notificaciones.
+        const badge = this.notifications.locator('.badge');
+        if (await badge.isVisible()) {
+            const text = await badge.textContent();
+            return parseInt(text ?? '0', 10);
+        }
+        return 0;
+    }
+}</code></pre>
+            </div>
+        </div>
         </div>
 
         <h3>📋 Component de tabla — Muy reutilizable</h3>
-        <pre><code class="python"># components/table_component.py
+        <div class="code-tabs" data-code-id="L055-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># components/table_component.py
 class TableComponent:
     """Component genérico para tablas de datos.
 
@@ -149,9 +285,102 @@ class TableComponent:
     def is_empty(self):
         """Verificar si la tabla no tiene datos."""
         return self.rows.count() == 0</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// components/table-component.ts
+import { type Page, type Locator } from '@playwright/test';
+
+export class TableComponent {
+    // Component genérico para tablas de datos.
+    // Funciona con cualquier tabla HTML estándar.
+    // Se puede reutilizar en productos, usuarios, pedidos, etc.
+    readonly page: Page;
+    readonly root: Locator;
+    readonly headers: Locator;
+    readonly rows: Locator;
+
+    constructor(page: Page, tableSelector: string) {
+        this.page = page;
+        this.root = page.locator(tableSelector);
+        this.headers = this.root.locator('thead th');
+        this.rows = this.root.locator('tbody tr');
+    }
+
+    async getColumnNames(): Promise&lt;string[]&gt; {
+        // Obtener nombres de las columnas.
+        return await this.headers.allTextContents();
+    }
+
+    async getRowCount(): Promise&lt;number&gt; {
+        // Obtener número de filas de datos.
+        return await this.rows.count();
+    }
+
+    async getCell(rowIndex: number, colIndex: number): Promise&lt;string&gt; {
+        // Obtener el texto de una celda específica.
+        const row = this.rows.nth(rowIndex);
+        const cell = row.locator('td').nth(colIndex);
+        const text = await cell.textContent();
+        return (text ?? '').trim();
+    }
+
+    async getRowData(rowIndex: number): Promise&lt;string[]&gt; {
+        // Obtener todos los datos de una fila como lista.
+        const row = this.rows.nth(rowIndex);
+        const cells = row.locator('td');
+        return await cells.allTextContents();
+    }
+
+    async getAllData(): Promise&lt;string[][]&gt; {
+        // Obtener todos los datos de la tabla como lista de listas.
+        const data: string[][] = [];
+        const count = await this.rows.count();
+        for (let i = 0; i &lt; count; i++) {
+            data.push(await this.getRowData(i));
+        }
+        return data;
+    }
+
+    async clickRow(rowIndex: number): Promise&lt;this&gt; {
+        // Hacer clic en una fila.
+        await this.rows.nth(rowIndex).click();
+        return this;
+    }
+
+    findRowWithText(text: string): Locator {
+        // Encontrar la primera fila que contenga el texto.
+        // filter({ hasText }) requiere Playwright >= 1.44
+        return this.rows.filter({ hasText: text });
+    }
+
+    async sortByColumn(columnName: string): Promise&lt;this&gt; {
+        // Hacer clic en un header para ordenar.
+        // filter({ hasText }) requiere Playwright >= 1.44
+        await this.headers.filter({ hasText: columnName }).click();
+        return this;
+    }
+
+    async isEmpty(): Promise&lt;boolean&gt; {
+        // Verificar si la tabla no tiene datos.
+        return (await this.rows.count()) === 0;
+    }
+}</code></pre>
+            </div>
+        </div>
 
         <h3>🔲 Component de modal/diálogo</h3>
-        <pre><code class="python"># components/modal_component.py
+        <div class="code-tabs" data-code-id="L055-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># components/modal_component.py
 class ModalComponent:
     """Component para diálogos modales."""
 
@@ -198,9 +427,89 @@ class ModalComponent:
         """Esperar a que el modal se abra."""
         self.root.wait_for(state="visible", timeout=timeout)
         return self</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// components/modal-component.ts
+import { type Page, type Locator } from '@playwright/test';
+
+export class ModalComponent {
+    // Component para diálogos modales.
+    readonly page: Page;
+    readonly root: Locator;
+    readonly titleLocator: Locator;
+    readonly body: Locator;
+    readonly closeButton: Locator;
+    readonly confirmButton: Locator;
+    readonly cancelButton: Locator;
+
+    constructor(page: Page, modalSelector: string = '.modal') {
+        this.page = page;
+        this.root = page.locator(modalSelector);
+        this.titleLocator = this.root.locator('.modal-title');
+        this.body = this.root.locator('.modal-body');
+        this.closeButton = this.root.locator('.modal-close, .btn-close');
+        this.confirmButton = this.root.locator('.btn-confirm, .btn-primary');
+        this.cancelButton = this.root.locator('.btn-cancel, .btn-secondary');
+    }
+
+    async isOpen(): Promise&lt;boolean&gt; {
+        // Verificar si el modal está abierto.
+        return await this.root.isVisible();
+    }
+
+    async getTitle(): Promise&lt;string | null&gt; {
+        // Obtener el título del modal.
+        return await this.titleLocator.textContent();
+    }
+
+    async getBodyText(): Promise&lt;string | null&gt; {
+        // Obtener el texto del cuerpo del modal.
+        return await this.body.textContent();
+    }
+
+    async close(): Promise&lt;this&gt; {
+        // Cerrar el modal con el botón X.
+        await this.closeButton.click();
+        await this.root.waitFor({ state: 'hidden' });
+        return this;
+    }
+
+    async confirm(): Promise&lt;this&gt; {
+        // Hacer clic en el botón de confirmar.
+        await this.confirmButton.click();
+        await this.root.waitFor({ state: 'hidden' });
+        return this;
+    }
+
+    async cancel(): Promise&lt;this&gt; {
+        // Hacer clic en el botón de cancelar.
+        await this.cancelButton.click();
+        await this.root.waitFor({ state: 'hidden' });
+        return this;
+    }
+
+    async waitForOpen(timeout: number = 5000): Promise&lt;this&gt; {
+        // Esperar a que el modal se abra.
+        await this.root.waitFor({ state: 'visible', timeout });
+        return this;
+    }
+}</code></pre>
+            </div>
+        </div>
 
         <h3>📐 Component de formulario</h3>
-        <pre><code class="python"># components/form_component.py
+        <div class="code-tabs" data-code-id="L055-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># components/form_component.py
 class FormComponent:
     """Component genérico para formularios."""
 
@@ -244,10 +553,86 @@ class FormComponent:
     def has_errors(self):
         """Verificar si el formulario tiene errores de validación."""
         return len(self.get_validation_errors()) > 0</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// components/form-component.ts
+import { type Page, type Locator } from '@playwright/test';
+
+export class FormComponent {
+    // Component genérico para formularios.
+    readonly page: Page;
+    readonly root: Locator;
+    readonly submitButton: Locator;
+
+    constructor(page: Page, formSelector: string) {
+        this.page = page;
+        this.root = page.locator(formSelector);
+        this.submitButton = this.root.locator(
+            "button[type='submit'], input[type='submit']"
+        );
+    }
+
+    async fillField(fieldName: string, value: string): Promise&lt;this&gt; {
+        // Llenar un campo por su name o label.
+        const field = this.root.locator(
+            \`input[name='\${fieldName}'], \` +
+            \`textarea[name='\${fieldName}'], \` +
+            \`select[name='\${fieldName}']\`
+        );
+        const tag = await field.evaluate(
+            (el) =&gt; el.tagName.toLowerCase()
+        );
+        if (tag === 'select') {
+            await field.selectOption({ label: value });
+        } else {
+            await field.fill(value);
+        }
+        return this;
+    }
+
+    async fillMany(data: Record&lt;string, string&gt;): Promise&lt;this&gt; {
+        // Llenar múltiples campos desde un objeto.
+        for (const [fieldName, value] of Object.entries(data)) {
+            await this.fillField(fieldName, value);
+        }
+        return this;
+    }
+
+    async submit(): Promise&lt;this&gt; {
+        // Enviar el formulario.
+        await this.submitButton.click();
+        return this;
+    }
+
+    async getValidationErrors(): Promise&lt;string[]&gt; {
+        // Obtener mensajes de error de validación.
+        const errors = this.root.locator('.error-message, .invalid-feedback');
+        return await errors.allTextContents();
+    }
+
+    async hasErrors(): Promise&lt;boolean&gt; {
+        // Verificar si el formulario tiene errores de validación.
+        const errors = await this.getValidationErrors();
+        return errors.length &gt; 0;
+    }
+}</code></pre>
+            </div>
+        </div>
 
         <h3>🔗 Integrando Components en Page Objects</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># pages/products_page.py
+            <div class="code-tabs" data-code-id="L055-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># pages/products_page.py
 from pages.base_page import BasePage
 from components.header_component import HeaderComponent
 from components.table_component import TableComponent
@@ -309,6 +694,88 @@ def test_busqueda_global_desde_productos(page):
     # El header con búsqueda global funciona desde cualquier página
     products.header.search("Configuración")
     assert "settings" in page.url</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// pages/products-page.ts
+import { type Page, type Locator } from '@playwright/test';
+import { BasePage } from './base-page';
+import { HeaderComponent } from '../components/header-component';
+import { TableComponent } from '../components/table-component';
+import { ModalComponent } from '../components/modal-component';
+
+export class ProductsPage extends BasePage {
+    // Página de productos — compuesta por components.
+    readonly url = 'https://mi-app.com/products';
+
+    // Components reutilizables
+    readonly header: HeaderComponent;
+    readonly table: TableComponent;
+    readonly deleteModal: ModalComponent;
+
+    // Locators propios de esta página
+    readonly addProductButton: Locator;
+    readonly filterInput: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.header = new HeaderComponent(page);
+        this.table = new TableComponent(page, '#products-table');
+        this.deleteModal = new ModalComponent(page, '#confirm-delete');
+        this.addProductButton = page.locator('[data-testid="add-product"]');
+        this.filterInput = page.locator('[data-testid="filter"]');
+    }
+
+    async addProduct(): Promise&lt;this&gt; {
+        // Abrir formulario de nuevo producto.
+        await this.addProductButton.click();
+        return this;
+    }
+
+    async deleteProduct(productName: string): Promise&lt;this&gt; {
+        // Eliminar un producto con confirmación.
+        const row = this.table.findRowWithText(productName);
+        await row.locator('.btn-delete').click();
+        await this.deleteModal.waitForOpen();
+        await this.deleteModal.confirm();
+        return this;
+    }
+
+    async filterProducts(text: string): Promise&lt;this&gt; {
+        // Filtrar la tabla de productos.
+        await this.filterInput.fill(text);
+        return this;
+    }
+}
+
+// ── En los tests ──
+import { test, expect } from '@playwright/test';
+
+test('eliminar producto', async ({ page }) =&gt; {
+    const products = new ProductsPage(page);
+    await products.navigate();
+    const initialCount = await products.table.getRowCount();
+
+    await products.deleteProduct('Producto Test');
+
+    expect(await products.table.getRowCount()).toBe(initialCount - 1);
+});
+
+test('header muestra usuario', async ({ page }) =&gt; {
+    const products = new ProductsPage(page);
+    await products.navigate();
+    // Accedemos al header a través del Page Object
+    expect(await products.header.getUsername()).toBe('Juan Reina');
+});
+
+test('búsqueda global desde productos', async ({ page }) =&gt; {
+    const products = new ProductsPage(page);
+    await products.navigate();
+    // El header con búsqueda global funciona desde cualquier página
+    await products.header.search('Configuración');
+    expect(page.url()).toContain('settings');
+});</code></pre>
+            </div>
+        </div>
         </div>
 
         <h3>📁 Estructura con components</h3>

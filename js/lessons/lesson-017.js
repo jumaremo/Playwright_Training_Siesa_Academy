@@ -48,7 +48,18 @@ const LESSON_017 = {
         </div>
 
         <h3>🔧 Configurar timeouts globales</h3>
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L017-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 
 import pytest
 
@@ -70,9 +81,44 @@ def configurar_timeouts(page):
     page.set_default_navigation_timeout(30000)  # 30 segundos
 
     yield page</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    // Timeout para cada test completo: 60 segundos
+    timeout: 60000,
+
+    // Timeout para expect() assertions
+    expect: {
+        timeout: 10000  // 10 segundos
+    },
+
+    use: {
+        // Timeout para acciones (click, fill, etc.)
+        actionTimeout: 10000,  // 10 segundos
+
+        // Timeout para navegación (goto, goBack)
+        navigationTimeout: 30000,  // 30 segundos
+    }
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⏳ Timeout por acción individual</h3>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L017-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_timeouts_individuales(page: Page):
     # Timeout en goto
@@ -87,9 +133,40 @@ def test_timeouts_individuales(page: Page):
     # Timeout en expect
     expect(page.locator("#resultado")).to_be_visible(timeout=20000)
     expect(page).to_have_url("**/resultado", timeout=15000)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('timeouts individuales', async ({ page }) => {
+    // Timeout en goto
+    await page.goto('https://sitio-lento.com', { timeout: 60000 });
+
+    // Timeout en click
+    await page.click('#boton-dinamico', { timeout: 15000 });
+
+    // Timeout en fill
+    await page.fill('#campo-ajax', 'texto', { timeout: 10000 });
+
+    // Timeout en expect
+    await expect(page.locator('#resultado')).toBeVisible({ timeout: 20000 });
+    await expect(page).toHaveURL('**/resultado', { timeout: 15000 });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 wait_for_selector y wait_for_url</h3>
-        <pre><code class="python">def test_esperas_explicitas(page: Page):
+        <div class="code-tabs" data-code-id="L017-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_esperas_explicitas(page: Page):
     page.goto("https://mi-app.com")
 
     # Esperar a que un elemento aparezca
@@ -106,10 +183,43 @@ def test_timeouts_individuales(page: Page):
 
     # Esperar URL específica
     page.wait_for_url("**/dashboard", timeout=10000)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('esperas explícitas', async ({ page }) => {
+    await page.goto('https://mi-app.com');
+
+    // Esperar a que un elemento aparezca
+    await page.waitForSelector('#datos-cargados', { timeout: 15000 });
+
+    // Esperar a que un elemento desaparezca
+    await page.waitForSelector('#spinner', { state: 'hidden', timeout: 10000 });
+
+    // Esperar a que un elemento sea eliminado del DOM
+    await page.waitForSelector('#temporal', { state: 'detached' });
+
+    // Esperar a que un elemento sea adjuntado al DOM
+    await page.waitForSelector('#nuevo-elemento', { state: 'attached' });
+
+    // Esperar URL específica
+    await page.waitForURL('**/dashboard', { timeout: 10000 });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⏰ wait_for_timeout (la pausa explícita)</h3>
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># ⚠️ EVITA usar wait_for_timeout en tests reales
+            <div class="code-tabs" data-code-id="L017-4">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># ⚠️ EVITA usar wait_for_timeout en tests reales
 # Solo úsalo para debugging temporal
 
 def test_con_pausa(page: Page):
@@ -122,12 +232,41 @@ def test_con_pausa(page: Page):
     page.wait_for_selector("#elemento-cargado")
     # o
     expect(page.locator("#elemento-cargado")).to_be_visible()</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// ⚠️ EVITA usar waitForTimeout en tests reales
+// Solo úsalo para debugging temporal
+
+test('con pausa', async ({ page }) => {
+    await page.goto('https://example.com');
+
+    // Pausa fija de 2 segundos (NO recomendado en producción)
+    await page.waitForTimeout(2000);
+
+    // ✅ Mejor: esperar una condición real
+    await page.waitForSelector('#elemento-cargado');
+    // o
+    await expect(page.locator('#elemento-cargado')).toBeVisible();
+});</code></pre>
+                </div>
+            </div>
             <p><strong>Regla de oro:</strong> Nunca uses <code>wait_for_timeout()</code> como solución permanente.
             Siempre espera una condición real (selector visible, URL, etc.).</p>
         </div>
 
         <h3>🔄 wait_for_load_state y wait_for_event</h3>
-        <pre><code class="python">def test_esperar_estados(page: Page):
+        <div class="code-tabs" data-code-id="L017-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_esperar_estados(page: Page):
     page.goto("https://mi-app.com")
 
     # Esperar estado de carga de la página
@@ -140,11 +279,63 @@ def test_con_pausa(page: Page):
     response = response_info.value
     assert response.status == 200
     print(f"Datos recibidos: {response.json()}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('esperar estados', async ({ page }) => {
+    await page.goto('https://mi-app.com');
+
+    // Esperar estado de carga de la página
+    await page.waitForLoadState('networkidle');
+
+    // Esperar un evento específico
+    const [response] = await Promise.all([
+        page.waitForResponse('**/api/datos'),
+        page.click('#btn-cargar')
+    ]);
+
+    expect(response.status()).toBe(200);
+    console.log(\`Datos recibidos: \${JSON.stringify(await response.json())}\`);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📋 pytest-timeout para tests completos</h3>
-        <pre><code class="bash"># Instalar
+        <div class="code-tabs" data-code-id="L017-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Instalar
 pip install pytest-timeout</code></pre>
-        <pre><code class="python"># pytest.ini o pyproject.toml
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># No se requiere instalación adicional
+# El timeout se configura en playwright.config.ts
+npx playwright test --timeout=120000</code></pre>
+            </div>
+        </div>
+        <div class="code-tabs" data-code-id="L017-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># pytest.ini o pyproject.toml
 # [pytest]
 # timeout = 120  # 2 minutos máximo por test
 
@@ -157,6 +348,24 @@ def test_proceso_largo(page):
     page.goto("/proceso-largo")
     page.click("#iniciar")
     expect(page.locator("#completado")).to_be_visible(timeout=50000)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+// timeout: 120000  // 2 minutos máximo por test (global)
+
+// O por test individual con test.setTimeout:
+import { test, expect } from '@playwright/test';
+
+test('proceso largo', async ({ page }) => {
+    /** Este test tiene máximo 60 segundos. */
+    test.setTimeout(60000);
+
+    await page.goto('/proceso-largo');
+    await page.click('#iniciar');
+    await expect(page.locator('#completado')).toBeVisible({ timeout: 50000 });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>💡 Estrategia recomendada de timeouts</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">

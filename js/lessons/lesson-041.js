@@ -30,7 +30,18 @@ const LESSON_041 = {
         <p>El <strong>encadenamiento de locators</strong> reduce el alcance de búsqueda progresivamente.
         Cada llamada a <code>.locator()</code> busca <em>dentro</em> del resultado anterior, como un embudo
         que va estrechándose.</p>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L041-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_encadenamiento_basico(page: Page):
     page.goto("https://example.com/catalogo")
@@ -57,6 +68,36 @@ def test_encadenamiento_basico(page: Page):
 
     # Ambos apuntan a los mismos elementos
     expect(boton_compra).to_have_count(boton.count())</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('encadenamiento básico', async ({ page }) => {
+    await page.goto('https://example.com/catalogo');
+
+    // Paso 1: seleccionar el contenedor principal
+    const catalogo = page.locator('#catalogo');
+
+    // Paso 2: dentro del catálogo, buscar la sección de electrónica
+    const seccion = catalogo.locator('.seccion-electronica');
+
+    // Paso 3: dentro de la sección, buscar tarjetas de producto
+    const tarjetas = seccion.locator('.tarjeta-producto');
+
+    // Paso 4: dentro de las tarjetas, buscar el botón de compra
+    const botonCompra = tarjetas.locator('button.comprar');
+
+    // Encadenamiento fluido (equivalente a lo anterior)
+    const boton = page.locator('#catalogo')
+        .locator('.seccion-electronica')
+        .locator('.tarjeta-producto')
+        .locator('button.comprar');
+
+    // Ambos apuntan a los mismos elementos
+    await expect(botonCompra).toHaveCount(await boton.count());
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ Importante sobre encadenamiento</h4>
@@ -70,7 +111,18 @@ def test_encadenamiento_basico(page: Page):
         <p>Mientras que <code>locator.locator()</code> busca <em>hijos</em>, <code>locator.filter()</code>
         <strong>filtra entre los propios elementos</strong> que coinciden, usando criterios como texto,
         sub-locators o exclusiones.</p>
-        <pre><code class="python">def test_filtrado_por_texto(page: Page):
+        <div class="code-tabs" data-code-id="L041-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_filtrado_por_texto(page: Page):
     page.goto("https://example.com/lista-usuarios")
 
     # Obtener todas las filas de la tabla
@@ -89,8 +141,42 @@ def test_encadenamiento_basico(page: Page):
     print(f"Filas activas: {filas_activas.count()}")
     print(f"Filas no suspendidas: {filas_no_suspendidas.count()}")
     print(f"Filas admin: {filas_admin.count()}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('filtrado por texto', async ({ page }) => {
+    await page.goto('https://example.com/lista-usuarios');
 
-        <pre><code class="python">def test_filtrado_por_sub_locator(page: Page):
+    // Obtener todas las filas de la tabla
+    const filas = page.locator('table tbody tr');
+
+    // Filtrar filas que contienen "Activo" en su texto
+    const filasActivas = filas.filter({ hasText: 'Activo' });
+
+    // Filtrar filas que NO contienen "Suspendido"
+    const filasNoSuspendidas = filas.filter({ hasNotText: 'Suspendido' });
+
+    // hasText acepta regex
+    const filasAdmin = filas.filter({ hasText: /Admin|Administrador/ });
+
+    console.log(\`Filas activas: \${await filasActivas.count()}\`);
+    console.log(\`Filas no suspendidas: \${await filasNoSuspendidas.count()}\`);
+    console.log(\`Filas admin: \${await filasAdmin.count()}\`);
+});</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L041-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_filtrado_por_sub_locator(page: Page):
     page.goto("https://example.com/dashboard")
 
     # Obtener todas las tarjetas
@@ -117,6 +203,36 @@ def test_encadenamiento_basico(page: Page):
     )
 
     expect(tarjetas_nuevas_habilitadas.first).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('filtrado por sub-locator', async ({ page }) => {
+    await page.goto('https://example.com/dashboard');
+
+    // Obtener todas las tarjetas
+    const tarjetas = page.locator('.card');
+
+    // Filtrar tarjetas que CONTIENEN un badge de "Nuevo"
+    const tarjetasNuevas = tarjetas.filter({ has: page.locator('.badge-nuevo') });
+
+    // Filtrar tarjetas que contienen un ícono específico
+    const tarjetasConAlerta = tarjetas.filter({
+        has: page.locator('.icon-alerta'),
+    });
+
+    // Filtrar tarjetas que NO contienen un botón deshabilitado
+    const tarjetasHabilitadas = tarjetas.filter({
+        hasNot: page.locator('button[disabled]'),
+    });
+
+    // Combinar múltiples filtros (AND implícito)
+    const tarjetasNuevasHabilitadas = tarjetas
+        .filter({ has: page.locator('.badge-nuevo') })
+        .filter({ hasNot: page.locator('button[disabled]') });
+
+    await expect(tarjetasNuevasHabilitadas.first()).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Parámetros de filter()</h4>
@@ -152,7 +268,18 @@ def test_encadenamiento_basico(page: Page):
         <h3>📍 Selección posicional: first, last, nth()</h3>
         <p>Cuando un locator coincide con múltiples elementos, puedes seleccionar uno específico
         por su posición.</p>
-        <pre><code class="python">def test_seleccion_posicional(page: Page):
+        <div class="code-tabs" data-code-id="L041-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_seleccion_posicional(page: Page):
     page.goto("https://example.com/lista")
 
     items = page.locator(".lista-item")
@@ -173,6 +300,32 @@ def test_encadenamiento_basico(page: Page):
     segunda_fila = page.locator("table tbody tr").nth(1)
     nombre = segunda_fila.locator("td").first
     expect(nombre).to_have_text("María García")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('selección posicional', async ({ page }) => {
+    await page.goto('https://example.com/lista');
+
+    const items = page.locator('.lista-item');
+
+    // Primer elemento
+    const primero = items.first();
+    await expect(primero).toBeVisible();
+
+    // Último elemento
+    const ultimo = items.last();
+    await expect(ultimo).toBeVisible();
+
+    // Elemento por índice (0-based)
+    const tercero = items.nth(2);
+    await expect(tercero).toBeVisible();
+
+    // Ejemplo práctico: segunda fila de una tabla
+    const segundaFila = page.locator('table tbody tr').nth(1);
+    const nombre = segundaFila.locator('td').first();
+    await expect(nombre).toHaveText('María García');
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ Precaución con índices posicionales</h4>
@@ -183,7 +336,18 @@ def test_encadenamiento_basico(page: Page):
         </div>
 
         <h3>🔢 Conteo y colecciones: count() y all()</h3>
-        <pre><code class="python">def test_count_y_all(page: Page):
+        <div class="code-tabs" data-code-id="L041-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_count_y_all(page: Page):
     page.goto("https://example.com/productos")
 
     productos = page.locator(".producto")
@@ -206,11 +370,52 @@ def test_encadenamiento_basico(page: Page):
 
     # Uso con expect para verificar cantidad exacta
     expect(productos).to_have_count(12)  # Esperar exactamente 12</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('count y all', async ({ page }) => {
+    await page.goto('https://example.com/productos');
+
+    const productos = page.locator('.producto');
+
+    // count() — número de elementos que coinciden
+    const total = await productos.count();
+    console.log(\`Total de productos: \${total}\`);
+    expect(total).toBeGreaterThan(0);
+
+    // all() — lista de locators individuales
+    const listaProductos = await productos.all();
+    for (const producto of listaProductos) {
+        const nombre = await producto.locator('.nombre').textContent();
+        const precio = await producto.locator('.precio').textContent();
+        console.log(\`  \${nombre}: \${precio}\`);
+    }
+
+    // Verificar que todos los productos tienen precio
+    for (const producto of await productos.all()) {
+        await expect(producto.locator('.precio')).toBeVisible();
+    }
+
+    // Uso con expect para verificar cantidad exacta
+    await expect(productos).toHaveCount(12);  // Esperar exactamente 12
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔀 Operaciones de conjunto: and_() y or_()</h3>
         <p>Desde <strong>Playwright 1.34+</strong>, puedes combinar locators usando operaciones de
         intersección (<code>and_()</code>) y unión (<code>or_()</code>).</p>
-        <pre><code class="python">def test_and_or_locators(page: Page):
+        <div class="code-tabs" data-code-id="L041-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_and_or_locators(page: Page):
     page.goto("https://example.com/formulario")
 
     # and_() — intersección: elementos que cumplen AMBAS condiciones
@@ -241,6 +446,36 @@ def test_encadenamiento_basico(page: Page):
         .and_(page.locator("[required]"))
     )
     print(f"Inputs requeridos: {input_requerido.count()}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('and y or locators', async ({ page }) => {
+    await page.goto('https://example.com/formulario');
+
+    // and() — intersección: elementos que cumplen AMBAS condiciones
+    // Botón que es de clase "primario" Y contiene texto "Guardar"
+    const boton = page.locator('button').and(
+        page.locator('.primario')
+    );
+    // Equivalente a: page.locator("button.primario")
+
+    // or() — unión: elementos que cumplen ALGUNA condición
+    const camposProblema = page.locator('.error').or(
+        page.locator('.advertencia')
+    );
+    console.log(\`Campos con problemas: \${await camposProblema.count()}\`);
+
+    // Ejemplo práctico: botón "Enviar" o "Submit" (soporte i18n)
+    const botonEnviar = page.getByRole('button', { name: 'Enviar' })
+        .or(page.getByRole('button', { name: 'Submit' }));
+    await expect(botonEnviar).toBeVisible();
+
+    // and() con locators semánticos
+    const inputRequerido = page.getByRole('textbox')
+        .and(page.locator('[required]'));
+    console.log(\`Inputs requeridos: \${await inputRequerido.count()}\`);
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🧠 and_() vs filter(has=...) vs locator.locator()</h4>
@@ -275,7 +510,18 @@ def test_encadenamiento_basico(page: Page):
 
         <h3>📋 Patrones prácticos</h3>
         <h4>Encontrar una fila en una tabla por contenido de celda</h4>
-        <pre><code class="python">def test_buscar_fila_en_tabla(page: Page):
+        <div class="code-tabs" data-code-id="L041-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_buscar_fila_en_tabla(page: Page):
     page.goto("https://example.com/usuarios")
 
     # Buscar la fila que contiene "juan.reina@siesa.com"
@@ -290,9 +536,38 @@ def test_encadenamiento_basico(page: Page):
 
     # Dentro de esa fila, hacer clic en "Editar"
     fila_juan.locator("button", has_text="Editar").click()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('buscar fila en tabla', async ({ page }) => {
+    await page.goto('https://example.com/usuarios');
+
+    // Buscar la fila que contiene "juan.reina@siesa.com"
+    const filaJuan = page.locator('table tbody tr')
+        .filter({ hasText: 'juan.reina@siesa.com' });
+
+    // Dentro de esa fila, obtener el nombre
+    const nombre = filaJuan.locator('td').first();
+    await expect(nombre).toHaveText('Juan Reina');
+
+    // Dentro de esa fila, hacer clic en "Editar"
+    await filaJuan.locator('button', { hasText: 'Editar' }).click();
+});</code></pre>
+            </div>
+        </div>
 
         <h4>Seleccionar una tarjeta por su título</h4>
-        <pre><code class="python">def test_seleccionar_tarjeta(page: Page):
+        <div class="code-tabs" data-code-id="L041-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_seleccionar_tarjeta(page: Page):
     page.goto("https://example.com/dashboard")
 
     # Encontrar la tarjeta cuyo título es "Ventas del mes"
@@ -308,9 +583,39 @@ def test_encadenamiento_basico(page: Page):
 
     # Hacer clic en "Ver detalle" de esa tarjeta
     tarjeta_ventas.locator("a", has_text="Ver detalle").click()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('seleccionar tarjeta', async ({ page }) => {
+    await page.goto('https://example.com/dashboard');
+
+    // Encontrar la tarjeta cuyo título es "Ventas del mes"
+    const tarjetaVentas = page.locator('.card')
+        .filter({ has: page.locator('h3', { hasText: 'Ventas del mes' }) });
+
+    // Leer el valor dentro de la tarjeta
+    const valor = tarjetaVentas.locator('.valor-principal');
+    await expect(valor).toBeVisible();
+    console.log(\`Ventas: \${await valor.textContent()}\`);
+
+    // Hacer clic en "Ver detalle" de esa tarjeta
+    await tarjetaVentas.locator('a', { hasText: 'Ver detalle' }).click();
+});</code></pre>
+            </div>
+        </div>
 
         <h4>Filtrar lista de productos por categoría y disponibilidad</h4>
-        <pre><code class="python">def test_filtrar_productos(page: Page):
+        <div class="code-tabs" data-code-id="L041-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_filtrar_productos(page: Page):
     page.goto("https://example.com/tienda")
 
     productos = page.locator(".producto")
@@ -329,9 +634,43 @@ def test_encadenamiento_basico(page: Page):
         nombre = laptop.locator(".nombre").text_content()
         precio = laptop.locator(".precio").text_content()
         print(f"  {nombre} - {precio}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('filtrar productos', async ({ page }) => {
+    await page.goto('https://example.com/tienda');
+
+    const productos = page.locator('.producto');
+
+    // Productos disponibles de la categoría "Laptop"
+    const laptopsDisponibles = productos
+        .filter({ has: page.locator('.categoria', { hasText: 'Laptop' }) })
+        .filter({ hasNot: page.locator('.agotado') });
+
+    console.log(\`Laptops disponibles: \${await laptopsDisponibles.count()}\`);
+
+    // Iterar sobre cada laptop disponible
+    for (const laptop of await laptopsDisponibles.all()) {
+        const nombre = await laptop.locator('.nombre').textContent();
+        const precio = await laptop.locator('.precio').textContent();
+        console.log(\`  \${nombre} - \${precio}\`);
+    }
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🐛 Debugging de locators</h3>
-        <pre><code class="python">def test_debugging_locators(page: Page):
+        <div class="code-tabs" data-code-id="L041-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_debugging_locators(page: Page):
     page.goto("https://example.com/pagina")
 
     locator = page.locator(".producto")
@@ -356,14 +695,66 @@ def test_encadenamiento_basico(page: Page):
         locator.first.click()
     else:
         print("ADVERTENCIA: locator no encontró elementos")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('debugging locators', async ({ page }) => {
+    await page.goto('https://example.com/pagina');
+
+    const locator = page.locator('.producto');
+
+    // count() — cuántos elementos coinciden
+    console.log(\`Elementos encontrados: \${await locator.count()}\`);
+
+    // highlight() — resalta visualmente el elemento (útil en headed mode)
+    await locator.first().highlight();
+
+    // evaluate() — ejecutar JS sobre el elemento para inspección
+    const tagName = await locator.first().evaluate(el => el.tagName);
+    const classList = await locator.first().evaluate(el => el.className);
+    console.log(\`Tag: \${tagName}, Classes: \${classList}\`);
+
+    // Obtener el HTML del elemento
+    const html = await locator.first().evaluate(el => el.outerHTML);
+    console.log(\`HTML: \${html.slice(0, 200)}...\`);
+
+    // Verificar que el locator coincide con algo antes de interactuar
+    if (await locator.count() > 0) {
+        await locator.first().click();
+    } else {
+        console.log('ADVERTENCIA: locator no encontró elementos');
+    }
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip: highlight() para debugging visual</h4>
             <p>Ejecuta tus tests en modo visible (<code>--headed</code>) y usa <code>locator.highlight()</code>
             para ver exactamente qué elemento está seleccionando tu locator. Es la forma más rápida de
             confirmar que tu selector apunta al elemento correcto.</p>
-            <pre><code class="bash"># Ejecutar en modo visible para usar highlight()
+            <div class="code-tabs" data-code-id="L041-11">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-bash"># Ejecutar en modo visible para usar highlight()
 pytest tests/ --headed --slowmo=500</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <div class="code-note">
+                        <span class="code-note-icon">ℹ️</span>
+                        <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                    </div>
+                    <pre><code class="language-bash"># Ejecutar en modo visible para usar highlight()
+npx playwright test --headed</code></pre>
+                </div>
+            </div>
         </div>
 
         <h3>📊 Tabla comparativa: cuándo usar cada técnica</h3>
@@ -411,7 +802,18 @@ pytest tests/ --headed --slowmo=500</code></pre>
         </table>
 
         <h3>🛒 Ejemplo completo: Navegar un catálogo de productos</h3>
-        <pre><code class="python">"""
+        <div class="code-tabs" data-code-id="L041-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">"""
 Ejemplo completo: automatizar la navegación de un catálogo de productos
 con filtrado complejo usando encadenamiento y filter().
 """
@@ -474,6 +876,74 @@ def test_catalogo_completo(page: Page):
         precio_texto = producto.locator(".precio").first.text_content()
         precio_num = float(re.sub(r"[^\\d.]", "", precio_texto))
         assert precio_num > 0, f"Precio inválido: {precio_texto}"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">/**
+ * Ejemplo completo: automatizar la navegación de un catálogo de productos
+ * con filtrado complejo usando encadenamiento y filter().
+ */
+import { test, expect } from '@playwright/test';
+
+test('catálogo completo', async ({ page }) => {
+    await page.goto('https://example.com/catalogo');
+
+    // --- 1. Verificar que el catálogo cargó ---
+    const productos = page.locator('.catalogo .producto');
+    await expect(productos.first()).toBeVisible();
+    const total = await productos.count();
+    console.log(\`Total productos en catálogo: \${total}\`);
+
+    // --- 2. Filtrar por categoría "Electrónica" ---
+    const electronicos = productos.filter({
+        has: page.locator('.categoria', { hasText: 'Electrónica' }),
+    });
+    console.log(\`Productos de electrónica: \${await electronicos.count()}\`);
+
+    // --- 3. De los electrónicos, solo los disponibles ---
+    const disponibles = electronicos.filter({
+        hasNot: page.locator('.badge-agotado'),
+    });
+    console.log(\`Electrónicos disponibles: \${await disponibles.count()}\`);
+
+    // --- 4. De los disponibles, solo los con descuento ---
+    const conDescuento = disponibles.filter({
+        has: page.locator('.precio-descuento'),
+    });
+    console.log(\`Con descuento: \${await conDescuento.count()}\`);
+
+    // --- 5. Del primer producto con descuento, obtener detalles ---
+    if (await conDescuento.count() > 0) {
+        const primerOferta = conDescuento.first();
+        const nombre = await primerOferta.locator('h3.nombre').textContent();
+        const precioOriginal = await primerOferta.locator('.precio-original').textContent();
+        const precioOferta = await primerOferta.locator('.precio-descuento').textContent();
+
+        console.log(\`Mejor oferta: \${nombre}\`);
+        console.log(\`  Precio original: \${precioOriginal}\`);
+        console.log(\`  Precio oferta: \${precioOferta}\`);
+
+        // Verificar que el precio de oferta es menor
+        const original = parseFloat(precioOriginal!.replace(/[^\\d.]/g, ''));
+        const oferta = parseFloat(precioOferta!.replace(/[^\\d.]/g, ''));
+        expect(oferta).toBeLessThan(original);
+
+        // --- 6. Agregar al carrito ---
+        await primerOferta.locator('button', { hasText: 'Agregar al carrito' }).click();
+
+        // --- 7. Verificar badge del carrito ---
+        const badgeCarrito = page.locator('.carrito .badge-count');
+        await expect(badgeCarrito).toHaveText('1');
+    }
+
+    // --- 8. Verificar todos los precios son positivos ---
+    for (const producto of await disponibles.all()) {
+        const precioTexto = await producto.locator('.precio').first().textContent();
+        const precioNum = parseFloat(precioTexto!.replace(/[^\\d.]/g, ''));
+        expect(precioNum).toBeGreaterThan(0);
+    }
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio</h3>
         <p>Practica el encadenamiento y filtrado de locators con el siguiente ejercicio:</p>
@@ -488,7 +958,18 @@ def test_catalogo_completo(page: Page):
             <li><strong>Bonus:</strong> Usa <code>.filter(has_not_text="$50.00")</code> para encontrar filas
             donde el monto no es $50.00</li>
         </ol>
-        <pre><code class="python"># Solución del ejercicio
+        <div class="code-tabs" data-code-id="L041-13">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Solución del ejercicio
 from playwright.sync_api import Page, expect
 
 
@@ -518,6 +999,42 @@ def test_tabla_encadenamiento(page: Page):
     for fila in filas_no_50.all():
         texto = fila.locator("td").nth(3).text_content()
         print(f"  Monto: {texto}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Solución del ejercicio
+import { test, expect } from '@playwright/test';
+
+test('tabla encadenamiento', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/tables');
+
+    // Todas las filas
+    const filas = page.locator('table#table1 tbody tr');
+    await expect(filas).toHaveCount(4);
+
+    // Fila de Smith
+    const filaSmith = filas.filter({ hasText: 'Smith' });
+    await expect(filaSmith).toHaveCount(1);
+
+    // Email de Smith (columna index 2)
+    const emailSmith = filaSmith.locator('td').nth(2);
+    await expect(emailSmith).toHaveText('jsmith@gmail.com');
+
+    // Imprimir todos los apellidos
+    for (const fila of await filas.all()) {
+        const apellido = await fila.locator('td').first().textContent();
+        console.log(\`Apellido: \${apellido}\`);
+    }
+
+    // Filas donde el monto NO es $50.00
+    const filasNo50 = filas.filter({ hasNotText: '\\$50.00' });
+    console.log(\`Filas sin $50.00: \${await filasNo50.count()}\`);
+    for (const fila of await filasNo50.all()) {
+        const texto = await fila.locator('td').nth(3).textContent();
+        console.log(\`  Monto: \${texto}\`);
+    }
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Objetivos de esta lección:</h4>

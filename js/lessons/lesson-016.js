@@ -43,7 +43,18 @@ const LESSON_016 = {
         </div>
 
         <h3>🏗️ Fixtures con yield (setup + teardown)</h3>
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L016-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest
 from playwright.sync_api import Page
 
@@ -62,7 +73,45 @@ def pagina_login(page: Page):
     # --- TEARDOWN ---
     page.click("#btn-logout")
     print("Sesión cerrada correctamente")</code></pre>
-        <pre><code class="python"># test_dashboard.py
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// fixtures.ts - Definir fixtures personalizadas
+import { test as base, expect } from '@playwright/test';
+
+// Extender test con fixture personalizada
+const test = base.extend<{ paginaLogin: import('@playwright/test').Page }>({
+    paginaLogin: async ({ page }, use) => {
+        /** Setup: navegar al login. Teardown: cerrar sesión. */
+        // --- SETUP ---
+        await page.goto('https://mi-app.com/login');
+        await page.fill('#usuario', 'admin');
+        await page.fill('#password', 'secreto');
+        await page.click('#btn-login');
+        await page.waitForURL('**/dashboard');
+
+        await use(page);  // <-- Aquí se ejecuta el test
+
+        // --- TEARDOWN ---
+        await page.click('#btn-logout');
+        console.log('Sesión cerrada correctamente');
+    }
+});
+
+export { test, expect };</code></pre>
+            </div>
+        </div>
+        <div class="code-tabs" data-code-id="L016-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_dashboard.py
 def test_ver_perfil(pagina_login):
     """Usa la fixture: ya está logueado al entrar."""
     pagina_login.click("#link-perfil")
@@ -72,9 +121,38 @@ def test_ver_reportes(pagina_login):
     """Cada test recibe una sesión fresca."""
     pagina_login.click("#link-reportes")
     expect(pagina_login.locator("h1")).to_have_text("Reportes")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test-dashboard.spec.ts
+import { test, expect } from './fixtures';
+
+test('ver perfil', async ({ paginaLogin }) => {
+    /** Usa la fixture: ya está logueado al entrar. */
+    await paginaLogin.click('#link-perfil');
+    await expect(paginaLogin.locator('h1')).toHaveText('Mi Perfil');
+});
+
+test('ver reportes', async ({ paginaLogin }) => {
+    /** Cada test recibe una sesión fresca. */
+    await paginaLogin.click('#link-reportes');
+    await expect(paginaLogin.locator('h1')).toHaveText('Reportes');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📦 Scopes de fixtures</h3>
-        <pre><code class="python"># Scope determina cuándo se ejecuta setup/teardown
+        <div class="code-tabs" data-code-id="L016-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Scope determina cuándo se ejecuta setup/teardown
 
 @pytest.fixture(scope="function")  # Default: por cada test
 def datos_test():
@@ -98,9 +176,58 @@ def conexion_db():
 def configuracion_global():
     config = cargar_config()
     yield config</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// En Playwright Test, los scopes se manejan de forma diferente:
+
+// Scope "function" (default) → cada test tiene su propia fixture
+// Equivale a definir la fixture con { scope: 'test' }
+const test = base.extend<{ datosTest: any }>({
+    datosTest: async ({}, use) => {
+        const data = crearDatos();
+        await use(data);
+        borrarDatos(data);
+    }
+});
+
+// Scope "class/module" → test.describe con beforeAll/afterAll
+test.describe('grupo de tests', () => {
+    let sesion: any;
+
+    test.beforeAll(async () => {
+        sesion = await iniciarSesion();
+    });
+
+    test.afterAll(async () => {
+        await cerrarSesion(sesion);
+    });
+
+    test('test 1', async ({ page }) => { /* usa sesion */ });
+    test('test 2', async ({ page }) => { /* usa sesion */ });
+});
+
+// Scope "session" → globalSetup en playwright.config.ts
+// import { defineConfig } from '@playwright/test';
+// export default defineConfig({
+//     globalSetup: './global-setup.ts',
+//     globalTeardown: './global-teardown.ts',
+// });</code></pre>
+            </div>
+        </div>
 
         <h3>🔄 autouse: fixtures automáticas</h3>
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L016-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 
 @pytest.fixture(autouse=True)
 def preparar_cada_test(page: Page):
@@ -114,9 +241,41 @@ def preparar_cada_test(page: Page):
     # Teardown: capturar estado final
     print(f"--- Test finalizado ---")
     print(f"URL final: {page.url}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// En Playwright Test, el equivalente de autouse es beforeEach/afterEach
+
+// test-setup.spec.ts o en un archivo base
+import { test, expect } from '@playwright/test';
+
+test.beforeEach(async ({ page }) => {
+    /** Se ejecuta automáticamente antes de CADA test. */
+    // Setup: limpiar cookies y storage
+    await page.context.clearCookies();
+    console.log('\\n--- Iniciando test ---');
+});
+
+test.afterEach(async ({ page }) => {
+    // Teardown: capturar estado final
+    console.log('--- Test finalizado ---');
+    console.log(\`URL final: \${page.url()}\`);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📄 conftest.py: el archivo de fixtures</h3>
-        <pre><code class="python"># conftest.py - Archivo especial de pytest
+        <div class="code-tabs" data-code-id="L016-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py - Archivo especial de pytest
 # Las fixtures aquí están disponibles para TODOS los tests en el directorio
 
 import pytest
@@ -156,10 +315,72 @@ def producto_test(page: Page):
     # Teardown: eliminar producto
     page.goto(f"/admin/productos/{producto_id}/eliminar")
     page.click("#confirmar")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts - Configuración global (equivale a conftest.py)
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        baseURL: 'https://mi-app.com',
+        viewport: { width: 1920, height: 1080 },
+    }
+});
+
+// fixtures.ts - Fixtures reutilizables
+import { test as base, expect } from '@playwright/test';
+
+type Fixtures = {
+    usuarioLogueado: import('@playwright/test').Page;
+    productoTest: { id: string; nombre: string };
+};
+
+export const test = base.extend&lt;Fixtures&gt;({
+    // Fixture de login reutilizable
+    usuarioLogueado: async ({ page }, use) => {
+        await page.goto('/login');
+        await page.fill('#email', 'test@ejemplo.com');
+        await page.fill('#password', 'clave123');
+        await page.click('#btn-login');
+        await expect(page).toHaveURL('**/dashboard');
+        await use(page);
+    },
+
+    // Fixture para crear datos de prueba
+    productoTest: async ({ page }, use) => {
+        // Crear producto via API o UI
+        await page.goto('/admin/productos/nuevo');
+        await page.fill('#nombre', 'Producto Test');
+        await page.fill('#precio', '99.99');
+        await page.click('#btn-guardar');
+        const productoId = await page.locator('#producto-id').textContent();
+
+        await use({ id: productoId!, nombre: 'Producto Test' });
+
+        // Teardown: eliminar producto
+        await page.goto(\`/admin/productos/\${productoId}/eliminar\`);
+        await page.click('#confirmar');
+    }
+});
+
+export { expect };</code></pre>
+            </div>
+        </div>
 
         <h3>🗂️ Jerarquía de conftest.py</h3>
         <div style="background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code>tests/
+            <div class="code-tabs" data-code-id="L016-6">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code>tests/
 ├── conftest.py              # Fixtures para TODOS los tests
 ├── test_home.py
 ├── auth/
@@ -169,6 +390,24 @@ def producto_test(page: Page):
 └── admin/
     ├── conftest.py          # Fixtures solo para admin/
     └── test_dashboard.py</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <div class="code-note">
+                        <span class="code-note-icon">ℹ️</span>
+                        <span class="code-note-text">Estructura equivalente en Playwright Test (TypeScript):</span>
+                    </div>
+                    <pre><code>tests/
+├── fixtures.ts              # Fixtures para TODOS los tests
+├── home.spec.ts
+├── auth/
+│   ├── fixtures.ts          # Fixtures solo para auth/
+│   ├── login.spec.ts
+│   └── registro.spec.ts
+└── admin/
+    ├── fixtures.ts          # Fixtures solo para admin/
+    └── dashboard.spec.ts</code></pre>
+                </div>
+            </div>
             <p>Cada subdirectorio puede tener su propio <code>conftest.py</code>.
             Las fixtures se heredan de arriba hacia abajo.</p>
         </div>

@@ -7,13 +7,42 @@
 const LESSON_003 = {
     id: 3,
     title: "Instalación de Playwright y navegadores",
-    duration: "8 min",
+    duration: "10 min",
     level: "beginner",
     section: "section-01",
     content: `
         <h2>🎭 Instalación de Playwright y navegadores</h2>
-        <p>Playwright necesita dos cosas: el paquete Python y los binarios de los navegadores.
+        <p>Playwright necesita dos cosas: el paquete Python (o npm) y los binarios de los navegadores.
         En esta lección instalaremos ambos.</p>
+
+        <div style="background: #e0f2f1; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #009688;">
+            <h4>🔍 Verificación de prerequisitos</h4>
+            <p>Antes de continuar, confirma que tienes las herramientas base instaladas:</p>
+            <div class="code-tabs" data-code-id="L003-prereq">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-bash"># Los 3 deben funcionar:
+python --version       # Python 3.8+ ✓
+pip --version          # pip 23+ ✓
+# Y tu entorno virtual debe estar activado:
+# (venv) debe aparecer al inicio del prompt</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-bash"># Los 2 deben funcionar:
+node --version   # v18+ ✓
+npm --version    # 9+ ✓</code></pre>
+                </div>
+            </div>
+            <p style="margin-bottom: 0;">Si algún comando falla, vuelve a la <strong>Lección 002</strong> para configurar tu entorno.</p>
+        </div>
 
         <h3>📥 Paso 1: Instalar paquetes</h3>
         <div class="code-tabs" data-code-id="L003-1">
@@ -41,10 +70,15 @@ pip install -r requirements.txt</code></pre>
                     <span class="code-note-icon">ℹ️</span>
                     <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
                 </div>
-                <pre><code class="language-bash"># Inicializar un proyecto Playwright con TypeScript
+                <pre><code class="language-bash"># Opción A: Inicialización guiada (RECOMENDADA para proyectos nuevos)
 npm init playwright@latest
+# Esto genera automáticamente:
+#   playwright.config.ts   → configuración del framework
+#   tests/example.spec.ts  → test de ejemplo funcional
+#   package.json           → dependencias actualizadas
+#   tests-examples/        → más ejemplos de referencia
 
-# O instalar manualmente
+# Opción B: Instalación manual (para proyectos existentes)
 npm install -D @playwright/test
 
 # Instalar desde package.json existente
@@ -68,12 +102,12 @@ npm install</code></pre>
                 <pre><code class="language-bash"># Instalar los 3 navegadores (Chromium, Firefox, WebKit)
 playwright install
 
-# Output esperado:
-# Downloading Chromium 131.0.6778.33 ...
-# Downloading Firefox 132.0 ...
-# Downloading WebKit 18.2 ...
+# Output esperado (las versiones pueden variar):
+# Downloading Chromium 136.0.7103.25 ...
+# Downloading Firefox 137.0 ...
+# Downloading WebKit 18.4 ...
 
-# Si solo necesitas Chromium (más rápido):
+# Si solo necesitas Chromium (más rápido, ~150MB menos):
 playwright install chromium</code></pre>
             </div>
             <div class="code-panel" data-lang="typescript">
@@ -84,13 +118,16 @@ playwright install chromium</code></pre>
                 <pre><code class="language-bash"># Instalar los 3 navegadores (Chromium, Firefox, WebKit)
 npx playwright install
 
-# Output esperado:
-# Downloading Chromium 131.0.6778.33 ...
-# Downloading Firefox 132.0 ...
-# Downloading WebKit 18.2 ...
+# Output esperado (las versiones pueden variar):
+# Downloading Chromium 136.0.7103.25 ...
+# Downloading Firefox 137.0 ...
+# Downloading WebKit 18.4 ...
 
-# Si solo necesitas Chromium (más rápido):
-npx playwright install chromium</code></pre>
+# Si solo necesitas Chromium (más rápido, ~150MB menos):
+npx playwright install chromium
+
+# Nota: si usaste "npm init playwright@latest",
+# los navegadores ya se instalaron automáticamente</code></pre>
             </div>
         </div>
 
@@ -98,22 +135,28 @@ npx playwright install chromium</code></pre>
             <h4>🔍 ¿Qué se instaló?</h4>
             <table style="width:100%; border-collapse: collapse;">
                 <tr style="background: #c8e6c9;">
-                    <th style="padding: 8px; border: 1px solid #ddd;">Paquete</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Paquete Python</th>
+                    <th style="padding: 8px; border: 1px solid #ddd;">Paquete TypeScript</th>
                     <th style="padding: 8px; border: 1px solid #ddd;">Propósito</th>
                 </tr>
                 <tr>
                     <td style="padding: 8px; border: 1px solid #ddd;"><code>playwright</code></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>playwright</code> (incluido en @playwright/test)</td>
                     <td style="padding: 8px; border: 1px solid #ddd;">Biblioteca principal para controlar navegadores</td>
                 </tr>
                 <tr style="background: #f5f5f5;">
                     <td style="padding: 8px; border: 1px solid #ddd;"><code>pytest-playwright</code></td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">Plugin de pytest que provee fixtures: <code>page</code>, <code>browser</code>, <code>context</code></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">— (integrado)</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Plugin de test: fixtures <code>page</code>, <code>browser</code>, <code>context</code></td>
                 </tr>
                 <tr>
                     <td style="padding: 8px; border: 1px solid #ddd;"><code>pytest</code></td>
-                    <td style="padding: 8px; border: 1px solid #ddd;">Framework de testing (se instala como dependencia)</td>
+                    <td style="padding: 8px; border: 1px solid #ddd;"><code>@playwright/test</code></td>
+                    <td style="padding: 8px; border: 1px solid #ddd;">Framework de testing / Test runner</td>
                 </tr>
             </table>
+            <p style="margin-top: 10px; margin-bottom: 0;"><strong>Nota:</strong> En TypeScript, <code>@playwright/test</code> incluye todo en un solo paquete:
+            Playwright + test runner + assertions + fixtures. No necesitas instalar nada adicional.</p>
         </div>
 
         <h3>✅ Paso 3: Verificar la instalación</h3>
@@ -157,14 +200,15 @@ with sync_playwright() as p:
                 <pre><code class="language-bash"># Verificar que Playwright está instalado
 npx playwright --version
 
-# Listar navegadores instalados
-npx playwright install --help
-
-# Test rápido desde línea de comandos
+# Listar tests disponibles
 npx playwright test --list
 
-# Ejecutar el test de ejemplo generado al inicializar
-npx playwright test</code></pre>
+# Ejecutar el test de ejemplo (si usaste npm init playwright@latest)
+npx playwright test
+
+# Output esperado:
+# Running 6 tests using 6 workers
+#   6 passed (5.2s)</code></pre>
             </div>
         </div>
 
@@ -202,14 +246,78 @@ sudo apt install libwoff1 libvpx7 libgstreamer-plugins-bad1.0-0 \\
             </div>
         </div>
 
+        <h3>🔧 Troubleshooting</h3>
+        <table style="width:100%; border-collapse: collapse; margin: 15px 0;">
+            <tr style="background: #fff3cd;">
+                <th style="padding: 10px; border: 1px solid #ddd; width: 40%;">Error</th>
+                <th style="padding: 10px; border: 1px solid #ddd;">Solución</th>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>browserType.launch: Executable doesn't exist</code></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Los navegadores no están instalados. Ejecuta <code>playwright install</code> (Python) o <code>npx playwright install</code> (TS)</td>
+            </tr>
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>Host system is missing dependencies</code> (Linux)</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Ejecuta <code>playwright install-deps</code> o <code>npx playwright install-deps</code> para instalar librerías del sistema</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;">Error de timeout al descargar navegadores</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Proxy corporativo: configura <code>HTTPS_PROXY=http://proxy:puerto</code> antes de ejecutar <code>playwright install</code></td>
+            </tr>
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>Permission denied</code> al instalar (Linux)</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">No uses <code>sudo pip install</code>. Asegúrate de tener el entorno virtual activado</td>
+            </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>npm ERR! code EACCES</code> (Linux/macOS)</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Configura npm para usar un directorio local: <code>npm config set prefix ~/.npm-global</code> y agrega al PATH</td>
+            </tr>
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;">Navegadores ocupan mucho espacio</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Instala solo Chromium: <code>playwright install chromium</code> (~250MB vs ~700MB con los 3)</td>
+            </tr>
+        </table>
+
         <h3>🎯 Ejercicio práctico</h3>
         <ol>
-            <li>Con tu entorno virtual activado, instala Playwright: <code>pip install playwright pytest-playwright</code></li>
-            <li>Instala los navegadores: <code>playwright install</code></li>
-            <li>Ejecuta el test rápido de verificación (código de arriba)</li>
-            <li>Crea un archivo <code>test_verificacion.py</code> con este contenido:</li>
+            <li>Con tu entorno preparado, instala Playwright:</li>
         </ol>
-        <div class="code-tabs" data-code-id="L003-5">
+        <div class="code-tabs" data-code-id="L003-5a">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># ☐ 1. Instalar paquetes
+pip install playwright pytest-playwright
+
+# ☐ 2. Instalar navegadores
+playwright install
+
+# ☐ 3. Verificar versión
+python -c "import playwright; print(playwright.__version__)"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-bash"># ☐ 1. Inicializar proyecto (si no lo hiciste en L002)
+npm init playwright@latest
+
+# ☐ 2. Verificar navegadores (ya se instalaron automáticamente)
+npx playwright --version
+
+# ☐ 3. Ejecutar tests de ejemplo
+npx playwright test</code></pre>
+            </div>
+        </div>
+
+        <ol start="4">
+            <li>Crea tu primer test de verificación:</li>
+        </ol>
+        <div class="code-tabs" data-code-id="L003-5b">
             <div class="code-tabs-header">
                 <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
                     <span class="code-tab-icon">🐍</span> Python
@@ -221,6 +329,7 @@ sudo apt install libwoff1 libvpx7 libgstreamer-plugins-bad1.0-0 \\
             </div>
             <div class="code-panel active" data-lang="python">
                 <pre><code class="language-python"># test_verificacion.py
+import re
 from playwright.sync_api import Page, expect
 
 def test_playwright_funciona(page: Page):
@@ -228,7 +337,7 @@ def test_playwright_funciona(page: Page):
     expect(page).to_have_title(re.compile("Playwright"))</code></pre>
             </div>
             <div class="code-panel" data-lang="typescript">
-                <pre><code class="language-typescript">// test_verificacion.spec.ts
+                <pre><code class="language-typescript">// tests/verificacion.spec.ts
 import { test, expect } from '@playwright/test';
 
 test('playwright funciona', async ({ page }) => {
@@ -237,34 +346,77 @@ test('playwright funciona', async ({ page }) => {
 });</code></pre>
             </div>
         </div>
+
         <ol start="5">
-            <li>Ejecútalo con: <code>pytest test_verificacion.py -v</code></li>
-            <li>Deberías ver un resultado verde: <code>PASSED</code></li>
+            <li>Ejecuta el test y verifica el resultado:</li>
         </ol>
+        <div class="code-tabs" data-code-id="L003-5c">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># ☐ Ejecutar
+pytest test_verificacion.py -v
+
+# Output esperado:
+# test_verificacion.py::test_playwright_funciona PASSED
+#
+# ====== 1 passed in 3.52s ======</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-bash"># ☐ Ejecutar
+npx playwright test tests/verificacion.spec.ts
+
+# Output esperado:
+# Running 1 test using 1 worker
+#   1 passed (2.1s)
+
+# ☐ Ver el reporte HTML (opcional)
+npx playwright show-report</code></pre>
+            </div>
+        </div>
+
+        <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
+            <h4>✅ Checklist de verificación final</h4>
+            <ul style="list-style: none; padding-left: 5px;">
+                <li>☐ Playwright instalado (<code>python -c "import playwright"</code> sin error)</li>
+                <li>☐ Navegadores descargados (<code>playwright install</code> completado)</li>
+                <li>☐ Test de verificación ejecutado y pasó (PASSED)</li>
+                <li>☐ Entiendes la diferencia entre <code>playwright</code> (paquete) y <code>pytest-playwright</code> (plugin)</li>
+            </ul>
+        </div>
 
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Objetivos de esta lección:</h4>
             <ul>
-                <li>Instalar Playwright y pytest-playwright con pip</li>
+                <li>Instalar Playwright y pytest-playwright / @playwright/test</li>
                 <li>Descargar los navegadores que Playwright controla</li>
                 <li>Verificar que la instalación funciona correctamente</li>
-                <li>Ejecutar tu primer test real con pytest</li>
+                <li>Ejecutar tu primer test real con pytest / Playwright Test</li>
+                <li>Saber resolver los errores más comunes de instalación</li>
             </ul>
         </div>
 
         <div style="background: #fff3cd; padding: 10px; border-radius: 8px; margin: 10px 0;">
             <h4>💡 Tip:</h4>
             <p>Los navegadores de Playwright se almacenan en <code>~/.cache/ms-playwright/</code> (Linux/Mac)
-            o <code>%USERPROFILE%\\AppData\\Local\\ms-playwright</code> (Windows). Ocupan ~500MB en total.</p>
+            o <code>%USERPROFILE%\\AppData\\Local\\ms-playwright</code> (Windows). Ocupan ~500MB en total.
+            Si necesitas liberar espacio, puedes borrar esa carpeta y reinstalar solo los que necesites.</p>
         </div>
 
         <h3>🚀 Siguiente: Lección 004 - Configuración de VS Code / PyCharm</h3>
         <p>Configuraremos tu IDE para trabajar eficientemente con Playwright.</p>
     `,
-    topics: ["playwright", "instalación", "navegadores"],
+    topics: ["playwright", "instalación", "navegadores", "troubleshooting"],
     hasCode: true,
     hasExercise: true,
-    estimatedTime: 8,
+    estimatedTime: 10,
     difficulty: "easy",
     type: "foundation"
 };

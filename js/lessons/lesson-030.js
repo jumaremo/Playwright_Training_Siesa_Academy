@@ -21,7 +21,18 @@ const LESSON_030 = {
             <p><code>page.click()</code> es el método más usado de Playwright. Acepta múltiples opciones
             para controlar exactamente cómo se ejecuta el click:</p>
         </div>
-        <pre><code class="python">from playwright.sync_api import Page
+        <div class="code-tabs" data-code-id="L030-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page
 
 def test_click_opciones(page: Page):
     page.goto("https://the-internet.herokuapp.com")
@@ -35,6 +46,25 @@ def test_click_opciones(page: Page):
     page.click("#boton", delay=100)           # Pausa entre mousedown y mouseup (ms)
     page.click("#boton", force=True)          # Ignorar actionability checks
     page.click("#boton", position={"x": 10, "y": 5})  # Click en posición específica</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('click opciones', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com');
+
+    // Click simple (el más común)
+    await page.click("a[href='/login']");
+
+    // Click con opciones avanzadas
+    await page.click('#boton', { button: 'left' });         // Botón izquierdo (default)
+    await page.click('#boton', { clickCount: 2 });          // Doble click
+    await page.click('#boton', { delay: 100 });             // Pausa entre mousedown y mouseup (ms)
+    await page.click('#boton', { force: true });            // Ignorar actionability checks
+    await page.click('#boton', { position: { x: 10, y: 5 } }); // Click en posición específica
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Opciones de page.click()</h3>
         <table style="width:100%; border-collapse: collapse;">
@@ -86,7 +116,18 @@ def test_click_opciones(page: Page):
         </table>
 
         <h3>👆 Doble click y click derecho</h3>
-        <pre><code class="python">def test_clicks_especiales(page: Page):
+        <div class="code-tabs" data-code-id="L030-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_clicks_especiales(page: Page):
     page.goto("https://the-internet.herokuapp.com/context_menu")
 
     # Doble click — método dedicado
@@ -100,13 +141,43 @@ def test_click_opciones(page: Page):
 
     # Triple click — selecciona párrafo completo
     page.click("#texto-largo", click_count=3)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('clicks especiales', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/context_menu');
+
+    // Doble click — método dedicado
+    await page.dblclick('#contenido-editable');
+
+    // Alternativa con clickCount
+    await page.click('#contenido-editable', { clickCount: 2 });
+
+    // Click derecho (abre menú contextual)
+    await page.click('#hot-spot', { button: 'right' });
+
+    // Triple click — selecciona párrafo completo
+    await page.click('#texto-largo', { clickCount: 3 });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⌨️ Click con modificadores (Shift, Ctrl)</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Los modificadores permiten simular combinaciones de teclado + mouse,
             útil para multi-selección en listas o tablas:</p>
         </div>
-        <pre><code class="python">def test_click_con_modificadores(page: Page):
+        <div class="code-tabs" data-code-id="L030-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_click_con_modificadores(page: Page):
     page.goto("https://ejemplo.com/lista-seleccionable")
 
     # Ctrl+Click — agregar a la selección
@@ -122,9 +193,41 @@ def test_click_opciones(page: Page):
 
     # Alt+Click — comportamiento especial de la app
     page.click("#elemento", modifiers=["Alt"])</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('click con modificadores', async ({ page }) => {
+    await page.goto('https://ejemplo.com/lista-seleccionable');
+
+    // Ctrl+Click — agregar a la selección
+    await page.click('#item-1');
+    await page.click('#item-3', { modifiers: ['Control'] });
+    await page.click('#item-5', { modifiers: ['Control'] });
+    // Ahora items 1, 3 y 5 están seleccionados
+
+    // Shift+Click — seleccionar rango
+    await page.click('#item-1');
+    await page.click('#item-5', { modifiers: ['Shift'] });
+    // Ahora items 1 a 5 están seleccionados
+
+    // Alt+Click — comportamiento especial de la app
+    await page.click('#elemento', { modifiers: ['Alt'] });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎈 Hovering: page.hover()</h3>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L030-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_hover(page: Page):
     page.goto("https://the-internet.herokuapp.com/hovers")
@@ -144,9 +247,43 @@ def test_hover(page: Page):
     perfiles.nth(1).hover()
     info2 = perfiles.nth(1).locator(".figcaption")
     expect(info2).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('hover', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com/hovers');
+
+    // Hover sobre un elemento para revelar contenido oculto
+    const perfiles = page.locator('.figure');
+
+    // Hover sobre el primer perfil
+    await perfiles.first().hover();
+
+    // Verificar que se muestra la información
+    const info = perfiles.first().locator('.figcaption');
+    await expect(info).toBeVisible();
+    await expect(info.locator('h5')).toHaveText('name: user1');
+
+    // Hover sobre el segundo perfil
+    await perfiles.nth(1).hover();
+    const info2 = perfiles.nth(1).locator('.figcaption');
+    await expect(info2).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔗 Interacción con links</h3>
-        <pre><code class="python">def test_links(page: Page):
+        <div class="code-tabs" data-code-id="L030-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_links(page: Page):
     page.goto("https://the-internet.herokuapp.com")
 
     # Click simple en un link
@@ -169,6 +306,34 @@ def test_hover(page: Page):
     # Contar links en la página
     total_links = page.locator("#content ul li a").count()
     assert total_links > 10</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('links', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com');
+
+    // Click simple en un link
+    await page.click("a[href='/login']");
+    await expect(page).toHaveURL('**/login');
+
+    await page.goto('https://the-internet.herokuapp.com');
+
+    // Obtener el href de un link antes de hacer click
+    const href = await page.locator("a[href='/login']").getAttribute('href');
+    expect(href).toBe('/login');
+
+    // Obtener el texto del link
+    const texto = await page.locator("a[href='/login']").innerText();
+    expect(texto).toContain('Form Authentication');
+
+    // Verificar que un link existe y es visible
+    await expect(page.locator("a[href='/checkboxes']")).toBeVisible();
+
+    // Contar links en la página
+    const totalLinks = await page.locator('#content ul li a').count();
+    expect(totalLinks).toBeGreaterThan(10);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧭 page.goto() vs click en links</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -190,7 +355,18 @@ def test_hover(page: Page):
                 </tr>
             </table>
         </div>
-        <pre><code class="python">def test_goto_vs_click(page: Page):
+        <div class="code-tabs" data-code-id="L030-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_goto_vs_click(page: Page):
     # goto() — Navegación directa (setup rápido)
     page.goto("https://the-internet.herokuapp.com/login")
     # Ideal para: precondiciones, ir al punto de inicio del test
@@ -199,13 +375,38 @@ def test_hover(page: Page):
     page.goto("https://the-internet.herokuapp.com")
     page.click("a[href='/login']")
     # Ideal para: verificar que los links funcionan correctamente</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('goto vs click', async ({ page }) => {
+    // goto() — Navegación directa (setup rápido)
+    await page.goto('https://the-internet.herokuapp.com/login');
+    // Ideal para: precondiciones, ir al punto de inicio del test
+
+    // click() — Navegación por interacción (verifica la UI)
+    await page.goto('https://the-internet.herokuapp.com');
+    await page.click("a[href='/login']");
+    // Ideal para: verificar que los links funcionan correctamente
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⏳ Eventos de navegación</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Cuando un click genera una navegación, necesitas esperar a que la página esté lista
             antes de interactuar con ella:</p>
         </div>
-        <pre><code class="python">def test_esperar_navegacion(page: Page):
+        <div class="code-tabs" data-code-id="L030-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_esperar_navegacion(page: Page):
     page.goto("https://the-internet.herokuapp.com")
 
     # Playwright auto-espera navegación después de click
@@ -223,9 +424,43 @@ def test_hover(page: Page):
 
     # Combinación con expect
     expect(page).to_have_url("**/login")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('esperar navegacion', async ({ page }) => {
+    await page.goto('https://the-internet.herokuapp.com');
+
+    // Playwright auto-espera navegación después de click
+    await page.click("a[href='/login']");
+
+    // waitForLoadState — esperar estado específico de la página
+    await page.waitForLoadState('networkidle');     // Sin tráfico de red
+    await page.waitForLoadState('domcontentloaded'); // DOM listo
+    await page.waitForLoadState('load');             // Todo cargado (default)
+
+    // waitForURL — esperar a que la URL cambie
+    await page.goto('https://the-internet.herokuapp.com');
+    await page.click("a[href='/login']");
+    await page.waitForURL('**/login');
+
+    // Combinación con expect
+    await expect(page).toHaveURL('**/login');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🆕 Links que abren nueva pestaña</h3>
-        <pre><code class="python">def test_nueva_pestana(page: Page):
+        <div class="code-tabs" data-code-id="L030-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_nueva_pestana(page: Page):
     """Manejar links con target='_blank' que abren nueva pestaña."""
     page.goto("https://the-internet.herokuapp.com/windows")
 
@@ -243,6 +478,29 @@ def test_hover(page: Page):
 
     # La página original sigue disponible
     expect(page.locator("h3")).to_have_text("Opening a new window")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('nueva pestana', async ({ page }) => {
+    // Manejar links con target='_blank' que abren nueva pestaña
+    await page.goto('https://the-internet.herokuapp.com/windows');
+
+    // Capturar la nueva página que se abrirá
+    const [nuevaPagina] = await Promise.all([
+        page.context().waitForEvent('page'),
+        page.click("a[href='/windows/new']"),
+    ]);
+
+    // Esperar a que cargue la nueva página
+    await nuevaPagina.waitForLoadState();
+
+    // Interactuar con la nueva página
+    await expect(nuevaPagina.locator('h3')).toHaveText('New Window');
+
+    // La página original sigue disponible
+    await expect(page.locator('h3')).toHaveText('Opening a new window');
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip: expect_page() vs popup</h4>
@@ -254,7 +512,18 @@ def test_hover(page: Page):
         </div>
 
         <h3>🏗️ Ejemplo completo: botones y navegación</h3>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L030-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_interacciones_completas(page: Page):
     """Test completo con diferentes tipos de clicks y navegación."""
@@ -287,6 +556,44 @@ def test_interacciones_completas(page: Page):
     page.goto("https://the-internet.herokuapp.com/hovers")
     page.locator(".figure").first.hover()
     expect(page.locator(".figcaption").first).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('interacciones completas', async ({ page }) => {
+    // Test completo con diferentes tipos de clicks y navegación
+
+    // --- Navegación inicial ---
+    await page.goto('https://the-internet.herokuapp.com');
+    await expect(page.locator('h1')).toHaveText('Welcome to the-internet');
+
+    // --- Click en link ---
+    await page.click("a[href='/add_remove_elements/']");
+    await expect(page).toHaveURL('**/add_remove_elements/');
+
+    // --- Click en botón para agregar elementos ---
+    await page.click('button', { timeout: 5000 });
+    await expect(page.locator('.added-manually')).toHaveCount(1);
+
+    // Click múltiple
+    for (let i = 0; i < 3; i++) {
+        await page.click("button:has-text('Add Element')");
+    }
+    await expect(page.locator('.added-manually')).toHaveCount(4);
+
+    // --- Click en botón Delete ---
+    await page.locator('.added-manually').first().click();
+    await expect(page.locator('.added-manually')).toHaveCount(3);
+
+    // --- Navegar atrás ---
+    await page.goBack();
+    await expect(page).toHaveURL('**/');
+
+    // --- Hover test ---
+    await page.goto('https://the-internet.herokuapp.com/hovers');
+    await page.locator('.figure').first().hover();
+    await expect(page.locator('.figcaption').first()).toBeVisible();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <ol>

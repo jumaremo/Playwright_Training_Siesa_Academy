@@ -21,7 +21,18 @@ const LESSON_058 = {
             <p>Un <strong>Fluent API</strong> permite encadenar llamadas a métodos devolviendo
             <code>self</code> en cada acción. Esto crea un estilo de código que se lee como
             una narrativa:</p>
-            <pre><code class="python"># ❌ Sin fluent API — verboso
+            <div class="code-tabs" data-code-id="L058-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># ❌ Sin fluent API — verboso
 checkout = CheckoutPage(page)
 checkout.navigate()
 checkout.fill_name("Juan Reina")
@@ -44,10 +55,48 @@ CheckoutPage(page) \\
     .fill_card_number("4111111111111111") \\
     .accept_terms() \\
     .submit()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// ❌ Sin fluent API — verboso
+const checkout = new CheckoutPage(page);
+await checkout.navigate();
+await checkout.fillName("Juan Reina");
+await checkout.fillEmail("juan@siesa.com");
+await checkout.fillAddress("Calle 5 #38-25");
+await checkout.fillCity("Cali");
+await checkout.selectPayment("Tarjeta de crédito");
+await checkout.fillCardNumber("4111111111111111");
+await checkout.acceptTerms();
+await checkout.submit();
+
+// ✅ Con fluent API — se lee como una historia
+await new CheckoutPage(page)
+    .navigate()
+    .then(c => c.fillName("Juan Reina"))
+    .then(c => c.fillEmail("juan@siesa.com"))
+    .then(c => c.fillAddress("Calle 5 #38-25"))
+    .then(c => c.fillCity("Cali"))
+    .then(c => c.selectPayment("Tarjeta de crédito"))
+    .then(c => c.fillCardNumber("4111111111111111"))
+    .then(c => c.acceptTerms())
+    .then(c => c.submit());</code></pre>
+            </div>
+        </div>
         </div>
 
         <h3>🔧 Implementando Fluent API en un Page Object</h3>
-        <pre><code class="python"># pages/checkout_page.py
+        <div class="code-tabs" data-code-id="L058-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># pages/checkout_page.py
 from pages.base_page import BasePage
 
 class CheckoutPage(BasePage):
@@ -113,9 +162,115 @@ class CheckoutPage(BasePage):
 
     def get_errors(self):
         return self.error_summary.all_text_contents()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// pages/checkout-page.ts
+import { type Page, type Locator } from '@playwright/test';
+import { BasePage } from './base-page';
+
+export class CheckoutPage extends BasePage {
+    // Page Object con Fluent API para el checkout.
+
+    readonly url = "https://mi-app.com/checkout";
+
+    // Locators
+    readonly nameInput: Locator;
+    readonly emailInput: Locator;
+    readonly addressInput: Locator;
+    readonly cityInput: Locator;
+    readonly paymentSelect: Locator;
+    readonly cardInput: Locator;
+    readonly termsCheckbox: Locator;
+    readonly submitButton: Locator;
+    readonly successMessage: Locator;
+    readonly errorSummary: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.nameInput = page.locator("[data-testid='name']");
+        this.emailInput = page.locator("[data-testid='email']");
+        this.addressInput = page.locator("[data-testid='address']");
+        this.cityInput = page.locator("[data-testid='city']");
+        this.paymentSelect = page.locator("[data-testid='payment-method']");
+        this.cardInput = page.locator("[data-testid='card-number']");
+        this.termsCheckbox = page.locator("[data-testid='terms']");
+        this.submitButton = page.locator("[data-testid='submit-order']");
+        this.successMessage = page.locator("[data-testid='order-success']");
+        this.errorSummary = page.locator("[data-testid='error-summary']");
+    }
+
+    // ── Cada método retorna this (como Promise) para encadenar ──
+
+    async fillName(name: string): Promise&lt;this&gt; {
+        await this.nameInput.fill(name);
+        return this; // ← Clave: retornar this
+    }
+
+    async fillEmail(email: string): Promise&lt;this&gt; {
+        await this.emailInput.fill(email);
+        return this;
+    }
+
+    async fillAddress(address: string): Promise&lt;this&gt; {
+        await this.addressInput.fill(address);
+        return this;
+    }
+
+    async fillCity(city: string): Promise&lt;this&gt; {
+        await this.cityInput.fill(city);
+        return this;
+    }
+
+    async selectPayment(method: string): Promise&lt;this&gt; {
+        await this.paymentSelect.selectOption({ label: method });
+        return this;
+    }
+
+    async fillCardNumber(number: string): Promise&lt;this&gt; {
+        await this.cardInput.fill(number);
+        return this;
+    }
+
+    async acceptTerms(): Promise&lt;this&gt; {
+        await this.termsCheckbox.check();
+        return this;
+    }
+
+    async submit(): Promise&lt;this&gt; {
+        await this.submitButton.click();
+        return this;
+    }
+
+    // ── Métodos de consulta (no encadenables) ──
+
+    async getSuccessText(): Promise&lt;string | null&gt; {
+        return await this.successMessage.textContent();
+    }
+
+    async isSuccessVisible(): Promise&lt;boolean&gt; {
+        return await this.successMessage.isVisible();
+    }
+
+    async getErrors(): Promise&lt;string[]&gt; {
+        return await this.errorSummary.allTextContents();
+    }
+}</code></pre>
+            </div>
+        </div>
 
         <h3>🧪 Tests con Fluent API</h3>
-        <pre><code class="python"># test_checkout.py
+        <div class="code-tabs" data-code-id="L058-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_checkout.py
 
 def test_compra_completa(page):
     """Flujo completo de compra con method chaining."""
@@ -145,19 +300,70 @@ def test_checkout_sin_terminos(page):
 
     errors = checkout.get_errors()
     assert "términos" in " ".join(errors).lower()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_checkout.spec.ts
+import { test, expect } from '@playwright/test';
+import { CheckoutPage } from './pages/checkout-page';
+
+test('compra completa', async ({ page }) => {
+    // Flujo completo de compra con method chaining.
+    const checkout = new CheckoutPage(page);
+    await (await (await (await (await (await (await (await
+        checkout.navigate())
+        .fillName("María García"))
+        .fillEmail("maria@ejemplo.com"))
+        .fillAddress("Av. Colombia #45-12"))
+        .fillCity("Bogotá"))
+        .selectPayment("Tarjeta de crédito"))
+        .fillCardNumber("4111111111111111"))
+        .acceptTerms())
+        .submit();
+
+    expect(await checkout.isSuccessVisible()).toBeTruthy();
+});
+
+test('checkout sin términos', async ({ page }) => {
+    // Verificar error al no aceptar términos.
+    const checkout = new CheckoutPage(page);
+    await (await (await (await (await (await
+        checkout.navigate())
+        .fillName("Test User"))
+        .fillEmail("test@test.com"))
+        .fillAddress("Calle 1 #1-1"))
+        .fillCity("Cali"))
+        .selectPayment("PSE"))
+        .submit(); // Sin acceptTerms()
+
+    const errors = await checkout.getErrors();
+    expect(errors.join(" ").toLowerCase()).toContain("términos");
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🏗️ Builder Pattern — Para datos complejos</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>El <strong>Builder Pattern</strong> es perfecto cuando necesitas construir
             objetos de datos complejos con muchos campos opcionales:</p>
-            <pre><code class="python"># builders/user_builder.py
+            <div class="code-tabs" data-code-id="L058-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># builders/user_builder.py
 class UserBuilder:
     """Builder para construir datos de usuario paso a paso."""
 
     def __init__(self):
         self._data = {
             "nombre": "Test User",
-            "email": f"test_{id(self)}@test.com",
+            "email": f"test_\${id(self)}@test.com",
             "password": "Test@12345",
             "rol": "usuario",
             "activo": True,
@@ -203,16 +409,116 @@ class UserBuilder:
     def as_siesa_employee(self, area):
         """Shortcut: empleado SIESA con datos realistas."""
         self._data["departamento"] = area
-        self._data["email"] = f"test_{area.lower()}@siesa.com"
+        self._data["email"] = f"test_\${area.lower()}@siesa.com"
         return self
 
     def build(self):
         """Retornar los datos construidos."""
         return dict(self._data)  # Copia para evitar mutación</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// builders/user-builder.ts
+
+interface UserData {
+    nombre: string;
+    email: string;
+    password: string;
+    rol: string;
+    activo: boolean;
+    telefono: string;
+    departamento: string;
+    cargo: string;
+}
+
+export class UserBuilder {
+    // Builder para construir datos de usuario paso a paso.
+
+    private data: UserData;
+
+    constructor() {
+        this.data = {
+            nombre: "Test User",
+            email: \`test_\${Date.now()}@test.com\`,
+            password: "Test@12345",
+            rol: "usuario",
+            activo: true,
+            telefono: "",
+            departamento: "",
+            cargo: "",
+        };
+    }
+
+    withName(nombre: string): this {
+        this.data.nombre = nombre;
+        return this;
+    }
+
+    withEmail(email: string): this {
+        this.data.email = email;
+        return this;
+    }
+
+    withRole(rol: string): this {
+        this.data.rol = rol;
+        return this;
+    }
+
+    withPhone(telefono: string): this {
+        this.data.telefono = telefono;
+        return this;
+    }
+
+    withDepartment(departamento: string): this {
+        this.data.departamento = departamento;
+        return this;
+    }
+
+    withPosition(cargo: string): this {
+        this.data.cargo = cargo;
+        return this;
+    }
+
+    inactive(): this {
+        this.data.activo = false;
+        return this;
+    }
+
+    asAdmin(): this {
+        // Shortcut: configurar como administrador.
+        this.data.rol = "admin";
+        this.data.departamento = "IT";
+        return this;
+    }
+
+    asSiesaEmployee(area: string): this {
+        // Shortcut: empleado SIESA con datos realistas.
+        this.data.departamento = area;
+        this.data.email = \`test_\${area.toLowerCase()}@siesa.com\`;
+        return this;
+    }
+
+    build(): UserData {
+        // Retornar los datos construidos.
+        return { ...this.data }; // Copia para evitar mutación
+    }
+}</code></pre>
+            </div>
+        </div>
         </div>
 
         <h3>🧪 Usando el Builder en tests</h3>
-        <pre><code class="python"># test_users.py
+        <div class="code-tabs" data-code-id="L058-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_users.py
 from builders.user_builder import UserBuilder
 
 def test_crear_admin(users_page):
@@ -243,10 +549,60 @@ def test_crear_empleado_siesa(users_page):
 
     users_page.create_user(empleado)
     assert users_page.is_user_visible("José Bravo")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_users.spec.ts
+import { test, expect } from '@playwright/test';
+import { UserBuilder } from './builders/user-builder';
+
+test('crear admin', async ({ page }) => {
+    // Crear un usuario administrador.
+    const admin = new UserBuilder()
+        .withName("Carlos Admin")
+        .withEmail("carlos.admin@test.com")
+        .asAdmin()
+        .build();
+
+    await usersPage.createUser(admin);
+    expect(await usersPage.isUserVisible("Carlos Admin")).toBeTruthy();
+});
+
+test('crear usuario básico', async ({ page }) => {
+    // Crear usuario con datos mínimos (Builder usa defaults).
+    const user = new UserBuilder().build(); // Solo defaults
+    await usersPage.createUser(user);
+    expect(await usersPage.isUserVisible(user.nombre)).toBeTruthy();
+});
+
+test('crear empleado SIESA', async ({ page }) => {
+    // Crear empleado con datos de SIESA.
+    const empleado = new UserBuilder()
+        .withName("José Bravo")
+        .asSiesaEmployee("QA")
+        .withPosition("QA Engineer")
+        .withPhone("3001234567")
+        .build();
+
+    await usersPage.createUser(empleado);
+    expect(await usersPage.isUserVisible("José Bravo")).toBeTruthy();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔄 Combinando Fluent POM + Builder</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># pages/user_form_page.py
+            <div class="code-tabs" data-code-id="L058-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># pages/user_form_page.py
 class UserFormPage(BasePage):
     """Formulario de usuario con Fluent API."""
 
@@ -280,10 +636,84 @@ def test_crear_multiples_usuarios(user_form):
             .fill_from_builder(user) \\
             .save()
         assert user_form.is_success_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// pages/user-form-page.ts
+import { type Page, type Locator } from '@playwright/test';
+import { BasePage } from './base-page';
+
+interface UserData {
+    nombre: string;
+    email: string;
+    rol: string;
+    departamento?: string;
+}
+
+export class UserFormPage extends BasePage {
+    // Formulario de usuario con Fluent API.
+
+    readonly nameInput: Locator;
+    readonly emailInput: Locator;
+    readonly roleSelect: Locator;
+    readonly deptInput: Locator;
+    readonly saveButton: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.nameInput = page.locator("[name='nombre']");
+        this.emailInput = page.locator("[name='email']");
+        this.roleSelect = page.locator("[name='rol']");
+        this.deptInput = page.locator("[name='departamento']");
+        this.saveButton = page.locator("[data-testid='save']");
+    }
+
+    async fillFromBuilder(userData: UserData): Promise&lt;this&gt; {
+        // Llenar el formulario desde datos del Builder.
+        await this.nameInput.fill(userData.nombre);
+        await this.emailInput.fill(userData.email);
+        await this.roleSelect.selectOption({ label: userData.rol });
+        if (userData.departamento) {
+            await this.deptInput.fill(userData.departamento);
+        }
+        return this;
+    }
+
+    async save(): Promise&lt;this&gt; {
+        await this.saveButton.click();
+        return this;
+    }
+}
+
+// ── En el test: Builder genera datos, POM fluent los usa ──
+import { test, expect } from '@playwright/test';
+import { UserBuilder } from './builders/user-builder';
+
+test('crear múltiples usuarios', async ({ page }) => {
+    const roles = ["admin", "editor", "viewer"];
+    for (const rol of roles) {
+        const user = new UserBuilder().withRole(rol).build();
+        const form = await userForm.navigate();
+        await (await form.fillFromBuilder(user)).save();
+        expect(await userForm.isSuccessVisible()).toBeTruthy();
+    }
+});</code></pre>
+            </div>
+        </div>
         </div>
 
         <h3>🎯 Patrón avanzado: Page Object que retorna otro Page Object</h3>
-        <pre><code class="python"># Flujo completo con transiciones de página
+        <div class="code-tabs" data-code-id="L058-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Flujo completo con transiciones de página
 
 class LoginPage(BasePage):
     # ...
@@ -328,6 +758,61 @@ def test_flujo_crear_producto(page):
         .save()
 
     assert form.is_success_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Flujo completo con transiciones de página
+
+class LoginPage extends BasePage {
+    // ...
+    async loginSuccessfully(email: string, password: string): Promise&lt;DashboardPage&gt; {
+        // Login que retorna DashboardPage (transición).
+        await this.emailInput.fill(email);
+        await this.passwordInput.fill(password);
+        await this.loginButton.click();
+        await this.page.waitForURL("**/dashboard");
+        return new DashboardPage(this.page);
+    }
+}
+
+class DashboardPage extends BasePage {
+    // ...
+    async goToProducts(): Promise&lt;ProductsPage&gt; {
+        // Navegar a productos — retorna ProductsPage.
+        await this.sidebar.clickItem("Productos");
+        return new ProductsPage(this.page);
+    }
+}
+
+class ProductsPage extends BasePage {
+    // ...
+    async addNewProduct(): Promise&lt;ProductFormPage&gt; {
+        // Abrir formulario — retorna ProductFormPage.
+        await this.addButton.click();
+        return new ProductFormPage(this.page);
+    }
+}
+
+// ── Flujo E2E encadenado ──
+test('flujo crear producto', async ({ page }) => {
+    // Login → Dashboard → Productos → Crear producto.
+    const product = new UserBuilder()
+        .withName("Producto E2E")
+        .build();
+
+    const dashboard = await new LoginPage(page)
+        .navigate()
+        .then(lp => lp.loginSuccessfully("admin@test.com", "admin123"));
+
+    const form = await dashboard
+        .goToProducts()
+        .then(pp => pp.addNewProduct());
+
+    await (await form.fillFromBuilder(product)).save();
+
+    expect(await form.isSuccessVisible()).toBeTruthy();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⚠️ Cuándo NO usar estos patrones</h3>
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">

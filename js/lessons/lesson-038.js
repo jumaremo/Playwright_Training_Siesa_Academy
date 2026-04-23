@@ -61,7 +61,18 @@ const LESSON_038 = {
             </tr>
         </table>
 
-        <pre><code class="python"># Selectores básicos en acción
+        <div class="code-tabs" data-code-id="L038-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Selectores básicos en acción
 from playwright.sync_api import Page, expect
 
 def test_selectores_basicos(page: Page):
@@ -81,6 +92,31 @@ def test_selectores_basicos(page: Page):
 
     # Múltiples clases
     page.locator(".card.card-destacada")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Selectores básicos en acción
+import { test, expect } from '@playwright/test';
+
+test('selectores básicos', async ({ page }) => {
+    await page.goto('https://mi-app.com');
+
+    // Por etiqueta
+    page.locator('h1');
+
+    // Por clase
+    page.locator('.alerta-exito');
+
+    // Por ID
+    page.locator('#nombre-usuario');
+
+    // Combinar etiqueta + clase
+    page.locator('button.btn-enviar');
+
+    // Múltiples clases
+    page.locator('.card.card-destacada');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔗 Combinadores CSS</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -121,7 +157,18 @@ def test_selectores_basicos(page: Page):
             </tr>
         </table>
 
-        <pre><code class="python"># Combinadores en acción
+        <div class="code-tabs" data-code-id="L038-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Combinadores en acción
 def test_combinadores(page: Page):
     page.goto("https://mi-app.com/productos")
 
@@ -137,6 +184,27 @@ def test_combinadores(page: Page):
 
     # Hermano general: todos los párrafos después de un h2
     parrafos = page.locator("h2 ~ p")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Combinadores en acción
+test('combinadores', async ({ page }) => {
+    await page.goto('https://mi-app.com/productos');
+
+    // Descendiente: cualquier input dentro de un form
+    await page.locator('form input').first().fill('dato');
+
+    // Hijo directo: solo los li inmediatos de un ul
+    const items = page.locator('ul.menu > li');
+    await expect(items).toHaveCount(5);
+
+    // Hermano adyacente: el párrafo justo después de un h2
+    const descripcion = page.locator('h2 + p');
+
+    // Hermano general: todos los párrafos después de un h2
+    const parrafos = page.locator('h2 ~ p');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🏷️ Selectores de atributos</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -183,7 +251,18 @@ def test_combinadores(page: Page):
             </tr>
         </table>
 
-        <pre><code class="python"># Selectores de atributos en Playwright
+        <div class="code-tabs" data-code-id="L038-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Selectores de atributos en Playwright
 def test_selectores_atributos(page: Page):
     page.goto("https://mi-app.com/formulario")
 
@@ -204,6 +283,32 @@ def test_selectores_atributos(page: Page):
 
     # Atributo data personalizado
     page.locator("[data-status='pendiente']")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Selectores de atributos en Playwright
+test('selectores de atributos', async ({ page }) => {
+    await page.goto('https://mi-app.com/formulario');
+
+    // Exacto: input de tipo email
+    await page.locator("input[type='email']").fill('correo@test.com');
+
+    // Contiene: todos los elementos con clase que incluya "error"
+    const errores = page.locator("[class*='error']");
+
+    // Empieza con: links externos (https)
+    const linksExternos = page.locator("a[href^='https://']");
+
+    // Termina con: links a documentos PDF
+    const linksPdf = page.locator("a[href\\$='.pdf']");
+
+    // Múltiples atributos combinados
+    await page.locator("input[type='text'][name='ciudad']").fill('Cali');
+
+    // Atributo data personalizado
+    page.locator("[data-status='pendiente']");
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎭 Pseudo-clases útiles para testing</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -212,7 +317,18 @@ def test_selectores_atributos(page: Page):
         </div>
 
         <h4>Pseudo-clases estándar</h4>
-        <pre><code class="python"># :first-child / :last-child — primer o último hijo
+        <div class="code-tabs" data-code-id="L038-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># :first-child / :last-child — primer o último hijo
 page.locator("ul > li:first-child")   # Primer item de la lista
 page.locator("ul > li:last-child")    # Último item
 
@@ -229,6 +345,27 @@ page.locator("button:not(.btn-secondary)")     # Botones que NO son secondary
 # :enabled / :disabled — estado de formularios
 page.locator("input:enabled")
 page.locator("button:disabled")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// :first-child / :last-child — primer o último hijo
+page.locator('ul > li:first-child');   // Primer item de la lista
+page.locator('ul > li:last-child');    // Último item
+
+// :nth-child(n) — por posición (1-indexado)
+page.locator('tr:nth-child(2)');       // Segunda fila de tabla
+page.locator('li:nth-child(odd)');     // Items impares (1, 3, 5...)
+page.locator('li:nth-child(even)');    // Items pares (2, 4, 6...)
+page.locator('li:nth-child(3n)');      // Cada tercer item
+
+// :not() — negación
+page.locator('input:not([disabled])');          // Inputs habilitados
+page.locator('button:not(.btn-secondary)');     // Botones que NO son secondary
+
+// :enabled / :disabled — estado de formularios
+page.locator('input:enabled');
+page.locator('button:disabled');</code></pre>
+            </div>
+        </div>
 
         <h4>Extensiones CSS de Playwright</h4>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -274,7 +411,18 @@ page.locator("button:disabled")</code></pre>
             </tr>
         </table>
 
-        <pre><code class="python"># Extensiones CSS de Playwright en acción
+        <div class="code-tabs" data-code-id="L038-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Extensiones CSS de Playwright en acción
 def test_extensiones_playwright(page: Page):
     page.goto("https://mi-app.com/catalogo")
 
@@ -296,6 +444,33 @@ def test_extensiones_playwright(page: Page):
 
     # >> (chaining) — encadenar CSS con texto
     page.locator("article.destacado >> text=Leer más").click()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Extensiones CSS de Playwright en acción
+test('extensiones Playwright', async ({ page }) => {
+    await page.goto('https://mi-app.com/catalogo');
+
+    // :has-text() — div que contiene texto "Agotado"
+    const productosAgotados = page.locator(".producto:has-text('Agotado')");
+
+    // :text() — el elemento más específico con el texto
+    await page.locator(":text('Agregar al carrito')").click();
+
+    // :has() — tarjetas que tienen una imagen con clase "oferta"
+    const tarjetasOferta = page.locator('.card:has(.badge-oferta)');
+    await expect(tarjetasOferta.first()).toBeVisible();
+
+    // :is() — cualquier heading
+    const headings = page.locator(':is(h1, h2, h3)');
+
+    // :visible — solo modales visibles
+    await page.locator('.modal:visible').locator('button').click();
+
+    // >> (chaining) — encadenar CSS con texto
+    await page.locator('article.destacado >> text=Leer más').click();
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔢 :nth-match() para múltiples coincidencias</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -303,7 +478,18 @@ def test_extensiones_playwright(page: Page):
             <code>:nth-match()</code> selecciona por posición global (no relativa al padre como <code>:nth-child</code>).</p>
         </div>
 
-        <pre><code class="python"># :nth-match(selector, n) — selecciona la n-ésima coincidencia global
+        <div class="code-tabs" data-code-id="L038-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># :nth-match(selector, n) — selecciona la n-ésima coincidencia global
 def test_nth_match(page: Page):
     page.goto("https://mi-app.com/dashboard")
 
@@ -315,9 +501,37 @@ def test_nth_match(page: Page):
 
     # Alternativa: usar .nth() de Playwright (0-indexado)
     page.locator("button:has-text('Editar')").nth(2).click()  # Tercero (0-indexed)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// :nth-match(selector, n) — selecciona la n-ésima coincidencia global
+test('nth-match', async ({ page }) => {
+    await page.goto('https://mi-app.com/dashboard');
+
+    // El tercer botón "Editar" de toda la página
+    await page.locator(":nth-match(button:has-text('Editar'), 3)").click();
+
+    // El segundo link con clase "ver-detalle"
+    await page.locator(':nth-match(.ver-detalle, 2)').click();
+
+    // Alternativa: usar .nth() de Playwright (0-indexado)
+    await page.locator("button:has-text('Editar')").nth(2).click();  // Tercero (0-indexed)
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔧 Combinando selectores para mayor precisión</h3>
-        <pre><code class="python"># Combinaciones poderosas para escenarios reales
+        <div class="code-tabs" data-code-id="L038-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Combinaciones poderosas para escenarios reales
 def test_selectores_combinados(page: Page):
     page.goto("https://mi-app.com/admin/usuarios")
 
@@ -335,6 +549,29 @@ def test_selectores_combinados(page: Page):
 
     # Formulario con atributo data + input deshabilitado dentro
     page.locator("form[data-section='facturacion'] input:disabled")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Combinaciones poderosas para escenarios reales
+test('selectores combinados', async ({ page }) => {
+    await page.goto('https://mi-app.com/admin/usuarios');
+
+    // Tabla: celda específica por fila y columna
+    page.locator('table.usuarios tr:nth-child(3) td:nth-child(2)');
+
+    // Botón dentro de una fila que contiene texto específico
+    await page.locator("tr:has-text('Juan Reina') button.btn-editar").click();
+
+    // Input dentro de un fieldset específico
+    page.locator("fieldset:has(legend:text('Datos personales')) input[name='email']");
+
+    // Link visible dentro de un nav con clase activa
+    page.locator('nav.sidebar li.active > a:visible');
+
+    // Formulario con atributo data + input deshabilitado dentro
+    page.locator("form[data-section='facturacion'] input:disabled");
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⚡ Rendimiento de selectores CSS</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -414,7 +651,18 @@ def test_selectores_combinados(page: Page):
             </table>
         </div>
 
-        <pre><code class="python"># ❌ MAL — selector frágil, depende de la estructura exacta
+        <div class="code-tabs" data-code-id="L038-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># ❌ MAL — selector frágil, depende de la estructura exacta
 page.locator("body > div:nth-child(2) > main > section > div > form > div:nth-child(3) > input")
 
 # ✅ BIEN — selector semántico y estable
@@ -431,6 +679,27 @@ page.locator("table tr:nth-child(7) td:nth-child(2) a")
 
 # ✅ BIEN — usa contenido para encontrar la fila
 page.locator("tr:has-text('Factura #1234') a")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// ❌ MAL — selector frágil, depende de la estructura exacta
+page.locator('body > div:nth-child(2) > main > section > div > form > div:nth-child(3) > input');
+
+// ✅ BIEN — selector semántico y estable
+page.locator("form[name='registro'] input[name='email']");
+
+// ❌ MAL — clase auto-generada que cambia en cada build
+page.locator('.MuiButton-root.css-1abc234');
+
+// ✅ BIEN — atributo estable
+page.locator("button[data-testid='btn-enviar']");
+
+// ❌ MAL — depende de posición exacta en la tabla
+page.locator('table tr:nth-child(7) td:nth-child(2) a');
+
+// ✅ BIEN — usa contenido para encontrar la fila
+page.locator("tr:has-text('Factura #1234') a");</code></pre>
+            </div>
+        </div>
 
         <h3>📊 Tabla resumen de patrones CSS</h3>
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -494,7 +763,18 @@ page.locator("tr:has-text('Factura #1234') a")</code></pre>
             Usa la combinación más precisa y resiliente posible.</p>
         </div>
 
-        <pre><code class="python"># Página HTML de referencia:
+        <div class="code-tabs" data-code-id="L038-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Página HTML de referencia:
 # <nav class="main-nav">
 #   <a href="/" class="logo">Inicio</a>
 #   <a href="/productos" class="active">Productos</a>
@@ -567,6 +847,48 @@ def test_selectores_css_avanzados(page: Page):
 
     # 10. Select de categoría por su nombre
     page.locator("select[name='categoria']").select_option("Electrónica")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('selectores CSS avanzados', async ({ page }) => {
+    await page.goto('/productos');
+
+    // 1. Link activo del nav
+    page.locator('nav.main-nav a.active');
+
+    // 2. Input de búsqueda por nombre
+    await page.locator("input[name='buscar']").fill('laptop');
+
+    // 3. Botón de filtrar deshabilitado
+    page.locator('button.btn-filtrar:disabled');
+
+    // 4. Todas las filas de productos disponibles
+    const filasDisponibles = page.locator("tr[data-status='disponible']");
+    await expect(filasDisponibles).toHaveCount(2);
+
+    // 5. Fila del producto agotado
+    page.locator("tr[data-status='agotado']");
+
+    // 6. Botón "Comprar" de la fila "Laptop HP"
+    await page.locator("tr:has-text('Laptop HP') .btn-comprar").click();
+
+    // 7. Todos los botones habilitados de comprar
+    const botonesActivos = page.locator('.btn-comprar:not(:disabled)');
+    await expect(botonesActivos).toHaveCount(2);
+
+    // 8. Primera celda de la última fila del tbody
+    page.locator('tbody tr:last-child td:first-child');
+
+    // 9. Headers de la tabla
+    const headers = page.locator('.tabla-productos thead th');
+    await expect(headers).toHaveCount(4);
+
+    // 10. Select de categoría por su nombre
+    await page.locator("select[name='categoria']").selectOption('Electrónica');
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Objetivos de esta lección:</h4>
