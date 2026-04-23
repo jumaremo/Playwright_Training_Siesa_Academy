@@ -30,7 +30,7 @@ const LESSON_003 = {
                 </div>
                 <div class="code-panel active" data-lang="python">
                     <pre><code class="language-bash"># Los 3 deben funcionar:
-python --version       # Python 3.8+ ✓
+python --version       # Python 3.10+ ✓
 pip --version          # pip 23+ ✓
 # Y tu entorno virtual debe estar activado:
 # (venv) debe aparecer al inicio del prompt</code></pre>
@@ -59,8 +59,8 @@ npm --version    # 9+ ✓</code></pre>
                 <pre><code class="language-bash"># Asegúrate de tener el entorno virtual activado
 # (venv) debe aparecer en tu terminal
 
-# Instalar Playwright y el plugin de pytest
-pip install playwright pytest-playwright
+# Instalar Playwright + pytest + plugin pytest-playwright
+pip install playwright pytest pytest-playwright
 
 # O instalar desde requirements.txt
 pip install -r requirements.txt</code></pre>
@@ -172,13 +172,14 @@ npx playwright install chromium
             </div>
             <div class="code-panel active" data-lang="python">
                 <pre><code class="language-bash"># Verificar que Playwright está instalado
-python -c "import playwright; print(playwright.__version__)"
+pip show playwright
+# Debe mostrar: Name: playwright, Version: 1.52+
 
 # Verificar pytest-playwright
 pip show pytest-playwright
 
-# Listar navegadores instalados
-playwright install --help
+# Verificar que el módulo se importa correctamente
+python -c "from playwright.sync_api import sync_playwright; print('OK')"
 
 # Test rápido desde línea de comandos
 python -c "
@@ -276,6 +277,14 @@ sudo apt install libwoff1 libvpx7 libgstreamer-plugins-bad1.0-0 \\
                 <td style="padding: 10px; border: 1px solid #ddd;">Navegadores ocupan mucho espacio</td>
                 <td style="padding: 10px; border: 1px solid #ddd;">Instala solo Chromium: <code>playwright install chromium</code> (~250MB vs ~700MB con los 3)</td>
             </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>greenlet</code> falla al compilar (requiere Visual C++)</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Usar Python 3.10+ que tiene wheels precompilados. Si tienes 3.9: <code>py -3.10 -m venv venv</code></td>
+            </tr>
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;">PowerShell: <code>Activate.ps1 cannot be loaded</code></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Ejecutar: <code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code></td>
+            </tr>
         </table>
 
         <h3>🎯 Ejercicio práctico</h3>
@@ -300,7 +309,7 @@ pip install playwright pytest-playwright
 playwright install
 
 # ☐ 3. Verificar versión
-python -c "import playwright; print(playwright.__version__)"</code></pre>
+pip show playwright</code></pre>
             </div>
             <div class="code-panel" data-lang="typescript">
                 <pre><code class="language-bash"># ☐ 1. Inicializar proyecto (si no lo hiciste en L002)
@@ -385,7 +394,7 @@ npx playwright show-report</code></pre>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Checklist de verificación final</h4>
             <ul style="list-style: none; padding-left: 5px;">
-                <li>☐ Playwright instalado (<code>python -c "import playwright"</code> sin error)</li>
+                <li>☐ Playwright instalado (<code>pip show playwright</code> muestra versión 1.52+)</li>
                 <li>☐ Navegadores descargados (<code>playwright install</code> completado)</li>
                 <li>☐ Test de verificación ejecutado y pasó (PASSED)</li>
                 <li>☐ Entiendes la diferencia entre <code>playwright</code> (paquete) y <code>pytest-playwright</code> (plugin)</li>

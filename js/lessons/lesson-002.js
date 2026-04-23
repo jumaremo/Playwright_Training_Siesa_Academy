@@ -12,8 +12,9 @@ const LESSON_002 = {
     section: "section-01",
     content: `
         <h2>🐍 Instalación de Python, Node.js y herramientas base</h2>
-        <p>Para usar Playwright necesitas <strong>Python 3.8 o superior</strong>. Si además quieres seguir
-        los ejemplos en TypeScript de este curso, necesitarás <strong>Node.js 18+</strong> y npm.</p>
+        <p>Para usar Playwright necesitas <strong>Python 3.10 o superior</strong> (recomendado; 3.8 es el mínimo teórico,
+        pero versiones anteriores a 3.10 pueden fallar al compilar dependencias como <code>greenlet</code> en Windows).
+        Si además quieres seguir los ejemplos en TypeScript de este curso, necesitarás <strong>Node.js 18+</strong> y npm.</p>
 
         <div style="background: #e0f2f1; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #009688;">
             <h4>⚡ ¿Ya tienes experiencia? — Verificación rápida</h4>
@@ -30,7 +31,7 @@ const LESSON_002 = {
                 </div>
                 <div class="code-panel active" data-lang="python">
                     <pre><code class="language-bash"># Verificación rápida — los 3 deben funcionar:
-python --version   # Python 3.8+ ✓
+python --version   # Python 3.10+ ✓
 pip --version      # pip 23+ ✓
 python -m venv --help  # Sin error ✓
 
@@ -145,6 +146,8 @@ cd mi-proyecto-playwright
 
 # Crear entorno virtual
 python -m venv venv
+# Tip: si tienes múltiples versiones de Python, especifica la versión:
+# py -3.10 -m venv venv    (Windows, con py launcher)
 
 # Activar entorno virtual
 # Windows (cmd):
@@ -270,6 +273,14 @@ pytest-playwright>=0.6.2</code></pre>
                 <td style="padding: 10px; border: 1px solid #ddd;"><code>node: command not found</code> después de instalar</td>
                 <td style="padding: 10px; border: 1px solid #ddd;">Cierra y vuelve a abrir la terminal. Si persiste, verifica que Node.js está en el PATH</td>
             </tr>
+            <tr>
+                <td style="padding: 10px; border: 1px solid #ddd;"><code>greenlet</code> falla al compilar (requiere Visual C++)</td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Usar Python 3.10+ que tiene wheels precompilados. Si tienes 3.9: <code>py -3.10 -m venv venv</code></td>
+            </tr>
+            <tr style="background: #f5f5f5;">
+                <td style="padding: 10px; border: 1px solid #ddd;">PowerShell: <code>Activate.ps1 cannot be loaded</code></td>
+                <td style="padding: 10px; border: 1px solid #ddd;">Ejecutar: <code>Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser</code></td>
+            </tr>
         </table>
 
         <h3>🎯 Ejercicio práctico</h3>
@@ -286,7 +297,7 @@ pytest-playwright>=0.6.2</code></pre>
             </div>
             <div class="code-panel active" data-lang="python">
                 <pre><code class="language-bash"># ☐ 1. Verificar Python
-python --version   # Debe mostrar 3.8+
+python --version   # Debe mostrar 3.10+
 
 # ☐ 2. Crear carpeta de trabajo
 mkdir playwright-academy-labs
@@ -334,7 +345,7 @@ cat package.json
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Objetivos de esta lección:</h4>
             <ul>
-                <li>Instalar Python 3.8+ correctamente en tu sistema operativo</li>
+                <li>Instalar Python 3.10+ correctamente en tu sistema operativo</li>
                 <li>Instalar Node.js 18+ y npm (para el path TypeScript)</li>
                 <li>Entender qué es pip y para qué sirve</li>
                 <li>Crear y activar entornos virtuales con venv</li>
