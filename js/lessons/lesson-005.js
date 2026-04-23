@@ -16,7 +16,18 @@ const LESSON_005 = {
         entendiendo cada línea.</p>
 
         <h3>📝 Anatomía de un test Playwright con pytest</h3>
-        <pre><code class="python"># test_demo_store.py
+        <div class="code-tabs" data-code-id="L005-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_demo_store.py
 import re
 from playwright.sync_api import Page, expect
 
@@ -57,6 +68,49 @@ def test_completar_tarea(page: Page):
 
     # ASSERT: Verificar que se marcó como completada
     expect(page.get_by_test_id("todo-item")).to_have_class(re.compile("completed"))</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_demo_store.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('página principal carga', async ({ page }) => {
+    // ARRANGE: Navegar a la página
+    await page.goto('https://demo.playwright.dev/todomvc/');
+
+    // ACT: (en este caso, solo navegamos)
+
+    // ASSERT: Verificar que la página cargó
+    await expect(page).toHaveTitle('React • TodoMVC');
+});
+
+
+test('agregar tarea', async ({ page }) => {
+    // ARRANGE
+    await page.goto('https://demo.playwright.dev/todomvc/');
+
+    // ACT: Escribir una tarea y presionar Enter
+    await page.getByPlaceholder('What needs to be done?').fill('Aprender Playwright');
+    await page.getByPlaceholder('What needs to be done?').press('Enter');
+
+    // ASSERT: Verificar que la tarea aparece en la lista
+    await expect(page.getByTestId('todo-title')).toHaveText('Aprender Playwright');
+});
+
+
+test('completar tarea', async ({ page }) => {
+    // ARRANGE
+    await page.goto('https://demo.playwright.dev/todomvc/');
+    await page.getByPlaceholder('What needs to be done?').fill('Tarea de prueba');
+    await page.getByPlaceholder('What needs to be done?').press('Enter');
+
+    // ACT: Marcar como completada
+    await page.getByRole('checkbox').click();
+
+    // ASSERT: Verificar que se marcó como completada
+    await expect(page.getByTestId('todo-item')).toHaveClass(/completed/);
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🔍 Desglose línea por línea</h3>
         <div style="background: #f0f9ff; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -93,7 +147,18 @@ def test_completar_tarea(page: Page):
         </div>
 
         <h3>▶️ Ejecutar los tests</h3>
-        <pre><code class="bash"># Ejecutar todos los tests del archivo
+        <div class="code-tabs" data-code-id="L005-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-bash"># Ejecutar todos los tests del archivo
 pytest test_demo_store.py -v
 
 # Ejecutar con navegador visible
@@ -110,6 +175,32 @@ pytest test_demo_store.py -v --html=report.html
 # test_demo_store.py::test_agregar_tarea PASSED
 # test_demo_store.py::test_completar_tarea PASSED
 # ======= 3 passed in 4.52s =======</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <div class="code-note">
+                    <span class="code-note-icon">ℹ️</span>
+                    <span class="code-note-text">Equivalente con Playwright Test (TypeScript):</span>
+                </div>
+                <pre><code class="language-bash"># Ejecutar todos los tests del archivo
+npx playwright test test_demo_store.spec.ts
+
+# Ejecutar con navegador visible
+npx playwright test test_demo_store.spec.ts --headed
+
+# Ejecutar un test específico
+npx playwright test test_demo_store.spec.ts -g "agregar tarea" --headed
+
+# Ejecutar y generar reporte HTML
+npx playwright test test_demo_store.spec.ts --reporter=html
+
+# Output esperado:
+# Running 3 tests using 1 worker
+#   ✓ página principal carga (1.2s)
+#   ✓ agregar tarea (1.8s)
+#   ✓ completar tarea (2.1s)
+# 3 passed (5.1s)</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <ol>

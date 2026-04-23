@@ -73,7 +73,18 @@ const LESSON_100 = {
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>❌ Sin masking: falsos positivos constantes</h4>
-            <pre><code class="python">from playwright.sync_api import Page, expect
+            <div class="code-tabs" data-code-id="L100-1">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_dashboard_sin_masking(page: Page):
     """Este test fallará casi siempre por contenido dinámico."""
@@ -84,6 +95,22 @@ def test_dashboard_sin_masking(page: Page):
     expect(page).to_have_screenshot("dashboard.png")
     # AssertionError: screenshot doesn't match
     # 847 pixels differ (0.12% of total)</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('dashboard sin masking', async ({ page }) => {
+    /** Este test fallará casi siempre por contenido dinámico. */
+    await page.goto('https://mi-app.com/dashboard');
+
+    // El dashboard tiene timestamps, avatar del usuario y un ad banner
+    // Cada ejecución captura valores diferentes → FALLA
+    await expect(page).toHaveScreenshot('dashboard.png');
+    // AssertionError: screenshot doesn't match
+    // 847 pixels differ (0.12% of total)
+});</code></pre>
+                </div>
+            </div>
         </div>
 
         <h3>🎭 Parámetro mask: excluir zonas dinámicas</h3>
@@ -91,7 +118,18 @@ def test_dashboard_sin_masking(page: Page):
         reemplaza esas áreas con un rectángulo de color sólido antes de comparar, eliminando las
         diferencias dinámicas de la comparación.</p>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L100-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_dashboard_con_masking(page: Page):
     """Masking de zonas dinámicas para visual test estable."""
@@ -109,6 +147,28 @@ def test_dashboard_con_masking(page: Page):
     )
     # Las áreas enmascaradas se reemplazan con un rectángulo magenta
     # y se excluyen de la comparación pixel a pixel</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('dashboard con masking', async ({ page }) => {
+    /** Masking de zonas dinámicas para visual test estable. */
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Definir localizadores de las zonas a enmascarar
+    const timestamp = page.locator('[data-testid="last-updated"]');
+    const avatar = page.locator('.user-avatar');
+    const adBanner = page.locator('#ad-container');
+
+    // mask recibe un array de localizadores
+    await expect(page).toHaveScreenshot('dashboard.png', {
+        mask: [timestamp, avatar, adBanner]
+    });
+    // Las áreas enmascaradas se reemplazan con un rectángulo magenta
+    // y se excluyen de la comparación pixel a pixel
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Resultado con masking</h4>
@@ -122,7 +182,18 @@ def test_dashboard_con_masking(page: Page):
         Puedes cambiar el color con <code>mask_color</code> para hacer los masks más identificables
         en los reportes o para diferenciar tipos de áreas enmascaradas.</p>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L100-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_dashboard_mask_color_personalizado(page: Page):
     """Usar mask_color para identificar fácilmente las áreas enmascaradas."""
@@ -144,6 +215,31 @@ def test_dashboard_mask_color_personalizado(page: Page):
         mask=[page.locator(".dynamic-content")],
         mask_color="black"  # Negro sólido
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('dashboard mask color personalizado', async ({ page }) => {
+    /** Usar maskColor para identificar fácilmente las áreas enmascaradas. */
+    await page.goto('https://mi-app.com/dashboard');
+
+    // maskColor acepta cualquier color CSS válido
+    await expect(page).toHaveScreenshot('dashboard.png', {
+        mask: [
+            page.locator('[data-testid="timestamp"]'),
+            page.locator('.ad-banner'),
+        ],
+        maskColor: '#808080'  // Gris — menos llamativo en reportes
+    });
+
+    // También acepta nombres de color CSS
+    await expect(page).toHaveScreenshot('dashboard-v2.png', {
+        mask: [page.locator('.dynamic-content')],
+        maskColor: 'black'  // Negro sólido
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA: Convención de colores para masks</h4>
@@ -158,7 +254,18 @@ def test_dashboard_mask_color_personalizado(page: Page):
         de tu aplicación.</p>
 
         <h4>1. Masking por localizador (recomendado)</h4>
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L100-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_masking_por_localizador(page: Page):
     """Estrategia preferida: usar localizadores semánticos."""
@@ -173,9 +280,39 @@ def test_masking_por_localizador(page: Page):
             page.get_by_role("img", name="Avatar del usuario"),
         ]
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('masking por localizador', async ({ page }) => {
+    /** Estrategia preferida: usar localizadores semánticos. */
+    await page.goto('https://mi-app.com/perfil');
+
+    // Localizadores semánticos — la mejor opción
+    await expect(page).toHaveScreenshot('perfil.png', {
+        mask: [
+            page.getByTestId('fecha-registro'),
+            page.getByTestId('ultimo-acceso'),
+            page.getByRole('img', { name: 'Avatar del usuario' }),
+        ]
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h4>2. Masking por selector CSS</h4>
-        <pre><code class="python">def test_masking_por_css(page: Page):
+        <div class="code-tabs" data-code-id="L100-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_masking_por_css(page: Page):
     """Masking con selectores CSS cuando no hay data-testid."""
     page.goto("https://mi-app.com/dashboard")
 
@@ -189,9 +326,38 @@ def test_masking_por_localizador(page: Page):
             page.locator(".animated"),            # Elementos con animaciones
         ]
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('masking por css', async ({ page }) => {
+    /** Masking con selectores CSS cuando no hay data-testid. */
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Selectores CSS — útil para agrupar múltiples elementos
+    await expect(page).toHaveScreenshot('dashboard.png', {
+        mask: [
+            page.locator('.timestamp'),          // Todos los timestamps
+            page.locator('[class*="ad-"]'),       // Todo lo que empieza con "ad-"
+            page.locator('time'),                 // Todos los elementos &lt;time&gt;
+            page.locator('.animated'),            // Elementos con animaciones
+        ]
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h4>3. Masking por región (nth, filtros)</h4>
-        <pre><code class="python">def test_masking_por_region(page: Page):
+        <div class="code-tabs" data-code-id="L100-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_masking_por_region(page: Page):
     """Masking de regiones específicas del layout."""
     page.goto("https://mi-app.com/dashboard")
 
@@ -212,6 +378,30 @@ def test_masking_por_localizador(page: Page):
             page.locator(".main-content >> .live-counter"),
         ]
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('masking por región', async ({ page }) => {
+    /** Masking de regiones específicas del layout. */
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Enmascarar secciones completas del layout
+    await expect(page).toHaveScreenshot('dashboard.png', {
+        mask: [
+            page.locator('aside.sidebar'),         // Sidebar completo
+            page.locator('header .notifications'), // Solo notificaciones del header
+            page.locator('.card').nth(2),           // La tercera tarjeta específica
+        ]
+    });
+
+    // Masking de un elemento dentro de un contenedor específico
+    await expect(page).toHaveScreenshot('dashboard-body.png', {
+        mask: [
+            page.locator('.main-content .live-counter'),
+        ]
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>📏 Umbrales: tolerancia a diferencias de píxeles</h3>
         <p>Incluso con masking, las comparaciones pixel a pixel pueden fallar por diferencias
@@ -224,7 +414,18 @@ def test_masking_por_localizador(page: Page):
         Rango de <code>0</code> (exacto, sin tolerancia) a <code>1</code> (cualquier diferencia se ignora).
         El valor por defecto es <code>0.2</code>.</p>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L100-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_threshold_basico(page: Page):
     """Ajustar sensibilidad de comparación pixel a pixel."""
@@ -242,6 +443,25 @@ def test_threshold_basico(page: Page):
     # threshold=0.3 — más permisivo
     # Útil cuando hay diferencias de renderizado entre OS
     expect(page).to_have_screenshot("cross-os.png", threshold=0.3)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('threshold básico', async ({ page }) => {
+    /** Ajustar sensibilidad de comparación pixel a pixel. */
+    await page.goto('https://mi-app.com/pagina-estatica');
+
+    // threshold=0.2 (default) — tolera variaciones menores de color
+    await expect(page).toHaveScreenshot('estatica.png', { threshold: 0.2 });
+
+    // threshold=0 — comparación exacta, sin tolerancia
+    await expect(page).toHaveScreenshot('logo.png', { threshold: 0 });
+
+    // threshold=0.3 — más permisivo
+    await expect(page).toHaveScreenshot('cross-os.png', { threshold: 0.3 });
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔬 Detalle técnico: cómo funciona threshold</h4>
@@ -260,7 +480,18 @@ def test_threshold_basico(page: Page):
         <p>Define el <strong>número máximo de píxeles</strong> que pueden ser diferentes antes de
         que el test falle. Útil cuando sabes que cierta cantidad de píxeles siempre variará.</p>
 
-        <pre><code class="python">def test_max_diff_pixels(page: Page):
+        <div class="code-tabs" data-code-id="L100-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_max_diff_pixels(page: Page):
     """Tolerar un número absoluto de píxeles diferentes."""
     page.goto("https://mi-app.com/dashboard")
 
@@ -277,12 +508,42 @@ def test_threshold_basico(page: Page):
         threshold=0.2,
         max_diff_pixels=50  # Si pasa threshold, aún permite 50 px distintos
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('max diff pixels', async ({ page }) => {
+    /** Tolerar un número absoluto de píxeles diferentes. */
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Permitir hasta 100 píxeles diferentes
+    await expect(page).toHaveScreenshot('dashboard.png', {
+        maxDiffPixels: 100
+    });
+
+    // Combinado con threshold para doble capa de tolerancia
+    await expect(page).toHaveScreenshot('dashboard-tolerante.png', {
+        threshold: 0.2,
+        maxDiffPixels: 50
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h4>3. max_diff_pixel_ratio — porcentaje de píxeles diferentes</h4>
         <p>Define el <strong>porcentaje máximo</strong> (0 a 1) de píxeles que pueden diferir.
         Es más portable que <code>max_diff_pixels</code> porque no depende de la resolución de pantalla.</p>
 
-        <pre><code class="python">def test_max_diff_pixel_ratio(page: Page):
+        <div class="code-tabs" data-code-id="L100-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_max_diff_pixel_ratio(page: Page):
     """Tolerar un porcentaje de píxeles diferentes."""
     page.goto("https://mi-app.com/dashboard")
 
@@ -298,6 +559,24 @@ def test_threshold_basico(page: Page):
         "dashboard-flexible.png",
         max_diff_pixel_ratio=0.01  # ~9,216 píxeles en 1280x720
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('max diff pixel ratio', async ({ page }) => {
+    /** Tolerar un porcentaje de píxeles diferentes. */
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Permitir hasta 0.1% de píxeles diferentes
+    await expect(page).toHaveScreenshot('dashboard.png', {
+        maxDiffPixelRatio: 0.001
+    });
+
+    // Más permisivo: 1% de diferencia
+    await expect(page).toHaveScreenshot('dashboard-flexible.png', {
+        maxDiffPixelRatio: 0.01
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⚖️ ¿Cuándo usar cada umbral?</h3>
         <table style="width:100%; border-collapse: collapse; margin: 15px 0;">
@@ -337,7 +616,18 @@ def test_threshold_basico(page: Page):
         y sistema operativo implementa su propia versión, lo que genera diferencias de 1-2 píxeles
         en bordes de texto, bordes redondeados y gradientes.</p>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L100-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_anti_aliasing_cross_browser(page: Page):
     """Manejar diferencias de anti-aliasing entre navegadores."""
@@ -360,6 +650,33 @@ def test_anti_aliasing_cross_browser(page: Page):
     # @pytest.fixture
     # def screenshot_name(request, browser_name):
     #     return f"{request.node.name}-{browser_name}"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('anti-aliasing cross browser', async ({ page }) => {
+    /** Manejar diferencias de anti-aliasing entre navegadores. */
+    await page.goto('https://mi-app.com/pagina');
+
+    // Estrategia 1: threshold más alto para absorber diferencias
+    await expect(page).toHaveScreenshot('pagina-chromium.png', {
+        threshold: 0.25
+    });
+
+    // Estrategia 2: ratio pequeño para tolerancia proporcional
+    await expect(page).toHaveScreenshot('pagina-cross.png', {
+        maxDiffPixelRatio: 0.005
+    });
+
+    // Estrategia 3: screenshots separados por navegador (más preciso)
+    // En playwright.config.ts configurar:
+    // projects: [
+    //   { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    //   { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    // ]
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔬 Detalle: diferencias comunes por plataforma</h4>
@@ -376,14 +693,25 @@ def test_anti_aliasing_cross_browser(page: Page):
         el screenshot puede capturarse en cualquier frame de la animación. Playwright permite
         inyectar CSS para desactivarlas antes de la captura.</p>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L100-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_desactivar_animaciones_css(page: Page):
     """Inyectar CSS para congelar animaciones antes del screenshot."""
     page.goto("https://mi-app.com/dashboard")
 
     # Inyectar CSS que desactiva TODAS las animaciones y transiciones
-    page.add_style_tag(content="""
+    page.add_style_tag(content=\"\"\"
         *, *::before, *::after {
             animation-duration: 0s !important;
             animation-delay: 0s !important;
@@ -401,18 +729,63 @@ def test_desactivar_animaciones_css(page: Page):
         * {
             caret-color: transparent !important;
         }
-    """)
+    \"\"\")
 
     # Ahora el screenshot captura un estado estático
     expect(page).to_have_screenshot("dashboard-sin-animaciones.png")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('desactivar animaciones css', async ({ page }) => {
+    /** Inyectar CSS para congelar animaciones antes del screenshot. */
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Inyectar CSS que desactiva TODAS las animaciones y transiciones
+    await page.addStyleTag({ content: \\\`
+        *, *::before, *::after {
+            animation-duration: 0s !important;
+            animation-delay: 0s !important;
+            transition-duration: 0s !important;
+            transition-delay: 0s !important;
+            animation-iteration-count: 1 !important;
+        }
+
+        /* También desactivar scroll suave */
+        html {
+            scroll-behavior: auto !important;
+        }
+
+        /* Ocultar cursores parpadeantes */
+        * {
+            caret-color: transparent !important;
+        }
+    \\\` });
+
+    // Ahora el screenshot captura un estado estático
+    await expect(page).toHaveScreenshot('dashboard-sin-animaciones.png');
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Buena práctica: fixture reutilizable para desactivar animaciones</h4>
-            <pre><code class="python"># conftest.py
+            <div class="code-tabs" data-code-id="L100-12">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># conftest.py
 import pytest
 from playwright.sync_api import Page
 
-DISABLE_ANIMATIONS_CSS = """
+DISABLE_ANIMATIONS_CSS = \"\"\"
 *, *::before, *::after {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
@@ -421,7 +794,7 @@ DISABLE_ANIMATIONS_CSS = """
     animation-iteration-count: 1 !important;
     scroll-behavior: auto !important;
 }
-"""
+\"\"\"
 
 @pytest.fixture
 def stable_page(page: Page):
@@ -433,13 +806,63 @@ def stable_page(page: Page):
 def test_visual_estable(stable_page: Page):
     stable_page.goto("https://mi-app.com")
     expect(stable_page).to_have_screenshot("home.png")</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// playwright.config.ts — equivalente a conftest.py
+import { defineConfig } from '@playwright/test';
+export default defineConfig({
+    use: {
+        // Desactivar animaciones CSS globalmente
+    },
+});
+
+// fixtures.ts — fixture reutilizable
+import { test as base, expect } from '@playwright/test';
+
+const DISABLE_ANIMATIONS_CSS = \\\`
+*, *::before, *::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+}
+\\\`;
+
+export const test = base.extend({
+    stablePage: async ({ page }, use) => {
+        /** Página con animaciones desactivadas para visual testing. */
+        await page.addStyleTag({ content: DISABLE_ANIMATIONS_CSS });
+        await use(page);
+    },
+});
+
+// Uso en tests:
+test('visual estable', async ({ stablePage }) => {
+    await stablePage.goto('https://mi-app.com');
+    await expect(stablePage).toHaveScreenshot('home.png');
+});</code></pre>
+                </div>
+            </div>
         </div>
 
         <p><strong>Nota importante:</strong> Playwright también ofrece el parámetro
         <code>animations="disabled"</code> directamente en <code>to_have_screenshot()</code>,
         que desactiva animaciones CSS automáticamente:</p>
 
-        <pre><code class="python">def test_animaciones_desactivadas_nativo(page: Page):
+        <div class="code-tabs" data-code-id="L100-13">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_animaciones_desactivadas_nativo(page: Page):
     """Usar el parámetro nativo de Playwright para desactivar animaciones."""
     page.goto("https://mi-app.com/dashboard")
 
@@ -450,19 +873,45 @@ def test_visual_estable(stable_page: Page):
     )
     # Esto es equivalente a inyectar CSS, pero más limpio
     # Rebobina las animaciones CSS a su estado final antes de capturar</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('animaciones desactivadas nativo', async ({ page }) => {
+    /** Usar el parámetro nativo de Playwright para desactivar animaciones. */
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Playwright desactiva animaciones CSS automáticamente
+    await expect(page).toHaveScreenshot('dashboard.png', {
+        animations: 'disabled'  // 'disabled' | 'allow' (default)
+    });
+    // Esto es equivalente a inyectar CSS, pero más limpio
+    // Rebobina las animaciones CSS a su estado final antes de capturar
+});</code></pre>
+            </div>
+        </div>
 
         <h3>⏱️ Congelar contenido dinámico: timers y countdowns</h3>
         <p>Algunos elementos dinámicos no se resuelven con CSS — requieren intervención a nivel
         de JavaScript para congelar su estado antes de la captura.</p>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L100-14">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_congelar_timers(page: Page):
     """Congelar timers y relojes antes de capturar screenshot."""
     page.goto("https://mi-app.com/dashboard")
 
     # Estrategia 1: Congelar Date para que siempre devuelva la misma hora
-    page.evaluate("""
+    page.evaluate(\"\"\"
         // Fijar la fecha a un momento específico
         const fixedDate = new Date('2026-01-15T10:30:00');
         const OriginalDate = Date;
@@ -475,26 +924,26 @@ def test_congelar_timers(page: Page):
             }
             static now() { return fixedDate.getTime(); }
         };
-    """)
+    \"\"\")
 
     # Estrategia 2: Detener setInterval/setTimeout activos
-    page.evaluate("""
+    page.evaluate(\"\"\"
         // Limpiar todos los intervals (los timers dejan de actualizarse)
         const highestId = window.setTimeout(() => {}, 0);
         for (let i = 0; i <= highestId; i++) {
             window.clearInterval(i);
         }
-    """)
+    \"\"\")
 
     # Estrategia 3: Reemplazar texto dinámico con valor fijo
-    page.evaluate("""
+    page.evaluate(\"\"\"
         document.querySelectorAll('[data-testid="countdown"]').forEach(el => {
             el.textContent = '05:00';
         });
         document.querySelectorAll('.live-counter').forEach(el => {
             el.textContent = '1,234';
         });
-    """)
+    \"\"\")
 
     # Ahora el contenido es determinista — capturar screenshot
     expect(page).to_have_screenshot(
@@ -502,6 +951,56 @@ def test_congelar_timers(page: Page):
         animations="disabled",
         mask=[page.locator(".ad-banner")]  # Ads aún se enmascaran
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('congelar timers', async ({ page }) => {
+    /** Congelar timers y relojes antes de capturar screenshot. */
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Estrategia 1: Congelar Date para que siempre devuelva la misma hora
+    await page.evaluate(() => {
+        const fixedDate = new Date('2026-01-15T10:30:00');
+        const OriginalDate = Date;
+
+        // @ts-ignore - Reemplazar Date para que siempre devuelva fixedDate
+        window.Date = class extends OriginalDate {
+            constructor(...args: any[]) {
+                if (args.length === 0) return fixedDate;
+                // @ts-ignore
+                return new OriginalDate(...args);
+            }
+            static now() { return fixedDate.getTime(); }
+        };
+    });
+
+    // Estrategia 2: Detener setInterval/setTimeout activos
+    await page.evaluate(() => {
+        const highestId = window.setTimeout(() => {}, 0);
+        for (let i = 0; i <= highestId; i++) {
+            window.clearInterval(i);
+        }
+    });
+
+    // Estrategia 3: Reemplazar texto dinámico con valor fijo
+    await page.evaluate(() => {
+        document.querySelectorAll('[data-testid="countdown"]').forEach(el => {
+            el.textContent = '05:00';
+        });
+        document.querySelectorAll('.live-counter').forEach(el => {
+            el.textContent = '1,234';
+        });
+    });
+
+    // Ahora el contenido es determinista — capturar screenshot
+    await expect(page).toHaveScreenshot('dashboard-congelado.png', {
+        animations: 'disabled',
+        mask: [page.locator('.ad-banner')]
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA: Combinar todas las técnicas</h4>
@@ -543,11 +1042,22 @@ def test_congelar_timers(page: Page):
         </div>
 
         <h3>🔧 Ejemplo completo: configuración robusta</h3>
-        <pre><code class="python"># conftest.py — Configuración centralizada para visual testing
+        <div class="code-tabs" data-code-id="L100-15">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py — Configuración centralizada para visual testing
 import pytest
 from playwright.sync_api import Page, BrowserContext
 
-DISABLE_ANIMATIONS_CSS = """
+DISABLE_ANIMATIONS_CSS = \"\"\"
 *, *::before, *::after {
     animation-duration: 0s !important;
     animation-delay: 0s !important;
@@ -557,9 +1067,9 @@ DISABLE_ANIMATIONS_CSS = """
 }
 html { scroll-behavior: auto !important; }
 * { caret-color: transparent !important; }
-"""
+\"\"\"
 
-FREEZE_DATE_JS = """
+FREEZE_DATE_JS = \"\"\"
 const fixedDate = new Date('2026-01-15T10:30:00');
 const OrigDate = Date;
 window.Date = class extends OrigDate {
@@ -569,7 +1079,7 @@ window.Date = class extends OrigDate {
     }
     static now() { return fixedDate.getTime(); }
 };
-"""
+\"\"\"
 
 @pytest.fixture
 def visual_page(page: Page):
@@ -623,6 +1133,92 @@ def test_sidebar_visual(visual_page: Page):
         threshold=0.2,
         animations="disabled"
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// fixtures.ts — Configuración centralizada para visual testing
+import { test as base, expect } from '@playwright/test';
+
+const DISABLE_ANIMATIONS_CSS = \\\`
+*, *::before, *::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+}
+html { scroll-behavior: auto !important; }
+* { caret-color: transparent !important; }
+\\\`;
+
+const FREEZE_DATE_JS = () => {
+    const fixedDate = new Date('2026-01-15T10:30:00');
+    const OrigDate = Date;
+    // @ts-ignore
+    window.Date = class extends OrigDate {
+        constructor(...args: any[]) {
+            if (args.length === 0) return fixedDate;
+            // @ts-ignore
+            return new OrigDate(...args);
+        }
+        static now() { return fixedDate.getTime(); }
+    };
+};
+
+export const test = base.extend({
+    visualPage: async ({ page }, use) => {
+        /** Página preparada para visual testing estable. */
+        await page.addStyleTag({ content: DISABLE_ANIMATIONS_CSS });
+        await page.evaluate(FREEZE_DATE_JS);
+        await use(page);
+    },
+});
+
+
+// test_visual_dashboard.spec.ts
+import { expect } from '@playwright/test';
+import { test } from './fixtures';
+
+test('dashboard visual completo', async ({ visualPage }) => {
+    /** Visual test robusto del dashboard con todas las técnicas. */
+    await visualPage.goto('https://mi-app.com/dashboard');
+
+    // Esperar a que el contenido cargue completamente
+    await visualPage.waitForLoadState('networkidle');
+
+    // Definir masks para zonas dinámicas no controlables
+    const masks = [
+        visualPage.locator('[data-testid="ad-banner"]'),
+        visualPage.locator('.user-avatar'),
+        visualPage.locator('[data-testid="notification-count"]'),
+    ];
+
+    // Captura con todas las capas de protección
+    await expect(visualPage).toHaveScreenshot('dashboard-completo.png', {
+        mask: masks,
+        maskColor: '#808080',
+        threshold: 0.2,
+        maxDiffPixelRatio: 0.002,
+        animations: 'disabled',
+        fullPage: false
+    });
+});
+
+
+test('sidebar visual', async ({ visualPage }) => {
+    /** Visual test de un componente específico. */
+    await visualPage.goto('https://mi-app.com/dashboard');
+    await visualPage.waitForLoadState('networkidle');
+
+    const sidebar = visualPage.locator('aside.sidebar');
+
+    // Screenshot de componente — más estable que full page
+    await expect(sidebar).toHaveScreenshot('sidebar.png', {
+        threshold: 0.2,
+        animations: 'disabled'
+    });
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🏋️ Ejercicio práctico</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -646,7 +1242,18 @@ def test_sidebar_visual(visual_page: Page):
             </ol>
 
             <p><strong>Estructura esperada:</strong></p>
-            <pre><code class="python"># conftest.py
+            <div class="code-tabs" data-code-id="L100-16">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># conftest.py
 import pytest
 from playwright.sync_api import Page
 
@@ -723,6 +1330,91 @@ def test_strict_logo(visual_page: Page):
         threshold=0,           # Pixel-perfect
         max_diff_pixels=0      # Cero diferencias permitidas
     )</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// fixtures.ts
+import { test as base } from '@playwright/test';
+
+const DISABLE_ANIMATIONS_CSS = \\\`
+*, *::before, *::after {
+    animation-duration: 0s !important;
+    animation-delay: 0s !important;
+    transition-duration: 0s !important;
+    transition-delay: 0s !important;
+}
+html { scroll-behavior: auto !important; }
+* { caret-color: transparent !important; }
+\\\`;
+
+const FREEZE_DATE_JS = () => {
+    const fixedDate = new Date('2026-01-15T10:30:00');
+    const OrigDate = Date;
+    // @ts-ignore
+    window.Date = class extends OrigDate {
+        constructor(...args: any[]) {
+            if (args.length === 0) return fixedDate;
+            // @ts-ignore
+            return new OrigDate(...args);
+        }
+        static now() { return fixedDate.getTime(); }
+    };
+};
+
+export const test = base.extend({
+    visualPage: async ({ page }, use) => {
+        await page.addStyleTag({ content: DISABLE_ANIMATIONS_CSS });
+        await page.evaluate(FREEZE_DATE_JS);
+        await use(page);
+    },
+});
+
+
+// test_visual_masking.spec.ts
+import { expect } from '@playwright/test';
+import { test } from './fixtures';
+
+test('full dashboard', async ({ visualPage }) => {
+    await visualPage.goto('https://mi-app.com/dashboard');
+    await visualPage.waitForLoadState('networkidle');
+
+    const masks = [
+        visualPage.locator('[data-testid="timestamp"]'),
+        visualPage.locator('.user-avatar'),
+        visualPage.locator('#ad-container'),
+    ];
+
+    await expect(visualPage).toHaveScreenshot('dashboard.png', {
+        mask: masks,
+        maskColor: '#808080',
+        threshold: 0.2,
+        maxDiffPixelRatio: 0.005,
+        animations: 'disabled'
+    });
+});
+
+test('component visual', async ({ visualPage }) => {
+    await visualPage.goto('https://mi-app.com/dashboard');
+    await visualPage.waitForLoadState('networkidle');
+
+    const card = visualPage.locator('[data-testid="stats-card"]');
+    await expect(card).toHaveScreenshot('stats-card.png', {
+        threshold: 0.2,
+        animations: 'disabled'
+    });
+});
+
+test('strict logo', async ({ visualPage }) => {
+    await visualPage.goto('https://mi-app.com/dashboard');
+    await visualPage.waitForLoadState('networkidle');
+
+    const logo = visualPage.locator('[data-testid="company-logo"]');
+    await expect(logo).toHaveScreenshot('logo.png', {
+        threshold: 0,
+        maxDiffPixels: 0
+    });
+});</code></pre>
+                </div>
+            </div>
 
             <div style="background: #e8f5e9; padding: 10px; border-radius: 5px; margin-top: 10px;">
                 <strong>Criterios de evaluación:</strong>

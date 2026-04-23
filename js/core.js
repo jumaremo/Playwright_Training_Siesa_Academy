@@ -329,7 +329,10 @@ function showLessonContent(lessonData) {
     lessonContent.innerHTML = lessonData.content;
     lessonContent.classList.remove('hidden');
     lessonContent.classList.add('active');
-    
+
+    // POST-PROCESAMIENTO: tabs + syntax highlighting
+    initCodeTabs();
+
     // Mostrar acciones
     if (lessonActions) {
         lessonActions.classList.remove('hidden');
@@ -1524,6 +1527,50 @@ function setupEventListeners() {
             console.log('✅ Sistema totalmente sincronizado');
         }, 500);
     });
+}
+
+// ===== DUAL-LANGUAGE CODE TABS =====
+
+window.PWAcademy.switchTab = function(btn) {
+    const lang = btn.dataset.lang;
+    localStorage.setItem('pw-academy-lang-pref', lang);
+    // Cambiar TODOS los code-tabs de la página (sincronizado)
+    document.querySelectorAll('.code-tabs').forEach(container => {
+        container.querySelectorAll('.code-tab').forEach(t =>
+            t.classList.toggle('active', t.dataset.lang === lang));
+        container.querySelectorAll('.code-panel').forEach(p =>
+            p.classList.toggle('active', p.dataset.lang === lang));
+    });
+};
+
+window.PWAcademy.copyCode = function(btn) {
+    const panel = btn.closest('.code-tabs').querySelector('.code-panel.active');
+    const code = panel ? panel.querySelector('code') : null;
+    if (!code) return;
+    navigator.clipboard.writeText(code.textContent).then(() => {
+        btn.classList.add('copied');
+        btn.textContent = '\u2705';
+        setTimeout(() => { btn.classList.remove('copied'); btn.textContent = '\ud83d\udccb'; }, 2000);
+    }).catch(() => showToast('No se pudo copiar', 'warning'));
+};
+
+function initCodeTabs() {
+    const el = document.getElementById('lessonContent');
+    if (!el) return;
+    // Syntax highlighting
+    if (typeof hljs !== 'undefined') {
+        el.querySelectorAll('pre code').forEach(block => hljs.highlightElement(block));
+    }
+    // Aplicar preferencia guardada
+    const pref = localStorage.getItem('pw-academy-lang-pref');
+    if (pref === 'python' || pref === 'typescript') {
+        el.querySelectorAll('.code-tabs').forEach(container => {
+            container.querySelectorAll('.code-tab').forEach(t =>
+                t.classList.toggle('active', t.dataset.lang === pref));
+            container.querySelectorAll('.code-panel').forEach(p =>
+                p.classList.toggle('active', p.dataset.lang === pref));
+        });
+    }
 }
 
 // ===== INICIALIZACIÓN FINAL =====
