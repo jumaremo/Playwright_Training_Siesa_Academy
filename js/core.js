@@ -793,7 +793,7 @@ function displaySearchResults(results, query = '') {
             return `
                 <div class="search-result-item" onclick="${isAvailable ? `loadLessonDirect(${result.id}); hideSearchResults();` : 'showComingSoon();'}">
                     <div class="search-result-title">
-                        ${result.sectionIcon} Lección ${lessonNumber}: ${highlightedTitle}
+                        ${result.sectionIcon || '📖'} Lección ${lessonNumber}: ${highlightedTitle}
                     </div>
                     <div class="search-result-meta">
                         ${result.sectionTitle} • ${isAvailable ? 'Disponible' : 'En desarrollo'}
