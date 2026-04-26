@@ -463,10 +463,13 @@ window.PLAYWRIGHT_CURRICULUM = {
         },
         searchLessons: function(query) {
             const results = [];
-            const q = query.toLowerCase();
+            const q = query.toLowerCase().trim();
             Object.values(PLAYWRIGHT_CURRICULUM.sections).forEach(section => {
                 section.lessons.forEach(lesson => {
-                    if (lesson.title.toLowerCase().includes(q) ||
+                    const lessonNumber = String(lesson.id).padStart(3, '0');
+                    if (lessonNumber.includes(q) ||
+                        lesson.id.toString() === q ||
+                        lesson.title.toLowerCase().includes(q) ||
                         (lesson.topics && lesson.topics.some(t => t.toLowerCase().includes(q)))) {
                         results.push({...lesson, sectionTitle: section.title});
                     }
