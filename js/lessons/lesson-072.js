@@ -63,7 +63,18 @@ const LESSON_072 = {
         </div>
 
         <h3>⚙️ Setup: Fixtures y configuración</h3>
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L072-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># conftest.py
 import pytest
 from playwright.sync_api import Playwright
 
@@ -103,10 +114,71 @@ def created_task(api, task_data):
     yield task
     # Cleanup: eliminar la tarea
     api.delete(f"/api/tasks/{task['id']}")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// fixtures.ts
+import { test as base, type APIRequestContext } from '@playwright/test';
+
+const API_BASE = 'https://api.taskmanager.com';
+
+type ApiFixtures = {
+    api: APIRequestContext;
+    taskData: Record&lt;string, string&gt;;
+    createdTask: Record&lt;string, unknown&gt;;
+};
+
+export const test = base.extend&lt;{}, ApiFixtures&gt;({
+    api: [async ({ playwright }, use) => {
+        const ctx = await playwright.request.newContext({
+            baseURL: API_BASE,
+            extraHTTPHeaders: {
+                'Authorization': 'Bearer test-api-key-123',
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+            },
+        });
+        await use(ctx);
+        await ctx.dispose();
+    }, { scope: 'worker' }],
+
+    taskData: [async ({}, use) => {
+        await use({
+            title: 'Tarea de prueba E2E',
+            description: 'Creada por Playwright API tests',
+            priority: 'high',
+            status: 'pending',
+            assignee: 'juan.reina@siesa.com',
+        });
+    }, { scope: 'worker' }],
+
+    createdTask: async ({ api, taskData }, use) => {
+        const response = await api.post('/api/tasks', { data: taskData });
+        expect(response.status()).toBe(201);
+        const task = await response.json();
+        await use(task);
+        // Cleanup: eliminar la tarea
+        await api.delete('/api/tasks/' + task.id);
+    },
+});
+
+export { expect } from '@playwright/test';</code></pre>
+        </div>
+        </div>
 
         <h3>✅ Tests de CREATE (POST)</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># test_tasks_create.py
+            <div class="code-tabs" data-code-id="L072-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_tasks_create.py
 
 def test_crear_tarea_exitoso(api, task_data):
     """POST /api/tasks — crear tarea con datos válidos."""
@@ -146,10 +218,62 @@ def test_crear_tarea_prioridad_invalida(api):
     assert response.status == 422
     errors = response.json()["errors"]
     assert "priority" in errors</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test-tasks-create.spec.ts
+import { test, expect } from './fixtures';
+
+test('crear tarea exitoso', async ({ api, taskData }) => {
+    const response = await api.post('/api/tasks', { data: taskData });
+
+    expect(response.status()).toBe(201);
+    const body = await response.json();
+    expect(body.id).not.toBeNull();
+    expect(body.title).toBe(taskData.title);
+    expect(body.priority).toBe('high');
+    expect(body.status).toBe('pending');
+    expect(body).toHaveProperty('created_at');
+
+    // Cleanup
+    await api.delete('/api/tasks/' + body.id);
+});
+
+test('crear tarea sin título falla', async ({ api }) => {
+    const response = await api.post('/api/tasks', {
+        data: { description: 'Sin título', priority: 'low' },
+    });
+
+    expect(response.status()).toBe(422);
+    const errors = (await response.json()).errors;
+    expect(errors).toHaveProperty('title');
+});
+
+test('crear tarea prioridad inválida', async ({ api }) => {
+    const response = await api.post('/api/tasks', {
+        data: { title: 'Test', priority: 'super-urgente' },
+    });
+
+    expect(response.status()).toBe(422);
+    const errors = (await response.json()).errors;
+    expect(errors).toHaveProperty('priority');
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📖 Tests de READ (GET)</h3>
-        <pre><code class="python"># test_tasks_read.py
+        <div class="code-tabs" data-code-id="L072-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_tasks_read.py
 
 def test_listar_tareas(api):
     """GET /api/tasks — lista de tareas."""
@@ -219,10 +343,102 @@ def test_paginacion(api):
         ids_p1 = {t["id"] for t in body["data"]}
         ids_p2 = {t["id"] for t in page2.json()["data"]}
         assert ids_p1.isdisjoint(ids_p2)  # Sin duplicados</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test-tasks-read.spec.ts
+import { test, expect } from './fixtures';
+
+test('listar tareas', async ({ api }) => {
+    const response = await api.get('/api/tasks');
+
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    expect(Array.isArray(body.data)).toBeTruthy();
+    expect(body).toHaveProperty('total');
+    expect(body).toHaveProperty('page');
+});
+
+test('obtener tarea por id', async ({ api, createdTask }) => {
+    const taskId = createdTask.id;
+    const response = await api.get('/api/tasks/' + taskId);
+
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    expect(body.id).toBe(taskId);
+    expect(body.title).toBe(createdTask.title);
+});
+
+test('tarea no existente', async ({ api }) => {
+    const response = await api.get('/api/tasks/999999');
+    expect(response.status()).toBe(404);
+});
+
+test('filtrar por status', async ({ api }) => {
+    const response = await api.get('/api/tasks', {
+        params: { status: 'pending' },
+    });
+
+    expect(response.ok()).toBeTruthy();
+    const tasks = (await response.json()).data;
+    for (const task of tasks) {
+        expect(task.status).toBe('pending');
+    }
+});
+
+test('filtrar por prioridad', async ({ api }) => {
+    const response = await api.get('/api/tasks', {
+        params: { priority: 'high' },
+    });
+
+    expect(response.ok()).toBeTruthy();
+    const tasks = (await response.json()).data;
+    for (const task of tasks) {
+        expect(task.priority).toBe('high');
+    }
+});
+
+test('paginación', async ({ api }) => {
+    const response = await api.get('/api/tasks', {
+        params: { page: '1', per_page: '5' },
+    });
+
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    expect(body.data.length).toBeLessThanOrEqual(5);
+    expect(body.page).toBe(1);
+    expect(body.per_page).toBe(5);
+
+    // Verificar que la página 2 tiene datos diferentes
+    const page2 = await api.get('/api/tasks', {
+        params: { page: '2', per_page: '5' },
+    });
+    const page2Data = (await page2.json()).data;
+    if (page2Data.length > 0) {
+        const idsP1 = new Set(body.data.map((t: any) => t.id));
+        const idsP2 = new Set(page2Data.map((t: any) => t.id));
+        // Sin duplicados entre páginas
+        for (const id of idsP2) {
+            expect(idsP1.has(id)).toBeFalsy();
+        }
+    }
+});</code></pre>
+        </div>
+        </div>
 
         <h3>✏️ Tests de UPDATE (PUT/PATCH)</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># test_tasks_update.py
+            <div class="code-tabs" data-code-id="L072-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_tasks_update.py
 
 def test_actualizar_tarea_completa(api, created_task):
     """PUT /api/tasks/:id — actualización completa."""
@@ -266,10 +482,70 @@ def test_actualizar_tarea_inexistente(api):
         "title": "No existe"
     })
     assert response.status == 404</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test-tasks-update.spec.ts
+import { test, expect } from './fixtures';
+
+test('actualizar tarea completa', async ({ api, createdTask }) => {
+    const taskId = createdTask.id;
+    const updatedData = {
+        title: 'Tarea actualizada',
+        description: 'Descripción modificada',
+        priority: 'low',
+        status: 'in_progress',
+        assignee: 'carlos.diaz@siesa.com',
+    };
+
+    const response = await api.put('/api/tasks/' + taskId, {
+        data: updatedData,
+    });
+
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    expect(body.title).toBe('Tarea actualizada');
+    expect(body.priority).toBe('low');
+    expect(body.status).toBe('in_progress');
+    expect(body).toHaveProperty('updated_at');
+});
+
+test('actualizar parcial', async ({ api, createdTask }) => {
+    const taskId = createdTask.id;
+
+    const response = await api.patch('/api/tasks/' + taskId, {
+        data: { status: 'completed' },
+    });
+
+    expect(response.ok()).toBeTruthy();
+    const body = await response.json();
+    expect(body.status).toBe('completed');
+    // Los demás campos no cambian
+    expect(body.title).toBe(createdTask.title);
+});
+
+test('actualizar tarea inexistente', async ({ api }) => {
+    const response = await api.put('/api/tasks/999999', {
+        data: { title: 'No existe' },
+    });
+    expect(response.status()).toBe(404);
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🗑️ Tests de DELETE</h3>
-        <pre><code class="python"># test_tasks_delete.py
+        <div class="code-tabs" data-code-id="L072-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_tasks_delete.py
 
 def test_eliminar_tarea(api, task_data):
     """DELETE /api/tasks/:id — eliminar tarea existente."""
@@ -304,9 +580,58 @@ def test_eliminar_no_permite_doble_delete(api, task_data):
     # Segundo delete: 404
     second = api.delete(f"/api/tasks/{task_id}")
     assert second.status == 404</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test-tasks-delete.spec.ts
+import { test, expect } from './fixtures';
+
+test('eliminar tarea', async ({ api, taskData }) => {
+    // Crear tarea para eliminar
+    const create = await api.post('/api/tasks', { data: taskData });
+    const taskId = (await create.json()).id;
+
+    // Eliminar
+    const response = await api.delete('/api/tasks/' + taskId);
+    expect(response.status()).toBe(204);
+
+    // Verificar que ya no existe
+    const getResponse = await api.get('/api/tasks/' + taskId);
+    expect(getResponse.status()).toBe(404);
+});
+
+test('eliminar tarea inexistente', async ({ api }) => {
+    const response = await api.delete('/api/tasks/999999');
+    expect(response.status()).toBe(404);
+});
+
+test('eliminar no permite doble delete', async ({ api, taskData }) => {
+    const create = await api.post('/api/tasks', { data: taskData });
+    const taskId = (await create.json()).id;
+
+    // Primer delete: éxito
+    const first = await api.delete('/api/tasks/' + taskId);
+    expect(first.status()).toBe(204);
+
+    // Segundo delete: 404
+    const second = await api.delete('/api/tasks/' + taskId);
+    expect(second.status()).toBe(404);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🔒 Tests de seguridad básicos</h3>
-        <pre><code class="python"># test_tasks_security.py
+        <div class="code-tabs" data-code-id="L072-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_tasks_security.py
 
 def test_sin_auth_retorna_401(api_no_auth):
     """Endpoints protegidos requieren autenticación."""
@@ -323,6 +648,33 @@ def test_token_invalido_retorna_401(playwright):
     response = ctx.get("/api/tasks")
     assert response.status == 401
     ctx.dispose()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test-tasks-security.spec.ts
+import { test, expect } from '@playwright/test';
+
+const API_BASE = 'https://api.taskmanager.com';
+
+test('sin auth retorna 401', async ({ playwright }) => {
+    const ctx = await playwright.request.newContext({
+        baseURL: API_BASE,
+    });
+    const response = await ctx.get('/api/tasks');
+    expect(response.status()).toBe(401);
+    await ctx.dispose();
+});
+
+test('token inválido retorna 401', async ({ playwright }) => {
+    const ctx = await playwright.request.newContext({
+        baseURL: API_BASE,
+        extraHTTPHeaders: { Authorization: 'Bearer token-invalido' },
+    });
+    const response = await ctx.get('/api/tasks');
+    expect(response.status()).toBe(401);
+    await ctx.dispose();
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00bcd4;">
             <strong>💡 Tip:</strong> La fixture <code>created_task</code> con yield es

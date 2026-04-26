@@ -148,7 +148,18 @@ playwright codegen \\
         <h3>🎯 Acciones que Codegen registra</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Codegen captura automáticamente las siguientes interacciones:</p>
-            <pre><code class="python"># El código generado por Codegen se ve así:
+            <div class="code-tabs" data-code-id="L094-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># El código generado por Codegen se ve así:
 from playwright.sync_api import Playwright, sync_playwright, expect
 
 def run(playwright: Playwright) -> None:
@@ -185,6 +196,47 @@ def run(playwright: Playwright) -> None:
 
 with sync_playwright() as playwright:
     run(playwright)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// El código generado por Codegen se ve así:
+import { chromium } from 'playwright';
+
+async function run() {
+    const browser = await chromium.launch({ headless: false });
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    // Navegación
+    await page.goto('https://mi-app.com/login');
+
+    // Clics en elementos
+    await page.getByRole('link', { name: 'Iniciar Sesión' }).click();
+
+    // Escritura en campos (fill)
+    await page.getByLabel('Correo electrónico').fill('admin@siesa.com');
+    await page.getByLabel('Contraseña').fill('Admin123!');
+
+    // Clic en botones
+    await page.getByRole('button', { name: 'Entrar' }).click();
+
+    // Selección en dropdowns
+    await page.getByLabel('Módulo').selectOption('HCM');
+
+    // Checkboxes y radio buttons
+    await page.getByLabel('Recordarme').check();
+    await page.getByLabel('Perfil completo').check();
+
+    // Navegación entre páginas
+    await page.getByRole('link', { name: 'Dashboard' }).click();
+
+    // ---------------------
+    await context.close();
+    await browser.close();
+}
+
+run();</code></pre>
+            </div>
+            </div>
             <p><strong>Nota:</strong> Codegen utiliza preferentemente localizadores semánticos como
             <code>get_by_role()</code>, <code>get_by_label()</code> y <code>get_by_text()</code>.
             Solo recurre a selectores CSS cuando no encuentra uno semántico adecuado.</p>
@@ -194,7 +246,18 @@ with sync_playwright() as playwright:
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>La barra de herramientas de Codegen permite agregar <strong>aserciones sin escribir código</strong>.
             Selecciona el tipo de aserción y haz clic en el elemento que quieres verificar:</p>
-            <pre><code class="python"># Aserción de visibilidad (Assert visibility)
+            <div class="code-tabs" data-code-id="L094-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Aserción de visibilidad (Assert visibility)
 # Haz clic en el botón "Assert visibility" y luego en el elemento
 expect(page.get_by_role("heading", name="Dashboard")).to_be_visible()
 
@@ -211,6 +274,27 @@ expect(page.get_by_role("button", name="Guardar")).to_be_enabled()
 
 # Aserción de checkbox marcado
 expect(page.get_by_label("Activo")).to_be_checked()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Aserción de visibilidad (Assert visibility)
+// Haz clic en el botón "Assert visibility" y luego en el elemento
+await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+
+// Aserción de texto (Assert text)
+// Verifica que un elemento contenga cierto texto
+await expect(page.getByRole('heading', { name: 'Bienvenido' })).toContainText('Bienvenido, Admin');
+
+// Aserción de valor (Assert value)
+// Verifica el valor de un campo de formulario
+await expect(page.getByLabel('Correo electrónico')).toHaveValue('admin@siesa.com');
+
+// Aserción de estado habilitado/deshabilitado
+await expect(page.getByRole('button', { name: 'Guardar' })).toBeEnabled();
+
+// Aserción de checkbox marcado
+await expect(page.getByLabel('Activo')).toBeChecked();</code></pre>
+            </div>
+            </div>
             <p><strong>Flujo para agregar aserciones:</strong></p>
             <ol>
                 <li>Haz clic en el botón de aserción en la barra de herramientas (ej. "Assert visibility")</li>
@@ -280,7 +364,18 @@ playwright codegen \\
     --color-scheme dark \\
     https://mi-app.com</code></pre>
             <p>El código generado incluirá automáticamente la configuración de emulación:</p>
-            <pre><code class="python"># Código generado con --device "iPhone 13"
+            <div class="code-tabs" data-code-id="L094-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Código generado con --device "iPhone 13"
 from playwright.sync_api import Playwright, sync_playwright, expect
 
 def run(playwright: Playwright) -> None:
@@ -296,6 +391,28 @@ def run(playwright: Playwright) -> None:
 
 with sync_playwright() as playwright:
     run(playwright)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Código generado con --device "iPhone 13"
+import { chromium, devices } from 'playwright';
+
+async function run() {
+    const browser = await chromium.launch({ headless: false });
+    const context = await browser.newContext({
+        ...devices['iPhone 13'],
+    });
+    const page = await context.newPage();
+
+    await page.goto('https://mi-app.com');
+    // ... acciones grabadas en vista móvil ...
+
+    await context.close();
+    await browser.close();
+}
+
+run();</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>⚠️ Limitaciones de Codegen</h3>
@@ -315,7 +432,18 @@ with sync_playwright() as playwright:
                 <li><strong>Cleanup:</strong> No genera teardown ni manejo de estado entre tests</li>
             </ul>
             <h4>Ejemplo de código que necesita limpieza manual</h4>
-            <pre><code class="python"># ❌ Código crudo generado por Codegen
+            <div class="code-tabs" data-code-id="L094-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># ❌ Código crudo generado por Codegen
 def run(playwright: Playwright) -> None:
     browser = playwright.chromium.launch(headless=False)
     context = browser.new_context()
@@ -334,6 +462,30 @@ def run(playwright: Playwright) -> None:
     expect(page.get_by_text("Empleado creado exitosamente")).to_be_visible()
     context.close()
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// ❌ Código crudo generado por Codegen
+async function run() {
+    const browser = await chromium.launch({ headless: false });
+    const context = await browser.newContext();
+    const page = await context.newPage();
+    await page.goto('https://mi-app.com/login');
+    await page.getByLabel('Correo electrónico').fill('admin@siesa.com');
+    await page.getByLabel('Contraseña').fill('Admin123!');
+    await page.getByRole('button', { name: 'Entrar' }).click();
+    await page.getByRole('link', { name: 'Empleados' }).click();
+    await page.getByRole('button', { name: 'Nuevo Empleado' }).click();
+    await page.getByLabel('Nombre').fill('Juan Manuel');
+    await page.getByLabel('Apellido').fill('Reina');
+    await page.getByLabel('Cédula').fill('12345678');
+    await page.getByLabel('Cargo').selectOption('Líder QA');
+    await page.getByRole('button', { name: 'Guardar' }).click();
+    await expect(page.getByText('Empleado creado exitosamente')).toBeVisible();
+    await context.close();
+    await browser.close();
+}</code></pre>
+            </div>
+            </div>
             <p>Este código funciona, pero tiene credenciales hardcodeadas, sin POM, sin fixtures,
             sin parametrización y sin manejo de errores.</p>
         </div>
@@ -345,7 +497,18 @@ def run(playwright: Playwright) -> None:
 playwright codegen --target python --output tests/raw_crear_empleado.py https://mi-app.com</code></pre>
 
             <h4>Paso 2: Refactorizar en Page Object Model</h4>
-            <pre><code class="python"># pages/login_page.py
+            <div class="code-tabs" data-code-id="L094-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># pages/login_page.py
 class LoginPage:
     def __init__(self, page):
         self.page = page
@@ -389,9 +552,94 @@ class EmpleadosPage:
         self.cargo_select.select_option(cargo)
         self.btn_guardar.click()
         return self</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// pages/login-page.ts
+import { type Page, type Locator } from '@playwright/test';
+
+export class LoginPage {
+    readonly page: Page;
+    readonly emailInput: Locator;
+    readonly passwordInput: Locator;
+    readonly submitButton: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.emailInput = page.getByLabel('Correo electrónico');
+        this.passwordInput = page.getByLabel('Contraseña');
+        this.submitButton = page.getByRole('button', { name: 'Entrar' });
+    }
+
+    async navigate() {
+        await this.page.goto('https://mi-app.com/login');
+        return this;
+    }
+
+    async login(email: string, password: string) {
+        await this.emailInput.fill(email);
+        await this.passwordInput.fill(password);
+        await this.submitButton.click();
+        await this.page.waitForURL('**/dashboard');
+        return this;
+    }
+}
+
+
+// pages/empleados-page.ts
+import { type Page, type Locator } from '@playwright/test';
+
+export class EmpleadosPage {
+    readonly page: Page;
+    readonly btnNuevo: Locator;
+    readonly nombreInput: Locator;
+    readonly apellidoInput: Locator;
+    readonly cedulaInput: Locator;
+    readonly cargoSelect: Locator;
+    readonly btnGuardar: Locator;
+    readonly msgExito: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.btnNuevo = page.getByRole('button', { name: 'Nuevo Empleado' });
+        this.nombreInput = page.getByLabel('Nombre');
+        this.apellidoInput = page.getByLabel('Apellido');
+        this.cedulaInput = page.getByLabel('Cédula');
+        this.cargoSelect = page.getByLabel('Cargo');
+        this.btnGuardar = page.getByRole('button', { name: 'Guardar' });
+        this.msgExito = page.getByText('Empleado creado exitosamente');
+    }
+
+    async navigate() {
+        await this.page.getByRole('link', { name: 'Empleados' }).click();
+        return this;
+    }
+
+    async crearEmpleado(nombre: string, apellido: string, cedula: string, cargo: string) {
+        await this.btnNuevo.click();
+        await this.nombreInput.fill(nombre);
+        await this.apellidoInput.fill(apellido);
+        await this.cedulaInput.fill(cedula);
+        await this.cargoSelect.selectOption(cargo);
+        await this.btnGuardar.click();
+        return this;
+    }
+}</code></pre>
+            </div>
+            </div>
 
             <h4>Paso 3: Escribir el test limpio con pytest</h4>
-            <pre><code class="python"># tests/test_crear_empleado.py
+            <div class="code-tabs" data-code-id="L094-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_crear_empleado.py
 import pytest
 from playwright.sync_api import expect
 from pages.login_page import LoginPage
@@ -434,6 +682,58 @@ def test_crear_multiples_empleados(authenticated_page, nombre, apellido, cedula,
     empleados.crear_empleado(nombre, apellido, cedula, cargo)
 
     expect(empleados.msg_exito).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/crear-empleado.spec.ts
+import { test, expect } from '@playwright/test';
+import { LoginPage } from '../pages/login-page';
+import { EmpleadosPage } from '../pages/empleados-page';
+
+
+// Fixture de autenticación centralizada
+test.beforeEach(async ({ page }) => {
+    const login = new LoginPage(page);
+    await login.navigate();
+    await login.login('admin@siesa.com', 'Admin123!');
+});
+
+
+test('crear empleado exitosamente', async ({ page }) => {
+    const empleados = new EmpleadosPage(page);
+    await empleados.navigate();
+
+    await empleados.crearEmpleado(
+        'Juan Manuel',
+        'Reina',
+        '12345678',
+        'Líder QA',
+    );
+
+    await expect(empleados.msgExito).toBeVisible();
+});
+
+
+// Parametrización con array de datos
+const empleadosData = [
+    { nombre: 'Carlos', apellido: 'Diaz', cedula: '11111111', cargo: 'QA Engineer' },
+    { nombre: 'Jose', apellido: 'Bravo', cedula: '22222222', cargo: 'QA Engineer' },
+    { nombre: 'Ana', apellido: 'García', cedula: '33333333', cargo: 'Desarrollador' },
+];
+
+for (const data of empleadosData) {
+    test(\`crear empleado: \${data.nombre} \${data.apellido}\`, async ({ page }) => {
+        const empleados = new EmpleadosPage(page);
+        await empleados.navigate();
+
+        await empleados.crearEmpleado(
+            data.nombre, data.apellido, data.cedula, data.cargo
+        );
+
+        await expect(empleados.msgExito).toBeVisible();
+    });
+}</code></pre>
+            </div>
+            </div>
             <p><strong>Resultado:</strong> De una función plana de 15 líneas generada por Codegen, obtuvimos
             un framework con Page Objects reutilizables, tests parametrizados y fixtures centralizados.</p>
         </div>
@@ -540,7 +840,18 @@ python -m playwright show-devices</code></pre>
                     </ul>
                 </li>
                 <li><strong>Refactorizar:</strong> Convierte el código generado en una estructura POM:
-                    <pre><code class="python"># pages/todo_page.py
+                    <div class="code-tabs" data-code-id="L094-7">
+                    <div class="code-tabs-header">
+                        <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                            <span class="code-tab-icon">🐍</span> Python
+                        </button>
+                        <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                            <span class="code-tab-icon">🔷</span> TypeScript
+                        </button>
+                        <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                    </div>
+                    <div class="code-panel active" data-lang="python">
+                        <pre><code class="language-python"># pages/todo_page.py
 class TodoPage:
     URL = "https://demo.playwright.dev/todomvc"
 
@@ -574,7 +885,71 @@ class TodoPage:
     def filter_all(self):
         self.page.get_by_role("link", name="All").click()
         return self</code></pre>
-                    <pre><code class="python"># tests/test_todo_refactored.py
+                    </div>
+                    <div class="code-panel" data-lang="typescript">
+                        <pre><code class="language-typescript">// pages/todo-page.ts
+import { type Page, type Locator } from '@playwright/test';
+
+export class TodoPage {
+    static readonly URL = 'https://demo.playwright.dev/todomvc';
+
+    readonly page: Page;
+    readonly newTodoInput: Locator;
+    readonly todoItems: Locator;
+    readonly todoCount: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.newTodoInput = page.getByPlaceholder('What needs to be done?');
+        this.todoItems = page.getByTestId('todo-item');
+        this.todoCount = page.getByTestId('todo-count');
+    }
+
+    async navigate() {
+        await this.page.goto(TodoPage.URL);
+        return this;
+    }
+
+    async addTodo(text: string) {
+        await this.newTodoInput.fill(text);
+        await this.newTodoInput.press('Enter');
+        return this;
+    }
+
+    async toggleTodo(index: number) {
+        await this.todoItems.nth(index).getByRole('checkbox').check();
+        return this;
+    }
+
+    async filterActive() {
+        await this.page.getByRole('link', { name: 'Active' }).click();
+        return this;
+    }
+
+    async filterCompleted() {
+        await this.page.getByRole('link', { name: 'Completed' }).click();
+        return this;
+    }
+
+    async filterAll() {
+        await this.page.getByRole('link', { name: 'All' }).click();
+        return this;
+    }
+}</code></pre>
+                    </div>
+                    </div>
+                    <div class="code-tabs" data-code-id="L094-8">
+                    <div class="code-tabs-header">
+                        <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                            <span class="code-tab-icon">🐍</span> Python
+                        </button>
+                        <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                            <span class="code-tab-icon">🔷</span> TypeScript
+                        </button>
+                        <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                    </div>
+                    <div class="code-panel active" data-lang="python">
+                        <pre><code class="language-python"># tests/test_todo_refactored.py
 import pytest
 from playwright.sync_api import expect
 from pages.todo_page import TodoPage
@@ -625,6 +1000,66 @@ def test_contador_refleja_items_activos(todo_page):
 
     todo_page.toggle_todo(0)
     expect(todo_page.todo_count).to_contain_text("2 items left")</code></pre>
+                    </div>
+                    <div class="code-panel" data-lang="typescript">
+                        <pre><code class="language-typescript">// tests/todo-refactored.spec.ts
+import { test, expect } from '@playwright/test';
+import { TodoPage } from '../pages/todo-page';
+
+
+const TAREAS = ['Instalar Playwright', 'Crear test', 'Ejecutar CI'];
+
+
+test.describe('TodoMVC', () => {
+    let todoPage: TodoPage;
+
+    test.beforeEach(async ({ page }) => {
+        todoPage = new TodoPage(page);
+        await todoPage.navigate();
+    });
+
+    test('agregar tareas', async () => {
+        for (const tarea of TAREAS) {
+            await todoPage.addTodo(tarea);
+        }
+
+        await expect(todoPage.todoItems).toHaveCount(3);
+    });
+
+    test('completar y filtrar', async () => {
+        for (const tarea of TAREAS) {
+            await todoPage.addTodo(tarea);
+        }
+
+        // Completar la primera tarea
+        await todoPage.toggleTodo(0);
+
+        // Filtrar por activas
+        await todoPage.filterActive();
+        await expect(todoPage.todoItems).toHaveCount(2);
+
+        // Filtrar por completadas
+        await todoPage.filterCompleted();
+        await expect(todoPage.todoItems).toHaveCount(1);
+
+        // Mostrar todas
+        await todoPage.filterAll();
+        await expect(todoPage.todoItems).toHaveCount(3);
+    });
+
+    test('contador refleja items activos', async () => {
+        for (const tarea of TAREAS) {
+            await todoPage.addTodo(tarea);
+        }
+
+        await expect(todoPage.todoCount).toContainText('3 items left');
+
+        await todoPage.toggleTodo(0);
+        await expect(todoPage.todoCount).toContainText('2 items left');
+    });
+});</code></pre>
+                    </div>
+                    </div>
                 </li>
                 <li><strong>Comparar:</strong> Revisa el archivo <code>raw_todo.py</code> generado por Codegen
                 versus el <code>test_todo_refactored.py</code>. Identifica las diferencias en:

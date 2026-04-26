@@ -19,7 +19,18 @@ const LESSON_068 = {
 
         <h3>🖼️ Bloquear imágenes</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># Bloquear todas las imágenes
+            <div class="code-tabs" data-code-id="L068-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Bloquear todas las imágenes
 page.route("**/*.{png,jpg,jpeg,gif,svg,webp,ico}", lambda r: r.abort())
 
 # ── Alternativa: bloquear por tipo de recurso ──
@@ -47,10 +58,50 @@ def replace_with_placeholder(route):
     )
 
 page.route("**/*.{png,jpg,jpeg,gif,webp}", replace_with_placeholder)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Bloquear todas las imágenes
+await page.route('**/*.{png,jpg,jpeg,gif,svg,webp,ico}', route => route.abort());
+
+// ── Alternativa: bloquear por tipo de recurso ──
+// Más preciso que por extensión
+await page.route('**/*', async (route) => {
+    if (route.request().resourceType() === 'image') {
+        await route.abort();
+    } else {
+        await route.continue();
+    }
+});
+
+// ── Reemplazar imágenes con placeholder (más visual) ──
+await page.route('**/*.{png,jpg,jpeg,gif,webp}', async (route) => {
+    const svgPlaceholder = '&lt;svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"&gt;'
+        + '&lt;rect width="200" height="200" fill="#f0f0f0"/&gt;'
+        + '&lt;text x="50%" y="50%" text-anchor="middle" fill="#999" font-size="14"&gt;'
+        + 'IMG&lt;/text&gt;&lt;/svg&gt;';
+    await route.fulfill({
+        status: 200,
+        contentType: 'image/svg+xml',
+        body: svgPlaceholder,
+    });
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📊 Bloquear analytics y tracking</h3>
-        <pre><code class="python"># Bloquear Google Analytics
+        <div class="code-tabs" data-code-id="L068-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Bloquear Google Analytics
 page.route("**google-analytics.com/**", lambda r: r.abort())
 page.route("**googletagmanager.com/**", lambda r: r.abort())
 page.route("**/*.google-analytics.com/**", lambda r: r.abort())
@@ -88,9 +139,62 @@ def block_tracking(route):
         route.continue_()
 
 page.route("**/*", block_tracking)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Bloquear Google Analytics
+await page.route('**google-analytics.com/**', route => route.abort());
+await page.route('**googletagmanager.com/**', route => route.abort());
+await page.route('**/*.google-analytics.com/**', route => route.abort());
+
+// Bloquear Facebook Pixel
+await page.route('**connect.facebook.net/**', route => route.abort());
+await page.route('**facebook.com/tr/**', route => route.abort());
+
+// Bloquear Hotjar, Mixpanel, Segment, etc.
+await page.route('**hotjar.com/**', route => route.abort());
+await page.route('**mixpanel.com/**', route => route.abort());
+await page.route('**segment.io/**', route => route.abort());
+await page.route('**segment.com/**', route => route.abort());
+await page.route('**amplitude.com/**', route => route.abort());
+
+// ── Bloqueo masivo con lista ──
+const BLOCKED_DOMAINS = [
+    'google-analytics.com',
+    'googletagmanager.com',
+    'facebook.net',
+    'hotjar.com',
+    'mixpanel.com',
+    'segment.io',
+    'amplitude.com',
+    'sentry.io',
+    'newrelic.com',
+    'doubleclick.net',
+];
+
+await page.route('**/*', async (route) => {
+    const url = route.request().url();
+    if (BLOCKED_DOMAINS.some(domain => url.includes(domain))) {
+        await route.abort();
+    } else {
+        await route.continue();
+    }
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🎨 Bloquear CSS y fuentes externas</h3>
-        <pre><code class="python"># Bloquear fuentes (reduce tiempo de carga significativamente)
+        <div class="code-tabs" data-code-id="L068-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Bloquear fuentes (reduce tiempo de carga significativamente)
 page.route("**/*.{woff,woff2,ttf,otf,eot}", lambda r: r.abort())
 page.route("**fonts.googleapis.com/**", lambda r: r.abort())
 page.route("**fonts.gstatic.com/**", lambda r: r.abort())
@@ -109,10 +213,48 @@ page.route("**/*", lambda route: (
     if route.request.resource_type in BLOCK_TYPES
     else route.continue_()
 ))</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Bloquear fuentes (reduce tiempo de carga significativamente)
+await page.route('**/*.{woff,woff2,ttf,otf,eot}', route => route.abort());
+await page.route('**fonts.googleapis.com/**', route => route.abort());
+await page.route('**fonts.gstatic.com/**', route => route.abort());
+
+// Bloquear CSS externos (si solo necesitas funcionalidad)
+await page.route('**/*', async (route) => {
+    if (route.request().resourceType() === 'font') {
+        await route.abort();
+    } else {
+        await route.continue();
+    }
+});
+
+// Bloquear por tipo de recurso — referencia completa
+const BLOCK_TYPES = new Set(['image', 'font', 'media', 'stylesheet']);
+await page.route('**/*', async (route) => {
+    if (BLOCK_TYPES.has(route.request().resourceType())) {
+        await route.abort();
+    } else {
+        await route.continue();
+    }
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📦 Bloquear scripts de terceros</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># Bloquear chat widgets
+            <div class="code-tabs" data-code-id="L068-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Bloquear chat widgets
 page.route("**intercom.io/**", lambda r: r.abort())
 page.route("**crisp.chat/**", lambda r: r.abort())
 page.route("**zendesk.com/**", lambda r: r.abort())
@@ -129,10 +271,42 @@ def block_third_party_scripts(route):
     route.continue_()
 
 page.route("**/*", block_third_party_scripts)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Bloquear chat widgets
+await page.route('**intercom.io/**', route => route.abort());
+await page.route('**crisp.chat/**', route => route.abort());
+await page.route('**zendesk.com/**', route => route.abort());
+
+// Bloquear todos los scripts de terceros
+// (solo permitir scripts del dominio propio)
+await page.route('**/*', async (route) => {
+    if (route.request().resourceType() === 'script') {
+        const url = route.request().url();
+        if (!url.includes('mi-app.com') &amp;&amp; !url.includes('localhost')) {
+            await route.abort();
+            return;
+        }
+    }
+    await route.continue();
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>⚡ Helper reutilizable para bloqueo</h3>
-        <pre><code class="python"># utils/network_helper.py
+        <div class="code-tabs" data-code-id="L068-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># utils/network_helper.py
 
 class NetworkHelper:
     """Helper para configurar bloqueos de red comunes."""
@@ -201,6 +375,67 @@ def optimize_network(page):
     NetworkHelper.block_tracking(page)
     NetworkHelper.block_fonts(page)
     yield</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// utils/network-helper.ts
+import type { Page } from '@playwright/test';
+
+export class NetworkHelper {
+    static async blockImages(page: Page) {
+        await page.route('**/*', async (route) => {
+            if (route.request().resourceType() === 'image') {
+                await route.abort();
+            } else { await route.continue(); }
+        });
+    }
+
+    static async blockTracking(page: Page) {
+        const domains = [
+            'google-analytics.com', 'googletagmanager.com',
+            'facebook.net', 'hotjar.com', 'mixpanel.com',
+            'segment.io', 'amplitude.com', 'sentry.io',
+        ];
+        await page.route('**/*', async (route) => {
+            if (domains.some(d => route.request().url().includes(d))) {
+                await route.abort();
+            } else { await route.continue(); }
+        });
+    }
+
+    static async blockFonts(page: Page) {
+        await page.route('**/*', async (route) => {
+            if (route.request().resourceType() === 'font') {
+                await route.abort();
+            } else { await route.continue(); }
+        });
+    }
+
+    static async speedMode(page: Page) {
+        const blockTypes = new Set(['image', 'font', 'media']);
+        const blockDomains = [
+            'google-analytics.com', 'googletagmanager.com',
+            'facebook.net', 'hotjar.com', 'fonts.googleapis.com',
+        ];
+        await page.route('**/*', async (route) => {
+            const url = route.request().url();
+            const rtype = route.request().resourceType();
+            if (blockTypes.has(rtype)) { await route.abort(); }
+            else if (blockDomains.some(d => url.includes(d))) { await route.abort(); }
+            else { await route.continue(); }
+        });
+    }
+}
+
+// ── Uso con beforeEach (equivalente a autouse fixture) ──
+import { test } from '@playwright/test';
+import { NetworkHelper } from './utils/network-helper';
+
+test.beforeEach(async ({ page }) => {
+    await NetworkHelper.blockTracking(page);
+    await NetworkHelper.blockFonts(page);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📊 Impacto en el rendimiento</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -245,7 +480,18 @@ def optimize_network(page):
         </div>
 
         <h3>🧪 Ejemplo completo: Suite optimizada</h3>
-        <pre><code class="python"># conftest.py — optimizaciones globales
+        <div class="code-tabs" data-code-id="L068-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># conftest.py — optimizaciones globales
 
 @pytest.fixture(autouse=True)
 def fast_mode(page):
@@ -275,6 +521,39 @@ def test_buscar_producto(page):
     page.click("#search-btn")
     expect(page.locator(".product-card")).not_to_have_count(0)
     # Este test corre ~1 segundo más rápido por el bloqueo</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// optimizaciones globales con beforeEach
+import { test, expect } from '@playwright/test';
+
+test.beforeEach(async ({ page }) => {
+    const blockedTypes = new Set(['image', 'font', 'media']);
+    const blockedUrls = [
+        'google-analytics', 'googletagmanager', 'facebook.net',
+        'hotjar.com', 'intercom.io', 'sentry.io',
+    ];
+
+    await page.route('**/*', async (route) => {
+        if (blockedTypes.has(route.request().resourceType())) {
+            await route.abort();
+        } else if (blockedUrls.some(u => route.request().url().includes(u))) {
+            await route.abort();
+        } else {
+            await route.continue();
+        }
+    });
+});
+
+// Los tests se ejecutan normalmente pero más rápido
+test('buscar producto', async ({ page }) => {
+    await page.goto('https://mi-app.com/products');
+    await page.fill('#search', 'laptop');
+    await page.click('#search-btn');
+    await expect(page.locator('.product-card')).not.toHaveCount(0);
+    // Este test corre ~1 segundo más rápido por el bloqueo
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00bcd4;">
             <strong>💡 Tip:</strong> Usa <code>autouse=True</code> en la fixture de bloqueo

@@ -96,7 +96,18 @@ const LESSON_077 = {
 └── pytest.ini</code></pre>
 
         <h3>📐 1. Schemas</h3>
-        <pre><code class="python"># schemas/employee_schema.py
+        <div class="code-tabs" data-code-id="L077-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># schemas/employee_schema.py
 EMPLOYEE_SCHEMA = {
     "type": "object",
     "required": ["id", "name", "email", "department", "position", "status"],
@@ -124,9 +135,61 @@ EMPLOYEE_LIST_SCHEMA = {
         "per_page": {"type": "integer"},
     }
 }</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// schemas/employee-schema.ts
+import Ajv from 'ajv';
+import addFormats from 'ajv-formats';
+
+const ajv = new Ajv({ allErrors: true });
+addFormats(ajv);
+
+export const EMPLOYEE_SCHEMA = {
+    type: 'object',
+    required: ['id', 'name', 'email', 'department', 'position', 'status'],
+    properties: {
+        id:         { type: 'integer', minimum: 1 },
+        name:       { type: 'string', minLength: 2 },
+        email:      { type: 'string', format: 'email' },
+        phone:      { type: ['string', 'null'] },
+        department: { type: 'string' },
+        position:   { type: 'string' },
+        salary:     { type: ['number', 'null'], minimum: 0 },
+        status:     { type: 'string', enum: ['active', 'inactive', 'on_leave'] },
+        hire_date:  { type: 'string', format: 'date' },
+        created_at: { type: 'string', format: 'date-time' },
+    },
+} as const;
+
+export const EMPLOYEE_LIST_SCHEMA = {
+    type: 'object',
+    required: ['data', 'total', 'page'],
+    properties: {
+        data:     { type: 'array', items: EMPLOYEE_SCHEMA },
+        total:    { type: 'integer', minimum: 0 },
+        page:     { type: 'integer', minimum: 1 },
+        per_page: { type: 'integer' },
+    },
+} as const;
+
+export const validateEmployee = ajv.compile(EMPLOYEE_SCHEMA);
+export const validateEmployeeList = ajv.compile(EMPLOYEE_LIST_SCHEMA);</code></pre>
+        </div>
+        </div>
 
         <h3>🔧 2. API Client</h3>
-        <pre><code class="python"># helpers/api_client.py
+        <div class="code-tabs" data-code-id="L077-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># helpers/api_client.py
 class EmployeeAPI:
     """Wrapper tipado para la API de empleados."""
 
@@ -156,9 +219,60 @@ class EmployeeAPI:
 
     def list_departments(self):
         return self.api.get("/api/departments")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// helpers/api-client.ts
+import type { APIRequestContext, APIResponse } from '@playwright/test';
+
+export class EmployeeAPI {
+    constructor(private api: APIRequestContext) {}
+
+    login(email: string, password: string): Promise&lt;APIResponse&gt; {
+        return this.api.post('/auth/login', {
+            data: { email, password },
+        });
+    }
+
+    listEmployees(params?: Record&lt;string, string&gt;) {
+        return this.api.get('/api/employees', { params });
+    }
+
+    getEmployee(empId: number) {
+        return this.api.get('/api/employees/' + empId);
+    }
+
+    createEmployee(data: Record&lt;string, unknown&gt;) {
+        return this.api.post('/api/employees', { data });
+    }
+
+    updateEmployee(empId: number, data: Record&lt;string, unknown&gt;) {
+        return this.api.put('/api/employees/' + empId, { data });
+    }
+
+    deleteEmployee(empId: number) {
+        return this.api.delete('/api/employees/' + empId);
+    }
+
+    listDepartments() {
+        return this.api.get('/api/departments');
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>🏭 3. Data Factory</h3>
-        <pre><code class="python"># helpers/data_factory.py
+        <div class="code-tabs" data-code-id="L077-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># helpers/data_factory.py
 import random
 import string
 
@@ -195,9 +309,62 @@ class EmployeeFactory:
         return EmployeeFactory.build(
             department="QA", position="QA Engineer"
         )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// helpers/data-factory.ts
+import crypto from 'crypto';
+
+const DEPARTMENTS = ['I+D', 'QA', 'Comercial', 'RRHH', 'Contabilidad'];
+const POSITIONS = ['Developer', 'QA Engineer', 'Manager', 'Analyst', 'Director'];
+
+function randomItem&lt;T&gt;(arr: T[]): T {
+    return arr[Math.floor(Math.random() * arr.length)];
+}
+
+export class EmployeeFactory {
+    static build(overrides: Record&lt;string, unknown&gt; = {}) {
+        const uid = crypto.randomBytes(3).toString('hex');
+        return {
+            name: 'Test Employee ' + uid,
+            email: 'test_' + uid + '@playwright-test.com',
+            phone: '300' + Math.floor(1000000 + Math.random() * 9000000),
+            department: randomItem(DEPARTMENTS),
+            position: randomItem(POSITIONS),
+            salary: Math.floor(2000000 + Math.random() * 6000000),
+            status: 'active',
+            hire_date: '2026-01-15',
+            ...overrides,
+        };
+    }
+
+    static buildAdmin() {
+        return EmployeeFactory.build({
+            department: 'I+D', position: 'Director', salary: 10000000,
+        });
+    }
+
+    static buildQa() {
+        return EmployeeFactory.build({
+            department: 'QA', position: 'QA Engineer',
+        });
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>⚙️ 4. Fixtures</h3>
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L077-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/conftest.py
 import pytest
 from playwright.sync_api import Playwright
 from helpers.api_client import EmployeeAPI
@@ -248,9 +415,82 @@ def test_employee(admin_api):
     employee = resp.json()
     yield employee
     admin_api.delete_employee(employee["id"])</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/fixtures.ts
+import { test as base, expect } from '@playwright/test';
+import { EmployeeAPI } from '../helpers/api-client';
+import { EmployeeFactory } from '../helpers/data-factory';
+
+const BASE_URL = 'https://api.employee-system.com';
+
+type EmpFixtures = {
+    testEmployee: Record&lt;string, unknown&gt;;
+};
+type EmpWorkerFixtures = {
+    adminApi: EmployeeAPI;
+    viewerApi: EmployeeAPI;
+};
+
+export const test = base.extend&lt;EmpFixtures, EmpWorkerFixtures&gt;({
+    adminApi: [async ({ playwright }, use) => {
+        const ctx = await playwright.request.newContext({ baseURL: BASE_URL });
+        const resp = await ctx.post('/auth/login', {
+            data: { email: 'admin@empresa.com', password: 'admin123' },
+        });
+        const token = (await resp.json()).access_token;
+        await ctx.dispose();
+
+        const apiCtx = await playwright.request.newContext({
+            baseURL: BASE_URL,
+            extraHTTPHeaders: { Authorization: 'Bearer ' + token },
+        });
+        await use(new EmployeeAPI(apiCtx));
+        await apiCtx.dispose();
+    }, { scope: 'worker' }],
+
+    viewerApi: [async ({ playwright }, use) => {
+        const ctx = await playwright.request.newContext({ baseURL: BASE_URL });
+        const resp = await ctx.post('/auth/login', {
+            data: { email: 'viewer@empresa.com', password: 'viewer123' },
+        });
+        const token = (await resp.json()).access_token;
+        await ctx.dispose();
+
+        const apiCtx = await playwright.request.newContext({
+            baseURL: BASE_URL,
+            extraHTTPHeaders: { Authorization: 'Bearer ' + token },
+        });
+        await use(new EmployeeAPI(apiCtx));
+        await apiCtx.dispose();
+    }, { scope: 'worker' }],
+
+    testEmployee: async ({ adminApi }, use) => {
+        const data = EmployeeFactory.build();
+        const resp = await adminApi.createEmployee(data);
+        const employee = await resp.json();
+        await use(employee);
+        await adminApi.deleteEmployee(employee.id);
+    },
+});
+
+export { expect } from '@playwright/test';</code></pre>
+        </div>
+        </div>
 
         <h3>🧪 5. Tests de API</h3>
-        <pre><code class="python"># tests/api/test_auth.py
+        <div class="code-tabs" data-code-id="L077-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/api/test_auth.py
 def test_login_exitoso(playwright):
     ctx = playwright.request.new_context(base_url=BASE_URL)
     resp = ctx.post("/auth/login", data={
@@ -309,9 +549,94 @@ def test_viewer_no_puede_crear(viewer_api):
 def test_viewer_puede_listar(viewer_api):
     resp = viewer_api.list_employees()
     assert resp.ok</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/api/test-auth.spec.ts
+import { test, expect } from '../fixtures';
+import { EmployeeFactory } from '../../helpers/data-factory';
+import { validateEmployee } from '../../schemas/employee-schema';
+
+const BASE_URL = 'https://api.employee-system.com';
+
+test('login exitoso', async ({ playwright }) => {
+    const ctx = await playwright.request.newContext({ baseURL: BASE_URL });
+    const resp = await ctx.post('/auth/login', {
+        data: { email: 'admin@empresa.com', password: 'admin123' },
+    });
+    expect(resp.status()).toBe(200);
+    expect(await resp.json()).toHaveProperty('access_token');
+    await ctx.dispose();
+});
+
+test('login credenciales inválidas', async ({ playwright }) => {
+    const ctx = await playwright.request.newContext({ baseURL: BASE_URL });
+    const resp = await ctx.post('/auth/login', {
+        data: { email: 'admin@empresa.com', password: 'wrong' },
+    });
+    expect(resp.status()).toBe(401);
+    await ctx.dispose();
+});
+
+// tests/api/test-employees-crud.spec.ts
+test('crear empleado', async ({ adminApi }) => {
+    const data = EmployeeFactory.build({ department: 'QA' });
+    const resp = await adminApi.createEmployee(data);
+    expect(resp.status()).toBe(201);
+    const employee = await resp.json();
+    expect(validateEmployee(employee)).toBeTruthy();
+    expect(employee.department).toBe('QA');
+    await adminApi.deleteEmployee(employee.id);
+});
+
+test('obtener empleado', async ({ adminApi, testEmployee }) => {
+    const resp = await adminApi.getEmployee(testEmployee.id as number);
+    expect(resp.ok()).toBeTruthy();
+    expect(validateEmployee(await resp.json())).toBeTruthy();
+});
+
+test('actualizar empleado', async ({ adminApi, testEmployee }) => {
+    const resp = await adminApi.updateEmployee(testEmployee.id as number, {
+        ...testEmployee, position: 'Senior QA',
+    });
+    expect(resp.ok()).toBeTruthy();
+    expect((await resp.json()).position).toBe('Senior QA');
+});
+
+test('eliminar empleado', async ({ adminApi }) => {
+    const data = EmployeeFactory.build();
+    const emp = await (await adminApi.createEmployee(data)).json();
+    const resp = await adminApi.deleteEmployee(emp.id);
+    expect(resp.status()).toBe(204);
+    expect((await adminApi.getEmployee(emp.id)).status()).toBe(404);
+});
+
+// tests/api/test-permissions.spec.ts
+test('viewer no puede crear', async ({ viewerApi }) => {
+    const data = EmployeeFactory.build();
+    const resp = await viewerApi.createEmployee(data);
+    expect(resp.status()).toBe(403);
+});
+
+test('viewer puede listar', async ({ viewerApi }) => {
+    const resp = await viewerApi.listEmployees();
+    expect(resp.ok()).toBeTruthy();
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🧪 6. Tests de UI con mocks</h3>
-        <pre><code class="python"># tests/ui/test_employee_list.py
+        <div class="code-tabs" data-code-id="L077-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/ui/test_employee_list.py
 from playwright.sync_api import expect
 import json
 
@@ -359,6 +684,62 @@ def test_crear_empleado_por_ui_verificar_api(page):
 
     # Cleanup
     api.delete(f"https://mi-app.com/api/employees/{emp_id}")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/ui/test-employee-list.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('lista empleados UI', async ({ page }) => {
+    await page.route('**/api/employees*', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                data: [
+                    { id: 1, name: 'Juan Reina', department: 'QA',
+                      position: 'Lead', status: 'active',
+                      email: 'juan@siesa.com', hire_date: '2020-01-01',
+                      created_at: '2020-01-01T00:00:00Z' },
+                    { id: 2, name: 'Carlos Díaz', department: 'QA',
+                      position: 'Engineer', status: 'active',
+                      email: 'carlos@siesa.com', hire_date: '2021-06-15',
+                      created_at: '2021-06-15T00:00:00Z' },
+                ],
+                total: 2, page: 1, per_page: 10,
+            }),
+        });
+    });
+
+    await page.goto('https://mi-app.com/employees');
+    await expect(page.locator('tr.employee-row')).toHaveCount(2);
+    await expect(page.locator('tr.employee-row').first()).toContainText('Juan Reina');
+});
+
+// tests/ui/test-employee-form.spec.ts — UI + API combinado
+test('crear empleado por UI verificar API', async ({ page }) => {
+    const api = page.context().request;
+
+    await page.goto('https://mi-app.com/employees/new');
+    await page.fill('[name="name"]', 'Alejandro Bravo');
+    await page.fill('[name="email"]', 'alejandro@siesa.com');
+    await page.selectOption('[name="department"]', { label: 'QA' });
+
+    const respPromise = page.waitForResponse('**/api/employees');
+    await page.click('[data-testid="save"]');
+    const resp = await respPromise;
+
+    const empId = (await resp.json()).id;
+    await expect(page.locator('.toast-success')).toBeVisible();
+
+    // Verificar via API
+    const verify = await api.get('https://mi-app.com/api/employees/' + empId);
+    expect((await verify.json()).name).toBe('Alejandro Bravo');
+
+    // Cleanup
+    await api.delete('https://mi-app.com/api/employees/' + empId);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📊 Resumen de cobertura</h3>
         <div style="background: #e8eaf6; padding: 15px; border-radius: 8px; margin: 15px 0;">

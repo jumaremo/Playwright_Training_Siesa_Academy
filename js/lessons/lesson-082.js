@@ -48,7 +48,18 @@ const LESSON_082 = {
 └── pytest.ini</code></pre>
 
         <h3>⚙️ Fixtures integradas</h3>
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L082-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/conftest.py
 import pytest
 from helpers.db_helper import DatabaseHelper
 from helpers.api_client import EmployeeAPI
@@ -105,9 +116,96 @@ def db_employee(db):
     emp = db.query_one("SELECT * FROM employees WHERE id = %s", (emp_id,))
     yield emp
     db.delete("employees", "id = %s", (emp_id,))</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/global-setup.ts
+import { DatabaseHelper } from './helpers/db-helper';
+import { EmployeeAPI } from './helpers/api-client';
+import { EmployeeFactory } from './helpers/data-factory';
+import { test as base, expect } from '@playwright/test';
+
+const DB_CONFIG = {
+    host: 'localhost', port: 5432,
+    database: 'employee_test', user: 'test', password: 'test123'
+};
+const API_BASE = 'https://employee-app.com';
+
+// Extender test con fixtures personalizadas
+type Fixtures = {
+    db: DatabaseHelper;
+    adminApi: EmployeeAPI;
+    loggedInPage: import('@playwright/test').Page;
+    dbEmployee: Record&lt;string, any&gt;;
+};
+
+export const test = base.extend&lt;Fixtures&gt;({
+    db: async ({}, use) => {
+        const db = new DatabaseHelper(DB_CONFIG);
+        await use(db);
+    },
+
+    adminApi: async ({ playwright }, use) => {
+        const ctx = await playwright.request.newContext({ baseURL: API_BASE });
+        const resp = await ctx.post('/auth/login', {
+            data: { email: 'admin@siesa.com', password: 'admin123' }
+        });
+        const token = (await resp.json()).access_token;
+        await ctx.dispose();
+
+        const ctx2 = await playwright.request.newContext({
+            baseURL: API_BASE,
+            extraHTTPHeaders: { Authorization: \`Bearer \${token}\` }
+        });
+        const api = new EmployeeAPI(ctx2);
+        await use(api);
+        await ctx2.dispose();
+    },
+
+    loggedInPage: async ({ page }, use) => {
+        // Página con login completado
+        await page.goto(\`\${API_BASE}/login\`);
+        await page.fill('#email', 'admin@siesa.com');
+        await page.fill('#password', 'admin123');
+        await page.click('#login-btn');
+        await page.waitForURL('**/dashboard');
+        await use(page);
+    },
+
+    dbEmployee: async ({ db }, use) => {
+        // Empleado creado directamente en BD
+        const data = EmployeeFactory.build();
+        const empId = await db.insert('employees', data);
+        const emp = await db.queryOne(
+            'SELECT * FROM employees WHERE id = $1', [empId]
+        );
+        await use(emp);
+        await db.delete('employees', 'id = $1', [empId]);
+    },
+});
+
+// Cleanup automático después de cada test
+test.afterEach(async ({ db }) => {
+    await db.execute(
+        "DELETE FROM employees WHERE email LIKE $1",
+        ['%@playwright-test.com']
+    );
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🧪 Test 1: Crear empleado (UI → API → DB)</h3>
-        <pre><code class="python"># tests/test_create_employee.py
+        <div class="code-tabs" data-code-id="L082-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_create_employee.py
 from playwright.sync_api import expect
 from helpers.data_factory import EmployeeFactory
 
@@ -155,9 +253,73 @@ def test_crear_empleado_tres_capas(logged_in_page, admin_api, db):
     assert float(db_record["salary"]) == emp_data["salary"]
     assert db_record["created_at"] is not None
     assert db_record["created_by"] is not None  # Auditoría</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test-create-employee.spec.ts
+import { test, expect } from './global-setup';
+import { EmployeeFactory } from './helpers/data-factory';
+
+test('crear empleado tres capas', async ({ loggedInPage, adminApi, db }) => {
+    const page = loggedInPage;
+    const empData = EmployeeFactory.build({
+        name: 'Juan Test Integrado',
+        department: 'QA',
+        position: 'QA Lead'
+    });
+
+    // ══ CAPA 1: UI — Crear por formulario ══
+    await page.goto('https://employee-app.com/employees/new');
+    await page.fill("[name='name']", empData.name);
+    await page.fill("[name='email']", empData.email);
+    await page.fill("[name='phone']", empData.phone);
+    await page.selectOption("[name='department']", { label: 'QA' });
+    await page.fill("[name='position']", empData.position);
+    await page.fill("[name='salary']", String(empData.salary));
+
+    const responsePromise = page.waitForResponse('**/api/employees');
+    await page.click("[data-testid='save']");
+    const resp = await responsePromise;
+
+    // Verificar UI muestra éxito
+    await expect(page.locator('.toast-success')).toBeVisible();
+    const empId = (await resp.json()).id;
+
+    // ══ CAPA 2: API — Verificar que la API retorna el empleado ══
+    const apiResponse = await adminApi.getEmployee(empId);
+    expect(apiResponse.ok()).toBeTruthy();
+    const apiData = await apiResponse.json();
+    expect(apiData.name).toBe(empData.name);
+    expect(apiData.email).toBe(empData.email);
+    expect(apiData.department).toBe('QA');
+    expect(apiData.status).toBe('active');
+
+    // ══ CAPA 3: BD — Verificar datos directamente ══
+    const dbRecord = await db.queryOne(
+        'SELECT * FROM employees WHERE id = $1', [empId]
+    );
+    expect(dbRecord).not.toBeNull();
+    expect(dbRecord.name).toBe(empData.name);
+    expect(dbRecord.email).toBe(empData.email);
+    expect(Number(dbRecord.salary)).toBe(empData.salary);
+    expect(dbRecord.created_at).not.toBeNull();
+    expect(dbRecord.created_by).not.toBeNull(); // Auditoría
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🧪 Test 2: Editar empleado (DB → UI → DB)</h3>
-        <pre><code class="python"># tests/test_edit_employee.py
+        <div class="code-tabs" data-code-id="L082-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_edit_employee.py
 
 def test_editar_empleado_tres_capas(logged_in_page, db, db_employee):
     """Setup en BD, editar por UI, verificar en BD."""
@@ -181,9 +343,50 @@ def test_editar_empleado_tres_capas(logged_in_page, db, db_employee):
     assert updated["position"] == "Director QA"
     assert float(updated["salary"]) == 12000000
     assert updated["updated_at"] > emp["created_at"]  # Timestamp actualizado</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test-edit-employee.spec.ts
+import { test, expect } from './global-setup';
+
+test('editar empleado tres capas', async ({ loggedInPage, db, dbEmployee }) => {
+    const page = loggedInPage;
+    const emp = dbEmployee;
+
+    // ══ Verificar estado inicial en BD ══
+    expect(emp.position).not.toBe('Director QA');
+
+    // ══ EDITAR por UI ══
+    await page.goto(\`https://employee-app.com/employees/\${emp.id}/edit\`);
+    await page.fill("[name='position']", 'Director QA');
+    await page.fill("[name='salary']", '12000000');
+    await page.click("[data-testid='save']");
+    await expect(page.locator('.toast-success')).toBeVisible();
+
+    // ══ VERIFICAR en BD ══
+    const updated = await db.queryOne(
+        'SELECT * FROM employees WHERE id = $1', [emp.id]
+    );
+    expect(updated.position).toBe('Director QA');
+    expect(Number(updated.salary)).toBe(12000000);
+    expect(new Date(updated.updated_at).getTime())
+        .toBeGreaterThan(new Date(emp.created_at).getTime()); // Timestamp actualizado
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🧪 Test 3: Eliminar empleado (DB → UI → DB)</h3>
-        <pre><code class="python"># tests/test_delete_employee.py
+        <div class="code-tabs" data-code-id="L082-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_delete_employee.py
 
 def test_eliminar_empleado_tres_capas(logged_in_page, db, admin_api):
     """Setup en BD, eliminar por UI, verificar ausencia en BD y API."""
@@ -212,9 +415,54 @@ def test_eliminar_empleado_tres_capas(logged_in_page, db, admin_api):
     # ══ VERIFICAR en API — 404 ══
     api_resp = admin_api.get_employee(emp_id)
     assert api_resp.status == 404</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test-delete-employee.spec.ts
+import { test, expect } from './global-setup';
+import { EmployeeFactory } from './helpers/data-factory';
+
+test('eliminar empleado tres capas', async ({ loggedInPage, db, adminApi }) => {
+    const page = loggedInPage;
+
+    // ══ SETUP: Crear empleado en BD ══
+    const data = EmployeeFactory.build({ name: 'Para Eliminar' });
+    const empId = await db.insert('employees', data);
+    expect(await db.count('employees', 'id = $1', [empId])).toBe(1);
+
+    // ══ ELIMINAR por UI ══
+    await page.goto('https://employee-app.com/employees');
+    const row = page.locator('tr.employee-row').filter({ hasText: 'Para Eliminar' });
+    await row.locator("[data-testid='delete-btn']").click();
+
+    // Confirmar en modal
+    await expect(page.locator('#confirm-modal')).toBeVisible();
+    await page.click('#confirm-delete');
+    await expect(page.locator('#confirm-modal')).toBeHidden();
+    await expect(page.locator('.toast-success')).toContainText('eliminado');
+
+    // ══ VERIFICAR en BD — ya no existe ══
+    expect(await db.count('employees', 'id = $1', [empId])).toBe(0);
+
+    // ══ VERIFICAR en API — 404 ══
+    const apiResp = await adminApi.getEmployee(empId);
+    expect(apiResp.status()).toBe(404);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🧪 Test 4: Reporte de nómina (DB seed → UI → DB verify)</h3>
-        <pre><code class="python"># tests/test_payroll_report.py
+        <div class="code-tabs" data-code-id="L082-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_payroll_report.py
 import re
 
 def test_reporte_nomina_coincide(logged_in_page, db):
@@ -246,6 +494,49 @@ def test_reporte_nomina_coincide(logged_in_page, db):
     ui_total_payroll = page.locator("[data-testid='total-payroll']").text_content()
     total_number = float(re.sub(r'[^\\d.]', '', ui_total_payroll.replace(",", "")))
     assert abs(total_number - float(payroll["total_payroll"])) < 1  # Tolerancia</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test-payroll-report.spec.ts
+import { test, expect } from './global-setup';
+
+test('reporte nómina coincide', async ({ loggedInPage, db }) => {
+    const page = loggedInPage;
+
+    // ══ Calcular totales reales desde BD ══
+    const payroll = await db.queryOne(
+        "SELECT " +
+        "  COUNT(*) as total_employees, " +
+        "  SUM(salary) as total_payroll, " +
+        "  AVG(salary)::numeric(12,2) as avg_salary, " +
+        "  COUNT(*) FILTER (WHERE department = 'QA') as qa_count " +
+        "FROM employees " +
+        "WHERE status = 'active'"
+    );
+
+    // ══ Navegar al reporte en UI ══
+    await page.goto('https://employee-app.com/reports/payroll');
+    await page.selectOption('#period', { label: 'Mensual' });
+    await page.click('#generate-report');
+
+    await expect(page.locator("[data-testid='report-table']")).toBeVisible();
+
+    // ══ CROSS-VALIDATE: UI vs BD ══
+    const uiTotalEmp = await page.locator(
+        "[data-testid='total-employees']"
+    ).textContent();
+    expect(uiTotalEmp).toContain(String(payroll.total_employees));
+
+    const uiTotalPayroll = await page.locator(
+        "[data-testid='total-payroll']"
+    ).textContent();
+    const totalNumber = parseFloat(
+        (uiTotalPayroll ?? '').replace(/[^\\d.]/g, '')
+    );
+    expect(Math.abs(totalNumber - Number(payroll.total_payroll)))
+        .toBeLessThan(1); // Tolerancia
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📊 Pirámide de verificación</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">

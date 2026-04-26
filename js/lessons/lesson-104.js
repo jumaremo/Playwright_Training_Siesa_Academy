@@ -135,7 +135,18 @@ filterwarnings =
         <h3>🏗️ Paso 4: Page Objects del portal corporativo</h3>
         <p>Definimos Page Objects para las cuatro páginas principales del portal que auditaremos.</p>
 
-        <pre><code class="python"># pages/login_page.py
+        <div class="code-tabs" data-code-id="L104-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pages/login_page.py
 """Page Object para la página de login del portal corporativo."""
 from playwright.sync_api import Page, expect
 
@@ -169,8 +180,68 @@ class LoginPage:
             self.page.locator("[data-testid='current-time']"),
             self.page.locator("[data-testid='session-id']"),
         ]</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// pages/login-page.ts
+import { type Page, type Locator, expect } from '@playwright/test';
 
-        <pre><code class="python"># pages/dashboard_page.py
+export class LoginPage {
+    readonly URL = 'https://portal-corporativo.example.com/login';
+
+    readonly page: Page;
+    // Localizadores principales
+    readonly logo: Locator;
+    readonly usernameInput: Locator;
+    readonly passwordInput: Locator;
+    readonly loginButton: Locator;
+    readonly forgotPasswordLink: Locator;
+    readonly errorMessage: Locator;
+    readonly rememberCheckbox: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.logo = page.getByRole('img', { name: 'Logo corporativo' });
+        this.usernameInput = page.getByLabel('Usuario');
+        this.passwordInput = page.getByLabel('Contraseña');
+        this.loginButton = page.getByRole('button', { name: 'Iniciar sesión' });
+        this.forgotPasswordLink = page.getByRole('link', { name: '¿Olvidó su contraseña?' });
+        this.errorMessage = page.locator('[data-testid="login-error"]');
+        this.rememberCheckbox = page.getByLabel('Recordarme');
+    }
+
+    async navigate() {
+        await this.page.goto(this.URL);
+        await this.page.waitForLoadState('networkidle');
+    }
+
+    async login(username: string, password: string) {
+        await this.usernameInput.fill(username);
+        await this.passwordInput.fill(password);
+        await this.loginButton.click();
+    }
+
+    getDynamicElementsForMasking(): Locator[] {
+        return [
+            this.page.locator('[data-testid="current-time"]'),
+            this.page.locator('[data-testid="session-id"]'),
+        ];
+    }
+}</code></pre>
+        </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L104-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pages/dashboard_page.py
 """Page Object para el dashboard principal."""
 from playwright.sync_api import Page, expect
 
@@ -214,8 +285,78 @@ class DashboardPage:
             {"element": "Formularios", "key": "Tab", "role": "link"},
             {"element": "Configuración", "key": "Tab", "role": "link"},
         ]</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// pages/dashboard-page.ts
+import { type Page, type Locator, expect } from '@playwright/test';
 
-        <pre><code class="python"># pages/reports_page.py
+export class DashboardPage {
+    readonly URL = 'https://portal-corporativo.example.com/dashboard';
+
+    readonly page: Page;
+    // Navegación principal
+    readonly navMenu: Locator;
+    readonly sidebar: Locator;
+    // Widgets del dashboard
+    readonly welcomeBanner: Locator;
+    readonly kpiCards: Locator;
+    readonly recentActivity: Locator;
+    readonly notificationsBadge: Locator;
+    readonly userAvatar: Locator;
+    readonly chartContainer: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.navMenu = page.getByRole('navigation', { name: 'Menú principal' });
+        this.sidebar = page.locator('[data-testid="sidebar"]');
+        this.welcomeBanner = page.locator('[data-testid="welcome-banner"]');
+        this.kpiCards = page.locator('[data-testid="kpi-card"]');
+        this.recentActivity = page.locator('[data-testid="recent-activity"]');
+        this.notificationsBadge = page.locator('[data-testid="notifications-badge"]');
+        this.userAvatar = page.locator('[data-testid="user-avatar"]');
+        this.chartContainer = page.locator('[data-testid="chart-container"]');
+    }
+
+    async navigate() {
+        await this.page.goto(this.URL);
+        await this.page.waitForLoadState('networkidle');
+    }
+
+    getDynamicElementsForMasking(): Locator[] {
+        return [
+            this.notificationsBadge,
+            this.userAvatar,
+            this.recentActivity,
+            this.page.locator('[data-testid="timestamp"]'),
+            this.chartContainer, // Datos de gráficos cambian
+        ];
+    }
+
+    getKeyboardNavigationFlow() {
+        return [
+            { element: 'Menú principal', key: 'Tab', role: 'navigation' },
+            { element: 'Inicio', key: 'Tab', role: 'link' },
+            { element: 'Reportes', key: 'Tab', role: 'link' },
+            { element: 'Formularios', key: 'Tab', role: 'link' },
+            { element: 'Configuración', key: 'Tab', role: 'link' },
+        ];
+    }
+}</code></pre>
+        </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L104-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pages/reports_page.py
 """Page Object para la página de reportes."""
 from playwright.sync_api import Page
 
@@ -240,8 +381,57 @@ class ReportsPage:
             self.page.locator("[data-testid='report-timestamp']"),
             self.page.locator("[data-testid='generated-by']"),
         ]</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// pages/reports-page.ts
+import { type Page, type Locator } from '@playwright/test';
 
-        <pre><code class="python"># pages/forms_page.py
+export class ReportsPage {
+    readonly URL = 'https://portal-corporativo.example.com/reports';
+
+    readonly page: Page;
+    readonly reportList: Locator;
+    readonly filterPanel: Locator;
+    readonly datePicker: Locator;
+    readonly exportButton: Locator;
+    readonly dataTable: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.reportList = page.locator('[data-testid="report-list"]');
+        this.filterPanel = page.locator('[data-testid="filter-panel"]');
+        this.datePicker = page.getByLabel('Fecha de reporte');
+        this.exportButton = page.getByRole('button', { name: 'Exportar' });
+        this.dataTable = page.getByRole('table', { name: 'Datos del reporte' });
+    }
+
+    async navigate() {
+        await this.page.goto(this.URL);
+        await this.page.waitForLoadState('networkidle');
+    }
+
+    getDynamicElementsForMasking(): Locator[] {
+        return [
+            this.page.locator('[data-testid="report-timestamp"]'),
+            this.page.locator('[data-testid="generated-by"]'),
+        ];
+    }
+}</code></pre>
+        </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L104-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pages/forms_page.py
 """Page Object para la página de formularios."""
 from playwright.sync_api import Page
 
@@ -269,12 +459,67 @@ class FormsPage:
             self.page.locator("[data-testid='form-timestamp']"),
             self.page.locator("[data-testid='csrf-token']"),
         ]</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// pages/forms-page.ts
+import { type Page, type Locator } from '@playwright/test';
+
+export class FormsPage {
+    readonly URL = 'https://portal-corporativo.example.com/forms';
+
+    readonly page: Page;
+    readonly formContainer: Locator;
+    readonly nameInput: Locator;
+    readonly emailInput: Locator;
+    readonly departmentSelect: Locator;
+    readonly submitButton: Locator;
+    readonly cancelButton: Locator;
+    readonly successMessage: Locator;
+    readonly errorSummary: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.formContainer = page.locator('[data-testid="form-container"]');
+        this.nameInput = page.getByLabel('Nombre completo');
+        this.emailInput = page.getByLabel('Correo electrónico');
+        this.departmentSelect = page.getByLabel('Departamento');
+        this.submitButton = page.getByRole('button', { name: 'Enviar' });
+        this.cancelButton = page.getByRole('button', { name: 'Cancelar' });
+        this.successMessage = page.locator('[data-testid="success-msg"]');
+        this.errorSummary = page.locator('[data-testid="error-summary"]');
+    }
+
+    async navigate() {
+        await this.page.goto(this.URL);
+        await this.page.waitForLoadState('networkidle');
+    }
+
+    getDynamicElementsForMasking(): Locator[] {
+        return [
+            this.page.locator('[data-testid="form-timestamp"]'),
+            this.page.locator('[data-testid="csrf-token"]'),
+        ];
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>🎨 Paso 5: Helper — VisualChecker</h3>
         <p>Clase reutilizable para regresión visual con soporte de masking, umbrales configurables
         y generación de imágenes de diferencia.</p>
 
-        <pre><code class="python"># helpers/visual_checker.py
+        <div class="code-tabs" data-code-id="L104-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># helpers/visual_checker.py
 """
 VisualChecker — Clase helper para regresión visual avanzada.
 Complementa la comparación nativa de Playwright con funcionalidades
@@ -499,12 +744,214 @@ class VisualChecker:
             "results": self.results,
         }
 </code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// helpers/visual-checker.ts
+/**
+ * VisualChecker — Clase helper para regresión visual avanzada.
+ * Complementa la comparación nativa de Playwright con funcionalidades
+ * adicionales: masking por regiones, umbrales por zona y diffs visuales.
+ */
+import * as fs from 'fs';
+import * as path from 'path';
+import { type Page, type Locator, expect } from '@playwright/test';
+
+// Nota: Para comparación con Pillow equivalente, usar 'pixelmatch' o 'sharp'
+// npm install pixelmatch pngjs
+import pixelmatch from 'pixelmatch';
+import { PNG } from 'pngjs';
+
+interface VisualResult {
+    pageName: string;
+    passed: boolean;
+    diffPercentage: number;
+    baselinePath: string;
+    actualPath: string;
+    diffPath: string;
+    maskedRegions: string[];
+    error?: string;
+}
+
+export class VisualChecker {
+    static readonly DEFAULT_THRESHOLD = 0.1;
+    static readonly DEFAULT_MAX_DIFF_PIXELS = 100;
+
+    private page: Page;
+    private baselinesDir: string;
+    private outputDir: string;
+    readonly threshold: number;
+    private maxDiffPixels: number;
+    readonly results: VisualResult[] = [];
+
+    constructor(
+        page: Page,
+        options: {
+            baselinesDir?: string;
+            outputDir?: string;
+            threshold?: number;
+            maxDiffPixels?: number;
+        } = {}
+    ) {
+        this.page = page;
+        this.baselinesDir = options.baselinesDir ?? 'baselines/screenshots';
+        this.outputDir = options.outputDir ?? 'reports/visual';
+        this.threshold = options.threshold ?? VisualChecker.DEFAULT_THRESHOLD;
+        this.maxDiffPixels = options.maxDiffPixels ?? VisualChecker.DEFAULT_MAX_DIFF_PIXELS;
+
+        // Crear directorios si no existen
+        fs.mkdirSync(this.baselinesDir, { recursive: true });
+        fs.mkdirSync(this.outputDir, { recursive: true });
+    }
+
+    async compare(
+        name: string,
+        options: {
+            maskLocators?: Locator[];
+            threshold?: number;
+            fullPage?: boolean;
+            animations?: 'disabled' | 'allow';
+        } = {}
+    ): Promise&lt;VisualResult&gt; {
+        const currentThreshold = options.threshold ?? this.threshold;
+        const mask = options.maskLocators ?? [];
+        const fullPage = options.fullPage ?? true;
+        const animations = options.animations ?? 'disabled';
+
+        const baselinePath = path.join(this.baselinesDir, \`\${name}.png\`);
+        const actualPath = path.join(this.outputDir, \`\${name}-actual.png\`);
+        const diffPath = path.join(this.outputDir, \`\${name}-diff.png\`);
+
+        try {
+            // Capturar screenshot actual con masking nativo
+            await this.page.screenshot({
+                path: actualPath,
+                fullPage,
+                animations,
+                mask,
+                maskColor: '#FF00FF', // Magenta para regiones enmascaradas
+            });
+
+            // Si no existe baseline, crear uno y marcar como "nuevo"
+            if (!fs.existsSync(baselinePath)) {
+                await this.page.screenshot({
+                    path: baselinePath,
+                    fullPage,
+                    animations,
+                    mask,
+                    maskColor: '#FF00FF',
+                });
+                const result: VisualResult = {
+                    pageName: name,
+                    passed: true,
+                    diffPercentage: 0,
+                    baselinePath,
+                    actualPath,
+                    diffPath: '',
+                    maskedRegions: mask.map(String),
+                    error: 'BASELINE_CREATED — Primera ejecución, baseline generado',
+                };
+                this.results.push(result);
+                return result;
+            }
+
+            // Comparar con pixelmatch
+            const diffPct = this.compareWithPixelmatch(
+                baselinePath, actualPath, diffPath
+            );
+
+            const passed = diffPct &lt;= currentThreshold;
+            const result: VisualResult = {
+                pageName: name,
+                passed,
+                diffPercentage: diffPct,
+                baselinePath,
+                actualPath,
+                diffPath: fs.existsSync(diffPath) ? diffPath : '',
+                maskedRegions: mask.map(String),
+            };
+            this.results.push(result);
+            return result;
+
+        } catch (e) {
+            const result: VisualResult = {
+                pageName: name,
+                passed: false,
+                diffPercentage: 0,
+                baselinePath: '',
+                actualPath: '',
+                diffPath: '',
+                maskedRegions: [],
+                error: String(e),
+            };
+            this.results.push(result);
+            return result;
+        }
+    }
+
+    private compareWithPixelmatch(
+        baselinePath: string, actualPath: string, diffPath: string
+    ): number {
+        const baseline = PNG.sync.read(fs.readFileSync(baselinePath));
+        const actual = PNG.sync.read(fs.readFileSync(actualPath));
+        const { width, height } = baseline;
+        const diff = new PNG({ width, height });
+
+        const diffPixels = pixelmatch(
+            baseline.data, actual.data, diff.data, width, height,
+            { threshold: 0.1 }
+        );
+        fs.writeFileSync(diffPath, PNG.sync.write(diff));
+
+        const totalPixels = width * height;
+        return Math.round(((diffPixels / totalPixels) * 100) * 10000) / 10000;
+    }
+
+    async updateBaseline(name: string, maskLocators: Locator[] = []) {
+        const baselinePath = path.join(this.baselinesDir, \`\${name}.png\`);
+        await this.page.screenshot({
+            path: baselinePath,
+            fullPage: true,
+            animations: 'disabled',
+            mask: maskLocators,
+            maskColor: '#FF00FF',
+        });
+        return baselinePath;
+    }
+
+    getSummary() {
+        const total = this.results.length;
+        const passed = this.results.filter(r => r.passed).length;
+        const failed = this.results.filter(r => !r.passed).length;
+        return {
+            total,
+            passed,
+            failed,
+            passRate: total > 0
+                ? \`\${((passed / total) * 100).toFixed(1)}%\`
+                : 'N/A',
+            results: this.results,
+        };
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>♿ Paso 6: Helper — A11yAuditor</h3>
         <p>Clase para auditorías de accesibilidad con axe-core, verificación WCAG 2.1 AA y
         pruebas de navegación por teclado.</p>
 
-        <pre><code class="python"># helpers/a11y_auditor.py
+        <div class="code-tabs" data-code-id="L104-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># helpers/a11y_auditor.py
 """
 A11yAuditor — Clase helper para auditorías de accesibilidad.
 Integra axe-core vía axe-playwright-python y pruebas de navegación por teclado.
@@ -796,6 +1243,229 @@ class A11yAuditor:
             "results": self.results,
         }
 </code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// helpers/a11y-auditor.ts
+/**
+ * A11yAuditor — Clase helper para auditorías de accesibilidad.
+ * Integra @axe-core/playwright y pruebas de navegación por teclado.
+ */
+import * as fs from 'fs';
+import * as path from 'path';
+import { type Page, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+interface A11yViolation {
+    ruleId: string;
+    description: string;
+    impact: string; // "critical" | "serious" | "moderate" | "minor"
+    helpUrl: string;
+    affectedNodes: number;
+    wcagTags: string[];
+    htmlSnippet: string;
+}
+
+interface A11yResult {
+    pageName: string;
+    url: string;
+    passed: boolean;
+    totalViolations: number;
+    criticalCount: number;
+    seriousCount: number;
+    moderateCount: number;
+    minorCount: number;
+    violations: A11yViolation[];
+    keyboardIssues: any[];
+    wcagLevel: string;
+    error?: string;
+}
+
+export class A11yAuditor {
+    static readonly WCAG_TAGS: Record&lt;string, string[]&gt; = {
+        A: ['wcag2a', 'wcag21a'],
+        AA: ['wcag2a', 'wcag21a', 'wcag2aa', 'wcag21aa'],
+        AAA: ['wcag2a', 'wcag21a', 'wcag2aa', 'wcag21aa', 'wcag2aaa', 'wcag21aaa'],
+    };
+
+    static readonly CRITICAL_RULES = [
+        'color-contrast', 'image-alt', 'label', 'link-name',
+        'button-name', 'document-title', 'html-has-lang',
+        'bypass', 'aria-required-attr',
+    ];
+
+    private page: Page;
+    private outputDir: string;
+    readonly wcagLevel: string;
+    private failOnImpact: string;
+    readonly results: A11yResult[] = [];
+    private impactSeverity: Record&lt;string, number&gt; = {
+        minor: 1, moderate: 2, serious: 3, critical: 4,
+    };
+    private failThreshold: number;
+
+    constructor(
+        page: Page,
+        options: {
+            outputDir?: string;
+            wcagLevel?: string;
+            failOnImpact?: string;
+        } = {}
+    ) {
+        this.page = page;
+        this.outputDir = options.outputDir ?? 'reports/a11y';
+        this.wcagLevel = options.wcagLevel ?? 'AA';
+        this.failOnImpact = options.failOnImpact ?? 'serious';
+        this.failThreshold = this.impactSeverity[this.failOnImpact] ?? 3;
+        fs.mkdirSync(this.outputDir, { recursive: true });
+    }
+
+    async audit(pageName: string): Promise&lt;A11yResult&gt; {
+        try {
+            const axeResults = await new AxeBuilder({ page: this.page })
+                .withTags(A11yAuditor.WCAG_TAGS[this.wcagLevel] ?? [])
+                .analyze();
+
+            const violations: A11yViolation[] = [];
+            const impactCounts = { critical: 0, serious: 0, moderate: 0, minor: 0 };
+
+            for (const v of axeResults.violations) {
+                const impact = v.impact ?? 'minor';
+                impactCounts[impact] = (impactCounts[impact] ?? 0) + 1;
+                const wcagTags = (v.tags ?? []).filter(t => t.includes('wcag'));
+
+                violations.push({
+                    ruleId: v.id,
+                    description: v.description ?? '',
+                    impact,
+                    helpUrl: v.helpUrl ?? '',
+                    affectedNodes: (v.nodes ?? []).length,
+                    wcagTags,
+                    htmlSnippet: v.nodes?.[0]?.html?.substring(0, 200) ?? '',
+                });
+            }
+
+            const maxImpact = Math.max(
+                ...violations.map(v => this.impactSeverity[v.impact] ?? 0), 0
+            );
+            const passed = maxImpact &lt; this.failThreshold;
+
+            const result: A11yResult = {
+                pageName, url: this.page.url(), passed,
+                totalViolations: violations.length,
+                criticalCount: impactCounts.critical,
+                seriousCount: impactCounts.serious,
+                moderateCount: impactCounts.moderate,
+                minorCount: impactCounts.minor,
+                violations, keyboardIssues: [], wcagLevel: this.wcagLevel,
+            };
+
+            // Guardar resultado JSON
+            const outFile = path.join(this.outputDir, \`\${pageName}-axe.json\`);
+            fs.writeFileSync(outFile, JSON.stringify(axeResults, null, 2));
+
+            this.results.push(result);
+            return result;
+
+        } catch (e) {
+            const result: A11yResult = {
+                pageName, url: this.page.url(), passed: false,
+                totalViolations: 0, criticalCount: 0, seriousCount: 0,
+                moderateCount: 0, minorCount: 0,
+                violations: [], keyboardIssues: [],
+                wcagLevel: this.wcagLevel, error: String(e),
+            };
+            this.results.push(result);
+            return result;
+        }
+    }
+
+    async testKeyboardNavigation(
+        navigationFlow: { element: string; key: string; role: string }[],
+        pageName = ''
+    ) {
+        const keyboardIssues: any[] = [];
+
+        for (let i = 0; i &lt; navigationFlow.length; i++) {
+            const step = navigationFlow[i];
+            await this.page.keyboard.press(step.key ?? 'Tab');
+
+            const focusedElement = await this.page.evaluate(() => {
+                const el = document.activeElement!;
+                return {
+                    tagName: el.tagName,
+                    role: el.getAttribute('role') || el.tagName.toLowerCase(),
+                    text: el.textContent?.trim().substring(0, 50) || '',
+                    ariaLabel: el.getAttribute('aria-label') || '',
+                    tabIndex: (el as HTMLElement).tabIndex,
+                    isVisible: (el as HTMLElement).offsetParent !== null,
+                    outline: window.getComputedStyle(el).outline,
+                };
+            });
+
+            if (focusedElement.outline?.startsWith('0px') ||
+                focusedElement.outline === 'none') {
+                keyboardIssues.push({
+                    step: i + 1, issue: 'MISSING_FOCUS_INDICATOR',
+                    description: \`El elemento '\${step.element}' no tiene indicador visual de foco\`,
+                    impact: 'serious', wcag: '2.4.7 Focus Visible',
+                    element: focusedElement,
+                });
+            }
+
+            const actualText = focusedElement.text || focusedElement.ariaLabel;
+            if (step.element && !actualText.toLowerCase().includes(step.element.toLowerCase())) {
+                keyboardIssues.push({
+                    step: i + 1, issue: 'WRONG_FOCUS_ORDER',
+                    description: \`Se esperaba foco en '\${step.element}' pero está en '\${actualText}'\`,
+                    impact: 'serious', wcag: '2.4.3 Focus Order',
+                    element: focusedElement,
+                });
+            }
+
+            if (!focusedElement.isVisible) {
+                keyboardIssues.push({
+                    step: i + 1, issue: 'FOCUS_ON_HIDDEN_ELEMENT',
+                    description: 'El foco está en un elemento no visible',
+                    impact: 'critical', wcag: '2.4.3 Focus Order',
+                    element: focusedElement,
+                });
+            }
+        }
+
+        for (const result of this.results) {
+            if (result.pageName === pageName) {
+                result.keyboardIssues = keyboardIssues;
+                break;
+            }
+        }
+        return keyboardIssues;
+    }
+
+    async checkSkipNavigation(): Promise&lt;boolean&gt; {
+        const skipLink = this.page.locator(
+            "a[href='#main-content'], a[href='#content'], " +
+            "[role='link']:has-text('Saltar'), [role='link']:has-text('Skip')"
+        );
+        await this.page.keyboard.press('Tab');
+        return await skipLink.count() > 0;
+    }
+
+    getSummary() {
+        const total = this.results.length;
+        const passed = this.results.filter(r => r.passed).length;
+        const totalViolations = this.results.reduce((s, r) => s + r.totalViolations, 0);
+        const critical = this.results.reduce((s, r) => s + r.criticalCount, 0);
+        const serious = this.results.reduce((s, r) => s + r.seriousCount, 0);
+        return {
+            totalPages: total, passed, failed: total - passed,
+            totalViolations, criticalViolations: critical,
+            seriousViolations: serious, wcagLevel: this.wcagLevel,
+            results: this.results,
+        };
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>🔒 Paso 7: Helper — SecurityChecker</h3>
         <p>Clase para validación de headers de seguridad, auditoría de cookies y detección

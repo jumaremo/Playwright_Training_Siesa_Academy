@@ -109,7 +109,18 @@ addopts =
         <h3>🔐 Paso 3: helpers/roles.py — Definición de roles</h3>
         <p>Centralizamos la configuración de roles, credenciales y permisos esperados.
         Esto facilita la reutilización y el mantenimiento de los tests.</p>
-        <pre><code class="python"># helpers/roles.py
+        <div class="code-tabs" data-code-id="L092-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># helpers/roles.py
 """
 Definición centralizada de roles, credenciales y permisos
 para la plataforma de gestión de proyectos.
@@ -194,6 +205,100 @@ ALL_ROLES = {
 def can_perform(role: UserRole, action: str) -> bool:
     """Verifica si un rol tiene permiso para una acción."""
     return action in role.permissions</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// helpers/roles.ts
+/**
+ * Definición centralizada de roles, credenciales y permisos
+ * para la plataforma de gestión de proyectos.
+ */
+import path from 'path';
+
+// Directorio de storage states
+const AUTH_DIR = path.join(__dirname, '..', 'auth_states');
+
+interface UserRole {
+    name: string;
+    username: string;
+    password: string;
+    permissions: string[];
+    readonly storageStatePath: string;
+}
+
+function createRole(
+    name: string,
+    username: string,
+    password: string,
+    permissions: string[] = []
+): UserRole {
+    return {
+        name,
+        username,
+        password,
+        permissions,
+        get storageStatePath() {
+            return path.join(AUTH_DIR, \`\${this.name}_state.json\`);
+        },
+    };
+}
+
+// =====================================================
+// ROLES DEL SISTEMA
+// =====================================================
+
+export const ADMIN = createRole(
+    'admin',
+    'admin@collab-platform.com',
+    'AdminSecure2024!',
+    [
+        'create_project', 'delete_project', 'edit_project',
+        'assign_tasks', 'delete_tasks', 'edit_tasks',
+        'manage_users', 'change_settings', 'send_announcements',
+        'view_reports', 'export_data',
+    ]
+);
+
+export const PROJECT_MANAGER = createRole(
+    'pm',
+    'pm@collab-platform.com',
+    'PMSecure2024!',
+    [
+        'create_project', 'edit_project',
+        'assign_tasks', 'edit_tasks',
+        'send_announcements', 'view_reports',
+    ]
+);
+
+export const DEVELOPER = createRole(
+    'developer',
+    'dev@collab-platform.com',
+    'DevSecure2024!',
+    [
+        'edit_tasks', 'update_status',
+        'add_comments', 'view_reports',
+    ]
+);
+
+export const VIEWER = createRole(
+    'viewer',
+    'viewer@collab-platform.com',
+    'ViewSecure2024!',
+    ['view_reports']
+);
+
+// Diccionario para acceso rápido
+export const ALL_ROLES: Record&lt;string, UserRole&gt; = {
+    admin: ADMIN,
+    pm: PROJECT_MANAGER,
+    developer: DEVELOPER,
+    viewer: VIEWER,
+};
+
+export function canPerform(role: UserRole, action: string): boolean {
+    return role.permissions.includes(action);
+}</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA: Centralización de roles</h4>
@@ -206,7 +311,18 @@ def can_perform(role: UserRole, action: str) -> bool:
         <h3>🔑 Paso 4: helpers/auth_setup.py — Generador de Storage States</h3>
         <p>Este script genera los archivos de storage state para cada rol. Se ejecuta una vez
         antes de la suite y guarda las sesiones autenticadas en disco.</p>
-        <pre><code class="python"># helpers/auth_setup.py
+        <div class="code-tabs" data-code-id="L092-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># helpers/auth_setup.py
 """
 Generador de storage states para todos los roles.
 Ejecutar ANTES de los tests para crear las sesiones autenticadas.
@@ -308,6 +424,100 @@ def generate_all_storage_states():
 
 if __name__ == "__main__":
     generate_all_storage_states()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// helpers/auth-setup.ts
+/**
+ * Generador de storage states para todos los roles.
+ * Ejecutar ANTES de los tests para crear las sesiones autenticadas.
+ *
+ * Uso:
+ *     npx ts-node helpers/auth-setup.ts
+ */
+import { chromium, Browser, BrowserContext } from 'playwright';
+import fs from 'fs';
+import path from 'path';
+import { ALL_ROLES, UserRole } from './roles';
+
+const AUTH_DIR = path.join(__dirname, '..', 'auth_states');
+const BASE_URL = 'https://collab-platform.example.com';
+
+async function createStorageState(
+    browser: Browser,
+    role: UserRole
+): Promise&lt;string&gt; {
+    console.log(\`Generando storage state para rol: \${role.name}\`);
+
+    // Crear un contexto limpio para la autenticación
+    const context = await browser.newContext({
+        baseURL: BASE_URL,
+        viewport: { width: 1280, height: 720 },
+    });
+    const page = await context.newPage();
+
+    try {
+        // 1. Navegar al login
+        await page.goto('/login');
+        await page.waitForLoadState('networkidle');
+
+        // 2. Completar credenciales
+        await page.getByLabel('Email').fill(role.username);
+        await page.getByLabel('Contraseña').fill(role.password);
+        await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+
+        // 3. Esperar a que el dashboard cargue (confirma autenticación)
+        await page.waitForURL('**/dashboard', { timeout: 15000 });
+        await page.waitForLoadState('networkidle');
+        console.log(\`  Login exitoso para \${role.name}\`);
+
+        // 4. Guardar el storage state (cookies + localStorage)
+        if (!fs.existsSync(AUTH_DIR)) {
+            fs.mkdirSync(AUTH_DIR, { recursive: true });
+        }
+        const statePath = role.storageStatePath;
+        await context.storageState({ path: statePath });
+        console.log(\`  Storage state guardado: \${statePath}\`);
+
+        return statePath;
+    } finally {
+        await context.close();
+    }
+}
+
+async function generateAllStorageStates(): Promise&lt;void&gt; {
+    console.log('='.repeat(60));
+    console.log('GENERANDO STORAGE STATES PARA TODOS LOS ROLES');
+    console.log('='.repeat(60));
+
+    const browser = await chromium.launch({ headless: true });
+
+    try {
+        for (const [roleName, role] of Object.entries(ALL_ROLES)) {
+            await createStorageState(browser, role);
+        }
+    } finally {
+        await browser.close();
+    }
+
+    console.log('='.repeat(60));
+    console.log('TODOS LOS STORAGE STATES GENERADOS EXITOSAMENTE');
+    console.log('='.repeat(60));
+
+    // Verificar archivos creados
+    for (const [roleName, role] of Object.entries(ALL_ROLES)) {
+        const filePath = role.storageStatePath;
+        if (fs.existsSync(filePath)) {
+            const size = fs.statSync(filePath).size;
+            console.log(\`  ✓ \${roleName}: \${path.basename(filePath)} (\${size} bytes)\`);
+        } else {
+            console.error(\`  ✗ \${roleName}: archivo NO encontrado\`);
+        }
+    }
+}
+
+generateAllStorageStates();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Buena práctica: Storage state como fase de setup</h4>
@@ -324,7 +534,18 @@ if __name__ == "__main__":
         <h3>📄 Paso 5: pages/ — Page Objects para cada módulo</h3>
         <p>Cada page object encapsula las interacciones con un módulo de la plataforma.</p>
 
-        <pre><code class="python"># pages/login_page.py
+        <div class="code-tabs" data-code-id="L092-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pages/login_page.py
 """Page Object para la página de login."""
 from playwright.sync_api import Page, expect
 
@@ -358,8 +579,62 @@ class LoginPage:
     def assert_logged_in(self):
         """Verifica que el usuario está autenticado."""
         expect(self.user_menu).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// pages/login-page.ts
+import { type Page, type Locator, expect } from '@playwright/test';
 
-        <pre><code class="python"># pages/projects_page.py
+export class LoginPage {
+    readonly page: Page;
+    readonly emailField: Locator;
+    readonly passwordField: Locator;
+    readonly loginButton: Locator;
+    readonly userMenu: Locator;
+    readonly logoutOption: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        // Localizadores
+        this.emailField = page.getByLabel('Email');
+        this.passwordField = page.getByLabel('Contraseña');
+        this.loginButton = page.getByRole('button', { name: 'Iniciar sesión' });
+        this.userMenu = page.getByRole('button', { name: 'Mi cuenta' });
+        this.logoutOption = page.getByRole('menuitem', { name: 'Cerrar sesión' });
+    }
+
+    async login(email: string, password: string): Promise&lt;void&gt; {
+        await this.page.goto('/login');
+        await this.emailField.fill(email);
+        await this.passwordField.fill(password);
+        await this.loginButton.click();
+        await this.page.waitForURL('**/dashboard');
+    }
+
+    async logout(): Promise&lt;void&gt; {
+        await this.userMenu.click();
+        await this.logoutOption.click();
+        await this.page.waitForURL('**/login');
+    }
+
+    async assertLoggedIn(): Promise&lt;void&gt; {
+        await expect(this.userMenu).toBeVisible();
+    }
+}</code></pre>
+        </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L092-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pages/projects_page.py
 """Page Object para la gestión de proyectos."""
 from playwright.sync_api import Page, expect
 
@@ -420,8 +695,92 @@ class ProjectsPage:
     def assert_project_not_visible(self, project_name: str):
         """Verifica que un proyecto NO aparece en la lista."""
         expect(self.project_list.get_by_text(project_name)).not_to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// pages/projects-page.ts
+import { type Page, type Locator, expect } from '@playwright/test';
 
-        <pre><code class="python"># pages/tasks_page.py
+export class ProjectsPage {
+    readonly page: Page;
+    readonly newProjectBtn: Locator;
+    readonly projectNameField: Locator;
+    readonly projectDescField: Locator;
+    readonly saveBtn: Locator;
+    readonly deleteBtn: Locator;
+    readonly projectList: Locator;
+    readonly settingsTab: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.newProjectBtn = page.getByRole('button', { name: 'Nuevo proyecto' });
+        this.projectNameField = page.getByLabel('Nombre del proyecto');
+        this.projectDescField = page.getByLabel('Descripción');
+        this.saveBtn = page.getByRole('button', { name: 'Guardar' });
+        this.deleteBtn = page.getByRole('button', { name: 'Eliminar proyecto' });
+        this.projectList = page.locator('[data-testid="project-list"]');
+        this.settingsTab = page.getByRole('tab', { name: 'Configuración' });
+    }
+
+    async navigate(): Promise&lt;void&gt; {
+        await this.page.goto('/projects');
+        await this.page.waitForLoadState('networkidle');
+    }
+
+    async createProject(name: string, description = ''): Promise&lt;string&gt; {
+        await this.newProjectBtn.click();
+        await this.projectNameField.fill(name);
+        if (description) {
+            await this.projectDescField.fill(description);
+        }
+        await this.saveBtn.click();
+
+        // Esperar confirmación
+        await expect(this.page.getByText(\`Proyecto '\${name}' creado\`)).toBeVisible();
+        await this.page.waitForLoadState('networkidle');
+
+        // Obtener el ID del proyecto desde la URL
+        const url = this.page.url();
+        const projectId = url.split('/projects/').pop()!;
+        return projectId;
+    }
+
+    async deleteProject(projectName: string): Promise&lt;void&gt; {
+        await this.page.getByText(projectName).click();
+        await this.settingsTab.click();
+        await this.deleteBtn.click();
+        // Confirmar eliminación
+        await this.page.getByRole('button', { name: 'Confirmar' }).click();
+        await expect(this.page.getByText('Proyecto eliminado')).toBeVisible();
+    }
+
+    async openProject(projectName: string): Promise&lt;void&gt; {
+        await this.projectList.getByText(projectName).click();
+        await this.page.waitForLoadState('networkidle');
+    }
+
+    async assertProjectVisible(projectName: string): Promise&lt;void&gt; {
+        await expect(this.projectList.getByText(projectName)).toBeVisible();
+    }
+
+    async assertProjectNotVisible(projectName: string): Promise&lt;void&gt; {
+        await expect(this.projectList.getByText(projectName)).not.toBeVisible();
+    }
+}</code></pre>
+        </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L092-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pages/tasks_page.py
 """Page Object para la gestión de tareas dentro de un proyecto."""
 from playwright.sync_api import Page, expect
 
@@ -475,8 +834,85 @@ class TasksPage:
         """Verifica a quién está asignada una tarea."""
         task_card = self.task_list.get_by_text(task_title).locator("..")
         expect(task_card.get_by_text(assignee)).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// pages/tasks-page.ts
+import { type Page, type Locator, expect } from '@playwright/test';
 
-        <pre><code class="python"># pages/settings_page.py
+export class TasksPage {
+    readonly page: Page;
+    readonly newTaskBtn: Locator;
+    readonly taskTitleField: Locator;
+    readonly assigneeSelect: Locator;
+    readonly statusSelect: Locator;
+    readonly saveBtn: Locator;
+    readonly taskBoard: Locator;
+    readonly taskList: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.newTaskBtn = page.getByRole('button', { name: 'Nueva tarea' });
+        this.taskTitleField = page.getByLabel('Título de la tarea');
+        this.assigneeSelect = page.getByLabel('Asignar a');
+        this.statusSelect = page.getByLabel('Estado');
+        this.saveBtn = page.getByRole('button', { name: 'Guardar' });
+        this.taskBoard = page.locator('[data-testid="task-board"]');
+        this.taskList = page.locator('[data-testid="task-list"]');
+    }
+
+    async createTask(title: string, assignee = ''): Promise&lt;void&gt; {
+        await this.newTaskBtn.click();
+        await this.taskTitleField.fill(title);
+        if (assignee) {
+            await this.assigneeSelect.selectOption({ label: assignee });
+        }
+        await this.saveBtn.click();
+        await expect(this.page.getByText(\`Tarea '\${title}' creada\`)).toBeVisible();
+    }
+
+    async assignTask(taskTitle: string, assignee: string): Promise&lt;void&gt; {
+        await this.taskList.getByText(taskTitle).click();
+        await this.assigneeSelect.selectOption({ label: assignee });
+        await this.saveBtn.click();
+        await expect(this.page.getByText('Tarea actualizada')).toBeVisible();
+    }
+
+    async updateStatus(taskTitle: string, newStatus: string): Promise&lt;void&gt; {
+        await this.taskList.getByText(taskTitle).click();
+        await this.statusSelect.selectOption({ label: newStatus });
+        await this.saveBtn.click();
+        await expect(this.page.getByText('Estado actualizado')).toBeVisible();
+    }
+
+    async assertTaskExists(taskTitle: string): Promise&lt;void&gt; {
+        await expect(this.taskBoard.getByText(taskTitle)).toBeVisible();
+    }
+
+    async assertTaskStatus(taskTitle: string, expectedStatus: string): Promise&lt;void&gt; {
+        const taskCard = this.taskList.getByText(taskTitle).locator('..');
+        await expect(taskCard.getByText(expectedStatus)).toBeVisible();
+    }
+
+    async assertTaskAssignedTo(taskTitle: string, assignee: string): Promise&lt;void&gt; {
+        const taskCard = this.taskList.getByText(taskTitle).locator('..');
+        await expect(taskCard.getByText(assignee)).toBeVisible();
+    }
+}</code></pre>
+        </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L092-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pages/settings_page.py
 """Page Object para la configuración del sistema."""
 from playwright.sync_api import Page, expect
 
@@ -506,13 +942,63 @@ class SettingsPage:
     def assert_access_denied(self):
         """Verifica que el acceso está denegado."""
         expect(self.access_denied_msg).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// pages/settings-page.ts
+import { type Page, type Locator, expect } from '@playwright/test';
+
+export class SettingsPage {
+    readonly page: Page;
+    readonly navSettings: Locator;
+    readonly timezoneSelect: Locator;
+    readonly notificationsToggle: Locator;
+    readonly saveBtn: Locator;
+    readonly accessDeniedMsg: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.navSettings = page.getByRole('link', { name: 'Configuración' });
+        this.timezoneSelect = page.getByLabel('Zona horaria');
+        this.notificationsToggle = page.getByLabel('Notificaciones por email');
+        this.saveBtn = page.getByRole('button', { name: 'Guardar cambios' });
+        this.accessDeniedMsg = page.getByText('No tienes permisos');
+    }
+
+    async navigate(): Promise&lt;void&gt; {
+        await this.navSettings.click();
+        await this.page.waitForLoadState('networkidle');
+    }
+
+    async changeTimezone(timezone: string): Promise&lt;void&gt; {
+        await this.timezoneSelect.selectOption({ label: timezone });
+        await this.saveBtn.click();
+        await expect(this.page.getByText('Configuración actualizada')).toBeVisible();
+    }
+
+    async assertAccessDenied(): Promise&lt;void&gt; {
+        await expect(this.accessDeniedMsg).toBeVisible();
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>🧩 Paso 6: tests/conftest.py — Fixtures multi-contexto</h3>
         <p>Este es el <strong>corazón del proyecto</strong>. Cada fixture crea un
         <code>BrowserContext</code> independiente con el storage state del rol correspondiente,
         garantizando aislamiento total entre usuarios.</p>
 
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L092-7">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/conftest.py
 """
 Fixtures globales para tests multi-usuario.
 Cada rol tiene su propio BrowserContext con storage state independiente.
@@ -760,6 +1246,172 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/fixtures.ts
+/**
+ * Fixtures globales para tests multi-usuario.
+ * Cada rol tiene su propio BrowserContext con storage state independiente.
+ */
+import { test as base, type Browser, type BrowserContext, type Page } from '@playwright/test';
+import path from 'path';
+import fs from 'fs';
+import { ADMIN, PROJECT_MANAGER, DEVELOPER, VIEWER, type UserRole } from '../helpers/roles';
+import { LoginPage } from '../pages/login-page';
+import { ProjectsPage } from '../pages/projects-page';
+import { TasksPage } from '../pages/tasks-page';
+import { SettingsPage } from '../pages/settings-page';
+
+// --- Constantes ---
+const BASE_URL = 'https://collab-platform.example.com';
+const SCREENSHOTS_DIR = path.join(__dirname, 'test-results', 'screenshots');
+const TRACES_DIR = path.join(__dirname, 'test-results', 'traces');
+
+// =====================================================
+// FUNCIÓN GENÉRICA: Crear contexto por rol
+// =====================================================
+
+async function createRoleContext(
+    browser: Browser,
+    role: UserRole,
+    viewport?: { width: number; height: number }
+): Promise&lt;BrowserContext&gt; {
+    const context = await browser.newContext({
+        baseURL: BASE_URL,
+        storageState: role.storageStatePath,
+        viewport: viewport ?? { width: 1280, height: 720 },
+    });
+
+    // Habilitar tracing para diagnóstico de fallos
+    await context.tracing.start({
+        screenshots: true,
+        snapshots: true,
+        sources: true,
+    });
+
+    console.log(\`Contexto creado para rol: \${role.name}\`);
+    return context;
+}
+
+async function teardownContext(
+    context: BrowserContext,
+    roleName: string,
+    testName: string
+): Promise&lt;void&gt; {
+    if (!fs.existsSync(TRACES_DIR)) {
+        fs.mkdirSync(TRACES_DIR, { recursive: true });
+    }
+    const tracePath = path.join(TRACES_DIR, \`\${testName}_\${roleName}.zip\`);
+    await context.tracing.stop({ path: tracePath });
+    await context.close();
+    console.log(\`Contexto cerrado para \${roleName}, trace: \${tracePath}\`);
+}
+
+// =====================================================
+// TIPO DE FIXTURES PERSONALIZADAS
+// =====================================================
+
+type MultiUserFixtures = {
+    adminContext: BrowserContext;
+    adminPage: Page;
+    pmContext: BrowserContext;
+    pmPage: Page;
+    developerContext: BrowserContext;
+    developerPage: Page;
+    viewerContext: BrowserContext;
+    viewerPage: Page;
+    adminProjects: ProjectsPage;
+    pmTasks: TasksPage;
+    devTasks: TasksPage;
+    allContexts: Record&lt;string, { context: BrowserContext; page: Page }&gt;;
+};
+
+export const test = base.extend&lt;MultiUserFixtures&gt;({
+    // --- Contextos por rol ---
+    adminContext: async ({ browser }, use) => {
+        const ctx = await createRoleContext(browser, ADMIN);
+        await use(ctx);
+        await ctx.close();
+    },
+    adminPage: async ({ adminContext }, use) => {
+        const page = await adminContext.newPage();
+        await use(page);
+        await page.close();
+    },
+    pmContext: async ({ browser }, use) => {
+        const ctx = await createRoleContext(browser, PROJECT_MANAGER);
+        await use(ctx);
+        await ctx.close();
+    },
+    pmPage: async ({ pmContext }, use) => {
+        const page = await pmContext.newPage();
+        await use(page);
+        await page.close();
+    },
+    developerContext: async ({ browser }, use) => {
+        const ctx = await createRoleContext(browser, DEVELOPER);
+        await use(ctx);
+        await ctx.close();
+    },
+    developerPage: async ({ developerContext }, use) => {
+        const page = await developerContext.newPage();
+        await use(page);
+        await page.close();
+    },
+    viewerContext: async ({ browser }, use) => {
+        const ctx = await createRoleContext(browser, VIEWER);
+        await use(ctx);
+        await ctx.close();
+    },
+    viewerPage: async ({ viewerContext }, use) => {
+        const page = await viewerContext.newPage();
+        await use(page);
+        await page.close();
+    },
+
+    // --- Page Objects pre-configurados ---
+    adminProjects: async ({ adminPage }, use) => {
+        const projects = new ProjectsPage(adminPage);
+        await projects.navigate();
+        await use(projects);
+    },
+    pmTasks: async ({ pmPage }, use) => {
+        await use(new TasksPage(pmPage));
+    },
+    devTasks: async ({ developerPage }, use) => {
+        await use(new TasksPage(developerPage));
+    },
+
+    // --- Multi-contexto simultáneo ---
+    allContexts: async ({ browser }, use) => {
+        const roles = { admin: ADMIN, pm: PROJECT_MANAGER, developer: DEVELOPER, viewer: VIEWER };
+        const contexts: Record&lt;string, { context: BrowserContext; page: Page }&gt; = {};
+
+        for (const [roleName, role] of Object.entries(roles)) {
+            const ctx = await createRoleContext(browser, role);
+            const page = await ctx.newPage();
+            contexts[roleName] = { context: ctx, page };
+            console.log(\`  Contexto '\${roleName}' listo\`);
+        }
+
+        await use(contexts);
+
+        // Teardown: cerrar todos los contextos
+        for (const [roleName, data] of Object.entries(contexts)) {
+            await data.page.close();
+            await data.context.close();
+            console.log(\`  Contexto '\${roleName}' cerrado\`);
+        }
+    },
+});
+
+// Screenshot automático en caso de fallo (configuración en playwright.config.ts)
+// En @playwright/test se configura globalmente:
+// use: { screenshot: 'only-on-failure', trace: 'retain-on-failure' }
+
+export { expect } from '@playwright/test';</code></pre>
+        </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔬 Concepto avanzado: La fixture <code>all_contexts</code></h4>
@@ -775,7 +1427,18 @@ def pytest_runtest_makereport(item, call):
         el PM asigna tareas y el developer actualiza el estado. Todo en el mismo test,
         usando contextos independientes.</p>
 
-        <pre><code class="python"># tests/test_colaboracion_multiusuario.py
+        <div class="code-tabs" data-code-id="L092-8">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_colaboracion_multiusuario.py
 """
 Tests de colaboración multi-usuario.
 Simula flujos donde múltiples roles interactúan en el mismo proyecto.
@@ -946,6 +1609,142 @@ class TestColaboracionMultiUsuario:
         page2.close()
         ctx1.close()
         ctx2.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test-colaboracion-multiusuario.spec.ts
+import { test, expect } from './fixtures';
+import { ADMIN, PROJECT_MANAGER, DEVELOPER, VIEWER } from '../helpers/roles';
+import { ProjectsPage } from '../pages/projects-page';
+import { TasksPage } from '../pages/tasks-page';
+
+test.describe('Colaboración Multi-Usuario', () => {
+
+    test('flujo completo admin → PM → developer @multiuser @smoke', async ({ browser }) => {
+        // ---- PASO 1: Admin crea el proyecto ----
+        const adminCtx = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: ADMIN.storageStatePath,
+        });
+        const adminPage = await adminCtx.newPage();
+        const adminProjects = new ProjectsPage(adminPage);
+        await adminProjects.navigate();
+
+        const projectId = await adminProjects.createProject(
+            'Sprint Q2-2025',
+            'Proyecto de testing automatizado'
+        );
+        expect(projectId).toBeTruthy();
+
+        await adminPage.close();
+        await adminCtx.close();
+
+        // ---- PASO 2: PM asigna tareas ----
+        const pmCtx = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: PROJECT_MANAGER.storageStatePath,
+        });
+        const pmPage = await pmCtx.newPage();
+
+        await pmPage.goto(\`/projects/\${projectId}\`);
+        const pmTasks = new TasksPage(pmPage);
+
+        await pmTasks.createTask('Implementar login tests', 'Developer');
+        await pmTasks.createTask('Configurar CI/CD', 'Developer');
+        await pmTasks.assertTaskExists('Implementar login tests');
+        await pmTasks.assertTaskAssignedTo('Implementar login tests', 'Developer');
+
+        await pmPage.close();
+        await pmCtx.close();
+
+        // ---- PASO 3: Developer actualiza estado ----
+        const devCtx = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: DEVELOPER.storageStatePath,
+        });
+        const devPage = await devCtx.newPage();
+
+        await devPage.goto(\`/projects/\${projectId}\`);
+        const devTasks = new TasksPage(devPage);
+
+        await devTasks.assertTaskExists('Implementar login tests');
+        await devTasks.updateStatus('Implementar login tests', 'En progreso');
+        await devTasks.assertTaskStatus('Implementar login tests', 'En progreso');
+
+        await devPage.close();
+        await devCtx.close();
+
+        // ---- PASO 4: Admin verifica el estado final ----
+        const adminCtx2 = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: ADMIN.storageStatePath,
+        });
+        const adminPage2 = await adminCtx2.newPage();
+        await adminPage2.goto(\`/projects/\${projectId}\`);
+
+        const adminTasks = new TasksPage(adminPage2);
+        await adminTasks.assertTaskStatus('Implementar login tests', 'En progreso');
+        await adminTasks.assertTaskStatus('Configurar CI/CD', 'Pendiente');
+
+        await adminPage2.close();
+        await adminCtx2.close();
+    });
+
+    test('contextos simultáneos 4 roles @multiuser', async ({ allContexts }) => {
+        const adminPage = allContexts.admin.page;
+        const pmPage = allContexts.pm.page;
+        const devPage = allContexts.developer.page;
+        const viewerPage = allContexts.viewer.page;
+
+        // Todos navegan al dashboard al mismo tiempo
+        await adminPage.goto('/dashboard');
+        await pmPage.goto('/dashboard');
+        await devPage.goto('/dashboard');
+        await viewerPage.goto('/dashboard');
+
+        // Cada uno ve su nombre de usuario en el menú
+        await expect(adminPage.getByText('admin@collab-platform.com')).toBeVisible();
+        await expect(pmPage.getByText('pm@collab-platform.com')).toBeVisible();
+        await expect(devPage.getByText('dev@collab-platform.com')).toBeVisible();
+        await expect(viewerPage.getByText('viewer@collab-platform.com')).toBeVisible();
+
+        // Verificar que cada contexto tiene cookies independientes
+        const adminCookies = await allContexts.admin.context.cookies();
+        const pmCookies = await allContexts.pm.context.cookies();
+        expect(adminCookies).not.toEqual(pmCookies);
+    });
+
+    test('aislamiento storage entre contextos @multiuser', async ({ browser }) => {
+        // Contexto 1: Admin modifica localStorage
+        const ctx1 = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: ADMIN.storageStatePath,
+        });
+        const page1 = await ctx1.newPage();
+        await page1.goto('/dashboard');
+        await page1.evaluate(() => {
+            localStorage.setItem('theme', 'dark');
+            localStorage.setItem('language', 'es');
+        });
+
+        // Contexto 2: Developer NO debe ver esos cambios
+        const ctx2 = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: DEVELOPER.storageStatePath,
+        });
+        const page2 = await ctx2.newPage();
+        await page2.goto('/dashboard');
+
+        const themeCtx2 = await page2.evaluate(() => localStorage.getItem('theme'));
+        expect(themeCtx2 === null || themeCtx2 !== 'dark').toBeTruthy();
+
+        await page1.close();
+        await page2.close();
+        await ctx1.close();
+        await ctx2.close();
+    });
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA: Flujos multi-rol en ERP</h4>
@@ -956,7 +1755,18 @@ class TestColaboracionMultiUsuario:
         </div>
 
         <h3>🔔 Paso 8: test_notificaciones_tiempo_real.py — Notificaciones entre usuarios</h3>
-        <pre><code class="python"># tests/test_notificaciones_tiempo_real.py
+        <div class="code-tabs" data-code-id="L092-9">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_notificaciones_tiempo_real.py
 """
 Tests de notificaciones en tiempo real.
 Verifica que acciones de un usuario se reflejan en las sesiones de otros.
@@ -1092,12 +1902,141 @@ class TestNotificacionesTiempoReal:
             dev_page.close()
             pm_ctx.close()
             dev_ctx.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test-notificaciones-tiempo-real.spec.ts
+import { test, expect } from './fixtures';
+import { ADMIN, PROJECT_MANAGER, DEVELOPER, VIEWER } from '../helpers/roles';
+
+test.describe('Notificaciones Tiempo Real', () => {
+
+    test('anuncio admin visible para todos @notifications @smoke', async ({ allContexts }) => {
+        const adminPage = allContexts.admin.page;
+        const pmPage = allContexts.pm.page;
+        const devPage = allContexts.developer.page;
+        const viewerPage = allContexts.viewer.page;
+
+        // Todos navegan al dashboard
+        for (const [, data] of Object.entries(allContexts)) {
+            await data.page.goto('/dashboard');
+        }
+
+        // Admin envía un anuncio
+        await adminPage.getByRole('button', { name: 'Nuevo anuncio' }).click();
+        await adminPage.getByLabel('Mensaje').fill(
+            'Despliegue programado para el viernes 18:00'
+        );
+        await adminPage.getByRole('button', { name: 'Enviar a todos' }).click();
+        await expect(adminPage.getByText('Anuncio enviado')).toBeVisible();
+
+        // Verificar que cada usuario recibe la notificación
+        const textoAnuncio = 'Despliegue programado para el viernes 18:00';
+
+        for (const roleName of ['pm', 'developer', 'viewer'] as const) {
+            const page = allContexts[roleName].page;
+            await page.getByRole('button', { name: 'Notificaciones' }).click();
+            await expect(page.getByText(textoAnuncio)).toBeVisible({
+                timeout: 10000,
+            });
+        }
+    });
+
+    test('asignación notifica developer @notifications', async ({ browser }) => {
+        const pmCtx = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: PROJECT_MANAGER.storageStatePath,
+        });
+        const devCtx = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: DEVELOPER.storageStatePath,
+        });
+        const pmPage = await pmCtx.newPage();
+        const devPage = await devCtx.newPage();
+
+        try {
+            // Developer abre su dashboard (para recibir notificaciones)
+            await devPage.goto('/dashboard');
+
+            // PM asigna una tarea
+            await pmPage.goto('/projects/sprint-q2/tasks');
+            await pmPage.getByRole('button', { name: 'Nueva tarea' }).click();
+            await pmPage.getByLabel('Título de la tarea').fill(
+                'Revisar tests de regresión'
+            );
+            await pmPage.getByLabel('Asignar a').selectOption({ label: 'Developer' });
+            await pmPage.getByRole('button', { name: 'Guardar' }).click();
+
+            // Developer debe ver la notificación
+            const notifBadge = devPage.locator('[data-testid="notification-badge"]');
+            await expect(notifBadge).toBeVisible({ timeout: 10000 });
+
+            // Abrir y verificar contenido
+            await devPage.getByRole('button', { name: 'Notificaciones' }).click();
+            await expect(
+                devPage.getByText('Revisar tests de regresión')
+            ).toBeVisible();
+        } finally {
+            await pmPage.close();
+            await devPage.close();
+            await pmCtx.close();
+            await devCtx.close();
+        }
+    });
+
+    test('cambio estado notifica PM @notifications', async ({ browser }) => {
+        const pmCtx = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: PROJECT_MANAGER.storageStatePath,
+        });
+        const devCtx = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: DEVELOPER.storageStatePath,
+        });
+        const pmPage = await pmCtx.newPage();
+        const devPage = await devCtx.newPage();
+
+        try {
+            // PM observa el tablero
+            await pmPage.goto('/projects/sprint-q2/tasks');
+
+            // Developer actualiza una tarea
+            await devPage.goto('/projects/sprint-q2/tasks');
+            await devPage.getByText('Implementar login tests').click();
+            await devPage.getByLabel('Estado').selectOption({ label: 'Completado' });
+            await devPage.getByRole('button', { name: 'Guardar' }).click();
+
+            // PM ve la actualización reflejada en tiempo real
+            const taskCard = pmPage.getByText('Implementar login tests').locator('..');
+            await expect(taskCard.getByText('Completado')).toBeVisible({
+                timeout: 10000,
+            });
+        } finally {
+            await pmPage.close();
+            await devPage.close();
+            await pmCtx.close();
+            await devCtx.close();
+        }
+    });
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🛡️ Paso 9: test_permisos_por_rol.py — Verificación de permisos</h3>
         <p>Estos tests verifican que cada rol <strong>solo puede hacer lo que le corresponde</strong>.
         Es fundamental para la seguridad de la aplicación.</p>
 
-        <pre><code class="python"># tests/test_permisos_por_rol.py
+        <div class="code-tabs" data-code-id="L092-10">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_permisos_por_rol.py
 """
 Tests de verificación de permisos por rol.
 Cada test verifica que un rol NO puede realizar acciones fuera de su alcance.
@@ -1295,10 +2234,169 @@ class TestPermisosValidacionCruzada:
         assert not can_perform(VIEWER, "edit_tasks")
         assert not can_perform(VIEWER, "create_project")
         assert not can_perform(VIEWER, "delete_project")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test-permisos-por-rol.spec.ts
+import { test, expect } from './fixtures';
+import {
+    ADMIN, PROJECT_MANAGER, DEVELOPER, VIEWER,
+    canPerform,
+} from '../helpers/roles';
+import { ProjectsPage } from '../pages/projects-page';
+import { TasksPage } from '../pages/tasks-page';
+import { SettingsPage } from '../pages/settings-page';
+
+test.describe('Permisos Viewer', () => {
+    test('viewer no puede crear proyecto @permissions @smoke', async ({ viewerPage }) => {
+        await viewerPage.goto('/projects');
+        const btn = viewerPage.getByRole('button', { name: 'Nuevo proyecto' });
+        await expect(btn).not.toBeVisible();
+    });
+
+    test('viewer no puede editar tarea @permissions', async ({ viewerPage }) => {
+        await viewerPage.goto('/projects/sprint-q2/tasks');
+        await viewerPage.getByText('Implementar login tests').click();
+
+        const statusSelect = viewerPage.getByLabel('Estado');
+        await expect(statusSelect).toBeDisabled();
+
+        const saveBtn = viewerPage.getByRole('button', { name: 'Guardar' });
+        await expect(saveBtn).not.toBeVisible();
+    });
+
+    test('viewer no puede eliminar @permissions', async ({ viewerPage }) => {
+        await viewerPage.goto('/projects/sprint-q2');
+        const deleteBtn = viewerPage.getByRole('button', { name: 'Eliminar proyecto' });
+        await expect(deleteBtn).not.toBeVisible();
+    });
+
+    test('viewer puede ver reportes @permissions', async ({ viewerPage }) => {
+        await viewerPage.goto('/reports');
+        await expect(viewerPage.getByRole('heading', { name: 'Reportes' })).toBeVisible();
+    });
+});
+
+test.describe('Permisos Developer', () => {
+    test('developer puede actualizar estado @permissions', async ({ developerPage }) => {
+        await developerPage.goto('/projects/sprint-q2/tasks');
+        await developerPage.getByText('Implementar login tests').click();
+        const statusSelect = developerPage.getByLabel('Estado');
+        await expect(statusSelect).toBeEnabled();
+    });
+
+    test('developer no puede eliminar proyecto @permissions', async ({ developerPage }) => {
+        await developerPage.goto('/projects/sprint-q2');
+        const deleteBtn = developerPage.getByRole('button', { name: 'Eliminar proyecto' });
+        await expect(deleteBtn).not.toBeVisible();
+    });
+
+    test('developer no puede asignar tareas @permissions', async ({ developerPage }) => {
+        await developerPage.goto('/projects/sprint-q2/tasks');
+        await developerPage.getByText('Implementar login tests').click();
+        const assigneeSelect = developerPage.getByLabel('Asignar a');
+        await expect(assigneeSelect).toBeDisabled();
+    });
+
+    test('developer no puede cambiar settings @permissions', async ({ developerPage }) => {
+        await developerPage.goto('/settings');
+        const settings = new SettingsPage(developerPage);
+        await settings.assertAccessDenied();
+    });
+});
+
+test.describe('Permisos Project Manager', () => {
+    test('PM puede crear proyecto @permissions', async ({ pmPage }) => {
+        await pmPage.goto('/projects');
+        const btn = pmPage.getByRole('button', { name: 'Nuevo proyecto' });
+        await expect(btn).toBeVisible();
+        await expect(btn).toBeEnabled();
+    });
+
+    test('PM puede asignar tareas @permissions', async ({ pmPage }) => {
+        await pmPage.goto('/projects/sprint-q2/tasks');
+        await pmPage.getByText('Implementar login tests').click();
+        const assigneeSelect = pmPage.getByLabel('Asignar a');
+        await expect(assigneeSelect).toBeEnabled();
+    });
+
+    test('PM no puede cambiar settings @permissions', async ({ pmPage }) => {
+        await pmPage.goto('/settings');
+        const settings = new SettingsPage(pmPage);
+        await settings.assertAccessDenied();
+    });
+
+    test('PM no puede eliminar proyecto @permissions', async ({ pmPage }) => {
+        await pmPage.goto('/projects/sprint-q2');
+        const deleteBtn = pmPage.getByRole('button', { name: 'Eliminar proyecto' });
+        await expect(deleteBtn).not.toBeVisible();
+    });
+});
+
+test.describe('Permisos Admin', () => {
+    test('admin puede acceder settings @permissions @smoke', async ({ adminPage }) => {
+        await adminPage.goto('/settings');
+        await expect(adminPage.getByText('No tienes permisos')).not.toBeVisible();
+        await expect(adminPage.getByLabel('Zona horaria')).toBeEnabled();
+    });
+
+    test('admin puede eliminar proyecto @permissions', async ({ adminPage }) => {
+        await adminPage.goto('/projects/sprint-q2');
+        const deleteBtn = adminPage.getByRole('button', { name: 'Eliminar proyecto' });
+        await expect(deleteBtn).toBeVisible();
+        await expect(deleteBtn).toBeEnabled();
+    });
+
+    test('admin puede gestionar usuarios @permissions', async ({ adminPage }) => {
+        await adminPage.goto('/admin/users');
+        await expect(
+            adminPage.getByRole('heading', { name: 'Gestión de usuarios' })
+        ).toBeVisible();
+    });
+});
+
+test.describe('Validación Cruzada de Permisos', () => {
+    test('roles definidos correctamente @permissions', async () => {
+        // Admin tiene todos los permisos
+        expect(canPerform(ADMIN, 'delete_project')).toBeTruthy();
+        expect(canPerform(ADMIN, 'change_settings')).toBeTruthy();
+        expect(canPerform(ADMIN, 'manage_users')).toBeTruthy();
+
+        // PM no puede eliminar ni cambiar settings
+        expect(canPerform(PROJECT_MANAGER, 'create_project')).toBeTruthy();
+        expect(canPerform(PROJECT_MANAGER, 'assign_tasks')).toBeTruthy();
+        expect(canPerform(PROJECT_MANAGER, 'delete_project')).toBeFalsy();
+        expect(canPerform(PROJECT_MANAGER, 'change_settings')).toBeFalsy();
+
+        // Developer solo edita tareas
+        expect(canPerform(DEVELOPER, 'edit_tasks')).toBeTruthy();
+        expect(canPerform(DEVELOPER, 'update_status')).toBeTruthy();
+        expect(canPerform(DEVELOPER, 'delete_project')).toBeFalsy();
+        expect(canPerform(DEVELOPER, 'assign_tasks')).toBeFalsy();
+
+        // Viewer solo ve
+        expect(canPerform(VIEWER, 'view_reports')).toBeTruthy();
+        expect(canPerform(VIEWER, 'edit_tasks')).toBeFalsy();
+        expect(canPerform(VIEWER, 'create_project')).toBeFalsy();
+        expect(canPerform(VIEWER, 'delete_project')).toBeFalsy();
+    });
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ Anti-patrón: Compartir contextos entre tests</h4>
-            <pre><code class="python"># ❌ MAL: Reutilizar el mismo contexto para diferentes tests
+            <div class="code-tabs" data-code-id="L092-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># ❌ MAL: Reutilizar el mismo contexto para diferentes tests
 @pytest.fixture(scope="session")  # ← scope="session" es peligroso
 def shared_admin_context(browser):
     ctx = browser.new_context(storage_state="admin_state.json")
@@ -1316,13 +2414,52 @@ def admin_context(browser):
     ctx.close()
 
 # Cada test tiene un contexto limpio y aislado.</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// ❌ MAL: Reutilizar el mismo contexto para diferentes tests
+// En @playwright/test, NO hagas esto:
+let sharedContext: BrowserContext; // Variable compartida
+
+test.beforeAll(async ({ browser }) => {
+    sharedContext = await browser.newContext({
+        storageState: 'admin_state.json',
+    });
+});
+// Si un test modifica cookies o localStorage, TODOS los
+// tests siguientes se ven afectados. Esto causa flaky tests.
+
+// ✅ BIEN: Contexto nuevo por test (comportamiento por defecto)
+// En @playwright/test, cada test recibe su propio context:
+const test = base.extend&lt;{ adminContext: BrowserContext }&gt;({
+    adminContext: async ({ browser }, use) => {
+        const ctx = await browser.newContext({
+            storageState: 'admin_state.json',
+        });
+        await use(ctx);
+        await ctx.close();
+    },
+});
+// Cada test tiene un contexto limpio y aislado.</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📱 Paso 10: test_crossbrowser_dispositivos.py — Mobile vs Desktop</h3>
         <p>Combinamos múltiples contextos con emulación de dispositivos para verificar
         que la plataforma funciona correctamente en diferentes configuraciones.</p>
 
-        <pre><code class="python"># tests/test_crossbrowser_dispositivos.py
+        <div class="code-tabs" data-code-id="L092-12">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_crossbrowser_dispositivos.py
 """
 Tests cross-browser con emulación de dispositivos.
 Verifica que la plataforma funciona en desktop y mobile.
@@ -1509,6 +2646,163 @@ class TestCrossBrowserDispositivos:
         finally:
             page_co.close()
             ctx_co.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test-crossbrowser-dispositivos.spec.ts
+import { test, expect } from './fixtures';
+import { DEVELOPER, PROJECT_MANAGER } from '../helpers/roles';
+
+test.describe('Cross-Browser y Dispositivos', () => {
+
+    test('desktop vs mobile misma sesión @crossbrowser @smoke', async ({ browser }) => {
+        // Contexto desktop
+        const desktopCtx = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: DEVELOPER.storageStatePath,
+            viewport: { width: 1920, height: 1080 },
+            userAgent:
+                'Mozilla/5.0 (Windows NT 10.0; Win64; x64) ' +
+                'AppleWebKit/537.36 Chrome/120.0.0.0 Safari/537.36',
+        });
+        const desktopPage = await desktopCtx.newPage();
+
+        // Contexto mobile (iPhone 14)
+        const mobileCtx = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: DEVELOPER.storageStatePath,
+            viewport: { width: 390, height: 844 },
+            userAgent:
+                'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) ' +
+                'AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
+            isMobile: true,
+            hasTouch: true,
+        });
+        const mobilePage = await mobileCtx.newPage();
+
+        try {
+            // Ambos navegan al dashboard
+            await desktopPage.goto('/dashboard');
+            await mobilePage.goto('/dashboard');
+
+            // Desktop: sidebar visible
+            const desktopSidebar = desktopPage.locator('[data-testid="sidebar"]');
+            await expect(desktopSidebar).toBeVisible();
+
+            // Mobile: sidebar oculta (hay menú hamburguesa)
+            const mobileSidebar = mobilePage.locator('[data-testid="sidebar"]');
+            await expect(mobileSidebar).not.toBeVisible();
+
+            const hamburger = mobilePage.getByRole('button', { name: 'Menú' });
+            await expect(hamburger).toBeVisible();
+
+            // Ambos ven los mismos datos
+            const desktopTasksCount = await desktopPage
+                .locator('[data-testid="task-count"]').textContent();
+            const mobileTasksCount = await mobilePage
+                .locator('[data-testid="task-count"]').textContent();
+            expect(desktopTasksCount).toBe(mobileTasksCount);
+        } finally {
+            await desktopPage.close();
+            await mobilePage.close();
+            await desktopCtx.close();
+            await mobileCtx.close();
+        }
+    });
+
+    test('tablet layout responsive @crossbrowser', async ({ browser }) => {
+        const tabletCtx = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: PROJECT_MANAGER.storageStatePath,
+            viewport: { width: 1024, height: 768 }, // iPad landscape
+            userAgent:
+                'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) ' +
+                'AppleWebKit/605.1.15 Mobile/15E148 Safari/604.1',
+            isMobile: true,
+            hasTouch: true,
+        });
+        const tabletPage = await tabletCtx.newPage();
+
+        try {
+            await tabletPage.goto('/projects');
+
+            const projectGrid = tabletPage.locator('[data-testid="project-grid"]');
+            await expect(projectGrid).toBeVisible();
+
+            // Verificar que los proyectos son interactuables con touch
+            const firstProject = projectGrid.locator('.project-card').first();
+            await firstProject.tap(); // Usar tap() en vez de click() para mobile
+            await tabletPage.waitForLoadState('networkidle');
+        } finally {
+            await tabletPage.close();
+            await tabletCtx.close();
+        }
+    });
+
+    test('contextos con diferentes locales @crossbrowser', async ({ browser }) => {
+        // Contexto en español
+        const ctxEs = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: DEVELOPER.storageStatePath,
+            locale: 'es-CO',
+            timezoneId: 'America/Bogota',
+        });
+        const pageEs = await ctxEs.newPage();
+
+        // Contexto en inglés
+        const ctxEn = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: DEVELOPER.storageStatePath,
+            locale: 'en-US',
+            timezoneId: 'America/New_York',
+        });
+        const pageEn = await ctxEn.newPage();
+
+        try {
+            await pageEs.goto('/dashboard');
+            await pageEn.goto('/dashboard');
+
+            // Verificar que las fechas se formatean según el locale
+            const fechaEs = await pageEs
+                .locator('[data-testid="current-date"]').textContent();
+            const fechaEn = await pageEn
+                .locator('[data-testid="current-date"]').textContent();
+
+            expect(fechaEs).not.toBe(fechaEn);
+        } finally {
+            await pageEs.close();
+            await pageEn.close();
+            await ctxEs.close();
+            await ctxEn.close();
+        }
+    });
+
+    test('geolocation y permisos @crossbrowser', async ({ browser }) => {
+        // Contexto con ubicación en Colombia (Cali)
+        const ctxCo = await browser.newContext({
+            baseURL: 'https://collab-platform.example.com',
+            storageState: DEVELOPER.storageStatePath,
+            geolocation: { longitude: -76.5225, latitude: 3.4516 },
+            permissions: ['geolocation'],
+            locale: 'es-CO',
+            timezoneId: 'America/Bogota',
+        });
+        const pageCo = await ctxCo.newPage();
+
+        try {
+            await pageCo.goto('/dashboard');
+
+            const timezoneDisplay = pageCo.locator(
+                '[data-testid="user-timezone"]'
+            );
+            await expect(timezoneDisplay).toContainText('Bogota');
+        } finally {
+            await pageCo.close();
+            await ctxCo.close();
+        }
+    });
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA: Emulación de dispositivos en ERP</h4>
@@ -1652,7 +2946,18 @@ pytest tests/ -v -n 4  # 4 workers en paralelo</code></pre>
                     3 tests de permisos.</li>
                 <li><strong>Test de sesión expirada:</strong> Crea un test que modifique el storage state
                     para simular una sesión expirada y verifique que el usuario es redirigido al login:
-                    <pre><code class="python"># Pista: modifica las cookies del contexto
+                    <div class="code-tabs" data-code-id="L092-13">
+                    <div class="code-tabs-header">
+                        <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                            <span class="code-tab-icon">🐍</span> Python
+                        </button>
+                        <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                            <span class="code-tab-icon">🔷</span> TypeScript
+                        </button>
+                        <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                    </div>
+                    <div class="code-panel active" data-lang="python">
+                        <pre><code class="language-python"># Pista: modifica las cookies del contexto
 context = browser.new_context(storage_state=ADMIN.storage_state_path)
 # Limpiar cookies para simular expiración
 context.clear_cookies()
@@ -1660,13 +2965,38 @@ page = context.new_page()
 page.goto("/dashboard")
 # Debería redirigir a /login
 expect(page).to_have_url("**/login")</code></pre>
+                    </div>
+                    <div class="code-panel" data-lang="typescript">
+                        <pre><code class="language-typescript">// Pista: modifica las cookies del contexto
+const context = await browser.newContext({
+    storageState: ADMIN.storageStatePath,
+});
+// Limpiar cookies para simular expiración
+await context.clearCookies();
+const page = await context.newPage();
+await page.goto('/dashboard');
+// Debería redirigir a /login
+await expect(page).toHaveURL('**/login');</code></pre>
+                    </div>
+                    </div>
                 </li>
                 <li><strong>Test de concurrencia:</strong> Crea un test donde el admin y el PM intentan
                     editar la misma tarea simultáneamente. Verifica que la plataforma maneja el conflicto
                     (optimistic locking, last-write-wins, etc.).</li>
                 <li><strong>Fixture parametrizada:</strong> Crea una fixture que acepte el rol como parámetro
                     para evitar duplicar código:
-                    <pre><code class="python"># Pista: usar indirect fixtures
+                    <div class="code-tabs" data-code-id="L092-14">
+                    <div class="code-tabs-header">
+                        <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                            <span class="code-tab-icon">🐍</span> Python
+                        </button>
+                        <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                            <span class="code-tab-icon">🔷</span> TypeScript
+                        </button>
+                        <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                    </div>
+                    <div class="code-panel active" data-lang="python">
+                        <pre><code class="language-python"># Pista: usar indirect fixtures
 @pytest.fixture
 def role_page(request, browser):
     """Fixture parametrizada que crea un contexto para cualquier rol."""
@@ -1684,6 +3014,30 @@ def role_page(request, browser):
 def test_puede_ver_dashboard(role_page):
     role_page.goto("/dashboard")
     expect(role_page.get_by_role("heading", name="Dashboard")).to_be_visible()</code></pre>
+                    </div>
+                    <div class="code-panel" data-lang="typescript">
+                        <pre><code class="language-typescript">// Pista: usar array de roles + loop
+import { ADMIN, PROJECT_MANAGER } from '../helpers/roles';
+
+const rolesToTest = [ADMIN, PROJECT_MANAGER];
+
+for (const role of rolesToTest) {
+    test(\`\${role.name} puede ver dashboard\`, async ({ browser }) => {
+        const ctx = await browser.newContext({
+            baseURL: BASE_URL,
+            storageState: role.storageStatePath,
+        });
+        const page = await ctx.newPage();
+        await page.goto('/dashboard');
+        await expect(
+            page.getByRole('heading', { name: 'Dashboard' })
+        ).toBeVisible();
+        await page.close();
+        await ctx.close();
+    });
+}</code></pre>
+                    </div>
+                    </div>
                 </li>
                 <li><strong>Reporte HTML:</strong> Genera un reporte con <code>pytest-html</code> que
                     incluya screenshots de cada contexto en caso de fallo:

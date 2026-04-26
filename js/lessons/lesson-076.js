@@ -20,7 +20,18 @@ const LESSON_076 = {
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>El escenario más realista: mockear solo las APIs que necesitas controlar
             y dejar el resto funcionar normalmente.</p>
-            <pre><code class="python">import json
+            <div class="code-tabs" data-code-id="L076-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import json
 
 def test_ui_con_mocking_parcial(page):
     """Mock solo la API de pagos, el resto funciona normal."""
@@ -48,10 +59,54 @@ def test_ui_con_mocking_parcial(page):
     # La UI recibe la respuesta mock de pagos
     expect(page.locator("[data-testid='payment-success']")).to_be_visible()
     expect(page.locator("[data-testid='txn-id']")).to_have_text("TXN-MOCK-001")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('UI con mocking parcial', async ({ page }) => {
+    // Solo mockear la API de pagos (servicio externo, lento)
+    await page.route('**/api/payments/**', async (route) => {
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+                transaction_id: 'TXN-MOCK-001',
+                status: 'approved',
+                amount: 150000,
+            }),
+        });
+    });
+
+    // El resto de APIs funcionan normal contra el servidor real
+    // /api/products → servidor real
+    // /api/cart → servidor real
+    // /api/users → servidor real
+
+    await page.goto('https://mi-app.com/checkout');
+    // ... interactuar con la UI
+    await page.click('[data-testid="pay-btn"]');
+
+    // La UI recibe la respuesta mock de pagos
+    await expect(page.locator('[data-testid="payment-success"]')).toBeVisible();
+    await expect(page.locator('[data-testid="txn-id"]')).toHaveText('TXN-MOCK-001');
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🧰 MockManager: Clase para gestionar mocks de UI</h3>
-        <pre><code class="python"># helpers/mock_manager.py
+        <div class="code-tabs" data-code-id="L076-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># helpers/mock_manager.py
 import json
 from pathlib import Path
 
@@ -136,10 +191,105 @@ class MockManager:
         for pattern in self._active_mocks:
             self.page.unroute(pattern)
         self._active_mocks.clear()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// helpers/mock-manager.ts
+import fs from 'fs';
+import path from 'path';
+import type { Page } from '@playwright/test';
+
+export class MockManager {
+    private page: Page;
+    private mocksDir: string;
+    private activeMocks: string[] = [];
+
+    constructor(page: Page, mocksDir = 'test-data/mocks') {
+        this.page = page;
+        this.mocksDir = mocksDir;
+    }
+
+    async mockApi(pattern: string, data: unknown, status = 200) {
+        const body = typeof data === 'string' ? data : JSON.stringify(data);
+        await this.page.route(pattern, async (route) => {
+            await route.fulfill({
+                status, contentType: 'application/json', body,
+            });
+        });
+        this.activeMocks.push(pattern);
+        return this;
+    }
+
+    async mockFromFile(pattern: string, filename: string, status = 200) {
+        const content = fs.readFileSync(
+            path.join(this.mocksDir, filename), 'utf-8'
+        );
+        await this.page.route(pattern, async (route) => {
+            await route.fulfill({
+                status, contentType: 'application/json', body: content,
+            });
+        });
+        this.activeMocks.push(pattern);
+        return this;
+    }
+
+    async mockError(pattern: string, status = 500, message = 'Error') {
+        return this.mockApi(pattern, { error: message }, status);
+    }
+
+    async mockEmptyList(pattern: string) {
+        return this.mockApi(pattern, { data: [], total: 0 });
+    }
+
+    async mockSlow(pattern: string, data: unknown, delayMs = 3000) {
+        const body = JSON.stringify(data);
+        await this.page.route(pattern, async (route) => {
+            await new Promise((r) => setTimeout(r, delayMs));
+            await route.fulfill({
+                status: 200, contentType: 'application/json', body,
+            });
+        });
+        this.activeMocks.push(pattern);
+        return this;
+    }
+
+    async scenario(name: string) {
+        const scenarioDir = path.join(this.mocksDir, 'scenarios', name);
+        const files = fs.readdirSync(scenarioDir).filter(f => f.endsWith('.json'));
+        for (const file of files) {
+            const config = JSON.parse(
+                fs.readFileSync(path.join(scenarioDir, file), 'utf-8')
+            );
+            await this.mockApi(
+                config.pattern, config.response, config.status ?? 200
+            );
+        }
+        return this;
+    }
+
+    async cleanup() {
+        for (const pattern of this.activeMocks) {
+            await this.page.unroute(pattern);
+        }
+        this.activeMocks = [];
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>⚙️ Integración con fixtures</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># conftest.py
+            <div class="code-tabs" data-code-id="L076-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest
 from helpers.mock_manager import MockManager
 
@@ -168,10 +318,59 @@ def checkout_ready(mocks, page):
     ])
     page.goto("https://mi-app.com/checkout")
     return mocks</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// fixtures.ts
+import { test as base } from '@playwright/test';
+import { MockManager } from '../helpers/mock-manager';
+
+type MockFixtures = {
+    mocks: MockManager;
+    catalogWithProducts: MockManager;
+    checkoutReady: MockManager;
+};
+
+export const test = base.extend&lt;MockFixtures&gt;({
+    mocks: async ({ page }, use) => {
+        const manager = new MockManager(page);
+        await use(manager);
+        await manager.cleanup();
+    },
+
+    catalogWithProducts: async ({ mocks, page }, use) => {
+        await mocks.mockFromFile('**/api/products*', 'products/full.json');
+        await mocks.mockApi('**/api/cart', { items: [], total: 0 });
+        await page.goto('https://mi-app.com/products');
+        await use(mocks);
+    },
+
+    checkoutReady: async ({ mocks, page }, use) => {
+        await mocks.mockFromFile('**/api/cart', 'cart/with_items.json');
+        await mocks.mockApi('**/api/shipping/options', [
+            { id: 'standard', name: 'Estándar', price: 10000, days: 5 },
+            { id: 'express', name: 'Express', price: 25000, days: 1 },
+        ]);
+        await page.goto('https://mi-app.com/checkout');
+        await use(mocks);
+    },
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🧪 Tests de UI con mocks organizados por escenario</h3>
-        <pre><code class="python"># test_catalog_ui.py
+        <div class="code-tabs" data-code-id="L076-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_catalog_ui.py
 from playwright.sync_api import expect
 
 def test_catalogo_muestra_productos(catalog_with_products, page):
@@ -247,6 +446,81 @@ def test_checkout_pago_rechazado(checkout_ready, page):
     expect(page.locator("[data-testid='payment-error']")).to_contain_text(
         "fondos insuficientes"
     )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test-catalog-ui.spec.ts
+import { test } from './fixtures';
+import { expect } from '@playwright/test';
+
+test('catálogo muestra productos', async ({ catalogWithProducts, page }) => {
+    await expect(page.locator('[data-testid="product-card"]')).not.toHaveCount(0);
+    await expect(page.locator('[data-testid="product-card"]').first())
+        .toContainText('$');
+});
+
+test('catálogo vacío muestra empty state', async ({ mocks, page }) => {
+    await mocks.mockEmptyList('**/api/products*');
+    await mocks.mockApi('**/api/cart', { items: [], total: 0 });
+    await page.goto('https://mi-app.com/products');
+
+    await expect(page.locator('[data-testid="empty-state"]')).toBeVisible();
+    await expect(page.locator('[data-testid="product-card"]')).toHaveCount(0);
+});
+
+test('catálogo error muestra mensaje', async ({ mocks, page }) => {
+    await mocks.mockError('**/api/products*', 500, 'Error interno');
+    await page.goto('https://mi-app.com/products');
+
+    await expect(page.locator('[data-testid="error-state"]')).toBeVisible();
+    await expect(page.locator('[data-testid="retry-btn"]')).toBeVisible();
+});
+
+test('catálogo loading durante carga lenta', async ({ mocks, page }) => {
+    const products = [{ id: 1, name: 'Test', price: 1000 }];
+    await mocks.mockSlow('**/api/products*', { data: products }, 3000);
+    await mocks.mockApi('**/api/cart', { items: [], total: 0 });
+    await page.goto('https://mi-app.com/products');
+
+    await expect(page.locator('[data-testid="loading"]')).toBeVisible();
+    await expect(page.locator('[data-testid="loading"]'))
+        .toBeHidden({ timeout: 10000 });
+    await expect(page.locator('[data-testid="product-card"]')).toHaveCount(1);
+});
+
+// test-checkout-ui.spec.ts
+test('checkout exitoso', async ({ checkoutReady, page }) => {
+    await checkoutReady.mockApi('**/api/orders', {
+        id: 12345, status: 'confirmed', total: 85000,
+    }, 201);
+
+    await page.fill('[data-testid="name"]', 'Juan Reina');
+    await page.fill('[data-testid="email"]', 'juan@siesa.com');
+    await page.fill('[data-testid="address"]', 'Calle 5 #38-25');
+    await page.selectOption('[data-testid="shipping"]', 'standard');
+    await page.check('[data-testid="terms"]');
+    await page.click('[data-testid="place-order"]');
+
+    await expect(page.locator('[data-testid="order-success"]')).toBeVisible();
+    await expect(page.locator('[data-testid="order-id"]')).toHaveText('12345');
+});
+
+test('checkout pago rechazado', async ({ checkoutReady, page }) => {
+    await checkoutReady.mockError(
+        '**/api/orders', 402, 'Pago rechazado: fondos insuficientes'
+    );
+
+    await page.fill('[data-testid="name"]', 'Test User');
+    await page.fill('[data-testid="email"]', 'test@test.com');
+    await page.fill('[data-testid="address"]', 'Dirección test');
+    await page.check('[data-testid="terms"]');
+    await page.click('[data-testid="place-order"]');
+
+    await expect(page.locator('[data-testid="payment-error"]')).toBeVisible();
+    await expect(page.locator('[data-testid="payment-error"]'))
+        .toContainText('fondos insuficientes');
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📊 Guía: ¿Cuándo mockear vs backend real?</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">

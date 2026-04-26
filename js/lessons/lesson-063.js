@@ -18,7 +18,18 @@ const LESSON_063 = {
 
         <h3>📡 Esperar respuestas de red (API calls)</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># expect_response() — esperar una respuesta HTTP específica
+            <div class="code-tabs" data-code-id="L063-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># expect_response() — esperar una respuesta HTTP específica
 
 # Ejemplo: esperar que la búsqueda termine (respuesta de API)
 with page.expect_response("**/api/search*") as response_info:
@@ -49,10 +60,62 @@ with page.expect_response("**/api/users") as users_resp, \\
 
 print(f"Users: {users_resp.value.status}")
 print(f"Stats: {stats_resp.value.status}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// waitForResponse() — esperar una respuesta HTTP específica
+
+// Ejemplo: esperar que la búsqueda termine (respuesta de API)
+const [searchResp] = await Promise.all([
+    page.waitForResponse('**/api/search*'),
+    (async () => {
+        await page.fill('#search', 'laptop');
+        await page.click('#search-btn');
+    })()
+]);
+
+console.log('Status:', searchResp.status());   // 200
+console.log('URL:', searchResp.url());         // https://api.com/search?q=laptop
+
+// Ahora los resultados están cargados, podemos verificar
+await expect(page.locator('.result')).not.toHaveCount(0);
+
+// ── Con filtro por método HTTP ──
+const [productResp] = await Promise.all([
+    page.waitForResponse(
+        resp => resp.url().includes('/api/products') && resp.request().method() === 'POST'
+    ),
+    page.click('#create-product-btn')
+]);
+
+const data = await productResp.json();
+console.log('Producto creado:', data.id);
+
+// ── Esperar múltiples respuestas ──
+const [usersResp, statsResp] = await Promise.all([
+    page.waitForResponse('**/api/users'),
+    page.waitForResponse('**/api/stats'),
+    page.goto('https://mi-app.com/dashboard')
+]);
+
+console.log('Users:', usersResp.status());
+console.log('Stats:', statsResp.status());</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📨 Esperar requests (antes de que se envíen)</h3>
-        <pre><code class="python"># expect_request() — esperar que una request se envíe
+        <div class="code-tabs" data-code-id="L063-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># expect_request() — esperar que una request se envíe
 
 with page.expect_request("**/api/analytics") as request_info:
     page.click("#track-btn")
@@ -64,10 +127,38 @@ print(f"Body: {request.post_data}")       # Datos enviados
 
 # Útil para verificar que la app envía los datos correctos
 # sin importar la respuesta del servidor</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// waitForRequest() — esperar que una request se envíe
+
+const [request] = await Promise.all([
+    page.waitForRequest('**/api/analytics'),
+    page.click('#track-btn')
+]);
+
+console.log('Method:', request.method());     // POST
+console.log('URL:', request.url());
+console.log('Body:', request.postData());     // Datos enviados
+
+// Útil para verificar que la app envía los datos correctos
+// sin importar la respuesta del servidor</code></pre>
+        </div>
+        </div>
 
         <h3>🔄 Esperar navegaciones</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># expect_navigation() — esperar cambio de página
+            <div class="code-tabs" data-code-id="L063-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># expect_navigation() — esperar cambio de página
 
 # Esperar navegación después de click en link
 with page.expect_navigation() as nav_info:
@@ -91,10 +182,52 @@ with page.expect_navigation(
 # ── Alternativa más simple: wait_for_url ──
 page.click("#go-dashboard")
 page.wait_for_url("**/dashboard")  # Más conciso para casos simples</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// waitForNavigation() — esperar cambio de página
+
+// Esperar navegación después de click en link
+const [response] = await Promise.all([
+    page.waitForNavigation(),
+    page.click('a.go-to-profile')
+]);
+
+console.log('Navegó a:', page.url());
+console.log('Status:', response?.status());
+
+// ── Con filtro de URL ──
+await Promise.all([
+    page.waitForNavigation({ url: '**/checkout' }),
+    page.click('#proceed-to-checkout')
+]);
+
+// ── Esperar navegación con estado de carga específico ──
+await Promise.all([
+    page.waitForNavigation({ waitUntil: 'networkidle' }),
+    page.click('#load-heavy-page')
+]);
+// La página completa (incluyendo AJAX) ha cargado
+
+// ── Alternativa más simple: waitForURL ──
+await page.click('#go-dashboard');
+await page.waitForURL('**/dashboard');  // Más conciso para casos simples</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🪟 Esperar popups (ventanas nuevas)</h3>
-        <pre><code class="python"># expect_popup() — capturar ventanas/pestañas nuevas
+        <div class="code-tabs" data-code-id="L063-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># expect_popup() — capturar ventanas/pestañas nuevas
 
 # Escenario: link con target="_blank" abre nueva pestaña
 with page.expect_popup() as popup_info:
@@ -124,9 +257,56 @@ google_popup.click("#sign-in")
 # El popup se cierra automáticamente después del OAuth
 # La página principal ahora está autenticada
 expect(page.locator(".user-menu")).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// waitForEvent('popup') — capturar ventanas/pestañas nuevas
+
+// Escenario: link con target="_blank" abre nueva pestaña
+const [popup] = await Promise.all([
+    page.waitForEvent('popup'),
+    page.click("a[target='_blank']")
+]);
+
+await popup.waitForLoadState();
+console.log('Popup URL:', popup.url());
+console.log('Popup título:', await popup.title());
+
+// Interactuar con la nueva ventana
+await popup.fill('#form-field', 'datos');
+await popup.click('#submit');
+
+// Cerrar el popup y volver a la página principal
+await popup.close();
+
+// ── Ejemplo: OAuth login en popup ──
+const [googlePopup] = await Promise.all([
+    page.waitForEvent('popup'),
+    page.click('#login-with-google')
+]);
+
+await googlePopup.fill('#email', 'test@gmail.com');
+await googlePopup.click('#next');
+await googlePopup.fill('#password', 'password123');
+await googlePopup.click('#sign-in');
+// El popup se cierra automáticamente después del OAuth
+// La página principal ahora está autenticada
+await expect(page.locator('.user-menu')).toBeVisible();</code></pre>
+        </div>
+        </div>
 
         <h3>💬 Esperar diálogos (alert, confirm, prompt)</h3>
-        <pre><code class="python"># expect_dialog() — manejar diálogos nativos del browser
+        <div class="code-tabs" data-code-id="L063-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># expect_dialog() — manejar diálogos nativos del browser
 
 # ── Alert ──
 page.on("dialog", lambda dialog: dialog.accept())
@@ -160,10 +340,58 @@ page.click("#delete-btn")
 # ── Usar once() para un solo diálogo ──
 page.once("dialog", lambda d: d.accept())
 page.click("#one-time-alert")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Dialog handling — manejar diálogos nativos del browser
+
+// ── Alert ──
+page.on('dialog', dialog => dialog.accept());
+await page.click('#show-alert');
+// El alert se acepta automáticamente
+
+// ── Confirm — aceptar ──
+page.on('dialog', dialog => dialog.accept());
+await page.click('#delete-item');
+// El confirm retorna true → item eliminado
+
+// ── Confirm — rechazar ──
+page.on('dialog', dialog => dialog.dismiss());
+await page.click('#delete-item');
+// El confirm retorna false → item no eliminado
+
+// ── Prompt — enviar texto ──
+page.on('dialog', dialog => dialog.accept('Mi respuesta'));
+await page.click('#ask-name');
+// El prompt retorna "Mi respuesta"
+
+// ── Verificar mensaje del diálogo ──
+page.on('dialog', async (dialog) => {
+    expect(dialog.message()).toBe('¿Estás seguro de eliminar?');
+    expect(dialog.type()).toBe('confirm');
+    await dialog.accept();
+});
+await page.click('#delete-btn');
+
+// ── Usar once() para un solo diálogo ──
+page.once('dialog', dialog => dialog.accept());
+await page.click('#one-time-alert');</code></pre>
+        </div>
+        </div>
 
         <h3>📥 Esperar descargas</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># expect_download() — capturar archivos descargados
+            <div class="code-tabs" data-code-id="L063-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># expect_download() — capturar archivos descargados
 
 with page.expect_download() as download_info:
     page.click("#download-report")
@@ -193,10 +421,55 @@ with open("temp/export.csv", "r") as f:
     rows = list(reader)
     assert len(rows) > 1  # Header + datos
     assert rows[0][0] == "Nombre"  # Verificar header</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// waitForEvent('download') — capturar archivos descargados
+import fs from 'fs';
+
+const [download] = await Promise.all([
+    page.waitForEvent('download'),
+    page.click('#download-report')
+]);
+
+console.log('Archivo:', download.suggestedFilename());  // "reporte.pdf"
+console.log('URL:', download.url());
+
+// Guardar el archivo
+await download.saveAs('downloads/' + download.suggestedFilename());
+
+// Obtener la ruta temporal
+const tempPath = await download.path();
+console.log('Temporal:', tempPath);
+
+// ── Verificar contenido del archivo descargado ──
+const [csvDownload] = await Promise.all([
+    page.waitForEvent('download'),
+    page.click('#export-csv')
+]);
+
+await csvDownload.saveAs('temp/export.csv');
+
+const csvContent = fs.readFileSync('temp/export.csv', 'utf-8');
+const rows = csvContent.split('\\n').map(r => r.split(','));
+expect(rows.length).toBeGreaterThan(1);    // Header + datos
+expect(rows[0][0]).toBe('Nombre');         // Verificar header</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📁 Esperar File Chooser (upload)</h3>
-        <pre><code class="python"># expect_file_chooser() — manejar diálogo de selección de archivo
+        <div class="code-tabs" data-code-id="L063-7">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># expect_file_chooser() — manejar diálogo de selección de archivo
 
 with page.expect_file_chooser() as fc_info:
     page.click("#upload-btn")
@@ -221,9 +494,51 @@ file_chooser.set_files([
 # ── Alternativa sin expect_file_chooser ──
 # Si el input[type=file] está en el DOM:
 page.set_input_files("#file-input", "test-data/documento.pdf")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// waitForEvent('filechooser') — manejar diálogo de selección de archivo
+
+const [fileChooser] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.click('#upload-btn')
+]);
+
+await fileChooser.setFiles('test-data/documento.pdf');
+
+// Verificar que se subió correctamente
+await expect(page.locator('.upload-status')).toHaveText('Subido exitosamente');
+
+// ── Subir múltiples archivos ──
+const [multiChooser] = await Promise.all([
+    page.waitForEvent('filechooser'),
+    page.click('#upload-multiple')
+]);
+
+await multiChooser.setFiles([
+    'test-data/imagen1.png',
+    'test-data/imagen2.png',
+    'test-data/imagen3.png'
+]);
+
+// ── Alternativa sin waitForEvent('filechooser') ──
+// Si el input[type=file] está en el DOM:
+await page.setInputFiles('#file-input', 'test-data/documento.pdf');</code></pre>
+        </div>
+        </div>
 
         <h3>🧪 Ejemplo completo: Flujo E2E con múltiples esperas</h3>
-        <pre><code class="python">from playwright.sync_api import sync_playwright, expect
+        <div class="code-tabs" data-code-id="L063-8">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright, expect
 
 def test_flujo_reporte_completo(page):
     """Test E2E: generar reporte, verificar datos, descargar."""
@@ -262,6 +577,56 @@ def test_flujo_reporte_completo(page):
         page.click("#share-email")
 
     assert email_resp.value.status == 200</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('flujo reporte completo', async ({ page }) => {
+    // Test E2E: generar reporte, verificar datos, descargar.
+
+    await page.goto('https://mi-app.com/reports');
+
+    // 1. Seleccionar parámetros del reporte
+    await page.selectOption('#report-type', { label: 'Ventas mensual' });
+    await page.fill('#date-from', '2026-01-01');
+    await page.fill('#date-to', '2026-03-31');
+
+    // 2. Generar reporte — esperar respuesta de API
+    const [resp] = await Promise.all([
+        page.waitForResponse('**/api/reports/generate'),
+        page.click('#generate-btn')
+    ]);
+
+    expect(resp.status()).toBe(200);
+
+    // 3. Esperar que el spinner desaparezca y la tabla cargue
+    await expect(page.locator('.report-spinner')).toBeHidden();
+    await expect(page.locator('.report-table tbody tr')).not.toHaveCount(0);
+
+    // 4. Verificar datos del reporte
+    const total = await page.locator("[data-testid='grand-total']").textContent();
+    expect(parseFloat(total!.replace('$', '').replace(',', ''))).toBeGreaterThan(0);
+
+    // 5. Descargar como PDF
+    const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.click('#download-pdf')
+    ]);
+
+    expect(download.suggestedFilename()).toMatch(/\\.pdf$/);
+    await download.saveAs('evidence/reporte_ventas.pdf');
+
+    // 6. Compartir por email — esperar diálogo
+    page.once('dialog', dialog => dialog.accept());
+    const [emailResp] = await Promise.all([
+        page.waitForResponse('**/api/email/send'),
+        page.click('#share-email')
+    ]);
+
+    expect(emailResp.status()).toBe(200);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📋 Resumen de métodos expect_*</h3>
         <table style="width: 100%; border-collapse: collapse; margin: 15px 0;">

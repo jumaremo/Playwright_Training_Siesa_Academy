@@ -109,7 +109,18 @@ services:
 
         <h3>Paso 2: Configuracion de pytest para CI</h3>
 
-        <pre><code class="python"># conftest.py - Configuracion completa para CI/CD
+        <div class="code-tabs" data-code-id="L116-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Configuracion completa para CI/CD
 import pytest
 import os
 import json
@@ -228,6 +239,133 @@ def pytest_terminal_summary(terminalreporter, config):
     terminalreporter.write_line(f"Failed: {summary['failed']}")
     terminalreporter.write_line(f"Rerun:  {summary['rerun']}")
     terminalreporter.write_line(f"Duration: {summary['total_duration']:.1f}s")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Configuracion completa para CI/CD
+import { defineConfig, devices, type ReporterDescription } from '@playwright/test';
+import * as path from 'path';
+import * as fs from 'fs';
+
+// ============================================
+// URLs POR ENTORNO
+// ============================================
+const urls: Record&lt;string, string&gt; = {
+  local: 'http://localhost:3000',
+  staging: 'https://staging.app.siesa.com',
+  production: 'https://app.siesa.com',
+};
+
+const testEnv = process.env.TEST_ENV || 'local';
+const baseURL = process.env.BASE_URL || urls[testEnv] || urls.local;
+
+export default defineConfig({
+  testDir: './tests',
+  fullyParallel: true,
+  forbidOnly: !!process.env.CI,
+  retries: process.env.CI ? 2 : 0,
+  workers: process.env.CI ? 3 : undefined,
+
+  // Configuracion de reportes
+  reporter: process.env.CI
+    ? [
+        ['list'],
+        ['junit', { outputFile: 'reports/junit-results.xml' }],
+        ['html', { outputFolder: 'reports/html', open: 'never' }],
+        ['json', { outputFile: 'reports/results.json' }],
+      ] satisfies ReporterDescription[]
+    : [['html', { open: 'on-failure' }]],
+
+  use: {
+    baseURL,
+    // Configuracion de contexto optimizada para CI
+    viewport: { width: 1920, height: 1080 },
+    ignoreHTTPSErrors: true,
+    // Capturar artefactos en fallo
+    screenshot: 'only-on-failure',
+    video: process.env.CI ? 'retain-on-failure' : 'off',
+    trace: process.env.CI ? 'retain-on-failure' : 'off',
+  },
+
+  // Multi-browser: Chromium + Firefox (minimo)
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+    {
+      name: 'firefox',
+      use: { ...devices['Desktop Firefox'] },
+    },
+  ],
+
+  // Servidor de desarrollo local
+  webServer: {
+    command: 'npm start',
+    url: 'http://localhost:3000',
+    reuseExistingServer: !process.env.CI,
+  },
+});
+
+// ============================================
+// GLOBAL SETUP - Reporte de resultados
+// ============================================
+// global-setup.ts
+import type { FullConfig } from '@playwright/test';
+
+async function globalSetup(config: FullConfig): Promise&lt;void&gt; {
+  // Crear directorios de reportes
+  const dirs = ['reports', 'test-results/screenshots', 'test-results/traces', 'test-results/logs'];
+  for (const dir of dirs) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+  console.log(\`[CI] Entorno: \${testEnv}, URL: \${baseURL}\`);
+}
+
+export { globalSetup };
+
+// ============================================
+// GLOBAL TEARDOWN - Resumen JSON para integraciones
+// ============================================
+// global-teardown.ts
+async function globalTeardown(): Promise&lt;void&gt; {
+  const resultsPath = path.join('reports', 'results.json');
+  if (!fs.existsSync(resultsPath)) return;
+
+  const results = JSON.parse(fs.readFileSync(resultsPath, 'utf-8'));
+  const summary = {
+    timestamp: new Date().toISOString(),
+    environment: testEnv,
+    browser: process.env.BROWSER || 'chromium',
+    passed: results.suites?.reduce(
+      (acc: number, s: any) => acc + (s.specs?.filter((sp: any) =>
+        sp.tests?.some((t: any) => t.status === 'expected')
+      ).length || 0), 0
+    ) || 0,
+    failed: results.suites?.reduce(
+      (acc: number, s: any) => acc + (s.specs?.filter((sp: any) =>
+        sp.tests?.some((t: any) => t.status === 'unexpected')
+      ).length || 0), 0
+    ) || 0,
+    totalDuration: results.stats?.duration || 0,
+  };
+
+  fs.writeFileSync(
+    path.join('reports', 'ci-summary.json'),
+    JSON.stringify(summary, null, 2)
+  );
+
+  // Mostrar resumen en consola
+  console.log('='.repeat(50));
+  console.log('CI/CD SUMMARY');
+  console.log('='.repeat(50));
+  console.log(\`Passed:   \${summary.passed}\`);
+  console.log(\`Failed:   \${summary.failed}\`);
+  console.log(\`Duration: \${(summary.totalDuration / 1000).toFixed(1)}s\`);
+}
+
+export { globalTeardown };</code></pre>
+</div>
+</div>
 
         <h3>Paso 3: GitHub Actions Workflow completo</h3>
 

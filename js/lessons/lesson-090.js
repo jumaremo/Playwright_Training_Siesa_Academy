@@ -54,7 +54,18 @@ const LESSON_090 = {
         <h3>⚠️ El problema: login repetitivo</h3>
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>❌ Sin storage state — login en cada test</h4>
-            <pre><code class="python"># tests/test_dashboard.py
+            <div class="code-tabs" data-code-id="L090-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_dashboard.py
 from playwright.sync_api import sync_playwright, expect
 
 def test_ver_dashboard(page):
@@ -79,6 +90,37 @@ def test_ver_reportes(page):
     expect(page.locator("h1")).to_contain_text("Reportes")
 
 # 50 tests × 3 segundos de login = 150 segundos desperdiciados</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test_dashboard.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('ver dashboard', async ({ page }) => {
+    // Login repetido en CADA test — lento y frágil
+    await page.goto('https://mi-app.com/login');
+    await page.fill('#email', 'admin@siesa.com');
+    await page.fill('#password', 'Admin123!');
+    await page.click("button[type='submit']");
+    await page.waitForURL('**/dashboard');
+
+    await expect(page.locator('h1')).toContainText('Dashboard');
+});
+
+test('ver reportes', async ({ page }) => {
+    // OTRA VEZ el mismo login...
+    await page.goto('https://mi-app.com/login');
+    await page.fill('#email', 'admin@siesa.com');
+    await page.fill('#password', 'Admin123!');
+    await page.click("button[type='submit']");
+    await page.waitForURL('**/dashboard');
+
+    await page.click('text=Reportes');
+    await expect(page.locator('h1')).toContainText('Reportes');
+});
+
+// 50 tests × 3 segundos de login = 150 segundos desperdiciados</code></pre>
+            </div>
+            </div>
             <p><strong>Problemas:</strong></p>
             <ul>
                 <li>Tiempo desperdiciado: cada login toma 2-5 segundos</li>
@@ -91,7 +133,18 @@ def test_ver_reportes(page):
         <h3>✅ La solución: guardar y reutilizar el estado</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Paso 1: Guardar el storage state</h4>
-            <pre><code class="python"># scripts/save_auth_state.py
+            <div class="code-tabs" data-code-id="L090-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># scripts/save_auth_state.py
 from playwright.sync_api import sync_playwright
 
 def save_auth_state():
@@ -116,9 +169,47 @@ def save_auth_state():
 
 if __name__ == "__main__":
     save_auth_state()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// scripts/saveAuthState.ts
+import { chromium } from 'playwright';
+
+async function saveAuthState(): Promise&lt;void&gt; {
+    const browser = await chromium.launch();
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    // Hacer login normalmente
+    await page.goto('https://mi-app.com/login');
+    await page.fill('#email', 'admin@siesa.com');
+    await page.fill('#password', 'Admin123!');
+    await page.click("button[type='submit']");
+    await page.waitForURL('**/dashboard');
+
+    // GUARDAR el estado de autenticación
+    await context.storageState({ path: 'auth/admin_state.json' });
+    console.log('Estado de autenticación guardado');
+
+    await browser.close();
+}
+
+saveAuthState();</code></pre>
+            </div>
+            </div>
 
             <h4>Paso 2: Reutilizar el estado en tests</h4>
-            <pre><code class="python"># tests/test_dashboard.py
+            <div class="code-tabs" data-code-id="L090-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_dashboard.py
 from playwright.sync_api import sync_playwright, expect
 
 def test_ver_dashboard():
@@ -138,12 +229,41 @@ def test_ver_dashboard():
         browser.close()
 
 # 50 tests × 0 segundos de login = ¡0 segundos desperdiciados!</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test_dashboard.spec.ts
+import { test, expect } from '@playwright/test';
+
+// Usar storageState en la configuración del test
+test.use({ storageState: 'auth/admin_state.json' });
+
+test('ver dashboard', async ({ page }) => {
+    // ¡Ya estamos autenticados! Ir directo al dashboard
+    await page.goto('https://mi-app.com/dashboard');
+    await expect(page.locator('h1')).toContainText('Dashboard');
+});
+
+// 50 tests × 0 segundos de login = ¡0 segundos desperdiciados!</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🏗️ Patrón con conftest.py: autenticación global</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <p>La forma profesional es centralizar la autenticación en <code>conftest.py</code>:</p>
-            <pre><code class="python"># conftest.py
+            <p>La forma profesional es centralizar la autenticación en <code>conftest.py</code> (Python)
+            o <code>playwright.config.ts</code> + <code>auth.setup.ts</code> (TypeScript):</p>
+            <div class="code-tabs" data-code-id="L090-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># conftest.py
 import pytest
 import os
 from playwright.sync_api import sync_playwright
@@ -198,8 +318,61 @@ def authenticated_page(browser_instance, authenticate):
     yield page
 
     context.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// auth.setup.ts — Proyecto de setup de autenticación
+import { test as setup, expect } from '@playwright/test';
+import path from 'path';
 
-            <pre><code class="python"># tests/test_dashboard.py — ¡Limpio y sin login!
+const AUTH_STATE_DIR = 'auth';
+const ADMIN_STATE = path.join(AUTH_STATE_DIR, 'admin_state.json');
+
+// Este "test" se ejecuta UNA VEZ antes de todos los demás
+setup('autenticar como admin', async ({ page }) => {
+    // Hacer login
+    await page.goto('https://mi-app.com/login');
+    await page.fill('#email', 'admin@siesa.com');
+    await page.fill('#password', 'Admin123!');
+    await page.click("button[type='submit']");
+    await page.waitForURL('**/dashboard');
+
+    // Guardar estado
+    await page.context().storageState({ path: ADMIN_STATE });
+});
+
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    projects: [
+        // Proyecto de setup — se ejecuta primero
+        { name: 'setup', testMatch: /.*\\.setup\\.ts/ },
+
+        // Tests que dependen del setup
+        {
+            name: 'chromium',
+            use: {
+                storageState: 'auth/admin_state.json',
+            },
+            dependencies: ['setup'],
+        },
+    ],
+});</code></pre>
+            </div>
+            </div>
+
+            <div class="code-tabs" data-code-id="L090-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_dashboard.py — ¡Limpio y sin login!
 from playwright.sync_api import expect
 
 def test_ver_dashboard(authenticated_page):
@@ -216,12 +389,46 @@ def test_ver_usuarios(authenticated_page):
     page = authenticated_page
     page.goto("https://mi-app.com/usuarios")
     expect(page.locator("h1")).to_contain_text("Usuarios")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test_dashboard.spec.ts — ¡Limpio y sin login!
+import { test, expect } from '@playwright/test';
+
+// storageState ya viene del proyecto en playwright.config.ts
+
+test('ver dashboard', async ({ page }) => {
+    await page.goto('https://mi-app.com/dashboard');
+    await expect(page.locator('h1')).toContainText('Dashboard');
+});
+
+test('ver reportes', async ({ page }) => {
+    await page.goto('https://mi-app.com/reportes');
+    await expect(page.locator('h1')).toContainText('Reportes');
+});
+
+test('ver usuarios', async ({ page }) => {
+    await page.goto('https://mi-app.com/usuarios');
+    await expect(page.locator('h1')).toContainText('Usuarios');
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>👥 Múltiples roles con storage states separados</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Para aplicaciones con múltiples roles, crea un storage state por cada rol:</p>
-            <pre><code class="python"># conftest.py — Múltiples roles
+            <div class="code-tabs" data-code-id="L090-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># conftest.py — Múltiples roles
 import pytest
 import os
 from playwright.sync_api import sync_playwright
@@ -313,8 +520,91 @@ def auditor_page(browser_instance, authenticate_all_roles):
     page = context.new_page()
     yield page
     context.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// auth.setup.ts — Múltiples roles
+import { test as setup } from '@playwright/test';
+import path from 'path';
 
-            <pre><code class="python"># tests/test_permisos.py — Tests por rol
+const AUTH_DIR = 'auth';
+
+interface Credentials {
+    email: string;
+    password: string;
+    stateFile: string;
+}
+
+const CREDENTIALS: Record&lt;string, Credentials&gt; = {
+    admin: {
+        email: 'admin@siesa.com',
+        password: 'Admin123!',
+        stateFile: path.join(AUTH_DIR, 'admin_state.json'),
+    },
+    usuario: {
+        email: 'usuario@siesa.com',
+        password: 'User123!',
+        stateFile: path.join(AUTH_DIR, 'user_state.json'),
+    },
+    auditor: {
+        email: 'auditor@siesa.com',
+        password: 'Audit123!',
+        stateFile: path.join(AUTH_DIR, 'auditor_state.json'),
+    },
+};
+
+// Un setup test por cada rol
+for (const [role, creds] of Object.entries(CREDENTIALS)) {
+    setup(\`autenticar como \${role}\`, async ({ page }) => {
+        await page.goto('https://mi-app.com/login');
+        await page.fill('#email', creds.email);
+        await page.fill('#password', creds.password);
+        await page.click("button[type='submit']");
+        await page.waitForURL('**/dashboard');
+        await page.context().storageState({ path: creds.stateFile });
+    });
+}
+
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    projects: [
+        { name: 'setup', testMatch: /.*\\.setup\\.ts/ },
+        {
+            name: 'admin-tests',
+            use: { storageState: 'auth/admin_state.json' },
+            dependencies: ['setup'],
+            testMatch: /.*admin.*\\.spec\\.ts/,
+        },
+        {
+            name: 'user-tests',
+            use: { storageState: 'auth/user_state.json' },
+            dependencies: ['setup'],
+            testMatch: /.*user.*\\.spec\\.ts/,
+        },
+        {
+            name: 'auditor-tests',
+            use: { storageState: 'auth/auditor_state.json' },
+            dependencies: ['setup'],
+            testMatch: /.*auditor.*\\.spec\\.ts/,
+        },
+    ],
+});</code></pre>
+            </div>
+            </div>
+
+            <div class="code-tabs" data-code-id="L090-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_permisos.py — Tests por rol
 from playwright.sync_api import expect
 
 def test_admin_puede_crear_usuario(admin_page):
@@ -330,10 +620,46 @@ def test_auditor_ve_solo_lectura(auditor_page):
     auditor_page.goto("https://mi-app.com/reportes")
     expect(auditor_page.locator("button:has-text('Editar')")).to_have_count(0)
     expect(auditor_page.locator("button:has-text('Exportar')")).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/admin.permisos.spec.ts — storageState: admin
+import { test, expect } from '@playwright/test';
+
+test('admin puede crear usuario', async ({ page }) => {
+    await page.goto('https://mi-app.com/usuarios/nuevo');
+    await expect(page.locator('h1')).toContainText('Crear Usuario');
+});
+
+// tests/user.permisos.spec.ts — storageState: usuario
+test('usuario no puede crear usuario', async ({ page }) => {
+    await page.goto('https://mi-app.com/usuarios/nuevo');
+    // Debería redirigir o mostrar error
+    await expect(page.locator('text=Sin permisos')).toBeVisible();
+});
+
+// tests/auditor.permisos.spec.ts — storageState: auditor
+test('auditor ve solo lectura', async ({ page }) => {
+    await page.goto('https://mi-app.com/reportes');
+    await expect(page.locator("button:has-text('Editar')")).toHaveCount(0);
+    await expect(page.locator("button:has-text('Exportar')")).toBeVisible();
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🔄 Fixture genérica con parámetro de rol</h3>
-        <pre><code class="python"># conftest.py — Fixture dinámica por rol
+        <div class="code-tabs" data-code-id="L090-8">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># conftest.py — Fixture dinámica por rol
 @pytest.fixture
 def page_as(browser_instance, authenticate_all_roles):
     """Factory fixture para obtener página con cualquier rol."""
@@ -367,11 +693,68 @@ def test_admin_vs_usuario(page_as):
 
     # Usuario no lo ve
     expect(usuario.locator("text=Config Avanzada")).to_have_count(0)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// helpers/createPageAs.ts — Función helper para múltiples roles
+import { Browser, Page } from 'playwright';
+import path from 'path';
+
+const STATE_FILES: Record&lt;string, string&gt; = {
+    admin: path.join('auth', 'admin_state.json'),
+    usuario: path.join('auth', 'user_state.json'),
+    auditor: path.join('auth', 'auditor_state.json'),
+};
+
+async function createPageAs(
+    browser: Browser,
+    role: string
+): Promise&lt;Page&gt; {
+    const context = await browser.newContext({
+        storageState: STATE_FILES[role],
+    });
+    return context.newPage();
+}
+
+// tests/admin_vs_usuario.spec.ts — Uso en tests
+import { test, expect, chromium } from '@playwright/test';
+
+test('admin vs usuario', async () => {
+    const browser = await chromium.launch();
+
+    const admin = await createPageAs(browser, 'admin');
+    const usuario = await createPageAs(browser, 'usuario');
+
+    await admin.goto('https://mi-app.com/config');
+    await usuario.goto('https://mi-app.com/config');
+
+    // Admin ve botón de configuración avanzada
+    await expect(admin.locator('text=Config Avanzada')).toBeVisible();
+
+    // Usuario no lo ve
+    await expect(usuario.locator('text=Config Avanzada')).toHaveCount(0);
+
+    await admin.context().close();
+    await usuario.context().close();
+    await browser.close();
+});</code></pre>
+        </div>
+        </div>
 
         <h3>⏰ Expiración del storage state</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Los tokens de sesión <strong>expiran</strong>. Para manejar esto correctamente:</p>
-            <pre><code class="python"># conftest.py — Con validación de expiración
+            <div class="code-tabs" data-code-id="L090-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># conftest.py — Con validación de expiración
 import os
 import time
 import json
@@ -430,6 +813,59 @@ def authenticate(browser_instance):
         print("✅ Reutilizando storage state existente")
 
     yield state_file</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// auth.setup.ts — Con validación de expiración
+import { test as setup } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+
+const AUTH_DIR = 'auth';
+// Estado válido por máximo 30 minutos
+const MAX_STATE_AGE_MS = 30 * 60 * 1000;
+
+function isStateValid(stateFile: string): boolean {
+    if (!fs.existsSync(stateFile)) return false;
+
+    const stats = fs.statSync(stateFile);
+    const fileAge = Date.now() - stats.mtimeMs;
+    if (fileAge > MAX_STATE_AGE_MS) {
+        console.log(
+            \`Estado expirado (\${Math.round(fileAge / 1000)}s > \${MAX_STATE_AGE_MS / 1000}s)\`
+        );
+        return false;
+    }
+
+    // Verificar que el JSON no esté vacío/corrupto
+    try {
+        const data = JSON.parse(fs.readFileSync(stateFile, 'utf-8'));
+        return Array.isArray(data.cookies) &amp;&amp; data.cookies.length > 0;
+    } catch {
+        return false;
+    }
+}
+
+const stateFile = path.join(AUTH_DIR, 'admin_state.json');
+
+setup('autenticar con validación de expiración', async ({ page }) => {
+    if (isStateValid(stateFile)) {
+        console.log('Reutilizando storage state existente');
+        return; // No re-autenticar
+    }
+
+    console.log('Generando nuevo storage state...');
+    fs.mkdirSync(AUTH_DIR, { recursive: true });
+
+    await page.goto('https://mi-app.com/login');
+    await page.fill('#email', 'admin@siesa.com');
+    await page.fill('#password', 'Admin123!');
+    await page.click("button[type='submit']");
+    await page.waitForURL('**/dashboard');
+
+    await page.context().storageState({ path: stateFile });
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🔒 Seguridad: nunca commitear archivos de estado</h3>
@@ -490,7 +926,18 @@ print("✅ No se encontraron archivos con secretos")</code></pre>
 ├── .gitignore                  # auth/ incluido
 └── pytest.ini</code></pre>
 
-            <pre><code class="python"># conftest.py — Versión completa de producción
+            <div class="code-tabs" data-code-id="L090-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># conftest.py — Versión completa de producción
 import pytest
 import os
 import time
@@ -589,8 +1036,92 @@ def auditor_page(browser, setup_auth):
     page = ctx.new_page()
     yield page
     ctx.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// auth.setup.ts — Versión completa de producción
+import { test as setup } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
 
-            <pre><code class="python"># tests/test_reportes.py
+const AUTH_DIR = path.join(__dirname, '..', 'auth');
+const MAX_STATE_AGE_MS = 25 * 60 * 1000; // 25 min (margen)
+
+interface RoleCreds { email: string; password: string }
+
+const ROLES: Record&lt;string, RoleCreds&gt; = {
+    admin:   { email: 'admin@siesa.com',   password: 'Admin123!' },
+    usuario: { email: 'user@siesa.com',    password: 'User123!' },
+    auditor: { email: 'auditor@siesa.com', password: 'Audit123!' },
+};
+
+function statePath(role: string): string {
+    return path.join(AUTH_DIR, \`\${role}_state.json\`);
+}
+
+function needsRefresh(role: string): boolean {
+    const p = statePath(role);
+    if (!fs.existsSync(p)) return true;
+    const age = Date.now() - fs.statSync(p).mtimeMs;
+    return age > MAX_STATE_AGE_MS;
+}
+
+// Generar un setup test por cada rol
+for (const [role, creds] of Object.entries(ROLES)) {
+    setup(\`autenticar como \${role}\`, async ({ page }) => {
+        if (!needsRefresh(role)) {
+            console.log(\`  ♻️ \${role}: reutilizando estado existente\`);
+            return;
+        }
+        fs.mkdirSync(AUTH_DIR, { recursive: true });
+
+        await page.goto('https://mi-app.com/login');
+        await page.fill('#email', creds.email);
+        await page.fill('#password', creds.password);
+        await page.click("button[type='submit']");
+        await page.waitForURL('**/dashboard');
+        await page.context().storageState({ path: statePath(role) });
+        console.log(\`  \${role} autenticado\`);
+    });
+}
+
+// playwright.config.ts — Versión completa de producción
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    projects: [
+        { name: 'setup', testMatch: /.*\\.setup\\.ts/ },
+        {
+            name: 'admin-tests',
+            use: { storageState: 'auth/admin_state.json' },
+            dependencies: ['setup'],
+        },
+        {
+            name: 'user-tests',
+            use: { storageState: 'auth/usuario_state.json' },
+            dependencies: ['setup'],
+        },
+        {
+            name: 'auditor-tests',
+            use: { storageState: 'auth/auditor_state.json' },
+            dependencies: ['setup'],
+        },
+    ],
+});</code></pre>
+            </div>
+            </div>
+
+            <div class="code-tabs" data-code-id="L090-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_reportes.py
 from playwright.sync_api import expect
 
 class TestReportesAdmin:
@@ -623,6 +1154,50 @@ class TestReportesUsuario:
         user_page.goto("https://mi-app.com/reportes")
         expect(user_page.locator("text=Reportes Financieros")).to_have_count(0)
         expect(user_page.locator("text=Mis Reportes")).to_be_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/admin.reportes.spec.ts — storageState: admin
+import { test, expect } from '@playwright/test';
+
+test.describe('Reportes Admin', () => {
+    test('puede generar reporte', async ({ page }) => {
+        await page.goto('https://mi-app.com/reportes');
+        await page.selectOption('#tipo-reporte', 'ventas_mensual');
+        await page.click("button:has-text('Generar')");
+        await expect(page.locator('.reporte-resultado')).toBeVisible();
+    });
+
+    test('puede exportar PDF', async ({ page }) => {
+        await page.goto('https://mi-app.com/reportes');
+        await page.selectOption('#tipo-reporte', 'inventario');
+        await page.click("button:has-text('Generar')");
+
+        const downloadPromise = page.waitForEvent('download');
+        await page.click("button:has-text('Exportar PDF')");
+        const download = await downloadPromise;
+        expect(download.suggestedFilename()).toMatch(/\\.pdf$/);
+    });
+});
+
+// tests/auditor.reportes.spec.ts — storageState: auditor
+test.describe('Reportes Auditor', () => {
+    test('ve reportes en solo lectura', async ({ page }) => {
+        await page.goto('https://mi-app.com/reportes');
+        await expect(page.locator("button:has-text('Eliminar')")).toHaveCount(0);
+        await expect(page.locator("button:has-text('Exportar')")).toBeVisible();
+    });
+});
+
+// tests/user.reportes.spec.ts — storageState: usuario
+test.describe('Reportes Usuario', () => {
+    test('no ve reportes financieros', async ({ page }) => {
+        await page.goto('https://mi-app.com/reportes');
+        await expect(page.locator('text=Reportes Financieros')).toHaveCount(0);
+        await expect(page.locator('text=Mis Reportes')).toBeVisible();
+    });
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📊 Comparación: con y sin storage state</h3>

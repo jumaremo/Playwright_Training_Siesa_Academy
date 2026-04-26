@@ -44,7 +44,18 @@ const LESSON_097 = {
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Screenshot básico del viewport</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L097-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -61,6 +72,26 @@ with sync_playwright() as p:
     screenshot_bytes = page.screenshot()
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.goto('https://mi-app.com/dashboard');
+
+// Screenshot del viewport visible
+await page.screenshot({ path: 'screenshot.png' });
+
+// Screenshot en formato JPEG (menor tamaño)
+await page.screenshot({ path: 'screenshot.jpg', quality: 80 });
+
+// Screenshot como bytes (útil para adjuntar a reportes)
+const screenshotBytes = await page.screenshot();
+
+await browser.close();</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📐 Screenshots de página completa</h3>
@@ -70,7 +101,18 @@ with sync_playwright() as p:
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Screenshot de página completa</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L097-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -88,6 +130,27 @@ with sync_playwright() as p:
     )
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.goto('https://mi-app.com/reportes');
+
+// Captura TODO el contenido, incluyendo scroll
+await page.screenshot({ path: 'pagina_completa.png', fullPage: true });
+
+// Útil para formularios largos, tablas extensas, dashboards
+await page.screenshot({
+    path: 'reporte_completo.png',
+    fullPage: true,
+    type: 'png' // 'png' o 'jpeg'
+});
+
+await browser.close();</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -103,7 +166,18 @@ with sync_playwright() as p:
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Screenshot de un locator</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L097-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -126,6 +200,32 @@ with sync_playwright() as p:
     )
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+const page = await browser.newPage();
+await page.goto('https://mi-app.com/dashboard');
+
+// Screenshot de un elemento específico
+await page.locator('.grafico-ventas').screenshot({ path: 'grafico.png' });
+
+// Screenshot de una tabla de resultados
+await page.locator('table.resultados').screenshot({ path: 'tabla.png' });
+
+// Screenshot de un formulario con error
+await page.locator('form#registro').screenshot({ path: 'formulario_error.png' });
+
+// Screenshot del header de navegación
+await page.locator('nav.main-nav').screenshot({
+    path: 'navegacion.png',
+    type: 'png'
+});
+
+await browser.close();</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>⚡ Screenshots automáticos al fallar</h3>
@@ -134,7 +234,18 @@ with sync_playwright() as p:
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>❌ Sin captura automática — información perdida</h4>
-            <pre><code class="python"># tests/test_login.py
+            <div class="code-tabs" data-code-id="L097-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_login.py
 def test_login_invalido(page):
     page.goto("https://mi-app.com/login")
     page.fill("#email", "usuario@siesa.com")
@@ -144,11 +255,39 @@ def test_login_invalido(page):
     # Si esto falla... ¿qué se veía en pantalla?
     # No hay screenshot, no hay forma de saber
     assert page.locator(".error-message").is_visible()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/test_login.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('login inválido', async ({ page }) => {
+    await page.goto('https://mi-app.com/login');
+    await page.fill('#email', 'usuario@siesa.com');
+    await page.fill('#password', 'clave_incorrecta');
+    await page.click("button[type='submit']");
+
+    // Si esto falla... ¿qué se veía en pantalla?
+    // No hay screenshot, no hay forma de saber
+    await expect(page.locator('.error-message')).toBeVisible();
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Con fixture de captura automática en conftest.py</h4>
-            <pre><code class="python"># tests/conftest.py
+            <div class="code-tabs" data-code-id="L097-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/conftest.py
 import pytest
 from pathlib import Path
 from datetime import datetime
@@ -186,6 +325,54 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        // Screenshot automático solo al fallar
+        screenshot: 'only-on-failure',
+
+        // Directorio de salida para artefactos
+        trace: 'retain-on-failure',
+    },
+    outputDir: 'test-results/screenshots',
+});
+
+// Playwright Test captura screenshots automáticamente
+// al fallar cuando se configura screenshot: 'only-on-failure'.
+// No se necesita hook adicional como en pytest.
+
+// Si necesitas lógica personalizada, usa afterEach:
+// tests/base.spec.ts
+import { test } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status !== testInfo.expectedStatus) {
+        // Crear directorio para screenshots
+        const screenshotDir = 'test-results/screenshots';
+        fs.mkdirSync(screenshotDir, { recursive: true });
+
+        // Nombre descriptivo con fecha y nombre del test
+        const timestamp = new Date().toISOString()
+            .replace(/[:.]/g, '').slice(0, 15);
+        const testName = testInfo.title.replace(/\\s+/g, '_');
+        const filename = \`\${testName}_\${timestamp}.png\`;
+
+        // Capturar screenshot
+        await page.screenshot({
+            path: path.join(screenshotDir, filename),
+            fullPage: true
+        });
+        console.log(\`\\nScreenshot guardado: \${screenshotDir}/\${filename}\`);
+    }
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -201,7 +388,18 @@ def pytest_runtest_makereport(item, call):
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Configurar grabación de video</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L097-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -224,6 +422,32 @@ with sync_playwright() as p:
     # El video se guarda automáticamente en videos/
     # con un nombre generado (UUID)
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Crear context con grabación de video
+const context = await browser.newContext({
+    recordVideo: { dir: 'videos/' } // Directorio donde se guardan
+});
+
+const page = await context.newPage();
+await page.goto('https://mi-app.com/login');
+await page.fill('#email', 'admin@siesa.com');
+await page.fill('#password', 'Admin123!');
+await page.click("button[type='submit']");
+await page.waitForURL('**/dashboard');
+
+// IMPORTANTE: cerrar context para que se guarde el video
+await context.close();
+
+// El video se guarda automáticamente en videos/
+// con un nombre generado (UUID)
+await browser.close();</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📏 Configuración del tamaño de video</h3>
@@ -231,7 +455,18 @@ with sync_playwright() as p:
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Personalizar resolución del video</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L097-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -260,6 +495,37 @@ with sync_playwright() as p:
     shutil.move(video_path, "videos/test_dashboard.webm")
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium } from 'playwright';
+import * as fs from 'fs';
+
+const browser = await chromium.launch();
+
+// Video con resolución personalizada
+const context = await browser.newContext({
+    recordVideo: {
+        dir: 'videos/',
+        size: { width: 1280, height: 720 }
+    }
+});
+
+const page = await context.newPage();
+await page.goto('https://mi-app.com/dashboard');
+// ... acciones del test ...
+
+// Obtener la ruta del video ANTES de cerrar el context
+const videoPath = await page.video()!.path();
+console.log(\`Video grabándose en: \${videoPath}\`);
+
+await context.close();
+
+// Después de cerrar, renombrar el video
+fs.renameSync(videoPath, 'videos/test_dashboard.webm');
+
+await browser.close();</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -277,7 +543,18 @@ with sync_playwright() as p:
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Fixture que conserva videos solo en fallos</h4>
-            <pre><code class="python"># tests/conftest.py
+            <div class="code-tabs" data-code-id="L097-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/conftest.py
 import pytest
 import os
 from pathlib import Path
@@ -330,6 +607,58 @@ def context_with_video(browser, request):
                     os.remove(video_path)
             except Exception:
                 pass</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts — Conservar videos solo en fallos
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        // 'retain-on-failure' graba siempre, pero solo conserva si falla
+        video: {
+            mode: 'retain-on-failure',
+            size: { width: 1280, height: 720 }
+        },
+    },
+    outputDir: 'test-results/videos',
+});
+
+// Playwright Test maneja automáticamente la retención de videos
+// con 'retain-on-failure'. Para lógica personalizada:
+
+// tests/base.spec.ts
+import { test } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status !== testInfo.expectedStatus) {
+        // Mover video a carpeta de fallos con nombre descriptivo
+        const failDir = 'test-results/videos/failures';
+        fs.mkdirSync(failDir, { recursive: true });
+
+        const timestamp = new Date().toISOString()
+            .replace(/[:.]/g, '').slice(0, 15);
+        const testName = testInfo.title.replace(/\\s+/g, '_');
+
+        const video = page.video();
+        if (video) {
+            const videoPath = await video.path();
+            if (fs.existsSync(videoPath)) {
+                const dest = path.join(
+                    failDir,
+                    \`\${testName}_\${timestamp}.webm\`
+                );
+                fs.renameSync(videoPath, dest);
+                console.log(\`\\nVideo de fallo: \${dest}\`);
+            }
+        }
+    }
+    // Si el test pasó, Playwright elimina el video automáticamente
+    // con 'retain-on-failure'
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🔗 Combinando screenshots + videos + traces</h3>
@@ -338,7 +667,18 @@ def context_with_video(browser, request):
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔬 Estrategia completa de recolección de artefactos</h4>
-            <pre><code class="python"># tests/conftest.py — Sistema completo de artefactos
+            <div class="code-tabs" data-code-id="L097-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/conftest.py — Sistema completo de artefactos
 import pytest
 import os
 import shutil
@@ -427,6 +767,78 @@ def artifacts_context(browser, request):
                     os.remove(video_path)
             except Exception:
                 pass</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts — Sistema completo de artefactos
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        // Screenshots, videos y traces solo en fallos
+        screenshot: 'only-on-failure',
+        video: {
+            mode: 'retain-on-failure',
+            size: { width: 1280, height: 720 }
+        },
+        trace: 'retain-on-failure',
+    },
+    outputDir: 'test-results',
+});
+
+// Para lógica personalizada equivalente al conftest.py:
+// tests/artifacts.setup.ts
+import { test } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+test.afterEach(async ({ page, context }, testInfo) => {
+    const failed = testInfo.status !== testInfo.expectedStatus;
+    const timestamp = new Date().toISOString()
+        .replace(/[:.]/g, '').slice(0, 15);
+    const testName = testInfo.title.replace(/\\s+/g, '_');
+
+    if (failed) {
+        // Crear carpeta específica para este fallo
+        const failDir = path.join(
+            'test-results', 'failures',
+            \`\${testName}_\${timestamp}\`
+        );
+        fs.mkdirSync(failDir, { recursive: true });
+
+        // 1. Screenshot del estado final
+        await page.screenshot({
+            path: path.join(failDir, 'screenshot.png'),
+            fullPage: true
+        });
+
+        // 2. Guardar trace
+        // (se guarda automáticamente con retain-on-failure)
+
+        // 3. Video — mover a carpeta del fallo
+        const video = page.video();
+        if (video) {
+            const videoPath = await video.path();
+            if (fs.existsSync(videoPath)) {
+                fs.renameSync(
+                    videoPath,
+                    path.join(failDir, 'video.webm')
+                );
+            }
+        }
+
+        // Adjuntar artefactos al reporte de Playwright
+        await testInfo.attach('screenshot', {
+            path: path.join(failDir, 'screenshot.png'),
+            contentType: 'image/png'
+        });
+
+        console.log(\`\\nArtefactos de fallo en: \${failDir}/\`);
+        console.log('   Screenshots, Video, Trace');
+    }
+    // Si el test pasó, retain-on-failure descarta artefactos
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📂 Organización de artefactos</h3>
@@ -457,7 +869,18 @@ def artifacts_context(browser, request):
             <p>En pipelines de CI/CD, agrega un paso de limpieza que elimine artefactos con más de
             N días de antigüedad. En Azure DevOps, publica la carpeta <code>test-results/failures/</code>
             como <strong>Pipeline Artifact</strong> para que el equipo pueda descargarla desde el portal.</p>
-            <pre><code class="python"># conftest.py — Limpieza de artefactos antiguos
+            <div class="code-tabs" data-code-id="L097-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py — Limpieza de artefactos antiguos
 import time
 
 def limpiar_artefactos_antiguos(directorio, dias_max=7):
@@ -469,6 +892,33 @@ def limpiar_artefactos_antiguos(directorio, dias_max=7):
         if carpeta.is_dir() and carpeta.stat().st_mtime < limite:
             shutil.rmtree(carpeta)
             print(f"🧹 Limpiado: {carpeta.name}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// cleanup.ts — Limpieza de artefactos antiguos
+import * as fs from 'fs';
+import * as path from 'path';
+
+function limpiarArtefactosAntiguos(
+    directorio: string,
+    diasMax: number = 7
+): void {
+    const ahora = Date.now();
+    const limite = ahora - (diasMax * 86400 * 1000); // ms
+
+    const entries = fs.readdirSync(directorio, { withFileTypes: true });
+    for (const entry of entries) {
+        if (entry.isDirectory()) {
+            const fullPath = path.join(directorio, entry.name);
+            const stats = fs.statSync(fullPath);
+            if (stats.mtimeMs < limite) {
+                fs.rmSync(fullPath, { recursive: true, force: true });
+                console.log(\`Limpiado: \${entry.name}\`);
+            }
+        }
+    }
+}</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📊 Adjuntar artefactos a reportes de CI</h3>
@@ -477,7 +927,18 @@ def limpiar_artefactos_antiguos(directorio, dias_max=7):
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Integración con pytest-html</h4>
-            <pre><code class="python"># conftest.py — Adjuntar artefactos a pytest-html
+            <div class="code-tabs" data-code-id="L097-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py — Adjuntar artefactos a pytest-html
 import pytest
 import base64
 from pathlib import Path
@@ -501,11 +962,66 @@ def pytest_runtest_makereport(item, call):
             extra = getattr(report, "extra", [])
             extra.append(pytest_html.extras.png(b64))
             report.extra = extra</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Playwright Test tiene reporte HTML integrado.
+// No se necesita pytest-html ni hooks adicionales.
+
+// playwright.config.ts — Reporte HTML con artefactos
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    reporter: [
+        ['html', { outputFolder: 'test-results/html-report' }],
+        ['list'] // También mostrar en consola
+    ],
+    use: {
+        screenshot: 'only-on-failure',
+        video: 'retain-on-failure',
+        trace: 'retain-on-failure',
+    },
+});
+
+// Los screenshots se adjuntan automáticamente al reporte HTML.
+// Para adjuntar artefactos personalizados:
+
+// tests/ejemplo.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('ejemplo con artefactos', async ({ page }, testInfo) => {
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Adjuntar screenshot manualmente al reporte
+    const screenshot = await page.screenshot({ fullPage: true });
+    await testInfo.attach('screenshot-dashboard', {
+        body: screenshot,
+        contentType: 'image/png'
+    });
+
+    await expect(page.locator('h1')).toBeVisible();
+});
+
+// Ejecutar y ver reporte:
+// npx playwright test
+// npx playwright show-report test-results/html-report</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔬 Integración con Allure</h4>
-            <pre><code class="python"># conftest.py — Adjuntar artefactos a Allure
+            <div class="code-tabs" data-code-id="L097-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py — Adjuntar artefactos a Allure
 import allure
 import pytest
 from pathlib import Path
@@ -547,6 +1063,72 @@ def attach_artifacts_on_failure(page, request):
             name="console_logs",
             attachment_type=allure.attachment_type.JSON
         )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Integración con Allure para Playwright Test
+// npm install allure-playwright
+
+// playwright.config.ts
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    reporter: [
+        ['allure-playwright', { outputFolder: 'allure-results' }],
+        ['list']
+    ],
+    use: {
+        screenshot: 'only-on-failure',
+        video: 'retain-on-failure',
+        trace: 'retain-on-failure',
+    },
+});
+
+// tests/ejemplo-allure.spec.ts
+import { test, expect } from '@playwright/test';
+import * as fs from 'fs';
+
+test.afterEach(async ({ page }, testInfo) => {
+    if (testInfo.status !== testInfo.expectedStatus) {
+        // Adjuntar screenshot al reporte
+        const screenshot = await page.screenshot({ fullPage: true });
+        await testInfo.attach('screenshot_fallo', {
+            body: screenshot,
+            contentType: 'image/png'
+        });
+
+        // Adjuntar video si existe
+        const video = page.video();
+        if (video) {
+            try {
+                const videoPath = await video.path();
+                if (fs.existsSync(videoPath)) {
+                    await testInfo.attach('video_fallo', {
+                        path: videoPath,
+                        contentType: 'video/webm'
+                    });
+                }
+            } catch {
+                // No hay video disponible
+            }
+        }
+
+        // Adjuntar logs de consola
+        const consoleLogs = await page.evaluate(
+            () => JSON.stringify((window as any).__console_logs || [])
+        );
+        await testInfo.attach('console_logs', {
+            body: consoleLogs,
+            contentType: 'application/json'
+        });
+    }
+});
+
+// Generar y ver reporte Allure:
+// npx playwright test
+// npx allure generate allure-results -o allure-report
+// npx allure open allure-report</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🏗️ conftest.py completo: recolección de artefactos en fallos</h3>
@@ -555,7 +1137,18 @@ def attach_artifacts_on_failure(page, request):
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ conftest.py completo — producción</h4>
-            <pre><code class="python"># tests/conftest.py
+            <div class="code-tabs" data-code-id="L097-13">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/conftest.py
 # Sistema completo de artefactos para análisis de fallos
 import pytest
 import os
@@ -724,11 +1317,141 @@ def cleanup_old_artifacts():
                 shutil.rmtree(folder)
 
     yield  # Los tests se ejecutan aquí</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+// Sistema completo de artefactos para análisis de fallos
+import { defineConfig, devices } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// ============================================================
+// CONFIGURACIÓN
+// ============================================================
+const ARTIFACTS_DIR = 'test-results';
+const VIDEO_RESOLUTION = { width: 1280, height: 720 };
+const CAPTURE_VIDEO = true;       // Activar/desactivar grabación
+const CAPTURE_TRACE = true;       // Activar/desactivar traces
+const FULL_PAGE_SCREENSHOT = true;
+const CLEANUP_DAYS = 7;           // Días antes de limpiar artefactos
+
+export default defineConfig({
+    outputDir: ARTIFACTS_DIR,
+    reporter: [
+        ['html', { outputFolder: \`\${ARTIFACTS_DIR}/html-report\` }],
+        ['list']
+    ],
+    use: {
+        screenshot: FULL_PAGE_SCREENSHOT
+            ? 'only-on-failure' : 'off',
+        video: CAPTURE_VIDEO
+            ? { mode: 'retain-on-failure', size: VIDEO_RESOLUTION }
+            : 'off',
+        trace: CAPTURE_TRACE
+            ? 'retain-on-failure' : 'off',
+    },
+    // Limpieza de artefactos antiguos al iniciar
+    globalSetup: require.resolve('./global-setup.ts'),
+});
+
+// ============================================================
+// global-setup.ts — Limpieza de artefactos antiguos
+// ============================================================
+// export default async function globalSetup() {
+//     const failuresDir = path.join(ARTIFACTS_DIR, 'failures');
+//     if (fs.existsSync(failuresDir)) {
+//         const limit = Date.now() - (CLEANUP_DAYS * 86400 * 1000);
+//         for (const entry of fs.readdirSync(failuresDir, {
+//             withFileTypes: true
+//         })) {
+//             if (entry.isDirectory()) {
+//                 const fullPath = path.join(failuresDir, entry.name);
+//                 if (fs.statSync(fullPath).mtimeMs < limit) {
+//                     fs.rmSync(fullPath, { recursive: true });
+//                 }
+//             }
+//         }
+//     }
+// }
+
+// ============================================================
+// tests/base.spec.ts — Lógica personalizada post-test
+// ============================================================
+import { test } from '@playwright/test';
+
+test.afterEach(async ({ page }, testInfo) => {
+    const failed = testInfo.status !== testInfo.expectedStatus;
+    const timestamp = new Date().toISOString()
+        .replace(/[:.]/g, '').slice(0, 15);
+    const testName = testInfo.title.replace(/\\s+/g, '_');
+
+    if (failed) {
+        const failDir = path.join(
+            ARTIFACTS_DIR, 'failures',
+            \`\${testName}_\${timestamp}\`
+        );
+        fs.mkdirSync(failDir, { recursive: true });
+
+        // 1. Screenshot del estado final
+        try {
+            await page.screenshot({
+                path: path.join(failDir, 'screenshot.png'),
+                fullPage: FULL_PAGE_SCREENSHOT
+            });
+        } catch (e) {
+            console.warn(\`No se pudo capturar screenshot: \${e}\`);
+        }
+
+        // 2. Video — mover a carpeta del fallo
+        if (CAPTURE_VIDEO) {
+            const video = page.video();
+            if (video) {
+                try {
+                    const videoPath = await video.path();
+                    if (fs.existsSync(videoPath)) {
+                        fs.renameSync(
+                            videoPath,
+                            path.join(failDir, 'video.webm')
+                        );
+                    }
+                } catch { /* sin video */ }
+            }
+        }
+
+        // 3. Adjuntar al reporte
+        await testInfo.attach('screenshot', {
+            path: path.join(failDir, 'screenshot.png'),
+            contentType: 'image/png'
+        });
+
+        console.log(\`\\n\${'='.repeat(50)}\`);
+        console.log(\`ARTEFACTOS DE FALLO: \${testName}\`);
+        console.log(\`   Screenshot: \${failDir}/screenshot.png\`);
+        console.log(\`   Video:      \${failDir}/video.webm\`);
+        console.log(\`   Trace:      (en outputDir automáticamente)\`);
+        console.log(\`   Carpeta:    \${failDir}/\`);
+        console.log('='.repeat(50));
+    }
+    // Si el test pasó, retain-on-failure descarta artefactos
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>📝 Uso del fixture en tests</h4>
-            <pre><code class="python"># tests/test_dashboard.py
+            <div class="code-tabs" data-code-id="L097-14">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_dashboard.py
 from playwright.sync_api import expect
 
 
@@ -752,6 +1475,33 @@ def test_filtro_por_fecha(pw_artifacts):
     # Si falla, tendremos screenshot + video + trace
     expect(page.locator(".tabla-resultados")).to_be_visible()
     expect(page.locator(".total-registros")).not_to_have_text("0")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/test_dashboard.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('dashboard carga correctamente', async ({ page }) => {
+    await page.goto('https://mi-app.com/dashboard');
+
+    await expect(page.locator('h1')).toContainText('Dashboard');
+    await expect(page.locator('.widget-ventas')).toBeVisible();
+});
+
+test('filtro por fecha', async ({ page }) => {
+    await page.goto('https://mi-app.com/dashboard');
+
+    await page.click('button.filtro-fecha');
+    await page.fill('#fecha-inicio', '2026-01-01');
+    await page.fill('#fecha-fin', '2026-03-31');
+    await page.click('button.aplicar-filtro');
+
+    // Si falla, tendremos screenshot + video + trace
+    // (configurados en playwright.config.ts)
+    await expect(page.locator('.tabla-resultados')).toBeVisible();
+    await expect(page.locator('.total-registros')).not.toHaveText('0');
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">

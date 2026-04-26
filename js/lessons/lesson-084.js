@@ -19,7 +19,18 @@ const LESSON_084 = {
 
         <h3>📄 Datos desde CSV</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># test-data/login_data.csv
+            <div class="code-tabs" data-code-id="L084-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test-data/login_data.csv
 # email,password,expected_result
 # admin@test.com,admin123,dashboard
 # editor@test.com,editor123,dashboard
@@ -46,10 +57,68 @@ def test_login_desde_csv(page, data):
     page.fill("#password", data["password"])
     page.click("#login-btn")
     assert data["expected_result"] in page.url</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test-data/login_data.csv
+// email,password,expected_result
+// admin@test.com,admin123,dashboard
+// editor@test.com,editor123,dashboard
+// invalid@test.com,wrong,login
+// blocked@test.com,blocked123,account-locked
+
+import { test, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface LoginData {
+    email: string;
+    password: string;
+    expected_result: string;
+}
+
+function loadCsv(filepath: string): LoginData[] {
+    const content = fs.readFileSync(filepath, 'utf-8');
+    const lines = content.trim().split('\\n');
+    const headers = lines[0].split(',');
+    return lines.slice(1).map(line => {
+        const values = line.split(',');
+        return Object.fromEntries(
+            headers.map((h, i) => [h.trim(), values[i]?.trim()])
+        ) as LoginData;
+    });
+}
+
+// Cargar datos del CSV
+const loginData = loadCsv(
+    path.resolve(__dirname, 'test-data/login_data.csv')
+);
+
+for (const data of loginData) {
+    test(\`login con \${data.email.split('@')[0]}\`, async ({ page }) => {
+        await page.goto('https://mi-app.com/login');
+        await page.fill('#email', data.email);
+        await page.fill('#password', data.password);
+        await page.click('#login-btn');
+        expect(page.url()).toContain(data.expected_result);
+    });
+}</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📋 Datos desde JSON</h3>
-        <pre><code class="python"># test-data/products.json
+        <div class="code-tabs" data-code-id="L084-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test-data/products.json
 # [
 #   {"name": "Laptop Pro", "price": "2500000", "category": "Electrónica", "valid": true},
 #   {"name": "", "price": "100", "category": "General", "valid": false},
@@ -79,10 +148,67 @@ def test_crear_producto(page, product):
         expect(page.locator(".toast-success")).to_be_visible()
     else:
         expect(page.locator(".error-message")).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test-data/products.json
+// [
+//   {"name": "Laptop Pro", "price": "2500000", "category": "Electrónica", "valid": true},
+//   {"name": "", "price": "100", "category": "General", "valid": false},
+//   {"name": "Mouse", "price": "-500", "category": "Accesorios", "valid": false}
+// ]
+
+import { test, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface ProductData {
+    name: string;
+    price: string;
+    category: string;
+    valid: boolean;
+}
+
+function loadJson(filepath: string): ProductData[] {
+    const content = fs.readFileSync(filepath, 'utf-8');
+    return JSON.parse(content);
+}
+
+const productData = loadJson(
+    path.resolve(__dirname, 'test-data/products.json')
+);
+
+for (const product of productData) {
+    test(\`crear producto: \${product.name || 'empty'}\`, async ({ page }) => {
+        await page.goto('https://mi-app.com/products/new');
+        await page.fill("[name='name']", product.name);
+        await page.fill("[name='price']", String(product.price));
+        await page.selectOption("[name='category']", { label: product.category });
+        await page.click('#save');
+
+        if (product.valid) {
+            await expect(page.locator('.toast-success')).toBeVisible();
+        } else {
+            await expect(page.locator('.error-message')).toBeVisible();
+        }
+    });
+}</code></pre>
+        </div>
+        </div>
 
         <h3>📊 Datos desde Excel</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># pip install openpyxl
+            <div class="code-tabs" data-code-id="L084-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># pip install openpyxl
 import openpyxl
 import pytest
 
@@ -128,10 +254,103 @@ def test_permisos_por_rol(page, data):
         expect(create_btn).to_be_visible()
     else:
         expect(create_btn).to_be_hidden()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// npm install exceljs
+import { test, expect } from '@playwright/test';
+import ExcelJS from 'exceljs';
+import * as path from 'path';
+
+interface PermissionData {
+    email: string;
+    password: string;
+    role: string;
+    can_create: boolean;
+    can_delete: boolean;
+}
+
+async function loadExcel(
+    filepath: string,
+    sheetName?: string
+): Promise<PermissionData[]> {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(filepath);
+    const ws = sheetName
+        ? workbook.getWorksheet(sheetName)!
+        : workbook.worksheets[0];
+
+    // Primera fila como headers
+    const headers = (ws.getRow(1).values as string[]).slice(1); // ExcelJS es 1-based
+    const data: PermissionData[] = [];
+
+    ws.eachRow((row, rowNumber) => {
+        if (rowNumber === 1) return; // Saltar headers
+        const values = (row.values as any[]).slice(1);
+        if (values.some(v => v != null)) {
+            const entry: any = {};
+            headers.forEach((h, i) => {
+                entry[h.trim()] = values[i];
+            });
+            data.push(entry);
+        }
+    });
+
+    return data;
+}
+
+// test-data/test_cases.xlsx
+// | email           | password | role   | can_create | can_delete |
+// | admin@test.com  | admin123 | admin  | True       | True       |
+// | editor@test.com | edit123  | editor | True       | False      |
+// | viewer@test.com | view123  | viewer | False      | False      |
+
+test.describe('permisos por rol', () => {
+    let permissionsData: PermissionData[];
+
+    test.beforeAll(async () => {
+        permissionsData = await loadExcel(
+            path.resolve(__dirname, 'test-data/test_cases.xlsx'),
+            'Permisos'
+        );
+    });
+
+    test('verificar permisos de cada rol', async ({ page }) => {
+        for (const data of permissionsData) {
+            // Login
+            await page.goto('https://mi-app.com/login');
+            await page.fill('#email', data.email);
+            await page.fill('#password', data.password);
+            await page.click('#login-btn');
+
+            // Verificar permisos
+            await page.goto('https://mi-app.com/products');
+            const createBtn = page.locator('[data-testid="create-btn"]');
+
+            if (data.can_create) {
+                await expect(createBtn).toBeVisible();
+            } else {
+                await expect(createBtn).toBeHidden();
+            }
+        }
+    });
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📝 Datos desde YAML</h3>
-        <pre><code class="python"># pip install pyyaml
+        <div class="code-tabs" data-code-id="L084-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pip install pyyaml
 
 # test-data/scenarios.yaml
 # login_scenarios:
@@ -166,9 +385,74 @@ def test_login_scenarios(page, scenario):
         expect(page).to_have_url("**/dashboard")
     else:
         expect(page.locator(".error")).to_contain_text(scenario["expected"])</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// npm install js-yaml @types/js-yaml
+
+// test-data/scenarios.yaml
+// login_scenarios:
+//   - name: "Admin exitoso"
+//     email: "admin@test.com"
+//     password: "admin123"
+//     expected: "dashboard"
+//
+//   - name: "Contraseña incorrecta"
+//     email: "admin@test.com"
+//     password: "wrong"
+//     expected: "Credenciales inválidas"
+
+import { test, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as yaml from 'js-yaml';
+
+interface LoginScenario {
+    name: string;
+    email: string;
+    password: string;
+    expected: string;
+}
+
+function loadYaml(filepath: string): Record&lt;string, any&gt; {
+    const content = fs.readFileSync(filepath, 'utf-8');
+    return yaml.load(content) as Record&lt;string, any&gt;;
+}
+
+const scenarios: LoginScenario[] = loadYaml(
+    path.resolve(__dirname, 'test-data/scenarios.yaml')
+).login_scenarios;
+
+for (const scenario of scenarios) {
+    test(\`login: \${scenario.name}\`, async ({ page }) => {
+        await page.goto('https://mi-app.com/login');
+        await page.fill('#email', scenario.email);
+        await page.fill('#password', scenario.password);
+        await page.click('#login-btn');
+
+        if (scenario.expected.includes('dashboard')) {
+            await expect(page).toHaveURL(/.*dashboard/);
+        } else {
+            await expect(page.locator('.error'))
+                .toContainText(scenario.expected);
+        }
+    });
+}</code></pre>
+        </div>
+        </div>
 
         <h3>🔧 Helper genérico para cargar datos</h3>
-        <pre><code class="python"># utils/data_loader.py
+        <div class="code-tabs" data-code-id="L084-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># utils/data_loader.py
 import csv
 import json
 from pathlib import Path
@@ -221,6 +505,87 @@ from utils.data_loader import DataLoader
 users = DataLoader.from_csv("users.csv")
 products = DataLoader.from_json("products.json")
 scenarios = DataLoader.from_excel("test_cases.xlsx", "Login")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// utils/data-loader.ts
+import * as fs from 'fs';
+import * as path from 'path';
+import ExcelJS from 'exceljs';
+
+export class DataLoader {
+    private static BASE_DIR = path.resolve(__dirname, '..', 'test-data');
+
+    static fromCsv&lt;T = Record&lt;string, string&gt;&gt;(filename: string): T[] {
+        const filepath = path.join(DataLoader.BASE_DIR, filename);
+        const content = fs.readFileSync(filepath, 'utf-8');
+        const lines = content.trim().split('\\n');
+        const headers = lines[0].split(',').map(h =&gt; h.trim());
+        return lines.slice(1)
+            .filter(line =&gt; line.trim() !== '')
+            .map(line =&gt; {
+                const values = line.split(',');
+                return Object.fromEntries(
+                    headers.map((h, i) =&gt; [h, values[i]?.trim()])
+                ) as T;
+            });
+    }
+
+    static fromJson&lt;T = any&gt;(filename: string): T {
+        const filepath = path.join(DataLoader.BASE_DIR, filename);
+        const content = fs.readFileSync(filepath, 'utf-8');
+        return JSON.parse(content);
+    }
+
+    static async fromExcel&lt;T = Record&lt;string, any&gt;&gt;(
+        filename: string,
+        sheet?: string
+    ): Promise&lt;T[]&gt; {
+        const filepath = path.join(DataLoader.BASE_DIR, filename);
+        const workbook = new ExcelJS.Workbook();
+        await workbook.xlsx.readFile(filepath);
+        const ws = sheet
+            ? workbook.getWorksheet(sheet)!
+            : workbook.worksheets[0];
+
+        const headers = (ws.getRow(1).values as string[]).slice(1);
+        const data: T[] = [];
+
+        ws.eachRow((row, num) =&gt; {
+            if (num === 1) return;
+            const values = (row.values as any[]).slice(1);
+            if (values.some(v =&gt; v != null)) {
+                const entry: any = {};
+                headers.forEach((h, i) =&gt; {
+                    entry[h.trim()] = values[i];
+                });
+                data.push(entry);
+            }
+        });
+
+        return data;
+    }
+
+    static autoLoad&lt;T = any&gt;(filename: string): T[] | Promise&lt;T[]&gt; {
+        const ext = path.extname(filename).toLowerCase();
+        switch (ext) {
+            case '.csv':  return DataLoader.fromCsv&lt;T&gt;(filename);
+            case '.json': return DataLoader.fromJson&lt;T[]&gt;(filename);
+            case '.xlsx':
+            case '.xls':  return DataLoader.fromExcel&lt;T&gt;(filename);
+            default:
+                throw new Error(\`Formato no soportado: \${ext}\`);
+        }
+    }
+}
+
+// Uso:
+import { DataLoader } from './utils/data-loader';
+
+const users = DataLoader.fromCsv('users.csv');
+const products = DataLoader.fromJson&lt;any[]&gt;('products.json');
+const scenarios = await DataLoader.fromExcel('test_cases.xlsx', 'Login');</code></pre>
+        </div>
+        </div>
 
         <h3>📁 Estructura recomendada de archivos de datos</h3>
         <pre><code class="text">test-data/

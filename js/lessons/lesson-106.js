@@ -160,7 +160,18 @@ allure generate allure-results -o allure-report --clean</code></pre>
         <p>Allure permite <strong>anotar</strong> los tests con metadatos que organizan el reporte,
         especialmente la vista <strong>Behaviors</strong> que es ideal para mostrar a stakeholders.</p>
 
-        <pre><code class="python"># test_login_allure.py
+        <div class="code-tabs" data-code-id="L106-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># test_login_allure.py
 import allure
 from playwright.sync_api import Page, expect
 
@@ -194,6 +205,39 @@ def test_login_campos_vacios(page: Page):
     page.goto("/login")
     page.get_by_role("button", name="Iniciar sesión").click()
     expect(page.get_by_text("El email es requerido")).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// test_login_allure.spec.ts
+import { test, expect } from '@playwright/test';
+
+
+test.describe('Autenticacion', () => {
+
+    test('Login con credenciales validas redirige al dashboard @critical', async ({ page }) => {
+        await page.goto('/login');
+        await page.getByLabel('Email').fill('admin@siesa.com');
+        await page.getByLabel('Contraseña').fill('password123');
+        await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+        await expect(page).toHaveURL('/dashboard');
+    });
+
+    test('Login con contraseña incorrecta muestra error @critical', async ({ page }) => {
+        await page.goto('/login');
+        await page.getByLabel('Email').fill('admin@siesa.com');
+        await page.getByLabel('Contraseña').fill('clave_erronea');
+        await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+        await expect(page.getByText('Credenciales inválidas')).toBeVisible();
+    });
+
+    test('Login con campos vacios muestra validacion @critical', async ({ page }) => {
+        await page.goto('/login');
+        await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+        await expect(page.getByText('El email es requerido')).toBeVisible();
+    });
+
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔮 Organización en Behaviors</h4>
@@ -211,7 +255,18 @@ def test_login_campos_vacios(page: Page):
         <p>El decorador <code>@allure.severity</code> clasifica los tests por criticidad, lo que ayuda
         a priorizar la investigación de fallos.</p>
 
-        <pre><code class="python">import allure
+        <div class="code-tabs" data-code-id="L106-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python">import allure
 from playwright.sync_api import Page, expect
 
 
@@ -262,6 +317,58 @@ def test_footer_anio(page: Page):
     """TRIVIAL: Detalle mínimo."""
     page.goto("/")
     expect(page.get_by_text("© 2026")).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+
+test.describe('Checkout', () => {
+
+    test('Proceso de pago completo @blocker', async ({ page }) => {
+        /** BLOCKER: Si falla, el negocio no puede facturar. */
+        await page.goto('/checkout');
+        // ... pasos del checkout
+        await expect(page.getByText('Pago exitoso')).toBeVisible();
+    });
+
+    test('Validacion de tarjeta de credito @critical', async ({ page }) => {
+        /** CRITICAL: Funcionalidad esencial del checkout. */
+        await page.goto('/checkout/payment');
+        await page.getByLabel('Número de tarjeta').fill('1234');
+        await expect(page.getByText('Número de tarjeta inválido')).toBeVisible();
+    });
+
+});
+
+test.describe('Catalogo', () => {
+
+    test('Filtrar productos por categoria @normal', async ({ page }) => {
+        /** NORMAL: Funcionalidad estandar. */
+        await page.goto('/catalogo');
+        await page.getByRole('combobox', { name: 'Categoría' }).selectOption('Electrónicos');
+        await expect(page.getByText('Electrónicos')).toBeVisible();
+    });
+
+});
+
+test.describe('UI', () => {
+
+    test('Tooltip aparece al hover en icono de ayuda @minor', async ({ page }) => {
+        /** MINOR: Defecto cosmetico o de UX menor. */
+        await page.goto('/dashboard');
+        await page.getByTitle('Ayuda').hover();
+        await expect(page.getByRole('tooltip')).toBeVisible();
+    });
+
+    test('Footer muestra año actual @trivial', async ({ page }) => {
+        /** TRIVIAL: Detalle minimo. */
+        await page.goto('/');
+        await expect(page.getByText('© 2026')).toBeVisible();
+    });
+
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>📋 Niveles de severidad disponibles</h4>
@@ -303,7 +410,18 @@ def test_footer_anio(page: Page):
         <p>Los <strong>steps</strong> documentan las acciones dentro de un test, haciendo que el reporte
         muestre exactamente qué hizo cada test y en qué paso falló.</p>
 
-        <pre><code class="python">import allure
+        <div class="code-tabs" data-code-id="L106-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python">import allure
 from playwright.sync_api import Page, expect
 
 
@@ -342,6 +460,53 @@ def test_flujo_compra_completo(page: Page):
     with allure.step("Verificar confirmación de compra"):
         expect(page.get_by_text("Compra exitosa")).to_be_visible()
         expect(page.get_by_text("Número de orden")).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test.describe('E-Commerce', () => {
+
+    test('Flujo completo de compra desde catálogo hasta confirmación @blocker', async ({ page }) => {
+
+        await test.step('Navegar al catálogo de productos', async () => {
+            await page.goto('/catalogo');
+            await expect(page.getByRole('heading', { name: 'Catálogo' })).toBeVisible();
+        });
+
+        await test.step('Agregar producto al carrito', async () => {
+            await page.getByText('Laptop Pro 15').click();
+            await page.getByRole('button', { name: 'Agregar al carrito' }).click();
+            await expect(page.getByText('Producto agregado')).toBeVisible();
+        });
+
+        await test.step('Ir al carrito y verificar producto', async () => {
+            await page.getByRole('link', { name: 'Carrito' }).click();
+            await expect(page.getByText('Laptop Pro 15')).toBeVisible();
+            await expect(page.getByText('$2,500.00')).toBeVisible();
+        });
+
+        await test.step('Completar datos de envío', async () => {
+            await page.getByRole('button', { name: 'Proceder al pago' }).click();
+            await page.getByLabel('Dirección').fill('Calle 123 #45-67');
+            await page.getByLabel('Ciudad').fill('Cali');
+            await page.getByRole('button', { name: 'Continuar' }).click();
+        });
+
+        await test.step('Procesar pago', async () => {
+            await page.getByLabel('Número de tarjeta').fill('4111111111111111');
+            await page.getByLabel('Vencimiento').fill('12/28');
+            await page.getByLabel('CVV').fill('123');
+            await page.getByRole('button', { name: 'Pagar' }).click();
+        });
+
+        await test.step('Verificar confirmación de compra', async () => {
+            await expect(page.getByText('Compra exitosa')).toBeVisible();
+            await expect(page.getByText('Número de orden')).toBeVisible();
+        });
+    });
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Ventaja clave de los steps</h4>
@@ -354,7 +519,18 @@ def test_flujo_compra_completo(page: Page):
         <p>Allure permite adjuntar <strong>cualquier tipo de archivo</strong> al reporte: screenshots,
         videos, logs, HTML, JSON, texto plano, etc.</p>
 
-        <pre><code class="python">import allure
+        <div class="code-tabs" data-code-id="L106-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python">import allure
 from playwright.sync_api import Page
 
 
@@ -392,12 +568,62 @@ def test_dashboard_con_adjuntos(page: Page):
         name="Network HAR",
         attachment_type=allure.attachment_type.JSON
     )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">import { test } from '@playwright/test';
+import * as fs from 'fs';
+
+test.describe('Dashboard', () => {
+
+    test('Dashboard carga correctamente con datos', async ({ page }, testInfo) => {
+        await page.goto('/dashboard');
+
+        // Adjuntar screenshot como imagen PNG
+        const screenshot = await page.screenshot();
+        await testInfo.attach('Dashboard cargado', {
+            body: screenshot,
+            contentType: 'image/png',
+        });
+
+        // Adjuntar el HTML de la página
+        const htmlContent = await page.content();
+        await testInfo.attach('HTML del dashboard', {
+            body: htmlContent,
+            contentType: 'text/html',
+        });
+
+        // Adjuntar texto plano (logs, datos, etc.)
+        await testInfo.attach('Info de la página', {
+            body: \`URL: \${page.url()}\\nTitle: \${await page.title()}\`,
+            contentType: 'text/plain',
+        });
+
+        // Adjuntar desde archivo existente
+        await testInfo.attach('Network HAR', {
+            path: 'test-results/network-log.har',
+            contentType: 'application/json',
+        });
+    });
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📸 Screenshots automáticos en fallos con Playwright</h3>
         <p>La integración más valiosa es <strong>adjuntar screenshots automáticamente cuando un test falla</strong>.
         Esto se configura en <code>conftest.py</code>.</p>
 
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L106-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># conftest.py
 import allure
 import pytest
 from playwright.sync_api import Page
@@ -422,6 +648,38 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// playwright.config.ts — screenshot automático en fallos
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        // Captura screenshot automáticamente al fallar
+        screenshot: 'only-on-failure',
+        // Screenshot de página completa
+        screenshotMode: 'full-page',
+    },
+});
+
+// Nota: Playwright Test adjunta screenshots de fallos
+// automáticamente al HTML report. No se necesita conftest.py
+// ni hooks manuales — basta con la configuración anterior.
+//
+// Para adjuntar screenshots adicionales dentro de un test:
+//
+// test('mi test', async ({ page }, testInfo) => {
+//     // ... acciones ...
+//     if (testInfo.status === 'failed') {
+//         const screenshot = await page.screenshot({ fullPage: true });
+//         await testInfo.attach(\`screenshot-\${testInfo.title}\`, {
+//             body: screenshot,
+//             contentType: 'image/png',
+//         });
+//     }
+// });</code></pre>
+        </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -435,7 +693,18 @@ def pytest_runtest_makereport(item, call):
         debuggear fallos. Adjuntarlos al reporte Allure permite que cualquier persona del equipo
         pueda analizar el fallo en detalle.</p>
 
-        <pre><code class="python"># conftest.py - Versión completa con traces y screenshots
+        <div class="code-tabs" data-code-id="L106-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># conftest.py - Versión completa con traces y screenshots
 import allure
 import pytest
 from pathlib import Path
@@ -482,6 +751,52 @@ def allure_attachments(page, request):
                 name="playwright-trace",
                 attachment_type=allure.attachment_type.ZIP
             )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// playwright.config.ts — Versión completa con traces y screenshots
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        // Screenshot en cada test (evidencia visual)
+        screenshot: 'on',
+        // Trace completo solo en fallos (screenshots + snapshots + sources)
+        trace: 'retain-on-failure',
+    },
+    // Directorio de resultados
+    outputDir: 'test-results/',
+});
+
+// Nota: Playwright Test maneja traces y screenshots de forma
+// nativa — no se necesitan fixtures ni hooks manuales.
+//
+// - screenshot: 'on'                → adjunta screenshot siempre
+// - trace: 'retain-on-failure'      → guarda trace .zip solo en fallos
+// - trace: 'on'                     → guarda trace en todos los tests
+//
+// Los traces se guardan automáticamente en test-results/ y se
+// adjuntan al HTML report. Para verlos:
+//   npx playwright show-trace test-results/.../trace.zip
+//
+// Para adjuntar evidencia extra dentro de un test:
+//
+// import { test } from '@playwright/test';
+//
+// test('con evidencia extra', async ({ page }, testInfo) => {
+//     await page.goto('/dashboard');
+//
+//     // Screenshot manual
+//     const screenshot = await page.screenshot({ fullPage: true });
+//     await testInfo.attach('screenshot-final', {
+//         body: screenshot,
+//         contentType: 'image/png',
+//     });
+//
+//     // Adjuntar trace manualmente si es necesario
+//     // (normalmente no hace falta — el config lo maneja)
+// });</code></pre>
+        </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔮 Flujo de análisis con traces en Allure</h4>
@@ -530,7 +845,18 @@ Environment=Staging
 Base.URL=https://staging.mi-app.com
 Tester=Equipo QA SIESA</code></pre>
 
-        <pre><code class="python"># conftest.py - Generar environment.properties automáticamente
+        <div class="code-tabs" data-code-id="L106-7">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># conftest.py - Generar environment.properties automáticamente
 import platform
 from pathlib import Path
 from playwright.sync_api import BrowserType
@@ -548,6 +874,42 @@ def pytest_configure(config):
             f"Platform={platform.machine()}\\n"
             f"Environment=staging\\n"
         )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// global-setup.ts — Generar metadata de entorno automáticamente
+import * as fs from 'fs';
+import * as os from 'os';
+
+async function globalSetup() {
+    /** Genera un archivo con info del entorno para el reporte. */
+    const envInfo = {
+        'Node.js': process.version,
+        OS: \`\${os.type()} \${os.release()}\`,
+        Platform: os.arch(),
+        Environment: 'staging',
+    };
+
+    // Guardar como JSON para consumir desde reporters
+    fs.writeFileSync(
+        'test-results/environment.json',
+        JSON.stringify(envInfo, null, 2),
+    );
+}
+
+export default globalSetup;
+
+// playwright.config.ts — registrar el global setup
+// import { defineConfig } from '@playwright/test';
+//
+// export default defineConfig({
+//     globalSetup: './global-setup.ts',
+//     reporter: [
+//         ['html', { open: 'never' }],
+//         // El HTML report incluye metadata de entorno automáticamente
+//     ],
+// });</code></pre>
+        </div>
+        </div>
 
         <h3>🔄 Allure con CI/CD: tendencias entre ejecuciones</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -633,7 +995,18 @@ jobs:
         <p>Veamos un archivo de tests completo que combina todas las funcionalidades de Allure
         con Playwright.</p>
 
-        <pre><code class="python"># tests/test_dashboard_allure.py
+        <div class="code-tabs" data-code-id="L106-8">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># tests/test_dashboard_allure.py
 """
 Suite de tests del Dashboard con reporting Allure completo.
 Demuestra: features, stories, severity, steps, attachments.
@@ -716,6 +1089,88 @@ def test_exportar_dashboard_pdf(page: Page):
             name="info-descarga",
             attachment_type=allure.attachment_type.TEXT
         )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// tests/dashboard-allure.spec.ts
+/**
+ * Suite de tests del Dashboard con reporting nativo de Playwright Test.
+ * Demuestra: describe, tags, steps, attachments.
+ */
+import { test, expect } from '@playwright/test';
+
+test.describe('Dashboard', () => {
+
+    test('Dashboard muestra widgets principales al cargar @critical', async ({ page }, testInfo) => {
+
+        await test.step('Navegar al dashboard', async () => {
+            await page.goto('/dashboard');
+            await testInfo.attach('dashboard-cargado', {
+                body: await page.screenshot(),
+                contentType: 'image/png',
+            });
+        });
+
+        await test.step('Verificar widget de ventas', async () => {
+            const widgetVentas = page.getByTestId('widget-ventas');
+            await expect(widgetVentas).toBeVisible();
+            await expect(widgetVentas.getByRole('heading')).toHaveText('Ventas del Mes');
+        });
+
+        await test.step('Verificar widget de inventario', async () => {
+            const widgetInv = page.getByTestId('widget-inventario');
+            await expect(widgetInv).toBeVisible();
+        });
+
+        await test.step('Capturar estado final', async () => {
+            await testInfo.attach('dashboard-completo', {
+                body: await page.screenshot({ fullPage: true }),
+                contentType: 'image/png',
+            });
+        });
+    });
+
+    test('Filtro de rango de fechas actualiza los datos @normal', async ({ page }, testInfo) => {
+
+        await test.step('Navegar al dashboard', async () => {
+            await page.goto('/dashboard');
+        });
+
+        await test.step('Seleccionar rango: Último mes', async () => {
+            await page.getByRole('combobox', { name: 'Período' }).selectOption('ultimo-mes');
+        });
+
+        await test.step('Verificar que los datos se actualizaron', async () => {
+            await expect(page.getByText('Mostrando: Último mes')).toBeVisible();
+            await testInfo.attach('filtro-ultimo-mes', {
+                body: await page.screenshot(),
+                contentType: 'image/png',
+            });
+        });
+    });
+
+    test('Exportar dashboard a PDF @minor', async ({ page }, testInfo) => {
+
+        await test.step('Navegar al dashboard', async () => {
+            await page.goto('/dashboard');
+        });
+
+        await test.step('Hacer click en Exportar PDF', async () => {
+            const downloadPromise = page.waitForEvent('download');
+            await page.getByRole('button', { name: 'Exportar PDF' }).click();
+            const download = await downloadPromise;
+
+            await test.step('Verificar descarga', async () => {
+                expect(download.suggestedFilename()).toMatch(/\\.pdf$/);
+                await testInfo.attach('info-descarga', {
+                    body: \`Archivo: \${download.suggestedFilename()}\`,
+                    contentType: 'text/plain',
+                });
+            });
+        });
+    });
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🎯 Ejercicio práctico</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -724,7 +1179,18 @@ def test_exportar_dashboard_pdf(page: Page):
             Debe incluir decoradores, steps, severidad y adjuntos.</p>
         </div>
 
-        <pre><code class="python"># tests/test_busqueda_allure.py
+        <div class="code-tabs" data-code-id="L106-9">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># tests/test_busqueda_allure.py
 """
 EJERCICIO: Suite de búsqueda con Allure completo.
 Completa los decoradores y steps que faltan.
@@ -828,6 +1294,91 @@ def test_busqueda_sin_resultados(page: Page):
 # Ejecutar con:
 # pytest tests/test_busqueda_allure.py --alluredir=allure-results -v
 # allure serve allure-results</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// tests/busqueda-allure.spec.ts
+/**
+ * EJERCICIO: Suite de búsqueda con reporting nativo de Playwright Test.
+ * Completa los steps y attachments que faltan.
+ */
+import { test, expect } from '@playwright/test';
+
+test.describe('Búsqueda', () => {
+
+    // TODO 1: Usa tags para marcar severidad (@critical, @normal, etc.)
+    test('Búsqueda con término válido retorna resultados @critical', async ({ page }, testInfo) => {
+
+        // TODO 2: Usa test.step() para documentar cada acción
+        await test.step('Navegar a la página de búsqueda', async () => {
+            await page.goto('/buscar');
+        });
+
+        await test.step("Ingresar término de búsqueda: 'laptop'", async () => {
+            await page.getByPlaceholder('Buscar productos...').fill('laptop');
+            await page.getByRole('button', { name: 'Buscar' }).click();
+        });
+
+        await test.step('Verificar que aparecen resultados', async () => {
+            const resultados = page.getByTestId('lista-resultados');
+            await expect(resultados).toBeVisible();
+            // TODO 3: Adjunta un screenshot de los resultados
+            await testInfo.attach('resultados-busqueda', {
+                body: await page.screenshot(),
+                contentType: 'image/png',
+            });
+        });
+
+        await test.step('Verificar que hay al menos 1 resultado', async () => {
+            const items = page.getByTestId('lista-resultados').getByRole('listitem');
+            await expect(items.first()).toBeVisible();
+        });
+    });
+
+    test('Búsqueda con término inexistente muestra mensaje vacío @normal', async ({ page }, testInfo) => {
+
+        await test.step('Navegar y buscar término inexistente', async () => {
+            await page.goto('/buscar');
+            await page.getByPlaceholder('Buscar productos...').fill('xyznoexiste123');
+            await page.getByRole('button', { name: 'Buscar' }).click();
+        });
+
+        await test.step('Verificar mensaje de sin resultados', async () => {
+            await expect(page.getByText('No se encontraron resultados')).toBeVisible();
+            await testInfo.attach('sin-resultados', {
+                body: await page.screenshot(),
+                contentType: 'image/png',
+            });
+        });
+    });
+});
+
+// EJERCICIO ADICIONAL: Configura playwright.config.ts con:
+// 1. globalSetup que genere metadata de entorno automáticamente
+// 2. screenshot: 'on' para capturar evidencia en cada test
+// 3. trace: 'retain-on-failure' para traces en fallos
+
+// playwright.config.ts sugerido:
+// --------------------------------------------------
+// import { defineConfig } from '@playwright/test';
+//
+// export default defineConfig({
+//     globalSetup: './global-setup.ts',
+//     use: {
+//         screenshot: 'only-on-failure',
+//         trace: 'retain-on-failure',
+//     },
+//     reporter: [
+//         ['html', { open: 'never' }],
+//         ['list'],
+//     ],
+// });
+// --------------------------------------------------
+
+// Ejecutar con:
+// npx playwright test tests/busqueda-allure.spec.ts
+// npx playwright show-report</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🧊 Tip: Allure como evidencia de testing</h4>

@@ -70,7 +70,18 @@ const LESSON_127 = {
 
         <h3>Prevencion: deshabilitar animaciones</h3>
 
-        <pre><code class="python"># conftest.py - Deshabilitar animaciones CSS en CI
+        <div class="code-tabs" data-code-id="L127-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Deshabilitar animaciones CSS en CI
 import pytest
 import os
 
@@ -87,10 +98,46 @@ def disable_animations(page):
             }
         """)
     yield</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// global-setup.ts - Deshabilitar animaciones CSS en CI
+import { test as base } from '@playwright/test';
+
+// Fixture auto-aplicado que deshabilita animaciones en CI
+export const test = base.extend({
+    page: async ({ page }, use) => {
+        if (process.env.CI) {
+            await page.addStyleTag({
+                content: \`
+                    *, *::before, *::after {
+                        animation-duration: 0s !important;
+                        animation-delay: 0s !important;
+                        transition-duration: 0s !important;
+                        transition-delay: 0s !important;
+                    }
+                \`
+            });
+        }
+        await use(page);
+    }
+});</code></pre>
+</div>
+</div>
 
         <h3>Prevencion: waits correctos</h3>
 
-        <pre><code class="python">from playwright.sync_api import expect
+        <div class="code-tabs" data-code-id="L127-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python">from playwright.sync_api import expect
 
 # ❌ MAL: sleep fijo
 import time
@@ -117,10 +164,52 @@ with page.expect_response("**/api/products") as response_info:
     page.click("[data-testid='load-more']")
 response = response_info.value
 assert response.ok</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">import { expect } from '@playwright/test';
+
+// ❌ MAL: sleep fijo con promesa
+await new Promise(resolve => setTimeout(resolve, 3000));
+await page.click('#button');
+
+// ❌ MAL: waitForTimeout (version Playwright de sleep)
+await page.waitForTimeout(3000);
+await page.click('#button');
+
+// ✅ BIEN: Auto-wait de Playwright (espera automaticamente)
+await page.click('#button'); // Espera a visible + habilitado + estable
+
+// ✅ BIEN: expect() con retry automatico
+await expect(page.locator('.result')).toBeVisible();
+await expect(page.locator('.count')).toHaveText('5');
+
+// ✅ BIEN: Esperar estado especifico
+await page.waitForURL('**/dashboard');
+await page.locator('[data-testid="spinner"]').waitFor({ state: 'hidden' });
+
+// ✅ BIEN: Esperar respuesta de red
+const [response] = await Promise.all([
+    page.waitForResponse('**/api/products'),
+    page.click('[data-testid="load-more"]')
+]);
+expect(response.ok()).toBeTruthy();</code></pre>
+</div>
+</div>
 
         <h3>Prevencion: manejo de popups y overlays</h3>
 
-        <pre><code class="python"># conftest.py - Cerrar cookie banners y modales automaticamente
+        <div class="code-tabs" data-code-id="L127-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Cerrar cookie banners y modales automaticamente
 @pytest.fixture(autouse=True)
 def handle_cookie_banner(page):
     """Cerrar cookie banner si aparece."""
@@ -148,11 +237,53 @@ def dismiss_overlays(page):
         observer.observe(document.body, { childList: true, subtree: true });
     """)
     yield</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// fixtures.ts - Cerrar cookie banners y modales automaticamente
+import { test as base } from '@playwright/test';
+
+export const test = base.extend({
+    // Fixture auto-aplicado para manejar overlays
+    page: async ({ page }, use) => {
+        // Auto-aceptar dialogos del navegador
+        page.on('dialog', async (dialog) => {
+            await dialog.accept();
+        });
+
+        // Cerrar cookie banner despues de navegacion
+        await page.addInitScript(() => {
+            // Auto-aceptar cookies si el banner existe
+            const observer = new MutationObserver(() => {
+                const acceptBtn = document.querySelector('[data-testid="accept-cookies"]');
+                if (acceptBtn) {
+                    (acceptBtn as HTMLElement).click();
+                    observer.disconnect();
+                }
+            });
+            observer.observe(document.body, { childList: true, subtree: true });
+        });
+
+        await use(page);
+    }
+});</code></pre>
+</div>
+</div>
 
         <h3>Diagnostico: Playwright Trace Viewer</h3>
         <p>La herramienta mas poderosa para diagnosticar flaky tests es el <strong>Trace Viewer</strong>:</p>
 
-        <pre><code class="python"># conftest.py - Capturar trace en CADA fallo
+        <div class="code-tabs" data-code-id="L127-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Capturar trace en CADA fallo
 import os
 from pathlib import Path
 
@@ -189,10 +320,69 @@ def capture_trace_on_failure(request, page):
 # - Snapshots del DOM
 # - Network log
 # - Console log</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Capturar trace en CADA fallo
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        // Capturar trace solo cuando un test falla (on-first-retry)
+        // o en cada intento con 'on' / 'retain-on-failure'
+        trace: 'retain-on-failure',
+        // Incluir screenshots, snapshots y sources
+        screenshot: 'only-on-failure',
+        video: 'retain-on-failure',
+    },
+    // Directorio donde se guardan los resultados
+    outputDir: 'test-results/',
+});
+
+// Alternativa: capturar trace manualmente en un test
+import { test, expect } from '@playwright/test';
+
+test('ejemplo con trace manual', async ({ page, context }) => {
+    // Iniciar tracing manualmente
+    await context.tracing.start({
+        screenshots: true,
+        snapshots: true,
+        sources: true,
+    });
+
+    // ... acciones del test ...
+    await page.goto('https://ejemplo.com');
+
+    // Detener y guardar trace
+    await context.tracing.stop({
+        path: 'test-results/traces/mi-test.zip'
+    });
+});
+
+// Ver el trace:
+// npx playwright show-trace test-results/traces/mi-test.zip
+// Abre un visor interactivo con:
+// - Timeline de acciones
+// - Screenshots de cada paso
+// - Snapshots del DOM
+// - Network log
+// - Console log</code></pre>
+</div>
+</div>
 
         <h3>Diagnostico: analisis de patrones de flakiness</h3>
 
-        <pre><code class="python"># scripts/flaky_analysis.py
+        <div class="code-tabs" data-code-id="L127-5">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># scripts/flaky_analysis.py
 """Analizar historial de ejecuciones para detectar patrones de flakiness."""
 import json
 import os
@@ -241,6 +431,87 @@ def detect_pattern(results):
         return "RARE - fallo aislado"
     else:
         return "INTERMITTENT - fallo aleatorio"</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// scripts/flaky-analysis.ts
+// Analizar historial de ejecuciones para detectar patrones de flakiness
+import * as fs from 'fs';
+import * as path from 'path';
+import { XMLParser } from 'fast-xml-parser';
+
+interface FlakyTest {
+    test: string;
+    totalRuns: number;
+    failures: number;
+    flakyRate: string;
+    pattern: string;
+}
+
+function analyzeTestHistory(
+    reportsDir: string = 'reports/history',
+    days: number = 30
+): FlakyTest[] {
+    // test_name -> [pass/fail, ...]
+    const testResults = new Map&lt;string, string[]&gt;();
+    const parser = new XMLParser({ ignoreAttributes: false });
+
+    // Leer archivos JUnit XML del directorio
+    const files = fs.readdirSync(reportsDir)
+        .filter(f =&gt; f.startsWith('junit-') &amp;&amp; f.endsWith('.xml'));
+
+    for (const file of files) {
+        const xml = fs.readFileSync(path.join(reportsDir, file), 'utf-8');
+        const parsed = parser.parse(xml);
+
+        // Parsear resultados (simplificado)
+        const testcases = parsed?.testsuites?.testsuite?.testcase ?? [];
+        const cases = Array.isArray(testcases) ? testcases : [testcases];
+
+        for (const tc of cases) {
+            const name = tc['@_name'];
+            const failed = tc.failure !== undefined;
+            if (!testResults.has(name)) {
+                testResults.set(name, []);
+            }
+            testResults.get(name)!.push(failed ? 'fail' : 'pass');
+        }
+    }
+
+    // Calcular metricas de flakiness
+    const flakyTests: FlakyTest[] = [];
+    for (const [name, results] of testResults.entries()) {
+        const total = results.length;
+        const failures = results.filter(r =&gt; r === 'fail').length;
+
+        if (total &gt;= 5 &amp;&amp; failures &gt; 0 &amp;&amp; failures &lt; total) {
+            // Es flaky: a veces pasa, a veces falla
+            const flakyRate = failures / total;
+            flakyTests.push({
+                test: name,
+                totalRuns: total,
+                failures,
+                flakyRate: \`\${(flakyRate * 100).toFixed(1)}%\`,
+                pattern: detectPattern(results),
+            });
+        }
+    }
+
+    return flakyTests.sort((a, b) =&gt; b.failures - a.failures);
+}
+
+function detectPattern(results: string[]): string {
+    // Detectar patron de fallo
+    const recent = results.slice(-10);
+    if (recent.slice(-3).every(r =&gt; r === 'fail')) {
+        return 'DEGRADING - ultimas 3 ejecuciones fallaron';
+    } else if (recent.filter(r =&gt; r === 'fail').length === 1) {
+        return 'RARE - fallo aislado';
+    } else {
+        return 'INTERMITTENT - fallo aleatorio';
+    }
+}</code></pre>
+</div>
+</div>
 
         <h3>Checklist anti-flakiness</h3>
 

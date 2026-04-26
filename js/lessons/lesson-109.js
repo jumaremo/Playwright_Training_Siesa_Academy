@@ -150,7 +150,18 @@ log_cli_date_format = %H:%M:%S</code></pre>
         <p>Extendemos pytest-html para incluir <strong>screenshots automáticos de fallos</strong>,
         información del entorno y estilos corporativos.</p>
 
-        <pre><code class="python"># conftest.py — Parte 1: Configuración de pytest-html
+        <div class="code-tabs" data-code-id="L109-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py — Parte 1: Configuración de pytest-html
 """
 conftest.py — Pipeline de reporting completo.
 Integra: pytest-html customizado, Allure, traces, métricas y notificaciones.
@@ -273,6 +284,90 @@ def pytest_runtest_makereport(item, call):
             metrics.record_fail(item.name, duration, str(report.longrepr))
         elif report.skipped:
             metrics.record_skip(item.name, report.longrepr[2])</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts — Parte 1: Configuración del reporter custom
+// Pipeline de reporting completo.
+// Integra: reporter HTML custom, traces, métricas y notificaciones.
+import {
+  test, expect, Page, Browser, BrowserContext,
+  type FullConfig, type FullResult, type Reporter,
+  type Suite, type TestCase, type TestResult
+} from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+import { MetricsCollector } from './reporting/metrics-collector';
+import { SlackNotifier } from './reporting/slack-notifier';
+import { HistoryTracker } from './reporting/history-tracker';
+import { DashboardGenerator } from './reporting/dashboard-generator';
+
+// --- Rutas ---
+const PROJECT_ROOT = path.resolve(__dirname);
+const REPORTS_DIR = path.join(PROJECT_ROOT, 'reports');
+const SCREENSHOTS_DIR = path.join(PROJECT_ROOT, 'test-results', 'screenshots');
+const TRACES_DIR = path.join(REPORTS_DIR, 'traces');
+const HISTORY_DIR = path.join(REPORTS_DIR, 'history');
+
+// --- Instancias globales ---
+const metrics = new MetricsCollector();
+const history = new HistoryTracker(HISTORY_DIR);
+
+
+// =====================================================
+// REPORTER CUSTOM: Personalización del reporte HTML
+// =====================================================
+
+class QAPipelineReporter implements Reporter {
+  /**
+   * Reporter personalizado que:
+   * 1. Captura screenshots en fallos y los embebe en el reporte.
+   * 2. Registra resultados en el MetricsCollector.
+   * 3. Genera dashboard y envía notificaciones al finalizar.
+   */
+
+  onBegin(config: FullConfig, suite: Suite): void {
+    console.log(\`QA Pipeline — Iniciando ejecución de \${suite.allTests().length} tests\`);
+  }
+
+  async onTestEnd(test: TestCase, result: TestResult): Promise&lt;void&gt; {
+    const duration = result.duration / 1000; // ms a segundos
+
+    if (result.status === 'passed') {
+      metrics.recordPass(test.title, duration);
+    } else if (result.status === 'failed') {
+      // --- Screenshot en fallos ---
+      if (!fs.existsSync(SCREENSHOTS_DIR)) {
+        fs.mkdirSync(SCREENSHOTS_DIR, { recursive: true });
+      }
+      const screenshotPath = path.join(
+        SCREENSHOTS_DIR,
+        \`\${test.title.replace(/\\s+/g, '_')}_\${Date.now()}.png\`
+      );
+
+      // Los screenshots se adjuntan automáticamente via attachments
+      for (const attachment of result.attachments) {
+        if (attachment.contentType === 'image/png' && attachment.body) {
+          fs.writeFileSync(screenshotPath, attachment.body);
+          console.error(\`Screenshot: \${screenshotPath}\`);
+        }
+      }
+
+      const errorMsg = result.error?.message ?? '';
+      metrics.recordFail(test.title, duration, errorMsg);
+    } else if (result.status === 'skipped') {
+      metrics.recordSkip(test.title, 'Test omitido');
+    }
+  }
+
+  async onEnd(result: FullResult): Promise&lt;void&gt; {
+    // El resumen y notificaciones se manejan en onEnd (ver Parte 3)
+  }
+}
+
+export default QAPipelineReporter;</code></pre>
+</div>
+</div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Consejo SIESA</h4>
@@ -287,7 +382,18 @@ def pytest_runtest_makereport(item, call):
         <p>Integramos Allure para generar reportes interactivos con <strong>jerarquía de features</strong>,
         <strong>severity markers</strong> y <strong>adjuntos automáticos</strong>.</p>
 
-        <pre><code class="python"># tests/test_login.py
+        <div class="code-tabs" data-code-id="L109-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># tests/test_login.py
 """
 Tests de autenticación con decoradores Allure completos.
 Demuestra: @allure.feature, @allure.story, @allure.step,
@@ -396,6 +502,125 @@ class TestLogin:
             expect(page.locator("#flash")).to_contain_text(
                 "You logged out"
             )</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// tests/login.spec.ts
+// Tests de autenticación con steps y annotations de Playwright.
+// Equivalente a Allure: test.describe (feature/story), test.step,
+// test.info().annotations, test.info().attach.
+import { test, expect, type Page } from '@playwright/test';
+
+test.describe('Autenticación > Login', () => {
+  // Suite de tests de login con reporting Playwright completo
+
+  test('Login con credenciales válidas @smoke @critical', async ({ page }) => {
+    // Login exitoso con credenciales correctas
+    test.info().annotations.push(
+      { type: 'feature', description: 'Autenticación' },
+      { type: 'story', description: 'Login exitoso' },
+      { type: 'severity', description: 'critical' }
+    );
+
+    await test.step('Navegar a la página de login', async () => {
+      await page.goto('/login');
+      const screenshot = await page.screenshot();
+      await test.info().attach('01-pagina-login', {
+        body: screenshot,
+        contentType: 'image/png',
+      });
+    });
+
+    await test.step('Ingresar credenciales válidas', async () => {
+      await page.getByLabel('Username').fill('tomsmith');
+      await page.getByLabel('Password').fill('SuperSecretPassword!');
+    });
+
+    await test.step('Hacer clic en Login', async () => {
+      await page.getByRole('button', { name: 'Login' }).click();
+    });
+
+    await test.step('Verificar redirección al área segura', async () => {
+      await expect(page).toHaveURL(/\\/secure/);
+      await expect(page.getByText('You logged into')).toBeVisible();
+      const screenshot = await page.screenshot();
+      await test.info().attach('02-login-exitoso', {
+        body: screenshot,
+        contentType: 'image/png',
+      });
+    });
+  });
+
+  test('Login con credenciales inválidas', async ({ page }) => {
+    // Login fallido muestra mensaje de error
+    test.info().annotations.push(
+      { type: 'story', description: 'Login fallido' },
+      { type: 'severity', description: 'normal' }
+    );
+
+    await test.step('Navegar a login e ingresar credenciales inválidas', async () => {
+      await page.goto('/login');
+      await page.getByLabel('Username').fill('usuario_falso');
+      await page.getByLabel('Password').fill('clave_erronea');
+      await page.getByRole('button', { name: 'Login' }).click();
+    });
+
+    await test.step('Verificar mensaje de error', async () => {
+      const error = page.locator('#flash');
+      await expect(error).toBeVisible();
+      await expect(error).toContainText('Your username is invalid!');
+      const screenshot = await page.screenshot();
+      await test.info().attach('login-error', {
+        body: screenshot,
+        contentType: 'image/png',
+      });
+    });
+  });
+
+  test('Login con campos vacíos', async ({ page }) => {
+    // Login sin datos muestra error
+    test.info().annotations.push(
+      { type: 'story', description: 'Login fallido' },
+      { type: 'severity', description: 'normal' }
+    );
+
+    await test.step('Intentar login sin completar campos', async () => {
+      await page.goto('/login');
+      await page.getByRole('button', { name: 'Login' }).click();
+    });
+
+    await test.step('Verificar que se muestra error', async () => {
+      const error = page.locator('#flash');
+      await expect(error).toBeVisible();
+    });
+  });
+
+  test('Logout después de login exitoso @smoke @critical', async ({ page }) => {
+    // Logout redirige al login con mensaje de confirmación
+    test.info().annotations.push(
+      { type: 'story', description: 'Logout' },
+      { type: 'severity', description: 'critical' }
+    );
+
+    await test.step('Login', async () => {
+      await page.goto('/login');
+      await page.getByLabel('Username').fill('tomsmith');
+      await page.getByLabel('Password').fill('SuperSecretPassword!');
+      await page.getByRole('button', { name: 'Login' }).click();
+      await expect(page).toHaveURL(/\\/secure/);
+    });
+
+    await test.step('Ejecutar logout', async () => {
+      await page.getByRole('link', { name: 'Logout' }).click();
+    });
+
+    await test.step('Verificar redirección a login', async () => {
+      await expect(page).toHaveURL(/\\/login/);
+      await expect(page.locator('#flash')).toContainText('You logged out');
+    });
+  });
+});</code></pre>
+</div>
+</div>
 
         <pre><code class="bash"># Generar reportes Allure
 pytest tests/ --alluredir=reports/allure-results --clean-alluredir
@@ -413,7 +638,18 @@ allure serve reports/allure-results</code></pre>
         <p>Configuramos Playwright para <strong>capturar traces solo cuando un test falla</strong>,
         organizándolos en una estructura limpia con timestamps.</p>
 
-        <pre><code class="python"># conftest.py — Parte 2: Trace collection automático
+        <div class="code-tabs" data-code-id="L109-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py — Parte 2: Trace collection automático
 # =====================================================
 # TRACES: Recolección automática en fallos
 # =====================================================
@@ -501,6 +737,91 @@ def save_trace_on_failure(request, context_with_tracing):
             context_with_tracing.tracing.stop()
         except Exception:
             pass</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts — Parte 2: Trace collection automático
+// =====================================================
+// TRACES: Recolección automática en fallos via config
+// =====================================================
+import { defineConfig, devices } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const TRACES_DIR = path.join(__dirname, 'reports', 'traces');
+
+export default defineConfig({
+  // Configurar base URL y viewport globalmente
+  use: {
+    baseURL: 'https://the-internet.herokuapp.com',
+    viewport: { width: 1280, height: 720 },
+    ignoreHTTPSErrors: true,
+
+    // Trace automático: solo en primer reintento tras fallo
+    trace: 'retain-on-failure',
+    screenshot: 'only-on-failure',
+  },
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+
+  // Reporter custom + HTML built-in
+  reporter: [
+    ['html', { open: 'never', outputFolder: 'reports/html' }],
+    ['./reporting/qa-pipeline-reporter.ts'],
+  ],
+});
+
+
+// --- Fixture para organizar traces por fecha ---
+// fixtures/trace-organizer.ts
+import { test as base, type TestInfo } from '@playwright/test';
+
+export const test = base.extend({
+  // afterEach automático: mover traces a carpetas por fecha
+  // eslint-disable-next-line no-empty-pattern
+  saveTraceOnFailure: [async ({}, use, testInfo: TestInfo) => {
+    await use();
+
+    // Si el test falló y hay attachments de trace
+    if (testInfo.status === 'failed') {
+      const fecha = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+      const traceDir = path.join(TRACES_DIR, fecha);
+      if (!fs.existsSync(traceDir)) {
+        fs.mkdirSync(traceDir, { recursive: true });
+      }
+
+      const testName = testInfo.title
+        .replace(/\\[/g, '_')
+        .replace(/\\]/g, '')
+        .replace(/\\s+/g, '_');
+
+      // Copiar trace a carpeta organizada por fecha
+      for (const attachment of testInfo.attachments) {
+        if (attachment.name === 'trace' && attachment.path) {
+          const destPath = path.join(traceDir, \`\${testName}.zip\`);
+          try {
+            fs.copyFileSync(attachment.path, destPath);
+            console.log(\`Trace guardado: \${destPath}\`);
+
+            // Adjuntar trace al reporte de Playwright
+            await testInfo.attach(\`trace-\${testName}\`, {
+              path: destPath,
+              contentType: 'application/zip',
+            });
+          } catch (e) {
+            console.warn(\`Error guardando trace: \${e}\`);
+          }
+        }
+      }
+    }
+  }, { auto: true }],
+});</code></pre>
+</div>
+</div>
 
         <pre><code class="bash"># Ver un trace guardado con Trace Viewer
 playwright show-trace reports/traces/2024-12-15/test_login_valido.zip
@@ -523,7 +844,18 @@ find reports/traces/ -type f -name "*.zip" -mtime +7 -delete</code></pre>
         <p>Clase que recolecta métricas detalladas de cada ejecución: pass/fail/skip, duración,
         tests flaky, y mensajes de error para análisis posterior.</p>
 
-        <pre><code class="python"># reporting/metrics_collector.py
+        <div class="code-tabs" data-code-id="L109-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># reporting/metrics_collector.py
 """
 MetricsCollector — Recolecta métricas de ejecución de tests.
 Se alimenta desde conftest.py via hooks de pytest.
@@ -663,13 +995,168 @@ class MetricsCollector:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(summary, f, indent=2, ensure_ascii=False)
         return str(path)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// reporting/metrics-collector.ts
+// MetricsCollector — Recolecta métricas de ejecución de tests.
+// Se alimenta desde el reporter custom de Playwright.
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface TestResult {
+  /** Resultado individual de un test. */
+  name: string;
+  status: 'passed' | 'failed' | 'skipped';  // Estado del test
+  duration: number;                           // Duración en segundos
+  errorMessage: string;
+  timestamp: string;
+  retryCount: number;
+}
+
+function createTestResult(
+  name: string,
+  status: 'passed' | 'failed' | 'skipped',
+  duration: number,
+  errorMessage = '',
+  retryCount = 0
+): TestResult {
+  return {
+    name,
+    status,
+    duration,
+    errorMessage,
+    timestamp: new Date().toISOString(),
+    retryCount,
+  };
+}
+
+export class MetricsCollector {
+  /**
+   * Recolector de métricas que acumula resultados durante la ejecución
+   * y genera un resumen al finalizar.
+   *
+   * Uso en el reporter:
+   *   const metrics = new MetricsCollector();
+   *   metrics.recordPass('test_login', 1.23);
+   *   metrics.recordFail('test_api', 0.45, 'AssertionError: ...');
+   *   const summary = metrics.getSummary();
+   */
+
+  private results: TestResult[] = [];
+  private startTime: number = Date.now();
+  private flakyTests: Record&lt;string, number&gt; = {};  // testName -> retryCount
+
+  recordPass(name: string, duration: number): void {
+    /** Registrar un test que pasó. */
+    this.results.push(
+      createTestResult(name, 'passed', duration)
+    );
+  }
+
+  recordFail(name: string, duration: number, error = ''): void {
+    /** Registrar un test que falló. */
+    this.results.push(
+      createTestResult(name, 'failed', duration, error.slice(0, 500))
+    );
+  }
+
+  recordSkip(name: string, reason = ''): void {
+    /** Registrar un test que fue omitido. */
+    this.results.push(
+      createTestResult(name, 'skipped', 0.0, reason)
+    );
+  }
+
+  recordFlaky(name: string, retries: number): void {
+    /** Registrar un test como flaky (pasó después de reintentos). */
+    this.flakyTests[name] = retries;
+  }
+
+  getSummary(): Record&lt;string, unknown&gt; {
+    /**
+     * Generar resumen completo de la ejecución.
+     * Retorna: objeto con total, passed, failed, skipped, duration,
+     * passRate, flakyTests, slowestTests, failures.
+     */
+    const totalDuration = (Date.now() - this.startTime) / 1000;
+    const passed = this.results.filter(r =&gt; r.status === 'passed');
+    const failed = this.results.filter(r =&gt; r.status === 'failed');
+    const skipped = this.results.filter(r =&gt; r.status === 'skipped');
+
+    // Top 5 tests más lentos
+    const sortedByDuration = [...this.results]
+      .sort((a, b) =&gt; b.duration - a.duration);
+    const slowest = sortedByDuration.slice(0, 5).map(r =&gt; ({
+      name: r.name,
+      duration: Math.round(r.duration * 1000) / 1000,
+    }));
+
+    // Detalle de failures
+    const failures = failed.map(r =&gt; ({
+      name: r.name,
+      error: r.errorMessage,
+      duration: Math.round(r.duration * 1000) / 1000,
+    }));
+
+    const total = this.results.length;
+    const passRate = total &gt; 0
+      ? Math.round((passed.length / total) * 1000) / 10
+      : 0.0;
+
+    const avgDuration = total &gt; 0
+      ? Math.round(
+          (this.results.reduce((sum, r) =&gt; sum + r.duration, 0) / total)
+          * 1000
+        ) / 1000
+      : 0.0;
+
+    return {
+      timestamp: new Date().toISOString(),
+      total_duration: Math.round(totalDuration * 100) / 100,
+      total,
+      passed: passed.length,
+      failed: failed.length,
+      skipped: skipped.length,
+      pass_rate: passRate,
+      flaky_tests: this.flakyTests,
+      flaky_count: Object.keys(this.flakyTests).length,
+      slowest_tests: slowest,
+      failures,
+      avg_duration: avgDuration,
+    };
+  }
+
+  saveToJson(outputPath: string): string {
+    /** Guardar métricas en archivo JSON. */
+    const dir = path.dirname(outputPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    const summary = this.getSummary();
+    fs.writeFileSync(outputPath, JSON.stringify(summary, null, 2), 'utf-8');
+    return outputPath;
+  }
+}</code></pre>
+</div>
+</div>
 
         <h3>🖥️ Paso 7: Dashboard HTML con Jinja2</h3>
         <p>Generador de dashboard ejecutivo con <strong>tarjetas de resumen</strong>,
         <strong>tabla de failures</strong>, <strong>gráfico de tendencias</strong> y
         <strong>análisis de tests flaky</strong>.</p>
 
-        <pre><code class="python"># reporting/dashboard_generator.py
+        <div class="code-tabs" data-code-id="L109-5">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># reporting/dashboard_generator.py
 """
 DashboardGenerator — Genera un dashboard HTML con Jinja2.
 Incluye summary cards, failure analysis, tendencias y flaky tests.
@@ -753,6 +1240,141 @@ class DashboardGenerator:
         with open(path, "w", encoding="utf-8") as f:
             f.write(html)
         return str(path)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// reporting/dashboard-generator.ts
+// DashboardGenerator — Genera un dashboard HTML con template literals.
+// Incluye summary cards, failure analysis, tendencias y flaky tests.
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface TrendData {
+  labels: string[];
+  passRates: number[];
+  totals: number[];
+  failures: number[];
+  durations: number[];
+}
+
+export class DashboardGenerator {
+  /**
+   * Genera un dashboard HTML rico a partir de las métricas
+   * recolectadas por MetricsCollector.
+   *
+   * Uso:
+   *   const generator = new DashboardGenerator('reporting/templates');
+   *   const html = generator.generate(metricsSummary, historyData);
+   *   generator.save(html, 'reports/dashboard/index.html');
+   */
+
+  private templateDir: string;
+
+  constructor(templateDir = 'reporting/templates') {
+    this.templateDir = templateDir;
+  }
+
+  generate(
+    summary: Record&lt;string, unknown&gt;,
+    history: Record&lt;string, unknown&gt;[] = []
+  ): string {
+    /**
+     * Genera el HTML del dashboard.
+     * @param summary - Diccionario de métricas (de MetricsCollector.getSummary())
+     * @param history - Lista de ejecuciones anteriores (de HistoryTracker)
+     * @returns String con el HTML completo del dashboard.
+     */
+    const templatePath = path.join(this.templateDir, 'dashboard.html');
+
+    // Si existe el template en disco, leerlo; si no, usar inline
+    if (fs.existsSync(templatePath)) {
+      const template = fs.readFileSync(templatePath, 'utf-8');
+      const trendData = this.prepareTrendData(history);
+      const generatedAt = new Date().toLocaleString('es-CO');
+      // Reemplazar placeholders Jinja2-style con valores reales
+      return this.renderTemplate(template, summary, trendData, generatedAt);
+    }
+
+    // Fallback: generar HTML inline con template literals
+    const trendData = this.prepareTrendData(history);
+    const generatedAt = new Date().toLocaleString('es-CO');
+    return this.generateInlineHtml(summary, trendData, generatedAt);
+  }
+
+  private prepareTrendData(
+    history: Record&lt;string, unknown&gt;[]
+  ): TrendData {
+    /** Preparar datos de tendencia para gráficos. */
+    // Últimas 10 ejecuciones para el gráfico
+    const recent = history.length &gt; 10
+      ? history.slice(-10)
+      : history;
+
+    return {
+      labels: recent.map(
+        h =&gt; String(h.timestamp ?? '').slice(0, 10)
+      ),
+      passRates: recent.map(
+        h =&gt; Number(h.pass_rate ?? 0)
+      ),
+      totals: recent.map(
+        h =&gt; Number(h.total ?? 0)
+      ),
+      failures: recent.map(
+        h =&gt; Number(h.failed ?? 0)
+      ),
+      durations: recent.map(
+        h =&gt; Number(h.total_duration ?? 0)
+      ),
+    };
+  }
+
+  private renderTemplate(
+    template: string,
+    summary: Record&lt;string, unknown&gt;,
+    trendData: TrendData,
+    generatedAt: string
+  ): string {
+    /** Reemplazar placeholders básicos en el template HTML. */
+    let html = template;
+    // Reemplazos simples de variables Jinja2
+    html = html.replace(/\\{\\{\\s*generated_at\\s*\\}\\}/g, generatedAt);
+    html = html.replace(/\\{\\{\\s*summary\\.total\\s*\\}\\}/g, String(summary.total));
+    html = html.replace(/\\{\\{\\s*summary\\.passed\\s*\\}\\}/g, String(summary.passed));
+    html = html.replace(/\\{\\{\\s*summary\\.failed\\s*\\}\\}/g, String(summary.failed));
+    html = html.replace(/\\{\\{\\s*summary\\.skipped\\s*\\}\\}/g, String(summary.skipped));
+    html = html.replace(/\\{\\{\\s*summary\\.pass_rate\\s*\\}\\}/g, String(summary.pass_rate));
+    html = html.replace(/\\{\\{\\s*summary\\.total_duration\\s*\\}\\}/g, String(summary.total_duration));
+    html = html.replace(/\\{\\{\\s*summary\\.flaky_count\\s*\\}\\}/g, String(summary.flaky_count));
+    return html;
+  }
+
+  private generateInlineHtml(
+    summary: Record&lt;string, unknown&gt;,
+    trendData: TrendData,
+    generatedAt: string
+  ): string {
+    /** Generar HTML inline como fallback. */
+    return \`&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;
+      &lt;title&gt;QA Dashboard&lt;/title&gt;
+    &lt;/head&gt;&lt;body&gt;
+      &lt;h1&gt;QA Dashboard — \${generatedAt}&lt;/h1&gt;
+      &lt;p&gt;Total: \${summary.total} | Passed: \${summary.passed}
+      | Failed: \${summary.failed} | Rate: \${summary.pass_rate}%&lt;/p&gt;
+    &lt;/body&gt;&lt;/html&gt;\`;
+  }
+
+  save(html: string, outputPath: string): string {
+    /** Guardar el dashboard HTML en disco. */
+    const dir = path.dirname(outputPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(outputPath, html, 'utf-8');
+    return outputPath;
+  }
+}</code></pre>
+</div>
+</div>
 
         <pre><code class="html">&lt;!-- reporting/templates/dashboard.html --&gt;
 &lt;!DOCTYPE html&gt;
@@ -958,7 +1580,18 @@ class DashboardGenerator:
         <p>Clase que envía un <strong>mensaje formateado a Slack</strong> cuando hay tests fallidos.
         Incluye un resumen con contadores, lista de failures y link al reporte.</p>
 
-        <pre><code class="python"># reporting/slack_notifier.py
+        <div class="code-tabs" data-code-id="L109-6">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># reporting/slack_notifier.py
 """
 SlackNotifier — Envía notificaciones a Slack vía Incoming Webhook.
 Se activa cuando hay tests fallidos al final de la sesión.
@@ -1123,6 +1756,176 @@ class SlackNotifier:
             })
 
         return {"channel": channel, "blocks": blocks}</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// reporting/slack-notifier.ts
+// SlackNotifier — Envía notificaciones a Slack vía Incoming Webhook.
+// Se activa cuando hay tests fallidos al final de la sesión.
+
+export class SlackNotifier {
+  /**
+   * Envía notificaciones a un canal de Slack cuando hay fallos.
+   *
+   * Uso:
+   *   const notifier = new SlackNotifier('https://hooks.slack.com/...');
+   *   await notifier.sendSummary(metricsSummary, 'https://...');
+   */
+
+  private webhookUrl: string | undefined;
+  private enabled: boolean;
+
+  constructor(webhookUrl?: string) {
+    /**
+     * @param webhookUrl - URL del Incoming Webhook de Slack.
+     *                     Si no se pasa, se lee de SLACK_WEBHOOK_URL.
+     */
+    this.webhookUrl = webhookUrl ?? process.env.SLACK_WEBHOOK_URL;
+    this.enabled = Boolean(this.webhookUrl);
+
+    if (!this.enabled) {
+      console.info(
+        'Slack notifier desactivado (no se configuró SLACK_WEBHOOK_URL)'
+      );
+    }
+  }
+
+  async sendSummary(
+    summary: Record&lt;string, any&gt;,
+    reportUrl = '',
+    channel = '#qa-alerts'
+  ): Promise&lt;boolean&gt; {
+    /**
+     * Envía resumen de ejecución a Slack.
+     * Solo envía si hay tests fallidos.
+     *
+     * @param summary - Métricas de MetricsCollector.getSummary()
+     * @param reportUrl - URL al reporte HTML completo
+     * @param channel - Canal de destino (por defecto #qa-alerts)
+     * @returns true si se envió correctamente, false si hubo error.
+     */
+    if (!this.enabled) {
+      console.info('Slack: notificación omitida (no configurado)');
+      return false;
+    }
+
+    if (summary.failed === 0) {
+      console.info('Slack: no se envía notificación (0 fallos)');
+      return true;
+    }
+
+    const payload = this.buildPayload(summary, reportUrl, channel);
+
+    try {
+      const response = await fetch(this.webhookUrl!, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+        signal: AbortSignal.timeout(10000),
+      });
+
+      if (!response.ok) {
+        throw new Error(\`HTTP \${response.status}: \${response.statusText}\`);
+      }
+
+      console.info('Slack: notificación enviada correctamente');
+      return true;
+    } catch (e) {
+      console.error(\`Slack: error al enviar notificación: \${e}\`);
+      return false;
+    }
+  }
+
+  private buildPayload(
+    summary: Record&lt;string, any&gt;,
+    reportUrl: string,
+    channel: string
+  ): Record&lt;string, unknown&gt; {
+    /** Construir el payload de Slack con bloques formateados. */
+    // Emoji según severidad
+    let statusEmoji: string;
+    if (summary.pass_rate &gt;= 95) {
+      statusEmoji = ':large_yellow_circle:';
+    } else if (summary.pass_rate &gt;= 80) {
+      statusEmoji = ':warning:';
+    } else {
+      statusEmoji = ':red_circle:';
+    }
+
+    // Lista de failures (máximo 5)
+    let failureLines = '';
+    const failures = (summary.failures ?? []) as Array&lt;Record&lt;string, any&gt;&gt;;
+    for (const f of failures.slice(0, 5)) {
+      const errorSnippet = String(f.error ?? '').slice(0, 100);
+      failureLines += \`  - \\\`\${f.name}\\\`: \${errorSnippet}\\n\`;
+    }
+
+    if (failures.length &gt; 5) {
+      failureLines += \`  _...y \${failures.length - 5} más_\\n\`;
+    }
+
+    const blocks: Record&lt;string, unknown&gt;[] = [
+      {
+        type: 'header',
+        text: {
+          type: 'plain_text',
+          text: \`\${statusEmoji} QA Pipeline — \${summary.failed} test(s) fallidos\`,
+        },
+      },
+      {
+        type: 'section',
+        fields: [
+          {
+            type: 'mrkdwn',
+            text: [
+              \`*Total:* \${summary.total}\`,
+              \`*Passed:* \${summary.passed}\`,
+              \`*Failed:* \${summary.failed}\`,
+            ].join('\\n'),
+          },
+          {
+            type: 'mrkdwn',
+            text: [
+              \`*Pass Rate:* \${summary.pass_rate}%\`,
+              \`*Duración:* \${summary.total_duration}s\`,
+              \`*Flaky:* \${summary.flaky_count}\`,
+            ].join('\\n'),
+          },
+        ],
+      },
+    ];
+
+    if (failureLines) {
+      blocks.push({
+        type: 'section',
+        text: {
+          type: 'mrkdwn',
+          text: \`*Failures:*\\n\${failureLines}\`,
+        },
+      });
+    }
+
+    if (reportUrl) {
+      blocks.push({
+        type: 'actions',
+        elements: [
+          {
+            type: 'button',
+            text: {
+              type: 'plain_text',
+              text: 'Ver Reporte Completo',
+            },
+            url: reportUrl,
+            style: 'primary',
+          },
+        ],
+      });
+    }
+
+    return { channel, blocks };
+  }
+}</code></pre>
+</div>
+</div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Consejo SIESA</h4>
@@ -1136,7 +1939,18 @@ class SlackNotifier:
         <p>Clase que almacena el resultado de cada ejecución en un archivo JSON y permite
         <strong>comparar tendencias a lo largo del tiempo</strong>.</p>
 
-        <pre><code class="python"># reporting/history_tracker.py
+        <div class="code-tabs" data-code-id="L109-7">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># reporting/history_tracker.py
 """
 HistoryTracker — Almacena resultados de ejecuciones en JSON.
 Permite comparar métricas entre runs y detectar degradaciones.
@@ -1284,6 +2098,182 @@ class HistoryTracker:
         """Guardar historial en archivo JSON."""
         with open(self.history_file, "w", encoding="utf-8") as f:
             json.dump(history, f, indent=2, ensure_ascii=False)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// reporting/history-tracker.ts
+// HistoryTracker — Almacena resultados de ejecuciones en JSON.
+// Permite comparar métricas entre runs y detectar degradaciones.
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface RunEntry {
+  run_id: number;
+  timestamp: string;
+  total: number;
+  passed: number;
+  failed: number;
+  skipped: number;
+  pass_rate: number;
+  total_duration: number;
+  flaky_count: number;
+  avg_duration: number;
+  failures: string[];
+}
+
+interface Comparison {
+  has_previous: boolean;
+  message?: string;
+  previous_run_id?: number;
+  pass_rate_delta?: number;
+  duration_delta?: number;
+  new_failures?: string[];
+  fixed_tests?: string[];
+  regression_detected?: boolean;
+}
+
+export class HistoryTracker {
+  /**
+   * Mantiene un historial de ejecuciones de tests en un archivo JSON.
+   * Permite detectar tendencias y degradaciones.
+   *
+   * Uso:
+   *   const tracker = new HistoryTracker('reports/history');
+   *   tracker.recordRun(metricsSummary);
+   *   const history = tracker.getHistory(10);
+   *   const comparison = tracker.compareWithPrevious(metricsSummary);
+   */
+
+  private static readonly HISTORY_FILE = 'test_history.json';
+  private historyDir: string;
+  private historyFile: string;
+
+  constructor(historyDir = 'reports/history') {
+    this.historyDir = historyDir;
+    if (!fs.existsSync(this.historyDir)) {
+      fs.mkdirSync(this.historyDir, { recursive: true });
+    }
+    this.historyFile = path.join(this.historyDir, HistoryTracker.HISTORY_FILE);
+  }
+
+  recordRun(summary: Record&lt;string, any&gt;): number {
+    /**
+     * Registrar el resultado de una ejecución.
+     * @param summary - Diccionario de métricas (MetricsCollector.getSummary())
+     * @returns Número total de ejecuciones en el historial.
+     */
+    const history = this.loadHistory();
+
+    const failures = (summary.failures ?? []) as Array&lt;Record&lt;string, any&gt;&gt;;
+    const runEntry: RunEntry = {
+      run_id: history.length + 1,
+      timestamp: String(summary.timestamp ?? new Date().toISOString()),
+      total: summary.total,
+      passed: summary.passed,
+      failed: summary.failed,
+      skipped: summary.skipped,
+      pass_rate: summary.pass_rate,
+      total_duration: summary.total_duration,
+      flaky_count: summary.flaky_count ?? 0,
+      avg_duration: summary.avg_duration ?? 0,
+      failures: failures.map((f: Record&lt;string, any&gt;) =&gt; String(f.name)),
+    };
+
+    history.push(runEntry);
+    this.saveHistory(history);
+
+    console.info(
+      \`Ejecución #\${runEntry.run_id} registrada \` +
+      \`(pass_rate: \${runEntry.pass_rate}%)\`
+    );
+    return history.length;
+  }
+
+  getHistory(lastN = 20): RunEntry[] {
+    /** Obtener las últimas N ejecuciones. */
+    const history = this.loadHistory();
+    return history.slice(-lastN);
+  }
+
+  getPreviousRun(): RunEntry | null {
+    /** Obtener la ejecución inmediatamente anterior. */
+    const history = this.loadHistory();
+    if (history.length &gt;= 2) {
+      return history[history.length - 2];
+    }
+    return null;
+  }
+
+  compareWithPrevious(current: Record&lt;string, any&gt;): Comparison {
+    /**
+     * Comparar ejecución actual con la anterior.
+     * @returns Objeto con deltas: passRateDelta, durationDelta,
+     * newFailures, fixedTests, regressionDetected.
+     */
+    const previous = this.getPreviousRun();
+    if (!previous) {
+      return {
+        has_previous: false,
+        message: 'No hay ejecución anterior para comparar.',
+      };
+    }
+
+    // Calcular deltas
+    const passRateDelta = current.pass_rate - previous.pass_rate;
+    const durationDelta = current.total_duration - previous.total_duration;
+
+    // Nuevos failures vs anterior
+    const prevFailures = new Set(previous.failures ?? []);
+    const currFailures = new Set(
+      ((current.failures ?? []) as Array&lt;Record&lt;string, any&gt;&gt;)
+        .map((f: Record&lt;string, any&gt;) =&gt; String(f.name))
+    );
+    const newFailures = [...currFailures].filter(f =&gt; !prevFailures.has(f));
+    const fixedTests = [...prevFailures].filter(f =&gt; !currFailures.has(f));
+
+    // Detectar regresión: pass rate bajó más de 5%
+    const regressionDetected = passRateDelta &lt; -5.0;
+
+    const comparison: Comparison = {
+      has_previous: true,
+      previous_run_id: previous.run_id,
+      pass_rate_delta: Math.round(passRateDelta * 10) / 10,
+      duration_delta: Math.round(durationDelta * 100) / 100,
+      new_failures: newFailures,
+      fixed_tests: fixedTests,
+      regression_detected: regressionDetected,
+    };
+
+    if (regressionDetected) {
+      console.warn(
+        \`REGRESION DETECTADA: pass rate bajó \` +
+        \`\${Math.abs(passRateDelta).toFixed(1)}% respecto a la \` +
+        \`ejecución anterior\`
+      );
+    }
+
+    return comparison;
+  }
+
+  private loadHistory(): RunEntry[] {
+    /** Cargar historial desde archivo JSON. */
+    if (fs.existsSync(this.historyFile)) {
+      const data = fs.readFileSync(this.historyFile, 'utf-8');
+      return JSON.parse(data) as RunEntry[];
+    }
+    return [];
+  }
+
+  private saveHistory(history: RunEntry[]): void {
+    /** Guardar historial en archivo JSON. */
+    fs.writeFileSync(
+      this.historyFile,
+      JSON.stringify(history, null, 2),
+      'utf-8'
+    );
+  }
+}</code></pre>
+</div>
+</div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ Importante: Regresiones automáticas</h4>
@@ -1298,7 +2288,18 @@ class HistoryTracker:
         <p>El <code>conftest.py</code> final conecta todos los componentes: métricas, traces,
         screenshots, Allure, notificaciones y tracking histórico.</p>
 
-        <pre><code class="python"># conftest.py — Parte 3: Session hooks (al final de la ejecución)
+        <div class="code-tabs" data-code-id="L109-8">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py — Parte 3: Session hooks (al final de la ejecución)
 # =====================================================
 # SESSION HOOKS: Al finalizar la ejecución
 # =====================================================
@@ -1363,6 +2364,99 @@ def pytest_sessionfinish(session, exitstatus):
     logger.info(f"  Duración: {summary['total_duration']}s")
     logger.info(f"  Flaky: {summary['flaky_count']}")
     logger.info("=" * 60)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// reporting/qa-pipeline-reporter.ts — Parte 3: onEnd (al final de la ejecución)
+// =====================================================
+// SESSION END: Al finalizar la ejecución
+// =====================================================
+import * as path from 'path';
+import { MetricsCollector } from './metrics-collector';
+import { SlackNotifier } from './slack-notifier';
+import { HistoryTracker } from './history-tracker';
+import { DashboardGenerator } from './dashboard-generator';
+import type { FullResult, Reporter } from '@playwright/test/reporter';
+
+const PROJECT_ROOT = path.resolve(__dirname, '..');
+const REPORTS_DIR = path.join(PROJECT_ROOT, 'reports');
+const HISTORY_DIR = path.join(REPORTS_DIR, 'history');
+
+// Instancias globales (compartidas con onTestEnd)
+const metrics = new MetricsCollector();
+const history = new HistoryTracker(HISTORY_DIR);
+
+// En el reporter custom, el método onEnd:
+class QAPipelineReporter implements Reporter {
+  // ... (onBegin y onTestEnd definidos en Parte 1)
+
+  async onEnd(result: FullResult): Promise&lt;void&gt; {
+    /**
+     * Se ejecuta al terminar TODA la sesión de tests.
+     * Genera el dashboard, registra historial y envía notificación.
+     */
+    const summary = metrics.getSummary();
+
+    if ((summary.total as number) === 0) {
+      return; // No hubo tests, no hacer nada
+    }
+
+    // 1. Guardar métricas en JSON
+    const metricsPath = path.join(REPORTS_DIR, 'metrics.json');
+    metrics.saveToJson(metricsPath);
+    console.info(\`Métricas guardadas en: \${metricsPath}\`);
+
+    // 2. Registrar en historial
+    history.recordRun(summary);
+    const comparison = history.compareWithPrevious(summary);
+
+    if (comparison.regression_detected) {
+      console.warn(
+        \`REGRESION: pass rate bajó \${Math.abs(comparison.pass_rate_delta ?? 0)}%\`
+      );
+    }
+
+    // 3. Generar dashboard HTML
+    try {
+      const generator = new DashboardGenerator(
+        path.join(PROJECT_ROOT, 'reporting', 'templates')
+      );
+      const historyData = history.getHistory(10);
+      const dashboardHtml = generator.generate(summary, historyData);
+      const dashboardPath = path.join(REPORTS_DIR, 'dashboard', 'index.html');
+      generator.save(dashboardHtml, dashboardPath);
+      console.info(\`Dashboard generado: \${dashboardPath}\`);
+    } catch (e) {
+      console.error(\`Error generando dashboard: \${e}\`);
+    }
+
+    // 4. Enviar notificación a Slack (solo si hay fallos)
+    if ((summary.failed as number) &gt; 0) {
+      try {
+        const notifier = new SlackNotifier();
+        const reportUrl = 'https://your-ci.com/reports/latest/dashboard';
+        await notifier.sendSummary(summary, reportUrl);
+      } catch (e) {
+        console.error(\`Error enviando notificación Slack: \${e}\`);
+      }
+    }
+
+    // 5. Log del resumen final
+    console.info('='.repeat(60));
+    console.info('RESUMEN DE EJECUCION');
+    console.info(\`  Total: \${summary.total}\`);
+    console.info(\`  Passed: \${summary.passed}\`);
+    console.info(\`  Failed: \${summary.failed}\`);
+    console.info(\`  Skipped: \${summary.skipped}\`);
+    console.info(\`  Pass Rate: \${summary.pass_rate}%\`);
+    console.info(\`  Duración: \${summary.total_duration}s\`);
+    console.info(\`  Flaky: \${summary.flaky_count}\`);
+    console.info('='.repeat(60));
+  }
+}
+
+export default QAPipelineReporter;</code></pre>
+</div>
+</div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Flujo completo del pipeline</h4>

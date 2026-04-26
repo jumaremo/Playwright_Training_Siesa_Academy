@@ -50,7 +50,18 @@ const LESSON_087 = {
 └── pytest.ini</code></pre>
 
         <h3>📦 1. Archivos de datos</h3>
-        <pre><code class="python"># test-data/tax_calculations.csv
+        <div class="code-tabs" data-code-id="L087-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test-data/tax_calculations.csv
 # producto,precio,tipo_iva,iva_esperado,total_esperado
 # Laptop,2500000,19,475000,2975000
 # Arroz 5kg,25000,5,1250,26250
@@ -95,9 +106,69 @@ const LESSON_087 = {
 #     {"input": "", "valid": false, "error": "Email es requerido"}
 #   ]
 # }</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test-data/tax_calculations.csv
+// producto,precio,tipo_iva,iva_esperado,total_esperado
+// Laptop,2500000,19,475000,2975000
+// Arroz 5kg,25000,5,1250,26250
+// Libro educativo,45000,0,0,45000
+// Consultoría,1000000,19,190000,1190000
+// Leche 1L,4500,5,225,4725
+// Exportación café,5000000,0,0,5000000
+
+// test-data/invoices.json
+// [
+//   {
+//     "id": "venta-standard",
+//     "tipo": "Venta",
+//     "cliente": {"nit": "900123456-7", "nombre": "Empresa Test SAS"},
+//     "items": [
+//       {"producto": "Laptop", "cantidad": 2, "precio": 2500000}
+//     ],
+//     "expected_total": 5950000
+//   },
+//   {
+//     "id": "servicio-consultoria",
+//     "tipo": "Servicio",
+//     "cliente": {"nit": "800987654-3", "nombre": "Consultoría ABC"},
+//     "items": [
+//       {"producto": "Consultoría", "cantidad": 10, "precio": 500000}
+//     ],
+//     "expected_total": 5950000
+//   }
+// ]
+
+// test-data/validation_rules.json
+// {
+//   "nit": [
+//     {"input": "900123456-7", "valid": true},
+//     {"input": "900123456", "valid": false, "error": "Falta dígito de verificación"},
+//     {"input": "abc", "valid": false, "error": "NIT debe ser numérico"},
+//     {"input": "", "valid": false, "error": "NIT es requerido"}
+//   ],
+//   "email": [
+//     {"input": "factura@empresa.com", "valid": true},
+//     {"input": "sin-arroba", "valid": false, "error": "Email inválido"},
+//     {"input": "", "valid": false, "error": "Email es requerido"}
+//   ]
+// }</code></pre>
+        </div>
+        </div>
 
         <h3>⚙️ 2. Data Loader y Fixtures</h3>
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L087-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/conftest.py
 import pytest
 import csv
 import json
@@ -133,10 +204,76 @@ def cross_browser_page(request, playwright):
     yield page
     context.close()
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/global-setup.ts
+import fs from 'fs';
+import path from 'path';
+import { parse } from 'csv-parse/sync';
+
+const DATA_DIR = path.join(__dirname, '..', 'test-data');
+
+export function loadCsvData(filename: string): Record&lt;string, string&gt;[] {
+    const content = fs.readFileSync(
+        path.join(DATA_DIR, filename), 'utf-8'
+    );
+    return parse(content, { columns: true, skip_empty_lines: true });
+}
+
+export function loadJsonData&lt;T = unknown&gt;(filename: string): T {
+    const content = fs.readFileSync(
+        path.join(DATA_DIR, filename), 'utf-8'
+    );
+    return JSON.parse(content) as T;
+}
+
+// ── Datos cargados una vez ──
+export const TAX_DATA = loadCsvData('tax_calculations.csv');
+export const INVOICE_SCENARIOS = loadJsonData&lt;InvoiceScenario[]&gt;('invoices.json');
+export const VALIDATION_RULES = loadJsonData&lt;ValidationRules&gt;('validation_rules.json');
+
+// ── Fixture parametrizada: cross-browser ──
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+    projects: [
+        { name: 'chrome', use: { ...devices['Desktop Chrome'] } },
+        { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+    ],
+    use: {
+        baseURL: 'https://facturacion.com',
+    },
+});
+
+// tests/auth.setup.ts — login compartido
+import { test as setup, expect } from '@playwright/test';
+
+setup('login', async ({ page }) => {
+    await page.goto('https://facturacion.com/login');
+    await page.fill('#email', 'admin@test.com');
+    await page.fill('#password', 'admin123');
+    await page.click('#login-btn');
+    await page.waitForURL('**/dashboard');
+    await page.context().storageState({ path: '.auth/state.json' });
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🧪 3. Tests de cálculo de impuestos (CSV)</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># tests/test_tax_calculation.py
+            <div class="code-tabs" data-code-id="L087-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_tax_calculation.py
 import pytest
 from playwright.sync_api import expect
 
@@ -168,6 +305,46 @@ def test_calculo_iva(page, data):
 
     assert parse_money(iva_text) == expected_iva
     assert parse_money(total_text) == expected_total</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/test-tax-calculation.spec.ts
+import { test, expect } from '@playwright/test';
+import { TAX_DATA } from './global-setup';
+
+for (const data of TAX_DATA) {
+    test(\`cálculo IVA - \${data.producto}\`, async ({ page }) => {
+        // Verificar cálculo de IVA para diferentes productos
+        await page.goto('https://facturacion.com/invoices/new');
+
+        // Agregar item
+        await page.fill('[data-testid="item-name"]', data.producto);
+        await page.fill('[data-testid="item-price"]', data.precio);
+        await page.fill('[data-testid="item-qty"]', '1');
+        await page.selectOption('[data-testid="tax-type"]',
+            { label: \`IVA \${data.tipo_iva}%\` });
+        await page.click('[data-testid="add-item"]');
+
+        // Verificar cálculos
+        const expectedIva = parseFloat(data.iva_esperado);
+        const expectedTotal = parseFloat(data.total_esperado);
+
+        const ivaText = await page.locator(
+            '[data-testid="total-iva"]'
+        ).textContent();
+        const totalText = await page.locator(
+            '[data-testid="grand-total"]'
+        ).textContent();
+
+        // Parsear moneda ($2,500,000)
+        const parseMoney = (text: string | null): number =>
+            parseFloat((text ?? '').replace(/[^\\d.]/g, ''));
+
+        expect(parseMoney(ivaText)).toBe(expectedIva);
+        expect(parseMoney(totalText)).toBe(expectedTotal);
+    });
+}</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🧪 4. Tests de escenarios de factura (JSON)</h3>

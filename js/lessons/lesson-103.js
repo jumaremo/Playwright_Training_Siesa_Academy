@@ -87,7 +87,18 @@ const LESSON_103 = {
         que expone todos los headers de la respuesta HTTP. Esto lo convierte en una herramienta
         ideal para validar la configuración de seguridad.</p>
 
-        <pre><code class="python"># test_security_headers_basic.py
+        <div class="code-tabs" data-code-id="L103-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_security_headers_basic.py
 """
 Verificación básica de security headers con Playwright.
 page.goto() retorna un Response con acceso a todos los headers.
@@ -132,6 +143,43 @@ def test_security_headers_presentes():
 
         print("✅ Todos los headers de seguridad esenciales están presentes")
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_security_headers_basic.spec.ts
+/**
+ * Verificación básica de security headers con Playwright.
+ * page.goto() retorna un Response con acceso a todos los headers.
+ */
+import { test, expect } from '@playwright/test';
+
+test('security headers presentes', async ({ page }) => {
+    // page.goto() retorna un objeto Response
+    const response = await page.goto('https://mi-aplicacion.com');
+
+    // Obtener todos los headers de la respuesta
+    const headers = response!.headers();
+
+    // Verificar Content-Security-Policy
+    expect(headers['content-security-policy']).toBeDefined();
+
+    // Verificar X-Content-Type-Options
+    expect(headers['x-content-type-options']).toBe('nosniff');
+
+    // Verificar X-Frame-Options
+    const xFrame = (headers['x-frame-options'] ?? '').toUpperCase();
+    expect(['DENY', 'SAMEORIGIN']).toContain(xFrame);
+
+    // Verificar Strict-Transport-Security
+    const hsts = headers['strict-transport-security'] ?? '';
+    expect(hsts).toContain('max-age=');
+
+    // Verificar Referrer-Policy
+    expect(headers['referrer-policy']).toBeDefined();
+
+    console.log('✅ Todos los headers de seguridad esenciales están presentes');
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -146,7 +194,18 @@ def test_security_headers_presentes():
         están permitidas para scripts, estilos, imágenes, frames y más. Una CSP mal configurada
         puede dejar la puerta abierta a ataques XSS.</p>
 
-        <pre><code class="python"># test_csp_validation.py
+        <div class="code-tabs" data-code-id="L103-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_csp_validation.py
 """
 Validación detallada de Content-Security-Policy.
 Verifica que las directivas críticas estén correctamente configuradas.
@@ -199,6 +258,56 @@ def test_csp_directivas_criticas():
 
         print("✅ CSP configurado correctamente")
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_csp_validation.spec.ts
+/**
+ * Validación detallada de Content-Security-Policy.
+ * Verifica que las directivas críticas estén correctamente configuradas.
+ */
+import { test, expect } from '@playwright/test';
+
+function parseCsp(cspValue: string): Record&lt;string, string[]&gt; {
+    /** Parsea un header CSP en un diccionario de directivas. */
+    const directivas: Record&lt;string, string[]&gt; = {};
+    for (const parte of cspValue.split(';')) {
+        const trimmed = parte.trim();
+        if (trimmed) {
+            const tokens = trimmed.split(/\\s+/);
+            const nombre = tokens[0];
+            const valores = tokens.length > 1 ? tokens.slice(1) : [];
+            directivas[nombre] = valores;
+        }
+    }
+    return directivas;
+}
+
+test('CSP directivas críticas', async ({ page }) => {
+    const response = await page.goto('https://mi-aplicacion.com');
+    const headers = response!.headers();
+
+    const csp = headers['content-security-policy'] ?? '';
+    expect(csp).toBeTruthy();
+
+    const directivas = parseCsp(csp);
+
+    // Verificar que default-src está definido
+    expect(directivas).toHaveProperty('default-src');
+
+    // Verificar que no se usa 'unsafe-inline' en script-src
+    const scriptSrc = directivas['script-src'] ?? [];
+    expect(scriptSrc).not.toContain("'unsafe-inline'");
+
+    // Verificar que no se usa 'unsafe-eval' en script-src
+    expect(scriptSrc).not.toContain("'unsafe-eval'");
+
+    // Verificar que frame-ancestors está definido (protección anti-clickjacking)
+    expect(directivas).toHaveProperty('frame-ancestors');
+
+    console.log('✅ CSP configurado correctamente');
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ CSP con unsafe-inline o unsafe-eval</h4>
@@ -214,7 +323,18 @@ def test_csp_directivas_criticas():
         un período de tiempo. Sin HSTS, un atacante podría interceptar la primera conexión HTTP
         y redirigir al usuario a un sitio falso (ataque de downgrade).</p>
 
-        <pre><code class="python"># test_hsts.py
+        <div class="code-tabs" data-code-id="L103-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_hsts.py
 """
 Validación de Strict-Transport-Security (HSTS).
 Verifica max-age adecuado e includeSubDomains.
@@ -249,13 +369,55 @@ def test_hsts_configuracion():
 
         print(f"✅ HSTS configurado: max-age={max_age}, includeSubDomains")
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_hsts.spec.ts
+/**
+ * Validación de Strict-Transport-Security (HSTS).
+ * Verifica max-age adecuado e includeSubDomains.
+ */
+import { test, expect } from '@playwright/test';
+
+test('HSTS configuración', async ({ page }) => {
+    const response = await page.goto('https://mi-aplicacion.com');
+    const headers = response!.headers();
+
+    const hsts = headers['strict-transport-security'] ?? '';
+    expect(hsts).toBeTruthy();
+
+    // Extraer max-age
+    const match = hsts.match(/max-age=(\\d+)/);
+    expect(match).not.toBeNull();
+
+    const maxAge = parseInt(match![1], 10);
+    // OWASP recomienda mínimo 1 año (31536000 segundos)
+    expect(maxAge).toBeGreaterThanOrEqual(31536000);
+
+    // Verificar includeSubDomains
+    expect(hsts.toLowerCase()).toContain('includesubdomains');
+
+    console.log(\`✅ HSTS configurado: max-age=\${maxAge}, includeSubDomains\`);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🌐 HTTPS validation y contenido mixto</h3>
         <p>Playwright permite verificar que una aplicación use HTTPS correctamente y detectar
         <strong>contenido mixto</strong> (recursos HTTP cargados desde una página HTTPS), lo cual
         degrada la seguridad y genera advertencias en el navegador.</p>
 
-        <pre><code class="python"># test_https_validation.py
+        <div class="code-tabs" data-code-id="L103-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_https_validation.py
 """
 Validación de HTTPS y detección de contenido mixto.
 Intercepta solicitudes de red para identificar recursos inseguros.
@@ -325,6 +487,65 @@ def test_https_redireccion():
 
         print("✅ Redirección HTTP → HTTPS funciona correctamente")
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_https_validation.spec.ts
+/**
+ * Validación de HTTPS y detección de contenido mixto.
+ * Intercepta solicitudes de red para identificar recursos inseguros.
+ */
+import { test, expect } from '@playwright/test';
+
+test('sin contenido mixto', async ({ page }) => {
+    // Recopilar todas las solicitudes HTTP (no HTTPS)
+    const solicitudesInseguras: { url: string; tipo: string }[] = [];
+
+    page.on('request', (request) => {
+        if (request.url().startsWith('http://')) {
+            solicitudesInseguras.push({
+                url: request.url(),
+                tipo: request.resourceType(),
+            });
+        }
+    });
+
+    // Navegar a la página HTTPS
+    const response = await page.goto('https://mi-aplicacion.com');
+
+    // Verificar que la página principal es HTTPS
+    expect(response!.url()).toMatch(/^https:\\/\\//);
+
+    // Esperar a que terminen de cargar todos los recursos
+    await page.waitForLoadState('networkidle');
+
+    // Reportar contenido mixto encontrado
+    if (solicitudesInseguras.length > 0) {
+        const reporte = solicitudesInseguras
+            .map((r) => \`  - [\${r.tipo}] \${r.url}\`)
+            .join('\\n');
+        throw new Error(
+            \`Se detectaron \${solicitudesInseguras.length} recursos \` +
+            \`con contenido mixto (HTTP en página HTTPS):\\n\${reporte}\`
+        );
+    }
+
+    console.log('✅ Sin contenido mixto detectado');
+});
+
+test('HTTPS redirección', async ({ page }) => {
+    // Intentar acceder vía HTTP
+    const response = await page.goto('http://mi-aplicacion.com');
+
+    // Verificar que la URL final es HTTPS
+    expect(page.url()).toMatch(/^https:\\/\\//);
+
+    // Verificar código 200 después de redirección
+    expect(response!.status()).toBe(200);
+
+    console.log('✅ Redirección HTTP → HTTPS funciona correctamente');
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -339,7 +560,18 @@ def test_https_redireccion():
         en una clase helper que pueda reutilizarse en múltiples tests y configurarse según el
         nivel de exigencia del proyecto.</p>
 
-        <pre><code class="python"># helpers/security_headers_checker.py
+        <div class="code-tabs" data-code-id="L103-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># helpers/security_headers_checker.py
 """
 Clase helper para validación de security headers y HTTPS.
 Uso: instanciar con una respuesta de Playwright y verificar headers.
@@ -555,6 +787,257 @@ class SecurityHeadersChecker:
             lineas.append("")
 
         return "\\n".join(lineas)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// helpers/security-headers-checker.ts
+/**
+ * Clase helper para validación de security headers y HTTPS.
+ * Uso: instanciar con una respuesta de Playwright y verificar headers.
+ */
+import type { Response } from '@playwright/test';
+
+interface SecurityFinding {
+    /** "critical" | "high" | "medium" | "low" | "info" */
+    severity: string;
+    /** Nombre del header */
+    header: string;
+    /** Descripción del problema */
+    message: string;
+    /** Recomendación de corrección */
+    recommendation: string;
+}
+
+interface HeaderConfig {
+    severity: string;
+    expected?: string;
+    expectedAny?: string[];
+    recommendation: string;
+}
+
+export class SecurityHeadersChecker {
+    /**
+     * Verifica security headers HTTP y genera un reporte de hallazgos.
+     *
+     * Uso:
+     *   const response = await page.goto('https://mi-app.com');
+     *   const checker = new SecurityHeadersChecker(response!);
+     *   const hallazgos = checker.verificarTodos();
+     *   expect(checker.esSeguro()).toBeTruthy();
+     */
+
+    static readonly HEADERS_REQUERIDOS: Record&lt;string, HeaderConfig&gt; = {
+        'content-security-policy': {
+            severity: 'high',
+            recommendation: "Configurar CSP con default-src 'self'",
+        },
+        'x-content-type-options': {
+            severity: 'medium',
+            expected: 'nosniff',
+            recommendation: 'Agregar: X-Content-Type-Options: nosniff',
+        },
+        'x-frame-options': {
+            severity: 'high',
+            expectedAny: ['deny', 'sameorigin'],
+            recommendation: 'Agregar: X-Frame-Options: DENY',
+        },
+        'strict-transport-security': {
+            severity: 'high',
+            recommendation:
+                'Agregar: Strict-Transport-Security: max-age=31536000; includeSubDomains',
+        },
+        'referrer-policy': {
+            severity: 'medium',
+            recommendation:
+                'Agregar: Referrer-Policy: strict-origin-when-cross-origin',
+        },
+        'permissions-policy': {
+            severity: 'medium',
+            recommendation:
+                'Agregar: Permissions-Policy: camera=(), microphone=(), geolocation=()',
+        },
+    };
+
+    private response: Response;
+    private headers: Record&lt;string, string&gt;;
+    private url: string;
+    hallazgos: SecurityFinding[] = [];
+
+    constructor(response: Response) {
+        /** Inicializa con un objeto Response de Playwright. */
+        this.response = response;
+        this.headers = response.headers();
+        this.url = response.url();
+    }
+
+    verificarTodos(): SecurityFinding[] {
+        /** Ejecuta todas las verificaciones y retorna hallazgos. */
+        this.hallazgos = [];
+        this.verificarHeadersPresentes();
+        this.verificarCsp();
+        this.verificarHsts();
+        this.verificarXContentType();
+        this.verificarXFrame();
+        this.verificarReferrerPolicy();
+        this.verificarPermissionsPolicy();
+        return this.hallazgos;
+    }
+
+    private verificarHeadersPresentes(): void {
+        for (const [header, config] of Object.entries(
+            SecurityHeadersChecker.HEADERS_REQUERIDOS
+        )) {
+            if (!(header in this.headers)) {
+                this.hallazgos.push({
+                    severity: config.severity,
+                    header,
+                    message: \`Header '\${header}' no encontrado\`,
+                    recommendation: config.recommendation,
+                });
+            }
+        }
+    }
+
+    private verificarCsp(): void {
+        const csp = this.headers['content-security-policy'] ?? '';
+        if (!csp) return; // Ya reportado en verificarHeadersPresentes
+
+        if (csp.includes("'unsafe-inline'")) {
+            this.hallazgos.push({
+                severity: 'high',
+                header: 'content-security-policy',
+                message: "CSP contiene 'unsafe-inline'",
+                recommendation: "Eliminar 'unsafe-inline' y usar nonces o hashes",
+            });
+        }
+        if (csp.includes("'unsafe-eval'")) {
+            this.hallazgos.push({
+                severity: 'critical',
+                header: 'content-security-policy',
+                message: "CSP contiene 'unsafe-eval'",
+                recommendation:
+                    "Eliminar 'unsafe-eval', refactorizar código que use eval()",
+            });
+        }
+    }
+
+    private verificarHsts(): void {
+        const hsts = this.headers['strict-transport-security'] ?? '';
+        if (!hsts) return;
+
+        const match = hsts.match(/max-age=(\\d+)/);
+        if (match) {
+            const maxAge = parseInt(match[1], 10);
+            if (maxAge &lt; 31536000) {
+                this.hallazgos.push({
+                    severity: 'medium',
+                    header: 'strict-transport-security',
+                    message: \`HSTS max-age=\${maxAge} es menor a 1 año\`,
+                    recommendation: 'Usar max-age=31536000 (1 año) o superior',
+                });
+            }
+        }
+        if (!hsts.toLowerCase().includes('includesubdomains')) {
+            this.hallazgos.push({
+                severity: 'low',
+                header: 'strict-transport-security',
+                message: 'HSTS no incluye directiva includeSubDomains',
+                recommendation: 'Agregar includeSubDomains a HSTS',
+            });
+        }
+    }
+
+    private verificarXContentType(): void {
+        const valor = this.headers['x-content-type-options'] ?? '';
+        if (valor && valor.toLowerCase() !== 'nosniff') {
+            this.hallazgos.push({
+                severity: 'medium',
+                header: 'x-content-type-options',
+                message: \`Valor incorrecto: '\${valor}' (debería ser 'nosniff')\`,
+                recommendation: 'Configurar: X-Content-Type-Options: nosniff',
+            });
+        }
+    }
+
+    private verificarXFrame(): void {
+        const valor = this.headers['x-frame-options'] ?? '';
+        if (valor && !['DENY', 'SAMEORIGIN'].includes(valor.toUpperCase())) {
+            this.hallazgos.push({
+                severity: 'high',
+                header: 'x-frame-options',
+                message: \`Valor no seguro: '\${valor}'\`,
+                recommendation: 'Usar DENY o SAMEORIGIN',
+            });
+        }
+    }
+
+    private verificarReferrerPolicy(): void {
+        const valor = this.headers['referrer-policy'] ?? '';
+        const inseguras = ['unsafe-url', 'no-referrer-when-downgrade'];
+        if (valor && inseguras.includes(valor.toLowerCase())) {
+            this.hallazgos.push({
+                severity: 'medium',
+                header: 'referrer-policy',
+                message: \`Política insegura: '\${valor}'\`,
+                recommendation:
+                    'Usar strict-origin-when-cross-origin o no-referrer',
+            });
+        }
+    }
+
+    private verificarPermissionsPolicy(): void {
+        const valor = this.headers['permissions-policy'] ?? '';
+        if (valor) {
+            const apisSensibles = ['camera', 'microphone', 'geolocation'];
+            for (const api of apisSensibles) {
+                if (!valor.includes(api)) {
+                    this.hallazgos.push({
+                        severity: 'low',
+                        header: 'permissions-policy',
+                        message: \`API '\${api}' no restringida en Permissions-Policy\`,
+                        recommendation: \`Agregar \${api}=() para desactivar\`,
+                    });
+                }
+            }
+        }
+    }
+
+    esSeguro(maxSeverity: string = 'medium'): boolean {
+        /** Retorna true si no hay hallazgos por encima del severity dado. */
+        const severities = ['info', 'low', 'medium', 'high', 'critical'];
+        const umbral = severities.indexOf(maxSeverity);
+        return !this.hallazgos.some(
+            (h) => severities.indexOf(h.severity) > umbral
+        );
+    }
+
+    reporteTexto(): string {
+        /** Genera un reporte de hallazgos en texto plano. */
+        if (this.hallazgos.length === 0) {
+            return \`✅ \${this.url}: Sin hallazgos de seguridad\`;
+        }
+
+        const lineas: string[] = [\`🔒 Reporte de seguridad: \${this.url}\`];
+        lineas.push(\`   Hallazgos: \${this.hallazgos.length}\`);
+        lineas.push('');
+
+        const iconos: Record&lt;string, string&gt; = {
+            critical: '🔴', high: '🟠',
+            medium: '🟡', low: '🔵', info: '⚪',
+        };
+
+        this.hallazgos.forEach((h, i) => {
+            const icono = iconos[h.severity] ?? '⚪';
+            lineas.push(\`   \${i + 1}. \${icono} [\${h.severity.toUpperCase()}] \${h.header}\`);
+            lineas.push(\`      \${h.message}\`);
+            lineas.push(\`      → \${h.recommendation}\`);
+            lineas.push('');
+        });
+
+        return lineas.join('\\n');
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔬 Uso avanzado del SecurityHeadersChecker</h4>
@@ -568,7 +1051,18 @@ class SecurityHeadersChecker:
         <p>Integremos el checker en una suite de tests con <code>pytest</code> y fixtures
         para verificar múltiples URLs de forma eficiente.</p>
 
-        <pre><code class="python"># tests/test_security_suite.py
+        <div class="code-tabs" data-code-id="L103-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_security_suite.py
 """
 Suite de tests de seguridad usando SecurityHeadersChecker.
 Verifica headers en múltiples endpoints de la aplicación.
@@ -625,12 +1119,64 @@ def test_csp_no_permite_unsafe(page):
         "CSP contiene 'unsafe-inline' - riesgo de XSS"
     assert "'unsafe-eval'" not in csp, \\
         "CSP contiene 'unsafe-eval' - riesgo de inyección"</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test_security_suite.spec.ts
+/**
+ * Suite de tests de seguridad usando SecurityHeadersChecker.
+ * Verifica headers en múltiples endpoints de la aplicación.
+ */
+import { test, expect } from '@playwright/test';
+import { SecurityHeadersChecker } from '../helpers/security-headers-checker';
+
+// URLs críticas a verificar
+const URLS_CRITICAS = [
+    'https://mi-aplicacion.com',
+    'https://mi-aplicacion.com/login',
+    'https://mi-aplicacion.com/api/health',
+    'https://mi-aplicacion.com/dashboard',
+];
+
+for (const url of URLS_CRITICAS) {
+    test(\`security headers en \${url}\`, async ({ page }) => {
+        const response = await page.goto(url);
+        const checker = new SecurityHeadersChecker(response!);
+        const hallazgos = checker.verificarTodos();
+
+        // Fallar si hay hallazgos high o critical
+        expect(
+            checker.esSeguro('medium'),
+            checker.reporteTexto()
+        ).toBeTruthy();
+    });
+}
+
+test('CSP no permite unsafe', async ({ page }) => {
+    const response = await page.goto('https://mi-aplicacion.com');
+    const csp = response!.headers()['content-security-policy'] ?? '';
+
+    expect(csp).not.toContain("'unsafe-inline'");
+    expect(csp).not.toContain("'unsafe-eval'");
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🛡️ Vulnerabilidades comunes: open redirects y clickjacking</h3>
         <p>Playwright también permite detectar vulnerabilidades a nivel de comportamiento de la
         aplicación, no solo de headers.</p>
 
-        <pre><code class="python"># test_vulnerabilidades_comunes.py
+        <div class="code-tabs" data-code-id="L103-7">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_vulnerabilidades_comunes.py
 """
 Detección de vulnerabilidades comunes con Playwright.
 Open redirects y clickjacking.
@@ -693,12 +1239,83 @@ def test_clickjacking_proteccion():
 
         print("✅ Protección contra clickjacking activa")
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_vulnerabilidades_comunes.spec.ts
+/**
+ * Detección de vulnerabilidades comunes con Playwright.
+ * Open redirects y clickjacking.
+ */
+import { test, expect } from '@playwright/test';
+
+test('open redirect', async ({ page }) => {
+    /**
+     * Verifica que la aplicación no sea vulnerable a open redirects.
+     * Un open redirect permite redirigir al usuario a un sitio externo
+     * manipulando un parámetro de URL.
+     */
+
+    // Intentar inyectar una redirección a un sitio externo
+    const urlsMaliciosas = [
+        'https://mi-app.com/redirect?url=https://evil.com',
+        'https://mi-app.com/login?next=https://evil.com',
+        'https://mi-app.com/goto?target=//evil.com',
+        'https://mi-app.com/redirect?url=http%3A%2F%2Fevil.com',
+    ];
+
+    for (const url of urlsMaliciosas) {
+        await page.goto(url);
+        const urlFinal = page.url();
+
+        // Verificar que NO se redirigió a un dominio externo
+        expect(urlFinal).not.toContain('evil.com');
+    }
+
+    console.log('✅ Sin vulnerabilidades de open redirect');
+});
+
+test('clickjacking protección', async ({ page }) => {
+    /**
+     * Verifica protección contra clickjacking verificando
+     * X-Frame-Options y CSP frame-ancestors.
+     */
+    const response = await page.goto('https://mi-aplicacion.com');
+    const headers = response!.headers();
+
+    // Verificar X-Frame-Options
+    const xFrame = (headers['x-frame-options'] ?? '').toUpperCase();
+    const tieneXFrame = ['DENY', 'SAMEORIGIN'].includes(xFrame);
+
+    // Verificar CSP frame-ancestors
+    const csp = headers['content-security-policy'] ?? '';
+    const tieneFrameAncestors = csp.includes('frame-ancestors');
+
+    expect(
+        tieneXFrame || tieneFrameAncestors,
+        'Sin protección contra clickjacking: falta X-Frame-Options Y CSP frame-ancestors'
+    ).toBeTruthy();
+
+    console.log('✅ Protección contra clickjacking activa');
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🍪 Seguridad de cookies: Secure, HttpOnly, SameSite</h3>
         <p>Las cookies son otro vector de ataque importante. Una cookie de sesión sin los
         atributos correctos puede ser robada vía XSS o enviada en peticiones cross-site (CSRF).</p>
 
-        <pre><code class="python"># test_cookie_security.py
+        <div class="code-tabs" data-code-id="L103-8">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_cookie_security.py
 """
 Verificación de atributos de seguridad en cookies.
 Valida Secure, HttpOnly y SameSite en cookies sensibles.
@@ -758,6 +1375,71 @@ def test_cookies_seguras():
         print("✅ Cookies de sesión correctamente configuradas")
         context.close()
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_cookie_security.spec.ts
+/**
+ * Verificación de atributos de seguridad en cookies.
+ * Valida Secure, HttpOnly y SameSite en cookies sensibles.
+ */
+import { test, expect } from '@playwright/test';
+
+test('cookies seguras', async ({ browser }) => {
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    // Navegar y autenticarse para obtener cookies de sesión
+    await page.goto('https://mi-aplicacion.com/login');
+    await page.fill('#username', 'test_user');
+    await page.fill('#password', 'test_password');
+    await page.click("button[type='submit']");
+    await page.waitForURL('**/dashboard');
+
+    // Obtener todas las cookies del contexto
+    const cookies = await context.cookies();
+
+    // Cookies que DEBEN ser seguras
+    const cookiesSensibles = ['session_id', 'auth_token', 'csrf_token'];
+    const hallazgos: string[] = [];
+
+    for (const cookie of cookies) {
+        if (cookiesSensibles.includes(cookie.name)) {
+            const nombre = cookie.name;
+
+            // Verificar atributo Secure
+            if (!cookie.secure) {
+                hallazgos.push(
+                    \`Cookie '\${nombre}' NO tiene atributo Secure\`
+                );
+            }
+
+            // Verificar atributo HttpOnly
+            if (!cookie.httpOnly) {
+                hallazgos.push(
+                    \`Cookie '\${nombre}' NO tiene atributo HttpOnly\`
+                );
+            }
+
+            // Verificar atributo SameSite
+            if (cookie.sameSite === 'None') {
+                hallazgos.push(
+                    \`Cookie '\${nombre}' tiene SameSite=None \` +
+                    \`(vulnerable a CSRF)\`
+                );
+            }
+        }
+    }
+
+    if (hallazgos.length > 0) {
+        const reporte = hallazgos.map((h) => \`  ⚠️ \${h}\`).join('\\n');
+        throw new Error(\`Problemas de seguridad en cookies:\\n\${reporte}\`);
+    }
+
+    console.log('✅ Cookies de sesión correctamente configuradas');
+    await context.close();
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Atributos de cookies seguros - Resumen</h4>
@@ -776,7 +1458,18 @@ def test_cookies_seguras():
         (los navegadores modernos lo han deprecado en favor de CSP), muchas auditorías de seguridad
         y herramientas de escaneo aún lo verifican. Es buena práctica incluirlo como capa adicional.</p>
 
-        <pre><code class="python"># Verificación de X-XSS-Protection
+        <div class="code-tabs" data-code-id="L103-9">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Verificación de X-XSS-Protection
 def test_xss_protection_header(page):
     """Verifica X-XSS-Protection como capa de defensa adicional."""
     response = page.goto("https://mi-aplicacion.com")
@@ -794,12 +1487,47 @@ def test_xss_protection_header(page):
         if not csp:
             assert False, \\
                 "Ni X-XSS-Protection ni CSP están presentes"</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Verificación de X-XSS-Protection
+test('xss protection header', async ({ page }) => {
+    /** Verifica X-XSS-Protection como capa de defensa adicional. */
+    const response = await page.goto('https://mi-aplicacion.com');
+    const xss = response!.headers()['x-xss-protection'] ?? '';
+
+    // Valor recomendado: "1; mode=block"
+    if (xss) {
+        expect(xss).toContain('1');
+        expect(xss).toContain('mode=block');
+    } else {
+        // No es crítico si CSP está presente, pero reportar como info
+        const csp = response!.headers()['content-security-policy'] ?? '';
+        if (!csp) {
+            throw new Error(
+                'Ni X-XSS-Protection ni CSP están presentes'
+            );
+        }
+    }
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📋 Permissions-Policy y Referrer-Policy</h3>
         <p>Estos headers controlan qué APIs del navegador puede usar la aplicación y cuánta
         información de referencia se comparte con sitios externos.</p>
 
-        <pre><code class="python"># test_permissions_referrer.py
+        <div class="code-tabs" data-code-id="L103-10">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_permissions_referrer.py
 """
 Verificación de Permissions-Policy y Referrer-Policy.
 """
@@ -844,6 +1572,61 @@ def test_referrer_policy(page):
     assert referrer in politicas_seguras, \\
         f"Referrer-Policy '{referrer}' no es segura. " \\
         f"Usar una de: {', '.join(politicas_seguras)}"</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_permissions_referrer.spec.ts
+/**
+ * Verificación de Permissions-Policy y Referrer-Policy.
+ */
+import { test, expect } from '@playwright/test';
+
+test('permissions policy', async ({ page }) => {
+    /** Verifica que Permissions-Policy restrinja APIs sensibles. */
+    const response = await page.goto('https://mi-aplicacion.com');
+    const perms = response!.headers()['permissions-policy'] ?? '';
+
+    expect(perms).toBeTruthy();
+
+    // APIs que normalmente deben estar restringidas
+    const apisRestringidas: Record&lt;string, string&gt; = {
+        camera: 'Cámara',
+        microphone: 'Micrófono',
+        geolocation: 'Geolocalización',
+        payment: 'API de pagos',
+        usb: 'Dispositivos USB',
+    };
+
+    for (const [api, nombre] of Object.entries(apisRestringidas)) {
+        // camera=() significa que está desactivada
+        const restringida =
+            perms.includes(\`\${api}=()\`) || perms.includes(\`\${api}=self\`);
+        expect(
+            restringida,
+            \`API de \${nombre} (\${api}) no está restringida\`
+        ).toBeTruthy();
+    }
+});
+
+test('referrer policy', async ({ page }) => {
+    /** Verifica que Referrer-Policy sea segura. */
+    const response = await page.goto('https://mi-aplicacion.com');
+    const referrer = response!.headers()['referrer-policy'] ?? '';
+
+    const politicasSeguras = [
+        'no-referrer',
+        'same-origin',
+        'strict-origin',
+        'strict-origin-when-cross-origin',
+    ];
+
+    expect(
+        politicasSeguras.includes(referrer),
+        \`Referrer-Policy '\${referrer}' no es segura. \` +
+        \`Usar una de: \${politicasSeguras.join(', ')}\`
+    ).toBeTruthy();
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -895,7 +1678,18 @@ def test_referrer_policy(page):
             <p><strong>Pista:</strong> Usa <code>pytest.mark.parametrize</code> para iterar sobre los
             sitios, y una fixture que recolecte los resultados en un diccionario compartido.</p>
 
-            <pre><code class="python"># Esqueleto del ejercicio
+            <div class="code-tabs" data-code-id="L103-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Esqueleto del ejercicio
 import pytest
 from playwright.sync_api import sync_playwright
 from helpers.security_headers_checker import SecurityHeadersChecker
@@ -927,6 +1721,45 @@ def test_security_audit(page, url, resultados):
     # TODO: Completar con detección de contenido mixto
     # TODO: Calcular puntuación de seguridad
     # TODO: Generar reporte comparativo al final</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Esqueleto del ejercicio
+import { test, expect } from '@playwright/test';
+import { SecurityHeadersChecker } from '../helpers/security-headers-checker';
+
+const SITIOS = [
+    'https://github.com',
+    'https://www.google.com',
+    'https://example.com',
+];
+
+const resultados: Record&lt;string, {
+    hallazgos: any[];
+    headers: Record&lt;string, string&gt;;
+    seguro: boolean;
+    reporte: string;
+}&gt; = {};
+
+for (const url of SITIOS) {
+    test(\`security audit: \${url}\`, async ({ page }) => {
+        /** Audita security headers de cada sitio. */
+        const response = await page.goto(url);
+        const checker = new SecurityHeadersChecker(response!);
+        const hallazgos = checker.verificarTodos();
+        resultados[url] = {
+            hallazgos,
+            headers: response!.headers(),
+            seguro: checker.esSeguro(),
+            reporte: checker.reporteTexto(),
+        };
+        // TODO: Completar con verificación de cookies
+        // TODO: Completar con detección de contenido mixto
+        // TODO: Calcular puntuación de seguridad
+        // TODO: Generar reporte comparativo al final
+    });
+}</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">

@@ -74,7 +74,18 @@ const LESSON_124 = {
 
         <h3>1. Independencia: tests sin dependencias</h3>
 
-        <pre><code class="python"># MAL: Test que depende de que otro test corra antes
+        <div class="code-tabs" data-code-id="L124-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># MAL: Test que depende de que otro test corra antes
 class TestOrdered:
     created_user_id = None
 
@@ -109,10 +120,61 @@ def test_edit_user(page, api_context):
     page.click("#save")
     from playwright.sync_api import expect
     expect(page.locator(".success")).to_be_visible()</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// MAL: Test que depende de que otro test corra antes
+let createdUserId: string | null = null;
+
+test('create user', async ({ page }) => {
+    // Crea un usuario y guarda el ID
+    await page.goto('/users/new');
+    await page.fill('#name', 'Juan');
+    await page.click('#save');
+    createdUserId = await page.locator('#user-id').textContent();
+});
+
+test('edit user (DEPENDE del anterior)', async ({ page }) => {
+    // DEPENDE de test anterior — si falla el primero, este tambien
+    await page.goto(\`/users/\${createdUserId}/edit\`);
+    await page.fill('#name', 'Juan Editado');
+    await page.click('#save');
+});
+
+// BIEN: Cada test gestiona su propio estado
+test('create user', async ({ page, request }) => {
+    await page.goto('/users/new');
+    await page.fill('#name', 'Juan');
+    await page.click('#save');
+    await expect(page.locator('.success')).toBeVisible();
+});
+
+test('edit user', async ({ page, request }) => {
+    // Crear usuario via API (rapido, confiable)
+    const resp = await request.post('/api/users', { data: { name: 'Juan' } });
+    const userId = (await resp.json()).id;
+
+    await page.goto(\`/users/\${userId}/edit\`);
+    await page.fill('#name', 'Juan Editado');
+    await page.click('#save');
+    await expect(page.locator('.success')).toBeVisible();
+});</code></pre>
+</div>
+</div>
 
         <h3>2. Legibilidad: tests autodocumentados</h3>
 
-        <pre><code class="python"># MAL: Nombre generico, acciones sin contexto
+        <div class="code-tabs" data-code-id="L124-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># MAL: Nombre generico, acciones sin contexto
 def test_1(page):
     page.goto("/p")
     page.fill("#e", "a@b.com")
@@ -135,10 +197,49 @@ def test_login_with_valid_credentials_redirects_to_dashboard(page):
     # ASSERT
     from playwright.sync_api import expect
     expect(page).to_have_url("**/dashboard")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// MAL: Nombre generico, acciones sin contexto
+test('test 1', async ({ page }) => {
+    await page.goto('/p');
+    await page.fill('#e', 'a@b.com');
+    await page.fill('#p', 'x');
+    await page.click('#b');
+    expect(page.url()).toContain('/d');
+});
+
+// BIEN: Nombre descriptivo, patron AAA, selectores claros
+test('login with valid credentials redirects to dashboard', async ({ page }) => {
+    // Verifica que un usuario con credenciales validas es redirigido al dashboard.
+
+    // ARRANGE
+    await page.goto('/auth/login');
+
+    // ACT
+    await page.fill('[data-testid="email-input"]', 'admin@siesa.com');
+    await page.fill('[data-testid="password-input"]', 'Admin1234!');
+    await page.click('[data-testid="login-button"]');
+
+    // ASSERT
+    await expect(page).toHaveURL('**/dashboard');
+});</code></pre>
+</div>
+</div>
 
         <h3>3. Determinismo: sin aleatoriedad</h3>
 
-        <pre><code class="python"># MAL: Resultado depende del estado de la base de datos
+        <div class="code-tabs" data-code-id="L124-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># MAL: Resultado depende del estado de la base de datos
 def test_product_count(page):
     page.goto("/products")
     count = page.locator(".product-card").count()
@@ -157,10 +258,45 @@ def test_products_page_has_content(page):
     from playwright.sync_api import expect
     count = page.locator(".product-card").count()
     assert count > 0, "La pagina de productos no muestra ningun resultado"</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// MAL: Resultado depende del estado de la base de datos
+test('product count', async ({ page }) => {
+    await page.goto('/products');
+    const count = await page.locator('.product-card').count();
+    expect(count).toBe(15); // Falla si alguien agrego/elimino productos
+});
+
+// BIEN: Controlar el estado o usar assertions flexibles
+test('products page shows results', async ({ page, seedProducts }) => {
+    // seedProducts crea exactamente 10 productos para este test.
+    await page.goto('/products');
+    await expect(page.locator('.product-card')).toHaveCount(10);
+});
+
+// O assertion flexible cuando no controlas los datos:
+test('products page has content', async ({ page }) => {
+    await page.goto('/products');
+    const count = await page.locator('.product-card').count();
+    expect(count).toBeGreaterThan(0);
+});</code></pre>
+</div>
+</div>
 
         <h3>4. Resiliencia: selectores estables</h3>
 
-        <pre><code class="python"># JERARQUIA DE SELECTORES (de mejor a peor):
+        <div class="code-tabs" data-code-id="L124-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># JERARQUIA DE SELECTORES (de mejor a peor):
 
 # 1. data-testid (MEJOR - diseñado para testing)
 page.locator("[data-testid='submit-button']")
@@ -184,10 +320,49 @@ page.locator("form.login-form input[type='email']")
 page.locator("#app > div:nth-child(3) > form > button")  # Fragil
 page.locator(".btn.btn-primary.mt-3")  # Clases CSS cambian
 page.locator("xpath=//div[2]/form/button[1]")  # Posicion dependiente</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// JERARQUIA DE SELECTORES (de mejor a peor):
+
+// 1. data-testid (MEJOR - diseñado para testing)
+page.locator('[data-testid="submit-button"]');
+page.getByTestId('submit-button');
+
+// 2. Role + name (semantico, accesible)
+page.getByRole('button', { name: 'Guardar' });
+page.getByRole('heading', { name: 'Dashboard' });
+
+// 3. Text content (legible pero fragil ante i18n)
+page.getByText('Iniciar Sesion');
+
+// 4. Placeholder / label (para inputs)
+page.getByPlaceholder('Correo electronico');
+page.getByLabel('Contraseña');
+
+// 5. CSS selector estable (cuando no hay opciones mejores)
+page.locator("form.login-form input[type='email']");
+
+// EVITAR:
+page.locator('#app > div:nth-child(3) > form > button');  // Fragil
+page.locator('.btn.btn-primary.mt-3');  // Clases CSS cambian
+page.locator('xpath=//div[2]/form/button[1]');  // Posicion dependiente</code></pre>
+</div>
+</div>
 
         <h3>5. Velocidad: optimizar sin sacrificar confiabilidad</h3>
 
-        <pre><code class="python"># TECNICAS DE OPTIMIZACION:
+        <div class="code-tabs" data-code-id="L124-5">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># TECNICAS DE OPTIMIZACION:
 
 # 1. Login via API en lugar de UI (ahorra 2-3 segundos por test)
 @pytest.fixture
@@ -217,10 +392,63 @@ def auth_state(playwright):
 # Preferir esperar por el elemento especifico que necesitas
 from playwright.sync_api import expect
 expect(page.locator("[data-testid='content']")).to_be_visible()  # Mejor</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// TECNICAS DE OPTIMIZACION:
+
+// 1. Login via API en lugar de UI (ahorra 2-3 segundos por test)
+// playwright.config.ts — definir storageState global o por proyecto
+import { test as base } from '@playwright/test';
+
+const test = base.extend<{ authenticatedPage: Page }>({
+    authenticatedPage: async ({ browser, request }, use) => {
+        // Login via API, inyectar token, usar pagina autenticada.
+        const resp = await request.post('/api/auth/login', {
+            data: { email: 'admin@siesa.com', password: 'Admin1234!' }
+        });
+        const token = (await resp.json()).token;
+
+        const context = await browser.newContext({
+            storageState: {
+                cookies: [],
+                origins: [{ origin: 'http://localhost:3000',
+                    localStorage: [{ name: 'token', value: token }] }]
+            }
+        });
+        const page = await context.newPage();
+        await use(page);
+        await context.close();
+    },
+});
+
+// 2. Reutilizar estado de sesion via proyecto en config
+// En playwright.config.ts:
+// projects: [
+//   { name: 'setup', testMatch: /.*\.setup\.ts/ },
+//   { name: 'tests', dependencies: ['setup'],
+//     use: { storageState: '.auth/state.json' } }
+// ]
+
+// 3. Evitar waitForLoadState('networkidle') cuando no es necesario
+// Preferir esperar por el elemento especifico que necesitas
+await expect(page.locator('[data-testid="content"]')).toBeVisible(); // Mejor</code></pre>
+</div>
+</div>
 
         <h3>6. Foco unico: un test, una validacion</h3>
 
-        <pre><code class="python"># MAL: Un test que valida demasiadas cosas
+        <div class="code-tabs" data-code-id="L124-6">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># MAL: Un test que valida demasiadas cosas
 def test_user_management(page):
     # Crear usuario
     page.goto("/users/new")
@@ -263,10 +491,69 @@ def test_delete_user_removes_from_list(page, create_user):
     from playwright.sync_api import expect
     expect(page).to_have_url("**/users")
     expect(page.locator(f"[data-user-id='{user_id}']")).to_have_count(0)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// MAL: Un test que valida demasiadas cosas
+test('user management', async ({ page }) => {
+    // Crear usuario
+    await page.goto('/users/new');
+    await page.fill('#name', 'Juan');
+    await page.click('#save');
+    expect(page.url()).toContain('created');
+
+    // Editar usuario
+    await page.click('#edit');
+    await page.fill('#name', 'Juan Editado');
+    await page.click('#save');
+    expect(page.url()).toContain('updated');
+
+    // Eliminar usuario
+    await page.click('#delete');
+    await page.click('#confirm');
+    expect(page.url()).toContain('deleted');
+});
+
+// BIEN: Tests separados con foco unico
+test('create user shows success', async ({ page }) => {
+    await page.goto('/users/new');
+    await page.fill('[data-testid="name"]', 'Juan');
+    await page.click('[data-testid="save-btn"]');
+    await expect(page.locator('.toast-success')).toBeVisible();
+});
+
+test('edit user updates name', async ({ page, createUser }) => {
+    const userId = await createUser({ name: 'Juan' });
+    await page.goto(\`/users/\${userId}/edit\`);
+    await page.fill('[data-testid="name"]', 'Juan Editado');
+    await page.click('[data-testid="save-btn"]');
+    await expect(page.locator('[data-testid="user-name"]')).toHaveText('Juan Editado');
+});
+
+test('delete user removes from list', async ({ page, createUser }) => {
+    const userId = await createUser({ name: 'Para Eliminar' });
+    await page.goto(\`/users/\${userId}\`);
+    await page.click('[data-testid="delete-btn"]');
+    await page.click('[data-testid="confirm-delete"]');
+    await expect(page).toHaveURL('**/users');
+    await expect(page.locator(\`[data-user-id="\${userId}"]\`)).toHaveCount(0);
+});</code></pre>
+</div>
+</div>
 
         <h3>7. DRY selectivo: reutilizar con criterio</h3>
 
-        <pre><code class="python"># BIEN reutilizar: logica de negocio en Page Objects
+        <div class="code-tabs" data-code-id="L124-7">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># BIEN reutilizar: logica de negocio en Page Objects
 class ProductsPage(BasePage):
     def search(self, query: str):
         self.fill("[data-testid='search']", query)
@@ -288,6 +575,41 @@ def assert_success_toast(page):
 
 # BIEN: Assertion directa en el test (mas claro)
 expect(page.locator(".toast-success")).to_have_text("Producto creado")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// BIEN reutilizar: logica de negocio en Page Objects
+class ProductsPage extends BasePage {
+    async search(query: string) {
+        await this.page.fill('[data-testid="search"]', query);
+        await this.page.click('[data-testid="search-btn"]');
+        await this.page.waitForLoadState('networkidle');
+    }
+}
+
+// BIEN reutilizar: setup complejo en fixtures
+const test = base.extend<{ productWithReviews: Product }>({
+    productWithReviews: async ({ request }, use) => {
+        const resp = await request.post('/api/products', { data: { /* ... */ } });
+        const product = await resp.json();
+        for (let i = 0; i < 3; i++) {
+            await request.post(\`/api/products/\${product.id}/reviews\`, {
+                data: { /* ... */ }
+            });
+        }
+        await use(product);
+    },
+});
+
+// EVITAR reutilizar: assertions (pierden claridad)
+// MAL:
+async function assertSuccessToast(page: Page) {
+    await expect(page.locator('.toast')).toBeVisible();
+}
+
+// BIEN: Assertion directa en el test (mas claro)
+await expect(page.locator('.toast-success')).toHaveText('Producto creado');</code></pre>
+</div>
+</div>
 
         <div style="background: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Señales de alerta: tests que necesitan refactor</h4>

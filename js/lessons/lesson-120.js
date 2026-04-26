@@ -55,7 +55,18 @@ const LESSON_120 = {
             </table>
         </div>
 
-        <pre><code class="python">from playwright.sync_api import expect
+        <div class="code-tabs" data-code-id="L120-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python">from playwright.sync_api import expect
 
 def test_add_product_to_cart(page):
     """Verifica que un producto se puede agregar al carrito."""
@@ -91,10 +102,62 @@ def test_login_with_invalid_credentials(page):
     expect(page.locator("[data-testid='error-alert']")).to_be_visible()
     expect(page.locator("[data-testid='error-alert']")).to_contain_text("Credenciales invalidas")
     expect(page).to_have_url("**/auth/login")  # No redirecciona</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('add product to cart', async ({ page }) => {
+    // Verifica que un producto se puede agregar al carrito
+
+    // ---- ARRANGE: Preparar estado inicial ----
+    await page.goto('/products');
+    await page.locator('[data-testid="product-card"]').first().click();
+    await page.waitForURL('**/products/*');
+
+    // ---- ACT: Ejecutar la accion bajo prueba ----
+    await page.click('[data-testid="add-to-cart-btn"]');
+
+    // ---- ASSERT: Verificar resultado esperado ----
+    await expect(page.locator('[data-testid="cart-badge"]')).toHaveText('1');
+    await expect(page.locator('.toast-success')).toBeVisible();
+    await expect(page.locator('.toast-success')).toHaveText('Producto agregado al carrito');
+});
+
+test('login with invalid credentials', async ({ page }) => {
+    // Verifica que el login falla con credenciales incorrectas
+
+    // ---- ARRANGE ----
+    await page.goto('/auth/login');
+    const loginForm = page.locator('[data-testid="login-form"]');
+    await expect(loginForm).toBeVisible();
+
+    // ---- ACT ----
+    await page.fill('[data-testid="email-input"]', 'invalid@test.com');
+    await page.fill('[data-testid="password-input"]', 'wrongpassword');
+    await page.click('[data-testid="submit-btn"]');
+
+    // ---- ASSERT ----
+    await expect(page.locator('[data-testid="error-alert"]')).toBeVisible();
+    await expect(page.locator('[data-testid="error-alert"]')).toContainText('Credenciales invalidas');
+    await expect(page).toHaveURL('**/auth/login'); // No redirecciona
+});</code></pre>
+</div>
+</div>
 
         <div style="background: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Anti-patron: Tests sin estructura clara</h4>
-            <pre><code class="python"># MAL: Las fases estan mezcladas, dificil de entender
+            <div class="code-tabs" data-code-id="L120-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># MAL: Las fases estan mezcladas, dificil de entender
 def test_confusing(page):
     page.goto("/products")
     assert page.title() != ""          # Assert mezclado con arrange
@@ -104,13 +167,39 @@ def test_confusing(page):
     page.click("#checkout")             # Segunda accion, deberia ser otro test
     page.fill("#name", "Juan")
     expect(page.locator("#total")).to_be_visible()  # Assert de otro flujo</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// MAL: Las fases estan mezcladas, dificil de entender
+test('confusing', async ({ page }) => {
+    await page.goto('/products');
+    expect(await page.title()).not.toBe('');  // Assert mezclado con arrange
+    await page.click('.product');
+    await page.click('#add-cart');
+    await expect(page.locator('.badge')).toHaveText('1');
+    await page.click('#checkout');             // Segunda accion, deberia ser otro test
+    await page.fill('#name', 'Juan');
+    await expect(page.locator('#total')).toBeVisible(); // Assert de otro flujo
+});</code></pre>
+</div>
+</div>
         </div>
 
         <h3>Patron Builder: Construccion de datos complejos</h3>
         <p>Cuando los datos de prueba tienen muchos campos, el patron Builder permite
         construirlos de forma fluida y legible, usando solo los valores relevantes para cada test:</p>
 
-        <pre><code class="python"># builders/user_builder.py
+        <div class="code-tabs" data-code-id="L120-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># builders/user_builder.py
 from dataclasses import dataclass, field
 from typing import Optional
 import random
@@ -170,8 +259,89 @@ class UserBuilder:
 
     def build(self) -> User:
         return self._user</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// builders/user-builder.ts
 
-        <pre><code class="python"># Uso en tests: solo se especifican los campos relevantes
+interface User {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+    company: string;
+    phone: string;
+    isActive: boolean;
+}
+
+class UserBuilder {
+    /** Builder para crear usuarios de prueba con datos flexibles. */
+    private user: User;
+
+    constructor() {
+        const uid = Math.random().toString(36).substring(2, 8);
+        this.user = {
+            email: \`test_\${uid}@example.com\`,
+            password: 'Test1234!',
+            firstName: 'Test',
+            lastName: 'User',
+            role: 'user',
+            company: 'SIESA',
+            phone: '+57 300 1234567',
+            isActive: true,
+        };
+    }
+
+    withEmail(email: string): UserBuilder {
+        this.user.email = email;
+        return this;
+    }
+
+    withName(first: string, last: string): UserBuilder {
+        this.user.firstName = first;
+        this.user.lastName = last;
+        return this;
+    }
+
+    withRole(role: string): UserBuilder {
+        this.user.role = role;
+        return this;
+    }
+
+    asAdmin(): UserBuilder {
+        this.user.role = 'admin';
+        return this;
+    }
+
+    inactive(): UserBuilder {
+        this.user.isActive = false;
+        return this;
+    }
+
+    withCompany(company: string): UserBuilder {
+        this.user.company = company;
+        return this;
+    }
+
+    build(): User {
+        return { ...this.user };
+    }
+}</code></pre>
+</div>
+</div>
+
+        <div class="code-tabs" data-code-id="L120-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Uso en tests: solo se especifican los campos relevantes
 
 def test_admin_can_access_settings(page, create_user_via_api):
     """Solo importa el rol admin — el builder llena el resto."""
@@ -201,12 +371,61 @@ def test_inactive_user_cannot_login(page, create_user_via_api):
 
     # ASSERT
     expect(page.locator(".error")).to_have_text("Cuenta desactivada")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Uso en tests: solo se especifican los campos relevantes
+import { test, expect } from '@playwright/test';
+import { UserBuilder } from './builders/user-builder';
+import { createUserViaApi, login } from './helpers';
+
+test('admin can access settings', async ({ page }) => {
+    // Solo importa el rol admin — el builder llena el resto
+    // ARRANGE
+    const admin = new UserBuilder().asAdmin().withName('Carlos', 'Diaz').build();
+    await createUserViaApi(admin);
+    await login(page, admin.email, admin.password);
+
+    // ACT
+    await page.goto('/settings/admin');
+
+    // ASSERT
+    await expect(page.locator('[data-testid="admin-panel"]')).toBeVisible();
+});
+
+test('inactive user cannot login', async ({ page }) => {
+    // Solo importa que el usuario este inactivo
+    // ARRANGE
+    const user = new UserBuilder().inactive().build();
+    await createUserViaApi(user);
+
+    // ACT
+    await page.goto('/auth/login');
+    await page.fill('#email', user.email);
+    await page.fill('#password', user.password);
+    await page.click('#login-btn');
+
+    // ASSERT
+    await expect(page.locator('.error')).toHaveText('Cuenta desactivada');
+});</code></pre>
+</div>
+</div>
 
         <h3>Patron Factory: Creacion de Page Objects</h3>
         <p>El patron Factory centraliza la creacion de Page Objects, permitiendo
         instanciarlos con configuraciones predefinidas:</p>
 
-        <pre><code class="python"># factories/page_factory.py
+        <div class="code-tabs" data-code-id="L120-5">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># factories/page_factory.py
 from pages.auth.login_page import LoginPage
 from pages.dashboard.dashboard_page import DashboardPage
 from pages.inventory.products_page import ProductsPage
@@ -240,8 +459,64 @@ class PageFactory:
         """Login completo y retornar DashboardPage."""
         lp = self.navigate_to_login()
         return lp.login_and_wait(username, password)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// factories/page-factory.ts
+import { type Page } from '@playwright/test';
+import { LoginPage } from '../pages/auth/login-page';
+import { DashboardPage } from '../pages/dashboard/dashboard-page';
+import { ProductsPage } from '../pages/inventory/products-page';
+import { ProductDetailPage } from '../pages/inventory/product-detail-page';
 
-        <pre><code class="python"># Fixture para inyectar la factory
+export class PageFactory {
+    /** Factory centralizada para crear Page Objects. */
+
+    constructor(private readonly page: Page) {}
+
+    loginPage(): LoginPage {
+        return new LoginPage(this.page);
+    }
+
+    dashboard(): DashboardPage {
+        return new DashboardPage(this.page);
+    }
+
+    products(): ProductsPage {
+        return new ProductsPage(this.page);
+    }
+
+    productDetail(productId: string): ProductDetailPage {
+        return new ProductDetailPage(this.page, productId);
+    }
+
+    async navigateToLogin(): Promise&lt;LoginPage&gt; {
+        /** Navegar y retornar LoginPage. */
+        const lp = new LoginPage(this.page);
+        await lp.navigate();
+        return lp;
+    }
+
+    async loginAs(username: string, password: string): Promise&lt;DashboardPage&gt; {
+        /** Login completo y retornar DashboardPage. */
+        const lp = await this.navigateToLogin();
+        return lp.loginAndWait(username, password);
+    }
+}</code></pre>
+</div>
+</div>
+
+        <div class="code-tabs" data-code-id="L120-6">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Fixture para inyectar la factory
 import pytest
 from factories.page_factory import PageFactory
 
@@ -272,11 +547,62 @@ def test_product_search(pages):
 
     # ASSERT
     assert products.result_count() > 0</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Fixture para inyectar la factory
+import { test as base, expect } from '@playwright/test';
+import { PageFactory } from './factories/page-factory';
+
+// Extender test con fixture personalizada
+const test = base.extend&lt;{ pages: PageFactory }&gt;({
+    pages: async ({ page }, use) => {
+        /** Factory de Page Objects inyectable en tests. */
+        await use(new PageFactory(page));
+    },
+});
+
+// Uso en tests
+test('dashboard shows widgets', async ({ pages }) => {
+    // ARRANGE
+    const dashboard = await pages.loginAs('admin@siesa.com', 'Test1234!');
+
+    // ACT
+    const widgets = await dashboard.getWidgetCount();
+
+    // ASSERT
+    expect(widgets).toBeGreaterThanOrEqual(4);
+});
+
+test('product search', async ({ pages }) => {
+    // ARRANGE
+    await pages.loginAs('admin@siesa.com', 'Test1234!');
+    const products = pages.products();
+    await products.navigate();
+
+    // ACT
+    await products.search('Laptop');
+
+    // ASSERT
+    expect(await products.resultCount()).toBeGreaterThan(0);
+});</code></pre>
+</div>
+</div>
 
         <h3>Patron Decorator: Mejoras transversales</h3>
         <p>Los decoradores añaden funcionalidad a tests sin modificar su codigo:</p>
 
-        <pre><code class="python"># utils/decorators.py
+        <div class="code-tabs" data-code-id="L120-7">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># utils/decorators.py
 import functools
 import time
 import logging
@@ -316,6 +642,48 @@ def require_role(role: str):
 def test_admin_settings(pages):
     dashboard = pages.login_as("admin@siesa.com", "Test1234!")
     # ...</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// utils/test-helpers.ts
+// En Playwright Test no hay decoradores nativos, pero se puede lograr
+// un patron equivalente con fixtures y hooks personalizados.
+
+import { test as base } from '@playwright/test';
+
+// Helper que envuelve un test con logging de duracion
+function logTest(
+    title: string,
+    fn: Parameters&lt;typeof base&gt;[1]
+): Parameters&lt;typeof base&gt;[1] {
+    return async (args, testInfo) => {
+        console.log(\`INICIO: \${title}\`);
+        const start = Date.now();
+        try {
+            await fn(args, testInfo);
+            const duration = ((Date.now() - start) / 1000).toFixed(2);
+            console.log(\`FIN OK: \${title} (\${duration}s)\`);
+        } catch (error) {
+            const duration = ((Date.now() - start) / 1000).toFixed(2);
+            console.error(\`FIN FAIL: \${title} (\${duration}s) - \${error}\`);
+            throw error;
+        }
+    };
+}
+
+// Fixture que documenta el rol requerido via tag
+const test = base.extend&lt;{ requiredRole: string }&gt;({
+    requiredRole: ['user', { option: true }],
+});
+
+// Uso:
+test('admin settings', { tag: '@admin' },
+    logTest('admin settings', async ({ pages }) => {
+        const dashboard = await pages.loginAs('admin@siesa.com', 'Test1234!');
+        // ...
+    })
+);</code></pre>
+</div>
+</div>
 
         <h3>Comparativa de patrones</h3>
 

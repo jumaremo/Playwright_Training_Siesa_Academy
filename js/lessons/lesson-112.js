@@ -467,7 +467,18 @@ playwright_tests:
         <p>La recoleccion de artefactos es crucial para diagnosticar fallos. Playwright genera
         screenshots, videos y traces que deben preservarse:</p>
 
-        <pre><code class="python"># conftest.py - Configuracion para generar artefactos en CI
+        <div class="code-tabs" data-code-id="L112-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Configuracion para generar artefactos en CI
 import pytest
 import os
 
@@ -498,6 +509,63 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Configuracion para generar artefactos en CI
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+  // Configurar grabacion de video y screenshots en CI
+  use: {
+    // Grabar video solo en CI
+    video: process.env.CI ? 'on' : 'off',
+    // Capturar screenshot automaticamente si el test falla
+    screenshot: 'only-on-failure',
+    // Grabar trace en primer reintento
+    trace: 'on-first-retry',
+  },
+
+  // Directorio de salida para artefactos
+  outputDir: 'test-results/',
+
+  projects: [
+    {
+      name: 'chromium',
+      use: {
+        ...devices['Desktop Chrome'],
+        // Tamano de video personalizado
+        video: process.env.CI
+          ? { mode: 'on', size: { width: 1280, height: 720 } }
+          : 'off',
+      },
+    },
+  ],
+});
+
+// -------------------------------------------------------
+// Ejemplo: fixture global para screenshot en fallo
+// tests/base.fixture.ts
+import { test as base } from '@playwright/test';
+
+export const test = base.extend({
+  // Playwright TS captura screenshots automaticamente
+  // con screenshot: 'only-on-failure' en config.
+  // Para logica personalizada, usa afterEach:
+  page: async ({ page }, use, testInfo) => {
+    await use(page);
+    // Si el test fallo, capturar screenshot adicional
+    if (testInfo.status !== testInfo.expectedStatus) {
+      const screenshotPath = \`test-results/screenshots/\${testInfo.title.replace(/ /g, '_')}.png\`;
+      await page.screenshot({ path: screenshotPath, fullPage: true });
+      await testInfo.attach('screenshot-on-failure', {
+        path: screenshotPath,
+        contentType: 'image/png',
+      });
+    }
+  },
+});</code></pre>
+</div>
+</div>
 
         <div style="background: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Advertencia: Recursos en CI</h4>
@@ -619,7 +687,18 @@ pipeline {
                 </li>
             </ol>
 
-            <pre><code class="python"># Verificacion del ejercicio
+            <div class="code-tabs" data-code-id="L112-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Verificacion del ejercicio
 # Tu Jenkinsfile debe incluir al menos:
 assert "pipeline {" in jenkinsfile_content
 assert "agent { docker" in jenkinsfile_content
@@ -633,6 +712,32 @@ assert "stages:" in gitlab_ci_content
 assert "artifacts:" in gitlab_ci_content
 assert "reports:" in gitlab_ci_content
 assert "retry:" in gitlab_ci_content</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Verificacion del ejercicio
+// Tu Jenkinsfile debe incluir al menos:
+console.assert(jenkinsfileContent.includes('pipeline {'));
+console.assert(jenkinsfileContent.includes('agent { docker'));
+console.assert(
+  jenkinsfileContent.includes("stage('Tests')") ||
+  jenkinsfileContent.includes("stage('Test')")
+);
+console.assert(jenkinsfileContent.includes('archiveArtifacts'));
+console.assert(jenkinsfileContent.includes('junit'));
+
+// Tu .gitlab-ci.yml debe incluir:
+console.assert(gitlabCiContent.includes('image: mcr.microsoft.com/playwright'));
+console.assert(gitlabCiContent.includes('stages:'));
+console.assert(gitlabCiContent.includes('artifacts:'));
+console.assert(gitlabCiContent.includes('reports:'));
+console.assert(gitlabCiContent.includes('retry:'));
+
+// Adicionalmente, tu playwright.config.ts debe incluir:
+console.assert(playwrightConfig.includes('defineConfig'));
+console.assert(playwrightConfig.includes('projects'));
+// Y los comandos npx playwright test en los pipelines</code></pre>
+</div>
+</div>
         </div>
 
         <div style="background: #e8eaf6; padding: 15px; border-radius: 8px; margin: 15px 0;">

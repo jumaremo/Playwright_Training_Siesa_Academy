@@ -93,7 +93,18 @@ const LESSON_128 = {
 
         <h3>Linting automatizado con flake8 y pylint</h3>
 
-        <pre><code class="python"># pyproject.toml - Configuracion de linting
+        <div class="code-tabs" data-code-id="L128-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># pyproject.toml - Configuracion de linting
 [tool.flake8]
 max-line-length = 120
 exclude = [".venv", "__pycache__", "reports", "test-results"]
@@ -115,6 +126,41 @@ max-line-length = 120
 # Ejecutar:
 # flake8 tests/ pages/ services/
 # pylint tests/ pages/ services/ --rcfile=pyproject.toml</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// .eslintrc.js - Configuracion de linting para TypeScript
+module.exports = {
+  parser: '@typescript-eslint/parser',
+  parserOptions: {
+    project: './tsconfig.json',
+    sourceType: 'module',
+  },
+  plugins: ['@typescript-eslint', 'playwright'],
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'plugin:playwright/recommended',
+  ],
+  rules: {
+    // Longitud maxima de linea
+    'max-len': ['warn', { code: 120 }],
+    // Permitir any en fixtures de test
+    '@typescript-eslint/no-explicit-any': 'warn',
+    // No requerir tipos de retorno en tests
+    '@typescript-eslint/explicit-function-return-type': 'off',
+    // Page Objects pueden tener pocos metodos
+    '@typescript-eslint/no-extraneous-class': 'off',
+  },
+  ignorePatterns: [
+    'node_modules/', 'test-results/', 'playwright-report/',
+  ],
+};
+
+// Ejecutar:
+// npx eslint tests/ pages/ services/ --ext .ts
+// npx eslint tests/ pages/ services/ --ext .ts --fix</code></pre>
+</div>
+</div>
 
         <h3>Pre-commit hooks para calidad</h3>
 
@@ -153,7 +199,18 @@ repos:
 
         <h3>Script de verificacion de naming</h3>
 
-        <pre><code class="python"># scripts/check_test_names.py
+        <div class="code-tabs" data-code-id="L128-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># scripts/check_test_names.py
 """Pre-commit hook: verificar convenciones de nombres en tests."""
 import ast
 import sys
@@ -205,6 +262,95 @@ if __name__ == "__main__":
         sys.exit(1)
 
     sys.exit(0)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// scripts/checkTestNames.ts
+/**
+ * Pre-commit hook: verificar convenciones de nombres en tests.
+ */
+import * as fs from 'fs';
+import * as path from 'path';
+
+const BANNED_NAMES = ['test_1', 'test_2', 'test_a', 'test_b', 'test_temp', 'test_debug'];
+
+// Patron para detectar nombres de test en Playwright
+// Captura: test('nombre del test', ...) y test.describe('nombre', ...)
+const TEST_PATTERN = /test\(\s*['"\`]([^'"\`]+)['"\`]/g;
+const DESCRIBE_PATTERN = /test\.describe\(\s*['"\`]([^'"\`]+)['"\`]/g;
+
+interface TestError {
+  file: string;
+  line: number;
+  name: string;
+  message: string;
+}
+
+function checkFile(filepath: string): TestError[] {
+  const errors: TestError[] = [];
+  const source = fs.readFileSync(filepath, 'utf-8');
+  const lines = source.split('\\n');
+
+  lines.forEach((line, index) => {
+    const lineNumber = index + 1;
+    const testMatch = /test\(\s*['"\`]([^'"\`]+)['"\`]/.exec(line);
+
+    if (testMatch) {
+      const name = testMatch[1];
+
+      // Verificar longitud minima
+      if (name.length < 15) {
+        errors.push({
+          file: filepath,
+          line: lineNumber,
+          name,
+          message: \`'\$\{name}' es demasiado corto. Usa descripcion clara de accion + resultado\`,
+        });
+      }
+
+      // Verificar nombres prohibidos
+      if (BANNED_NAMES.includes(name)) {
+        errors.push({
+          file: filepath,
+          line: lineNumber,
+          name,
+          message: \`'\$\{name}' es un nombre generico prohibido\`,
+        });
+      }
+
+      // Verificar que no sea solo numeros
+      if (/^\\d+\$/.test(name)) {
+        errors.push({
+          file: filepath,
+          line: lineNumber,
+          name,
+          message: \`'\$\{name}' usa solo numeros. Describe la funcionalidad\`,
+        });
+      }
+    }
+  });
+
+  return errors;
+}
+
+// Ejecucion principal
+const files = process.argv.slice(2);
+const allErrors: TestError[] = [];
+
+for (const filepath of files) {
+  allErrors.push(...checkFile(filepath));
+}
+
+if (allErrors.length > 0) {
+  console.error('Errores de naming convention:');
+  for (const error of allErrors) {
+    console.error(\`  \$\{error.file}:\$\{error.line} - \$\{error.message}\`);
+  }
+  process.exit(1);
+}
+
+process.exit(0);</code></pre>
+</div>
+</div>
 
         <h3>Quality gates en CI</h3>
 
@@ -252,7 +398,18 @@ jobs:
 
         <h3>Metricas de calidad de la suite</h3>
 
-        <pre><code class="python"># scripts/suite_metrics.py
+        <div class="code-tabs" data-code-id="L128-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># scripts/suite_metrics.py
 """Calcular metricas de calidad de la suite de tests."""
 import ast
 import os
@@ -308,6 +465,109 @@ if __name__ == "__main__":
     print(f"Con docstring: {m['tests_with_docstring']} ({m['tests_with_docstring']/max(m['total_tests'],1)*100:.0f}%)")
     print(f"Longitud promedio: {m['avg_test_length']:.0f} lineas")
     print(f"Usando sleep: {m['tests_using_sleep']} (objetivo: 0)")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// scripts/suiteMetrics.ts
+/**
+ * Calcular metricas de calidad de la suite de tests.
+ */
+import * as fs from 'fs';
+import * as path from 'path';
+import { glob } from 'glob';
+
+interface SuiteMetrics {
+  totalFiles: number;
+  totalTests: number;
+  testsWithJSDoc: number;
+  testsWithAAAComments: number;
+  avgTestLength: number;
+  testsUsingSleep: number;
+  testsWithAssertion: number;
+}
+
+async function analyzeTestSuite(testsDir: string = 'tests'): Promise&lt;SuiteMetrics&gt; {
+  const metrics: SuiteMetrics = {
+    totalFiles: 0,
+    totalTests: 0,
+    testsWithJSDoc: 0,
+    testsWithAAAComments: 0,
+    avgTestLength: 0,
+    testsUsingSleep: 0,
+    testsWithAssertion: 0,
+  };
+
+  const allLengths: number[] = [];
+
+  // Buscar archivos de test recursivamente
+  const testFiles = await glob(\`\$\{testsDir}/**/*.spec.ts\`);
+
+  for (const testFile of testFiles) {
+    metrics.totalFiles += 1;
+    const source = fs.readFileSync(testFile, 'utf-8');
+    const lines = source.split('\\n');
+
+    // Detectar tests: test('...', async ...)
+    let insideTest = false;
+    let testStartLine = 0;
+    let braceDepth = 0;
+
+    lines.forEach((line, index) => {
+      // Detectar inicio de test
+      if (/test\(|test\.describe\(/.test(line)) {
+        metrics.totalTests += 1;
+        insideTest = true;
+        testStartLine = index;
+        braceDepth = 0;
+      }
+
+      if (insideTest) {
+        braceDepth += (line.match(/\\{/g) || []).length;
+        braceDepth -= (line.match(/\\}/g) || []).length;
+
+        if (braceDepth <= 0 && index > testStartLine) {
+          allLengths.push(index - testStartLine);
+          insideTest = false;
+        }
+      }
+
+      // Tiene JSDoc antes del test?
+      if (/\/\*\*/.test(line) && index + 3 < lines.length) {
+        if (/test\(/.test(lines[index + 2]) || /test\(/.test(lines[index + 3])) {
+          metrics.testsWithJSDoc += 1;
+        }
+      }
+    });
+
+    // Buscar patrones en el source
+    if (source.includes('// ARRANGE') || source.includes('// Arrange')) {
+      metrics.testsWithAAAComments += (source.match(/\/\/ ARRANGE/g) || []).length;
+    }
+    if (source.includes('waitForTimeout') || source.includes('setTimeout')) {
+      metrics.testsUsingSleep += (source.match(/waitForTimeout|setTimeout/g) || []).length;
+    }
+  }
+
+  if (allLengths.length > 0) {
+    metrics.avgTestLength = allLengths.reduce((a, b) => a + b, 0) / allLengths.length;
+  }
+
+  return metrics;
+}
+
+// Ejecucion principal
+(async () => {
+  const m = await analyzeTestSuite();
+  console.log(\`Archivos de test: \$\{m.totalFiles}\`);
+  console.log(\`Total tests: \$\{m.totalTests}\`);
+  const jsdocPct = m.totalTests > 0
+    ? ((m.testsWithJSDoc / m.totalTests) * 100).toFixed(0)
+    : '0';
+  console.log(\`Con JSDoc: \$\{m.testsWithJSDoc} (\$\{jsdocPct}%)\`);
+  console.log(\`Longitud promedio: \$\{m.avgTestLength.toFixed(0)} lineas\`);
+  console.log(\`Usando sleep/waitForTimeout: \$\{m.testsUsingSleep} (objetivo: 0)\`);
+})();</code></pre>
+</div>
+</div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Ejercicio Practico</h4>

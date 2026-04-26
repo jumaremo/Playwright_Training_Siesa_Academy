@@ -124,7 +124,18 @@ const LESSON_123 = {
 
         <h3>Paso 2: Configuracion centralizada</h3>
 
-        <pre><code class="python"># config/settings.py
+        <div class="code-tabs" data-code-id="L123-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># config/settings.py
 import os
 import yaml
 from dataclasses import dataclass
@@ -169,6 +180,76 @@ class FrameworkSettings:
             self.api_url = os.getenv("API_URL", env_config.get("api_url", ""))
 
 settings = FrameworkSettings()</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// config/settings.ts
+import * as fs from 'fs';
+import * as path from 'path';
+import * as yaml from 'js-yaml';
+
+// Interfaz de configuracion del framework enterprise
+interface FrameworkSettings {
+    // Entorno
+    environment: string;
+    baseUrl: string;
+    apiUrl: string;
+
+    // Browser
+    browser: string;
+    headless: boolean;
+    slowMo: number;
+    viewportWidth: number;
+    viewportHeight: number;
+
+    // Timeouts (ms)
+    defaultTimeout: number;
+    navigationTimeout: number;
+    assertionTimeout: number;
+
+    // Performance
+    perfEnabled: boolean;
+    perfThresholdMultiplier: number;
+
+    // Retry
+    maxRetries: number;
+}
+
+function loadSettings(): FrameworkSettings {
+    const environment = process.env.TEST_ENV || 'local';
+    let baseUrl = '';
+    let apiUrl = '';
+
+    // Cargar URLs desde archivo de entornos
+    const envsFile = path.join(__dirname, 'environments.yaml');
+    if (fs.existsSync(envsFile)) {
+        const envsContent = fs.readFileSync(envsFile, 'utf-8');
+        const envs = yaml.load(envsContent) as Record&lt;string, any&gt;;
+        const envConfig = envs[environment] || envs['local'] || {};
+        baseUrl = process.env.BASE_URL || envConfig.base_url || '';
+        apiUrl = process.env.API_URL || envConfig.api_url || '';
+    }
+
+    return {
+        environment,
+        baseUrl,
+        apiUrl,
+        browser: process.env.BROWSER || 'chromium',
+        headless: (process.env.HEADLESS || 'true').toLowerCase() === 'true',
+        slowMo: parseInt(process.env.SLOW_MO || '0', 10),
+        viewportWidth: 1920,
+        viewportHeight: 1080,
+        defaultTimeout: 30000,
+        navigationTimeout: 60000,
+        assertionTimeout: 10000,
+        perfEnabled: (process.env.PERF_MONITORING || 'false').toLowerCase() === 'true',
+        perfThresholdMultiplier: 1.2,
+        maxRetries: parseInt(process.env.MAX_RETRIES || '0', 10),
+    };
+}
+
+export const settings = loadSettings();</code></pre>
+</div>
+</div>
 
         <pre><code class="yaml"># config/environments.yaml
 local:
@@ -185,7 +266,18 @@ production:
 
         <h3>Paso 3: BasePage robusto</h3>
 
-        <pre><code class="python"># pages/base_page.py
+        <div class="code-tabs" data-code-id="L123-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># pages/base_page.py
 from playwright.sync_api import Page, Locator, expect
 from config.settings import settings
 import logging
@@ -265,10 +357,124 @@ class BasePage:
     # ---- Screenshots ----
     def screenshot(self, name: str):
         self.page.screenshot(path=f"reports/screenshots/{name}.png", full_page=True)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// pages/base-page.ts
+import { Page, Locator, expect } from '@playwright/test';
+import { settings } from '../config/settings';
+
+export class BasePage {
+    // Clase base con metodos reutilizables para todos los Page Objects
+    readonly page: Page;
+    protected _url: string = '';
+
+    constructor(page: Page) {
+        this.page = page;
+    }
+
+    // ---- Navegacion ----
+    async navigate(): Promise&lt;this&gt; {
+        const fullUrl = \`\${settings.baseUrl}\${this._url}\`;
+        console.log(\`Navegando a \${fullUrl}\`);
+        await this.page.goto(fullUrl);
+        await this.waitForPageLoad();
+        return this;
+    }
+
+    async waitForPageLoad(): Promise&lt;void&gt; {
+        await this.page.waitForLoadState('domcontentloaded');
+    }
+
+    async waitForNetworkIdle(): Promise&lt;void&gt; {
+        await this.page.waitForLoadState('networkidle');
+    }
+
+    // ---- Locators ----
+    locator(selector: string): Locator {
+        return this.page.locator(selector);
+    }
+
+    byTestId(testId: string): Locator {
+        return this.page.getByTestId(testId);
+    }
+
+    byRole(role: Parameters&lt;Page['getByRole']&gt;[0], options?: Parameters&lt;Page['getByRole']&gt;[1]): Locator {
+        return this.page.getByRole(role, options);
+    }
+
+    byText(text: string): Locator {
+        return this.page.getByText(text);
+    }
+
+    // ---- Acciones ----
+    async click(selector: string): Promise&lt;void&gt; {
+        await this.locator(selector).click();
+    }
+
+    async fill(selector: string, value: string): Promise&lt;void&gt; {
+        await this.locator(selector).fill(value);
+    }
+
+    async selectOption(selector: string, value: string): Promise&lt;void&gt; {
+        await this.locator(selector).selectOption(value);
+    }
+
+    async check(selector: string): Promise&lt;void&gt; {
+        await this.locator(selector).check();
+    }
+
+    // ---- Lectura ----
+    async getText(selector: string): Promise&lt;string&gt; {
+        return (await this.locator(selector).textContent()) || '';
+    }
+
+    async getValue(selector: string): Promise&lt;string&gt; {
+        return await this.locator(selector).inputValue();
+    }
+
+    async isVisible(selector: string): Promise&lt;boolean&gt; {
+        return await this.locator(selector).isVisible();
+    }
+
+    async count(selector: string): Promise&lt;number&gt; {
+        return await this.locator(selector).count();
+    }
+
+    // ---- Assertions ----
+    async shouldBeVisible(selector: string): Promise&lt;void&gt; {
+        await expect(this.locator(selector)).toBeVisible();
+    }
+
+    async shouldHaveText(selector: string, text: string): Promise&lt;void&gt; {
+        await expect(this.locator(selector)).toHaveText(text);
+    }
+
+    async shouldHaveUrl(pattern: string): Promise&lt;void&gt; {
+        await expect(this.page).toHaveURL(pattern);
+    }
+
+    // ---- Screenshots ----
+    async screenshot(name: string): Promise&lt;void&gt; {
+        await this.page.screenshot({ path: \`reports/screenshots/\${name}.png\`, fullPage: true });
+    }
+}</code></pre>
+</div>
+</div>
 
         <h3>Paso 4: Builders y Factory</h3>
 
-        <pre><code class="python"># builders/user_builder.py
+        <div class="code-tabs" data-code-id="L123-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># builders/user_builder.py
 from dataclasses import dataclass
 import random, string
 
@@ -292,8 +498,59 @@ class UserBuilder:
     def with_name(self, f, l): self._user.first_name = f; self._user.last_name = l; return self
     def as_admin(self): self._user.role = "admin"; return self
     def build(self): return self._user</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// builders/user-builder.ts
 
-        <pre><code class="python"># factories/page_factory.py
+// Interfaz para datos de usuario
+interface User {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    role: string;
+}
+
+// Genera un UID aleatorio de longitud dada
+function randomUid(length: number): string {
+    const chars = 'abcdefghijklmnopqrstuvwxyz';
+    return Array.from({ length }, () =&gt; chars[Math.floor(Math.random() * chars.length)]).join('');
+}
+
+export class UserBuilder {
+    private user: User;
+
+    constructor() {
+        const uid = randomUid(6);
+        this.user = {
+            email: \`test_\${uid}@siesa.com\`,
+            password: 'Test1234!',
+            firstName: 'Test',
+            lastName: 'User',
+            role: 'user',
+        };
+    }
+
+    withEmail(e: string): this { this.user.email = e; return this; }
+    withName(f: string, l: string): this { this.user.firstName = f; this.user.lastName = l; return this; }
+    asAdmin(): this { this.user.role = 'admin'; return this; }
+    build(): User { return { ...this.user }; }
+}</code></pre>
+</div>
+</div>
+
+        <div class="code-tabs" data-code-id="L123-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># factories/page_factory.py
 from pages.auth.login_page import LoginPage
 from pages.dashboard.dashboard_page import DashboardPage
 from pages.inventory.products_page import ProductsPage
@@ -310,10 +567,50 @@ class PageFactory:
         lp = self.login()
         lp.navigate()
         return lp.login_and_wait(user, pwd)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// factories/page-factory.ts
+import { Page } from '@playwright/test';
+import { LoginPage } from '../pages/auth/login-page';
+import { DashboardPage } from '../pages/dashboard/dashboard-page';
+import { ProductsPage } from '../pages/inventory/products-page';
+import { OrdersPage } from '../pages/orders/orders-page';
+
+export class PageFactory {
+    readonly page: Page;
+
+    constructor(page: Page) {
+        this.page = page;
+    }
+
+    login(): LoginPage { return new LoginPage(this.page); }
+    dashboard(): DashboardPage { return new DashboardPage(this.page); }
+    products(): ProductsPage { return new ProductsPage(this.page); }
+    orders(): OrdersPage { return new OrdersPage(this.page); }
+
+    async loginAs(user: string, pwd: string): Promise&lt;DashboardPage&gt; {
+        const lp = this.login();
+        await lp.navigate();
+        return await lp.loginAndWait(user, pwd);
+    }
+}</code></pre>
+</div>
+</div>
 
         <h3>Paso 5: Plugin personalizado</h3>
 
-        <pre><code class="python"># plugins/pytest_performance.py
+        <div class="code-tabs" data-code-id="L123-5">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># plugins/pytest_performance.py
 """Plugin que mide y reporta tiempos de ejecucion de tests."""
 import pytest
 import time
@@ -357,10 +654,74 @@ class PerformancePlugin:
 
 def pytest_configure(config):
     config.pluginmanager.register(PerformancePlugin(), "performance-plugin")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// plugins/performance-reporter.ts
+// Reporter personalizado que mide y reporta tiempos de ejecucion de tests
+import type { Reporter, TestCase, TestResult, FullResult } from '@playwright/test/reporter';
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface TestTiming {
+    test: string;
+    durationMs: number;
+    passed: boolean;
+}
+
+class PerformanceReporter implements Reporter {
+    private timings: TestTiming[] = [];
+
+    onTestEnd(test: TestCase, result: TestResult): void {
+        this.timings.push({
+            test: test.titlePath().join(' &gt; '),
+            durationMs: Math.round(result.duration * 10) / 10,
+            passed: result.status === 'passed',
+        });
+    }
+
+    onEnd(result: FullResult): void {
+        if (this.timings.length === 0) return;
+
+        console.log('='.repeat(60));
+        console.log('PERFORMANCE REPORT');
+        console.log('='.repeat(60));
+
+        // Top 10 tests mas lentos
+        const sorted = [...this.timings].sort((a, b) =&gt; b.durationMs - a.durationMs);
+        console.log('Top 10 tests mas lentos:');
+        for (const t of sorted.slice(0, 10)) {
+            const status = t.passed ? 'PASS' : 'FAIL';
+            console.log(\`  \${String(t.durationMs).padStart(8)}ms [\${status}] \${t.test}\`);
+        }
+
+        // Guardar JSON
+        const reportsDir = path.join(process.cwd(), 'reports');
+        fs.mkdirSync(reportsDir, { recursive: true });
+        fs.writeFileSync(
+            path.join(reportsDir, 'test-timings.json'),
+            JSON.stringify(this.timings, null, 2)
+        );
+    }
+}
+
+export default PerformanceReporter;</code></pre>
+</div>
+</div>
 
         <h3>Paso 6: Tests de ejemplo usando todo el framework</h3>
 
-        <pre><code class="python"># tests/smoke/test_login.py
+        <div class="code-tabs" data-code-id="L123-6">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># tests/smoke/test_login.py
 """Smoke tests de login usando el framework enterprise."""
 from builders.user_builder import UserBuilder
 from playwright.sync_api import expect
@@ -387,6 +748,46 @@ def test_invalid_credentials_shows_error(pages):
     # ASSERT
     login_page.should_show_error("Credenciales invalidas")
     login_page.should_have_url("**/login")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// tests/smoke/login.spec.ts
+// Smoke tests de login usando el framework enterprise
+import { test, expect } from '@playwright/test';
+import { PageFactory } from '../../factories/page-factory';
+
+// Fixture personalizada con PageFactory
+const testWithPages = test.extend&lt;{ pages: PageFactory }&gt;({
+    pages: async ({ page }, use) =&gt; {
+        await use(new PageFactory(page));
+    },
+});
+
+testWithPages('admin login exitoso', async ({ pages }) =&gt; {
+    // ARRANGE
+    const dashboard = await pages.loginAs('admin@siesa.com', 'Admin1234!');
+
+    // ACT (ya en dashboard)
+    const welcome = await dashboard.getWelcomeMessage();
+
+    // ASSERT
+    expect(welcome.toLowerCase()).toContain('admin');
+    await dashboard.shouldHaveUrl('**/dashboard');
+});
+
+testWithPages('credenciales invalidas muestra error', async ({ pages }) =&gt; {
+    // ARRANGE
+    const loginPage = pages.login();
+    await loginPage.navigate();
+
+    // ACT
+    await loginPage.login('invalid@test.com', 'wrongpass');
+
+    // ASSERT
+    await loginPage.shouldShowError('Credenciales invalidas');
+    await loginPage.shouldHaveUrl('**/login');
+});</code></pre>
+</div>
+</div>
 
         <h3>Criterios de evaluacion</h3>
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">

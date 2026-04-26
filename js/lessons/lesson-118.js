@@ -128,7 +128,18 @@ const LESSON_118 = {
 
         <h3>Configuracion de imports compartidos</h3>
 
-        <pre><code class="python"># pyproject.toml - Configurar Python path para imports
+        <div class="code-tabs" data-code-id="L118-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># pyproject.toml - Configurar Python path para imports
 [tool.pytest.ini_options]
 pythonpath = ["."]  # Permite imports desde la raiz
 testpaths = ["projects"]
@@ -138,8 +149,42 @@ python_files = ["test_*.py"]
 # from shared.pages.base_page import BasePage
 # from shared.services.auth_service import AuthService
 # from shared.fixtures.auth_fixtures import *</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Configurar proyectos para imports
+import { defineConfig, devices } from '@playwright/test';
 
-        <pre><code class="python"># projects/erp-nomina/tests/conftest.py
+export default defineConfig({
+  // Permite ejecutar tests por proyecto
+  testDir: './projects',
+  testMatch: '**/*.spec.ts',
+
+  // Esto permite hacer imports como:
+  // import { BasePage } from '../../shared/pages/base-page';
+  // import { AuthService } from '../../shared/services/auth-service';
+  // import { authFixtures } from '../../shared/fixtures/auth-fixtures';
+
+  // tsconfig.json con paths simplifica los imports:
+  // "paths": {
+  //   "@shared/*": ["shared/*"],
+  //   "@nomina/*": ["projects/erp-nomina/*"]
+  // }
+});</code></pre>
+</div>
+</div>
+
+        <div class="code-tabs" data-code-id="L118-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># projects/erp-nomina/tests/conftest.py
 """Conftest del proyecto Nomina - importa shared + fixtures locales."""
 
 # Importar fixtures compartidos
@@ -164,10 +209,55 @@ def test_employees():
     from pathlib import Path
     data_file = Path(__file__).parent.parent / "data" / "test_employees.json"
     return json.loads(data_file.read_text())</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// projects/erp-nomina/tests/fixtures.ts
+// Fixtures del proyecto Nomina - importa shared + fixtures locales
+
+import { test as base, expect } from '@playwright/test';
+import { authFixtures } from '../../../shared/fixtures/auth-fixtures';
+import { PayrollPage } from '../pages/payroll-page';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Extender fixtures base con autenticacion compartida
+const test = authFixtures.extend<{
+  payrollPage: PayrollPage;
+  testEmployees: Record<string, unknown>[];
+}>({
+  // Fixture local: pagina de nomina ya autenticada
+  payrollPage: async ({ authenticatedPage }, use) => {
+    const payrollPage = new PayrollPage(authenticatedPage);
+    await payrollPage.navigate();
+    await use(payrollPage);
+  },
+
+  // Fixture local: datos de empleados para testing
+  testEmployees: async ({}, use) => {
+    const dataFile = path.join(__dirname, '..', 'data', 'test_employees.json');
+    const data = JSON.parse(fs.readFileSync(dataFile, 'utf-8'));
+    await use(data);
+  },
+});
+
+export { test, expect };</code></pre>
+</div>
+</div>
 
         <h3>Ejecucion selectiva por proyecto</h3>
 
-        <pre><code class="python"># Ejecutar solo un proyecto
+        <div class="code-tabs" data-code-id="L118-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Ejecutar solo un proyecto
 # pytest projects/erp-nomina/tests/ -v
 
 # Ejecutar todos los proyectos
@@ -178,6 +268,29 @@ def test_employees():
 
 # Ejecutar por marcador de proyecto
 # pytest projects/ -m nomina -v</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Ejecutar solo un proyecto
+// npx playwright test --project=erp-nomina
+
+// Ejecutar todos los proyectos
+// npx playwright test
+
+// Ejecutar smoke tests de todos los proyectos
+// npx playwright test --grep @smoke
+
+// Ejecutar por tag de proyecto
+// npx playwright test --grep @nomina
+
+// Alternativa: usar config con proyectos definidos
+// playwright.config.ts:
+// projects: [
+//   { name: 'erp-nomina', testDir: './projects/erp-nomina/tests' },
+//   { name: 'erp-inventarios', testDir: './projects/erp-inventarios/tests' },
+//   { name: 'erp-contabilidad', testDir: './projects/erp-contabilidad/tests' },
+// ]</code></pre>
+</div>
+</div>
 
         <pre><code class="makefile"># Makefile - Comandos por proyecto
 .PHONY: test-all test-nomina test-inventarios test-contabilidad
@@ -267,7 +380,18 @@ jobs:
         <h3>Paquete compartido como libreria interna</h3>
         <p>Para monorepos mas grandes, puedes empaquetar <code>shared/</code> como un paquete instalable:</p>
 
-        <pre><code class="python"># shared/setup.py (o shared/pyproject.toml)
+        <div class="code-tabs" data-code-id="L118-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># shared/setup.py (o shared/pyproject.toml)
 from setuptools import setup, find_packages
 
 setup(
@@ -285,6 +409,40 @@ setup(
 
 # Ahora puedes importar desde cualquier proyecto:
 # from qa_shared.pages.base_page import BasePage</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// shared/package.json - Paquete compartido como libreria interna
+// {
+//   "name": "@qa/shared",
+//   "version": "1.0.0",
+//   "main": "index.ts",
+//   "dependencies": {
+//     "@playwright/test": ">=1.42.0"
+//   }
+// }
+
+// tsconfig.json - Configurar paths para imports limpios
+// {
+//   "compilerOptions": {
+//     "baseUrl": ".",
+//     "paths": {
+//       "@shared/*": ["shared/*"],
+//       "@nomina/*": ["projects/erp-nomina/*"],
+//       "@inventarios/*": ["projects/erp-inventarios/*"]
+//     }
+//   }
+// }
+
+// Ahora puedes importar desde cualquier proyecto:
+// import { BasePage } from '@shared/pages/base-page';
+
+// Alternativa con npm workspaces (package.json raiz):
+// {
+//   "workspaces": ["shared", "projects/*"]
+// }
+// npm install  # vincula automaticamente los paquetes locales</code></pre>
+</div>
+</div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Ejercicio Practico</h4>

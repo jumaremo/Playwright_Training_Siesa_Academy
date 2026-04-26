@@ -74,7 +74,18 @@ const LESSON_125 = {
 
         <h3>Convenciones de nombres para funciones de test</h3>
 
-        <pre><code class="python"># PATRON RECOMENDADO: test_[accion]_[resultado_esperado]
+        <div class="code-tabs" data-code-id="L125-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># PATRON RECOMENDADO: test_[accion]_[resultado_esperado]
 
 # Flujos positivos (happy path)
 def test_login_with_valid_credentials_shows_dashboard():
@@ -100,10 +111,51 @@ def test_admin_role_shows_settings_menu():
 # ---- ALTERNATIVA: Patron Given-When-Then ----
 def test_given_valid_user_when_login_then_redirects_to_dashboard():
 def test_given_empty_cart_when_checkout_then_shows_error():</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// PATRON RECOMENDADO: descripcion legible del escenario
+
+// Flujos positivos (happy path)
+test('login with valid credentials shows dashboard', async ({ page }) => { });
+test('add product to cart increases badge count', async ({ page }) => { });
+test('submit order creates confirmation', async ({ page }) => { });
+test('search by name returns matching products', async ({ page }) => { });
+
+// Flujos negativos (error handling)
+test('login with wrong password shows error', async ({ page }) => { });
+test('register with existing email shows duplicate error', async ({ page }) => { });
+test('checkout with empty cart disables submit', async ({ page }) => { });
+
+// Validaciones
+test('email field rejects invalid format', async ({ page }) => { });
+test('password requires minimum 8 characters', async ({ page }) => { });
+test('price field accepts only numbers', async ({ page }) => { });
+
+// Estados
+test('inactive user cannot access dashboard', async ({ page }) => { });
+test('expired session redirects to login', async ({ page }) => { });
+test('admin role shows settings menu', async ({ page }) => { });
+
+// ---- ALTERNATIVA: Patron Given-When-Then ----
+test('given valid user when login then redirects to dashboard', async ({ page }) => { });
+test('given empty cart when checkout then shows error', async ({ page }) => { });</code></pre>
+</div>
+</div>
 
         <h3>Convenciones para Page Objects</h3>
 
-        <pre><code class="python"># Nombres de clase: PascalCase + 'Page'
+        <div class="code-tabs" data-code-id="L125-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Nombres de clase: PascalCase + 'Page'
 class LoginPage(BasePage):
 class DashboardPage(BasePage):
 class ProductDetailPage(BasePage):
@@ -128,10 +180,60 @@ class LoginPage(BasePage):
     _email_input = "[data-testid='email-input']"
     _password_input = "[data-testid='password-input']"
     _login_button = "[data-testid='login-button']"</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">import { type Page, type Locator } from '@playwright/test';
+
+// Nombres de clase: PascalCase + 'Page'
+class LoginPage extends BasePage { }
+class DashboardPage extends BasePage { }
+class ProductDetailPage extends BasePage { }
+
+// Metodos: camelCase, verbos de accion
+class LoginPage extends BasePage {
+    // Acciones (verbos)
+    async login(email: string, password: string) { }
+    async loginAndWait(email: string, password: string) { }
+    async clickForgotPassword() { }
+    async checkRememberMe() { }
+
+    // Queries (get*)
+    async getErrorMessage(): Promise&lt;string&gt; { return ''; }
+    async getWelcomeText(): Promise&lt;string&gt; { return ''; }
+
+    // Assertions (shouldShow*, shouldBeOn*)
+    async shouldShowError(message: string) { }
+    async shouldBeOnLoginPage() { }
+
+    // Propiedades/locators (private, readonly)
+    private readonly emailInput: Locator;
+    private readonly passwordInput: Locator;
+    private readonly loginButton: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.emailInput = page.getByTestId('email-input');
+        this.passwordInput = page.getByTestId('password-input');
+        this.loginButton = page.getByTestId('login-button');
+    }
+}</code></pre>
+</div>
+</div>
 
         <h3>Convenciones para fixtures</h3>
 
-        <pre><code class="python"># Fixtures de datos: sustantivo (lo que retornan)
+        <div class="code-tabs" data-code-id="L125-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Fixtures de datos: sustantivo (lo que retornan)
 @pytest.fixture
 def admin_user(): ...          # Retorna un User
 
@@ -165,6 +267,59 @@ def session_auth_state(): ...
 
 @pytest.fixture(scope="module")
 def module_test_data(): ...</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">import { test as base, type Page } from '@playwright/test';
+
+// Fixtures de datos: sustantivo (lo que retornan)
+// Se definen con test.extend
+type MyFixtures = {
+    adminUser: User;              // Retorna un User
+    sampleProducts: Product[];    // Retorna lista de productos
+    authToken: string;            // Retorna string token
+    // Fixtures de accion: verbo (lo que hacen)
+    createUser: (data: UserData) =&gt; Promise&lt;User&gt;; // Retorna callable
+    seedDatabase: void;           // Prepara datos, no retorna nada util
+    // Fixtures de pagina: nombre de la pagina
+    loginPage: LoginPage;         // Retorna LoginPage navegada
+    authenticatedPage: Page;      // Retorna page con sesion activa
+    // Fixtures de contexto: descripcion del estado
+    loggedInAsAdmin: Page;        // Estado de sesion admin
+};
+
+const test = base.extend&lt;MyFixtures&gt;({
+    adminUser: async ({}, use) =&gt; {
+        await use(/* ... */);
+    },
+    sampleProducts: async ({}, use) =&gt; {
+        await use(/* ... */);
+    },
+    authToken: async ({}, use) =&gt; {
+        await use(/* ... */);
+    },
+    createUser: async ({}, use) =&gt; {
+        await use(async (data) =&gt; { /* crear usuario */ });
+    },
+    seedDatabase: [async ({}, use) =&gt; {
+        // Prepara datos
+        await use();
+    }, { auto: true }],
+    loginPage: async ({ page }, use) =&gt; {
+        await use(/* ... */);
+    },
+    authenticatedPage: async ({ page }, use) =&gt; {
+        await use(page);
+    },
+    loggedInAsAdmin: async ({ page }, use) =&gt; {
+        await use(page);
+    },
+});
+
+// Scope de proyecto (equivalente a session/module scope)
+// Se configura en playwright.config.ts con storageState
+// o con test.extend y { scope: 'worker' }</code></pre>
+</div>
+</div>
 
         <h3>Organizacion de directorios</h3>
 
@@ -213,7 +368,18 @@ tests/
 
         <h3>Markers de pytest para organizacion</h3>
 
-        <pre><code class="python"># conftest.py / pyproject.toml - Registrar markers
+        <div class="code-tabs" data-code-id="L125-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py / pyproject.toml - Registrar markers
 def pytest_configure(config):
     config.addinivalue_line("markers", "smoke: tests criticos de sanity")
     config.addinivalue_line("markers", "regression: suite de regresion completa")
@@ -245,6 +411,49 @@ def test_bulk_product_import(page):
 # pytest -m smoke                    # Solo smoke
 # pytest -m "auth and not slow"      # Auth rapidos
 # pytest -m "regression and inventory"  # Regresion de inventario</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">import { test } from '@playwright/test';
+
+// Organizar con test.describe y tags (@tag en titulo)
+// Playwright usa tags en el titulo del test: @smoke, @regression, etc.
+
+test.describe('Auth', () => {
+    // Tests criticos de sanity
+    test('@smoke @auth login successful', async ({ page }) => {
+        // Este test es: smoke + auth. Se ejecuta con ambos filtros.
+    });
+});
+
+test.describe('Inventory', () => {
+    // Tests de regresion
+    test('@regression @inventory @slow bulk product import', async ({ page }) => {
+        // Este test es: regression + inventory + slow.
+    });
+});
+
+// Alternativa: usar test.describe con tag en el describe
+test.describe('@auth', () => {
+    test('@smoke login successful', async ({ page }) => { });
+    test('@regression password reset flow', async ({ page }) => { });
+});
+
+test.describe('@inventory', () => {
+    test('@regression @slow bulk product import', async ({ page }) => { });
+});
+
+// Ejecucion selectiva:
+// npx playwright test --grep @smoke                 # Solo smoke
+// npx playwright test --grep "(?=.*@auth)(?!.*@slow)" # Auth rapidos
+// npx playwright test --grep "(?=.*@regression)(?=.*@inventory)" # Regresion inventario
+
+// Alternativa con projects en playwright.config.ts:
+// projects: [
+//   { name: 'smoke', grep: /@smoke/ },
+//   { name: 'regression', grep: /@regression/ },
+// ]</code></pre>
+</div>
+</div>
 
         <h3>Checklist de organizacion</h3>
 

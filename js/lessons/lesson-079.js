@@ -18,7 +18,18 @@ const LESSON_079 = {
 
         <h3>🔍 Queries de verificación comunes</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># ── Verificar que un registro existe ──
+            <div class="code-tabs" data-code-id="L079-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># ── Verificar que un registro existe ──
 def test_usuario_se_guarda_en_bd(db, page):
     page.goto("https://mi-app.com/register")
     page.fill("#name", "María Test")
@@ -38,10 +49,46 @@ def test_usuario_se_guarda_en_bd(db, page):
     assert user["role"] == "user"  # Rol por defecto
     assert user["active"] is True
     assert user["created_at"] is not None</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// ── Verificar que un registro existe ──
+test('usuario se guarda en BD', async ({ db, page }) => {
+    await page.goto('https://mi-app.com/register');
+    await page.fill('#name', 'María Test');
+    await page.fill('#email', 'maria@playwright-test.com');
+    await page.fill('#password', 'Test@12345');
+    await page.click('#register-btn');
+
+    // Verificar en BD
+    const user = await db.queryOne(
+        'SELECT id, name, email, role, active, created_at ' +
+        'FROM users WHERE email = $1',
+        ['maria@playwright-test.com']
+    );
+
+    expect(user).not.toBeNull();
+    expect(user.name).toBe('María Test');
+    expect(user.role).toBe('user'); // Rol por defecto
+    expect(user.active).toBe(true);
+    expect(user.created_at).not.toBeNull();
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📋 Verificar campos que la UI no muestra</h3>
-        <pre><code class="python">def test_pedido_guarda_datos_internos(db, page):
+        <div class="code-tabs" data-code-id="L079-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">def test_pedido_guarda_datos_internos(db, page):
     """Verificar campos que solo existen en BD (no en UI)."""
     # Crear pedido por UI
     page.goto("https://mi-app.com/checkout")
@@ -64,9 +111,49 @@ def test_usuario_se_guarda_en_bd(db, page):
     assert order["subtotal"] + order["tax_amount"] == order["total"]
     assert order["created_at"] is not None
     assert order["updated_at"] is not None</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">test('pedido guarda datos internos', async ({ db, page }) => {
+    // Crear pedido por UI
+    await page.goto('https://mi-app.com/checkout');
+    // ... llenar formulario y enviar ...
+    await page.click('#place-order');
+
+    // Verificar campos internos de BD
+    const order = await db.queryOne(
+        'SELECT * FROM orders ORDER BY created_at DESC LIMIT 1'
+    );
+
+    // Campos visibles en UI
+    expect(order.status).toBe('confirmed');
+
+    // Campos que solo existen en BD
+    expect(order.payment_gateway_ref).not.toBeNull(); // Ref del gateway
+    expect(order.ip_address).not.toBeNull();           // IP del cliente
+    expect(order.user_agent).not.toBeNull();           // Browser
+    expect(Number(order.tax_amount)).toBeGreaterThan(0); // IVA calculado
+    expect(
+        Number(order.subtotal) + Number(order.tax_amount)
+    ).toBe(Number(order.total));
+    expect(order.created_at).not.toBeNull();
+    expect(order.updated_at).not.toBeNull();
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🔗 Verificar relaciones entre tablas</h3>
-        <pre><code class="python">def test_pedido_tiene_items_correctos(db, page):
+        <div class="code-tabs" data-code-id="L079-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">def test_pedido_tiene_items_correctos(db, page):
     """Verificar que la relación order-items se guardó bien."""
     # Agregar 2 productos y hacer checkout por UI
     # ... (interacción con UI) ...
@@ -94,10 +181,53 @@ def test_usuario_se_guarda_en_bd(db, page):
         item["quantity"] * item["unit_price"] for item in items
     )
     assert order["subtotal"] == calculated_total</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">test('pedido tiene items correctos', async ({ db, page }) => {
+    // Agregar 2 productos y hacer checkout por UI
+    // ... (interacción con UI) ...
+
+    // Verificar el pedido
+    const order = await db.queryOne(
+        'SELECT * FROM orders ORDER BY id DESC LIMIT 1'
+    );
+
+    // Verificar los items del pedido (tabla relacionada)
+    const items = await db.query(
+        'SELECT oi.*, p.name as product_name ' +
+        'FROM order_items oi ' +
+        'JOIN products p ON oi.product_id = p.id ' +
+        'WHERE oi.order_id = $1',
+        [order.id]
+    );
+
+    expect(items).toHaveLength(2);
+    expect(items.every((i: any) => i.quantity > 0)).toBeTruthy();
+    expect(items.every((i: any) => i.unit_price > 0)).toBeTruthy();
+
+    // Verificar que el total cuadra
+    const calculatedTotal = items.reduce(
+        (sum: number, i: any) => sum + i.quantity * Number(i.unit_price), 0
+    );
+    expect(Number(order.subtotal)).toBe(calculatedTotal);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📊 Queries de agregación para validaciones</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python">def test_dashboard_muestra_totales_correctos(db, page):
+            <div class="code-tabs" data-code-id="L079-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_dashboard_muestra_totales_correctos(db, page):
     """Verificar que el dashboard muestra datos reales de BD."""
 
     # Obtener totales reales de la BD
@@ -140,10 +270,67 @@ def test_reporte_ventas_cuadra_con_bd(db, page):
     expect(page.locator("[data-testid='total-orders']")).to_contain_text(
         str(ventas_bd["total_orders"])
     )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('dashboard muestra totales correctos', async ({ db, page }) => {
+    // Obtener totales reales de la BD
+    const stats = await db.queryOne(
+        "SELECT " +
+        "  COUNT(*) as total_employees, " +
+        "  COUNT(*) FILTER (WHERE status = 'active') as active_count, " +
+        "  COUNT(DISTINCT department) as dept_count, " +
+        "  AVG(salary)::numeric(12,2) as avg_salary " +
+        "FROM employees"
+    );
+
+    // Navegar al dashboard
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Comparar UI con BD
+    const uiTotal = await page.locator(
+        '[data-testid="total-employees"]'
+    ).textContent();
+    expect(uiTotal).toContain(String(stats.total_employees));
+
+    const uiActive = await page.locator(
+        '[data-testid="active-employees"]'
+    ).textContent();
+    expect(uiActive).toContain(String(stats.active_count));
+});
+
+test('reporte ventas cuadra con BD', async ({ db, page }) => {
+    const ventasBd = await db.queryOne(
+        "SELECT " +
+        "  COUNT(*) as total_orders, " +
+        "  SUM(total) as total_revenue, " +
+        "  AVG(total)::numeric(12,2) as avg_order " +
+        "FROM orders " +
+        "WHERE created_at >= DATE_TRUNC('month', CURRENT_DATE) " +
+        "AND status = 'confirmed'"
+    );
+
+    await page.goto('https://mi-app.com/reports/sales');
+
+    await expect(page.locator('[data-testid="total-orders"]'))
+        .toContainText(String(ventasBd.total_orders));
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🔒 Verificar integridad y constraints</h3>
-        <pre><code class="python">def test_email_unico_en_bd(db):
+        <div class="code-tabs" data-code-id="L079-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">def test_email_unico_en_bd(db):
     """Verificar que el constraint UNIQUE funciona."""
     # Insertar un usuario
     db.execute(
@@ -182,6 +369,44 @@ def test_campo_not_null(db):
             "INSERT INTO employees (name, email) VALUES (%s, NULL)",
             ("Test",)
         )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">test('email único en BD', async ({ db }) => {
+    // Insertar un usuario
+    await db.execute(
+        'INSERT INTO users (name, email) VALUES ($1, $2)',
+        ['Test User', 'unique@test.com']
+    );
+
+    // Intentar insertar con el mismo email → debe lanzar error
+    await expect(db.execute(
+        'INSERT INTO users (name, email) VALUES ($1, $2)',
+        ['Other User', 'unique@test.com']
+    )).rejects.toThrow(/unique/i); // PostgreSQL: unique_violation
+});
+
+test('cascade delete', async ({ db }) => {
+    // Contar items del pedido
+    const itemsBefore = await db.count('order_items', 'order_id = $1', [1]);
+    expect(itemsBefore).toBeGreaterThan(0);
+
+    // Eliminar el pedido
+    await db.execute('DELETE FROM orders WHERE id = $1', [1]);
+
+    // Los items deben haberse eliminado también
+    const itemsAfter = await db.count('order_items', 'order_id = $1', [1]);
+    expect(itemsAfter).toBe(0);
+});
+
+test('campo NOT NULL', async ({ db }) => {
+    // Intentar insertar con email NULL → debe lanzar error
+    await expect(db.execute(
+        'INSERT INTO employees (name, email) VALUES ($1, NULL)',
+        ['Test']
+    )).rejects.toThrow(/not-null|null value/i);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>⏱️ Verificar timestamps y auditoría</h3>
         <pre><code class="python">from datetime import datetime, timedelta

@@ -19,7 +19,18 @@ const LESSON_067 = {
 
         <h3>📤 Modificar headers de la request</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># Agregar/modificar headers antes de que la request llegue al servidor
+            <div class="code-tabs" data-code-id="L067-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Agregar/modificar headers antes de que la request llegue al servidor
 
 def add_custom_headers(route):
     """Agregar headers de autenticación y tracking."""
@@ -50,10 +61,56 @@ def mobile_ua(route):
     route.continue_(headers=headers)
 
 page.route("**/*", mobile_ua)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Agregar/modificar headers antes de que la request llegue al servidor
+
+async function addCustomHeaders(route) {
+    const headers = {
+        ...route.request().headers(),
+        'Authorization': 'Bearer test-token-abc123',
+        'X-Test-ID': 'e2e-test-001',
+        'X-Environment': 'testing',
+        'Accept-Language': 'es-CO',
+    };
+    await route.continue({ headers });
+}
+
+await page.route('**/api/**', addCustomHeaders);
+
+// ── Ejemplo: Forzar un idioma específico ──
+await page.route('**/*', async (route) => {
+    await route.continue({
+        headers: { ...route.request().headers(), 'Accept-Language': 'es-CO' },
+    });
+});
+
+// ── Ejemplo: Simular un user-agent móvil ──
+await page.route('**/*', async (route) => {
+    await route.continue({
+        headers: {
+            ...route.request().headers(),
+            'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)',
+        },
+    });
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📤 Modificar el body de la request (POST data)</h3>
-        <pre><code class="python">import json
+        <div class="code-tabs" data-code-id="L067-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">import json
 
 # Interceptar y modificar datos enviados en POST/PUT
 
@@ -81,12 +138,51 @@ def force_quantity(route):
         route.continue_()
 
 page.route("**/api/cart/add", force_quantity)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Interceptar y modificar datos enviados en POST/PUT
+
+await page.route('**/api/orders', async (route) => {
+    if (route.request().method() === 'POST') {
+        const originalBody = JSON.parse(route.request().postData() || '{}');
+        // Agregar un campo que identifica datos de test
+        originalBody._test_marker = 'playwright-e2e';
+        originalBody._timestamp = '2026-04-03T10:00:00';
+        await route.continue({ postData: JSON.stringify(originalBody) });
+    } else {
+        await route.continue();
+    }
+});
+
+// ── Ejemplo: Forzar un valor específico ──
+await page.route('**/api/cart/add', async (route) => {
+    if (route.request().method() === 'POST') {
+        const body = JSON.parse(route.request().postData() || '{}');
+        body.quantity = 1;  // Forzar cantidad
+        await route.continue({ postData: JSON.stringify(body) });
+    } else {
+        await route.continue();
+    }
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📥 Modificar la respuesta del servidor</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Con <code>route.fetch()</code> puedes dejar que la request llegue al servidor
             real, obtener la respuesta, modificarla y luego entregarla al navegador:</p>
-            <pre><code class="python"># Patrón: fetch real → modificar → entregar
+            <div class="code-tabs" data-code-id="L067-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Patrón: fetch real → modificar → entregar
 def modify_response(route):
     """Obtener respuesta real y modificarla."""
     # 1. Hacer la request al servidor real
@@ -107,10 +203,45 @@ def modify_response(route):
     )
 
 page.route("**/api/users", modify_response)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Patrón: fetch real → modificar → entregar
+await page.route('**/api/users', async (route) => {
+    // 1. Hacer la request al servidor real
+    const response = await route.fetch();
+
+    // 2. Obtener el body original
+    const originalBody = await response.json();
+
+    // 3. Modificar los datos
+    for (const user of originalBody.users || []) {
+        user.email = '***@***.com';  // Ocultar emails reales
+    }
+
+    // 4. Entregar la respuesta modificada
+    await route.fulfill({
+        status: response.status(),
+        headers: response.headers(),
+        body: JSON.stringify(originalBody),
+    });
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🔄 Ejemplo: Inyectar datos en respuesta real</h3>
-        <pre><code class="python">def add_test_product(route):
+        <div class="code-tabs" data-code-id="L067-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">def add_test_product(route):
     """Agregar un producto de test a la respuesta real."""
     response = route.fetch()
     data = response.json()
@@ -138,9 +269,50 @@ page.goto("https://mi-app.com/products")
 expect(page.locator(".product-card").filter(
     has_text="Producto Test E2E"
 )).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">await page.route('**/api/products', async (route) => {
+    const response = await route.fetch();
+    const data = await response.json();
+
+    // Agregar un producto de test al final de la lista
+    const testProduct = {
+        id: 99999,
+        name: 'Producto Test E2E',
+        price: 12345,
+        category: 'Testing',
+    };
+    data.products.push(testProduct);
+    data.total += 1;
+
+    await route.fulfill({
+        status: response.status(),
+        headers: response.headers(),
+        body: JSON.stringify(data),
+    });
+});
+
+// El test puede buscar el producto inyectado
+await page.goto('https://mi-app.com/products');
+await expect(page.locator('.product-card').filter({
+    hasText: 'Producto Test E2E',
+})).toBeVisible();</code></pre>
+        </div>
+        </div>
 
         <h3>🔀 Redirigir requests a otro servidor</h3>
-        <pre><code class="python"># Redirigir del servidor de producción al de staging
+        <div class="code-tabs" data-code-id="L067-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Redirigir del servidor de producción al de staging
 
 def redirect_to_staging(route):
     """Redirigir requests de prod a staging."""
@@ -161,10 +333,42 @@ def redirect_to_local(route):
     route.continue_(url=local_url)
 
 page.route("**/api/**", redirect_to_local)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Redirigir del servidor de producción al de staging
+
+await page.route('**/api.produccion.com/**', async (route) => {
+    const originalUrl = route.request().url();
+    const stagingUrl = originalUrl.replace(
+        'api.produccion.com',
+        'api.staging.com'
+    );
+    await route.continue({ url: stagingUrl });
+});
+
+// ── Redirigir a mock server local ──
+await page.route('**/api/**', async (route) => {
+    const path = route.request().url().split('/api/')[1];
+    const localUrl = 'http://localhost:3001/api/' + path;
+    await route.continue({ url: localUrl });
+});</code></pre>
+        </div>
+        </div>
 
         <h3>⏱️ Simular latencia de red</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python">import time
+            <div class="code-tabs" data-code-id="L067-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import time
 
 # Agregar delay a las respuestas para simular red lenta
 def slow_response(route):
@@ -205,10 +409,63 @@ def simulate_slow_3g(route):
     """Simular 3G lento (~2s de latencia)."""
     time.sleep(2)
     route.continue_()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Agregar delay a las respuestas para simular red lenta
+await page.route('**/api/search**', async (route) => {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    await route.continue();
+});
+
+// ── Test: Verificar que la UI muestra spinner durante la espera ──
+test('spinner durante carga', async ({ page }) => {
+    await page.route('**/api/search**', async (route) => {
+        await new Promise(resolve => setTimeout(resolve, 3000));
+        await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ results: [] }),
+        });
+    });
+
+    await page.goto('https://mi-app.com/search');
+    await page.fill('#query', 'test');
+    await page.click('#search-btn');
+
+    // Verificar que el spinner aparece durante la carga
+    await expect(page.locator('.loading-spinner')).toBeVisible();
+
+    // Esperar a que termine y el spinner desaparezca
+    await expect(page.locator('.loading-spinner')).toBeHidden({ timeout: 10000 });
+});
+
+// ── Simular diferentes velocidades de red ──
+async function simulate3g(route) {
+    await new Promise(resolve => setTimeout(resolve, 400));
+    await route.continue();
+}
+
+async function simulateSlow3g(route) {
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    await route.continue();
+}</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🧪 Ejemplo: Interceptar y validar request body</h3>
-        <pre><code class="python">def test_formulario_envia_datos_correctos(page):
+        <div class="code-tabs" data-code-id="L067-7">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">def test_formulario_envia_datos_correctos(page):
     """Verificar que el formulario envía los datos esperados."""
     captured_request = {}
 
@@ -240,6 +497,39 @@ def simulate_slow_3g(route):
     assert captured_request["body"]["email"] == "juan@siesa.com"
     assert captured_request["body"]["rol"] == "admin"
     assert "Content-Type" in captured_request["headers"]</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">test('formulario envía datos correctos', async ({ page }) => {
+    let capturedBody: Record&lt;string, unknown&gt; = {};
+    let capturedHeaders: Record&lt;string, string&gt; = {};
+
+    await page.route('**/api/users', async (route) => {
+        capturedBody = JSON.parse(route.request().postData() || '{}');
+        capturedHeaders = route.request().headers();
+        await route.fulfill({
+            status: 201,
+            contentType: 'application/json',
+            body: JSON.stringify({ id: 1, status: 'created' }),
+        });
+    });
+
+    await page.goto('https://mi-app.com/users/new');
+    await page.fill('#nombre', 'Juan Reina');
+    await page.fill('#email', 'juan@siesa.com');
+    await page.selectOption('#rol', { label: 'Admin' });
+    await page.click('#guardar-btn');
+
+    // Verificar que se envió correctamente
+    await expect(page.locator('.toast-success')).toBeVisible();
+
+    // Verificar el body capturado
+    expect(capturedBody.nombre).toBe('Juan Reina');
+    expect(capturedBody.email).toBe('juan@siesa.com');
+    expect(capturedBody.rol).toBe('admin');
+    expect(capturedHeaders['content-type']).toBeDefined();
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00bcd4;">
             <strong>💡 Tip:</strong> El patrón de "capturar request + mockear response" es

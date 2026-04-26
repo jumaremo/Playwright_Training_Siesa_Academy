@@ -83,7 +83,18 @@ const LESSON_059 = {
 └── requirements.txt                # Dependencias</code></pre>
 
         <h3>🏛️ 1. Base Page con métodos comunes</h3>
-        <pre><code class="python"># pages/base_page.py
+        <div class="code-tabs" data-code-id="L059-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pages/base_page.py
 from components.header_component import HeaderComponent
 from components.toast_component import ToastComponent
 
@@ -117,9 +128,67 @@ class BasePage:
     def take_screenshot(self, name):
         self.page.screenshot(path=f"evidence/{name}.png")
         return self</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// pages/base-page.ts
+import { Page, Locator } from '@playwright/test';
+import { HeaderComponent } from '../components/header-component';
+import { ToastComponent } from '../components/toast-component';
+
+export class BasePage {
+    protected page: Page;
+    protected url = '';
+    public header: HeaderComponent;
+    public toast: ToastComponent;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.header = new HeaderComponent(page);
+        this.toast = new ToastComponent(page);
+    }
+
+    async navigate(): Promise&lt;this&gt; {
+        if (this.url) {
+            await this.page.goto(this.url);
+            await this.waitForLoad();
+        }
+        return this;
+    }
+
+    async waitForLoad(): Promise&lt;this&gt; {
+        await this.page.waitForLoadState('networkidle');
+        return this;
+    }
+
+    getCurrentUrl(): string {
+        return this.page.url();
+    }
+
+    async getTitle(): Promise&lt;string&gt; {
+        return this.page.title();
+    }
+
+    async takeScreenshot(name: string): Promise&lt;this&gt; {
+        await this.page.screenshot({ path: 'evidence/' + name + '.png' });
+        return this;
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>🧩 2. Components clave</h3>
-        <pre><code class="python"># components/header_component.py
+        <div class="code-tabs" data-code-id="L059-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># components/header_component.py
 class HeaderComponent:
     def __init__(self, page):
         self.root = page.locator("header.main-nav")
@@ -197,9 +266,131 @@ class ToastComponent:
         if close.is_visible():
             close.click()
         return self</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// components/header-component.ts
+import { Page, Locator } from '@playwright/test';
+
+export class HeaderComponent {
+    private root: Locator;
+    private logo: Locator;
+    private searchInput: Locator;
+    private cartIcon: Locator;
+    private cartCount: Locator;
+    private userMenu: Locator;
+
+    constructor(page: Page) {
+        this.root = page.locator('header.main-nav');
+        this.logo = this.root.locator('.logo');
+        this.searchInput = this.root.locator("[data-testid='search']");
+        this.cartIcon = this.root.locator("[data-testid='cart-icon']");
+        this.cartCount = this.root.locator("[data-testid='cart-count']");
+        this.userMenu = this.root.locator("[data-testid='user-menu']");
+    }
+
+    async search(query: string): Promise&lt;this&gt; {
+        await this.searchInput.fill(query);
+        await this.searchInput.press('Enter');
+        return this;
+    }
+
+    async openCart(): Promise&lt;this&gt; {
+        await this.cartIcon.click();
+        return this;
+    }
+
+    async getCartCount(): Promise&lt;number&gt; {
+        const text = await this.cartCount.textContent();
+        return text ? parseInt(text) : 0;
+    }
+
+    async getUsername(): Promise&lt;string&gt; {
+        const text = await this.userMenu.textContent();
+        return text?.trim() ?? '';
+    }
+}
+
+// components/product-card-component.ts
+export class ProductCardComponent {
+    private root: Locator;
+    private nameEl: Locator;
+    private priceEl: Locator;
+    private image: Locator;
+    private addToCartBtn: Locator;
+
+    constructor(locator: Locator) {
+        this.root = locator;
+        this.nameEl = this.root.locator('.product-name');
+        this.priceEl = this.root.locator('.product-price');
+        this.image = this.root.locator('.product-image');
+        this.addToCartBtn = this.root.locator("[data-testid='add-to-cart']");
+    }
+
+    async getName(): Promise&lt;string&gt; {
+        const text = await this.nameEl.textContent();
+        return text?.trim() ?? '';
+    }
+
+    async getPrice(): Promise&lt;number&gt; {
+        const text = await this.priceEl.textContent();
+        return parseFloat(text!.replace('$', '').replace(',', '').trim());
+    }
+
+    async addToCart(): Promise&lt;this&gt; {
+        await this.addToCartBtn.click();
+        return this;
+    }
+
+    async click(): Promise&lt;this&gt; {
+        await this.root.click();
+        return this;
+    }
+}
+
+// components/toast-component.ts
+export class ToastComponent {
+    private page: Page;
+    private toast: Locator;
+
+    constructor(page: Page) {
+        this.page = page;
+        this.toast = page.locator(".toast, [role='alert']");
+    }
+
+    async getMessage(): Promise&lt;string&gt; {
+        await this.toast.first().waitFor({ state: 'visible', timeout: 5000 });
+        return (await this.toast.first().textContent()) ?? '';
+    }
+
+    async isSuccess(): Promise&lt;boolean&gt; {
+        const cls = await this.toast.first().getAttribute('class');
+        return (cls ?? '').includes('success');
+    }
+
+    async dismiss(): Promise&lt;this&gt; {
+        const close = this.toast.first().locator('.toast-close');
+        if (await close.isVisible()) {
+            await close.click();
+        }
+        return this;
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>📄 3. Page Objects principales</h3>
-        <pre><code class="python"># pages/login_page.py
+        <div class="code-tabs" data-code-id="L059-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pages/login_page.py
 from pages.base_page import BasePage
 
 class LoginPage(BasePage):
@@ -393,9 +584,219 @@ class CheckoutPage(BasePage):
             self.select_payment(order_data["metodo_pago"])
 
         return self</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// pages/login-page.ts
+import { Page, Locator } from '@playwright/test';
+import { BasePage } from './base-page';
+
+export class LoginPage extends BasePage {
+    private emailInput: Locator;
+    private passwordInput: Locator;
+    private loginButton: Locator;
+    private errorMessage: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.url = 'https://tienda-test.com/login';
+        this.emailInput = page.locator("[data-testid='email']");
+        this.passwordInput = page.locator("[data-testid='password']");
+        this.loginButton = page.locator("[data-testid='login-btn']");
+        this.errorMessage = page.locator("[data-testid='error']");
+    }
+
+    async login(email: string, password: string): Promise&lt;this&gt; {
+        await this.emailInput.fill(email);
+        await this.passwordInput.fill(password);
+        await this.loginButton.click();
+        return this;
+    }
+
+    async loginAsAdmin(): Promise&lt;this&gt; {
+        return this.login('admin@tienda.com', 'admin123');
+    }
+
+    async loginAsCustomer(): Promise&lt;this&gt; {
+        return this.login('cliente@test.com', 'cliente123');
+    }
+
+    async isErrorVisible(): Promise&lt;boolean&gt; {
+        return this.errorMessage.isVisible();
+    }
+
+    async getErrorText(): Promise&lt;string | null&gt; {
+        return this.errorMessage.textContent();
+    }
+}
+
+// pages/catalog-page.ts
+import { ProductCardComponent } from '../components/product-card-component';
+import { PaginationComponent } from '../components/pagination-component';
+
+export class CatalogPage extends BasePage {
+    private productCards: Locator;
+    private categoryFilter: Locator;
+    private priceMin: Locator;
+    private priceMax: Locator;
+    private sortSelect: Locator;
+    private noResults: Locator;
+    public pagination: PaginationComponent;
+
+    constructor(page: Page) {
+        super(page);
+        this.url = 'https://tienda-test.com/products';
+        this.productCards = page.locator("[data-testid='product-card']");
+        this.categoryFilter = page.locator("[data-testid='category-filter']");
+        this.priceMin = page.locator("[data-testid='price-min']");
+        this.priceMax = page.locator("[data-testid='price-max']");
+        this.sortSelect = page.locator("[data-testid='sort-by']");
+        this.noResults = page.locator("[data-testid='no-results']");
+        this.pagination = new PaginationComponent(page);
+    }
+
+    async getProductCount(): Promise&lt;number&gt; {
+        return this.productCards.count();
+    }
+
+    getProduct(index: number): ProductCardComponent {
+        return new ProductCardComponent(this.productCards.nth(index));
+    }
+
+    getProductByName(name: string): ProductCardComponent {
+        return new ProductCardComponent(this.productCards.filter({ hasText: name }));
+    }
+
+    async filterByCategory(category: string): Promise&lt;this&gt; {
+        await this.categoryFilter.selectOption({ label: category });
+        await this.waitForLoad();
+        return this;
+    }
+
+    async filterByPrice(minPrice?: number, maxPrice?: number): Promise&lt;this&gt; {
+        if (minPrice !== undefined) await this.priceMin.fill(String(minPrice));
+        if (maxPrice !== undefined) await this.priceMax.fill(String(maxPrice));
+        await this.page.keyboard.press('Enter');
+        await this.waitForLoad();
+        return this;
+    }
+
+    async sortBy(option: string): Promise&lt;this&gt; {
+        await this.sortSelect.selectOption({ label: option });
+        await this.waitForLoad();
+        return this;
+    }
+
+    async getAllPrices(): Promise&lt;number[]&gt; {
+        const prices: number[] = [];
+        const count = await this.productCards.count();
+        for (let i = 0; i &lt; count; i++) {
+            const card = this.getProduct(i);
+            prices.push(await card.getPrice());
+        }
+        return prices;
+    }
+
+    async hasResults(): Promise&lt;boolean&gt; {
+        return !(await this.noResults.isVisible());
+    }
+}
+
+// pages/checkout-page.ts — Con Fluent API
+export class CheckoutPage extends BasePage {
+    private nameInput: Locator;
+    private emailInput: Locator;
+    private phoneInput: Locator;
+    private addressInput: Locator;
+    private cityInput: Locator;
+    private departmentSelect: Locator;
+    private paymentSelect: Locator;
+    private cardNumber: Locator;
+    private cardExpiry: Locator;
+    private cardCvv: Locator;
+    private termsCheckbox: Locator;
+    private submitButton: Locator;
+    private orderTotal: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.url = 'https://tienda-test.com/checkout';
+        this.nameInput = page.locator("[data-testid='fullname']");
+        this.emailInput = page.locator("[data-testid='email']");
+        this.phoneInput = page.locator("[data-testid='phone']");
+        this.addressInput = page.locator("[data-testid='address']");
+        this.cityInput = page.locator("[data-testid='city']");
+        this.departmentSelect = page.locator("[data-testid='department']");
+        this.paymentSelect = page.locator("[data-testid='payment-method']");
+        this.cardNumber = page.locator("[data-testid='card-number']");
+        this.cardExpiry = page.locator("[data-testid='card-expiry']");
+        this.cardCvv = page.locator("[data-testid='card-cvv']");
+        this.termsCheckbox = page.locator("[data-testid='accept-terms']");
+        this.submitButton = page.locator("[data-testid='place-order']");
+        this.orderTotal = page.locator("[data-testid='order-total']");
+    }
+
+    async fillName(name: string) { await this.nameInput.fill(name); return this; }
+    async fillEmail(email: string) { await this.emailInput.fill(email); return this; }
+    async fillPhone(phone: string) { await this.phoneInput.fill(phone); return this; }
+    async fillAddress(addr: string) { await this.addressInput.fill(addr); return this; }
+    async fillCity(city: string) { await this.cityInput.fill(city); return this; }
+    async selectDepartment(dept: string) {
+        await this.departmentSelect.selectOption({ label: dept }); return this;
+    }
+    async selectPayment(method: string) {
+        await this.paymentSelect.selectOption({ label: method }); return this;
+    }
+    async fillCard(number: string, expiry: string, cvv: string) {
+        await this.cardNumber.fill(number);
+        await this.cardExpiry.fill(expiry);
+        await this.cardCvv.fill(cvv);
+        return this;
+    }
+    async acceptTerms() { await this.termsCheckbox.check(); return this; }
+    async placeOrder() { await this.submitButton.click(); return this; }
+
+    async getTotal(): Promise&lt;number&gt; {
+        const text = await this.orderTotal.textContent();
+        return parseFloat(text!.replace('$', '').replace(',', '').trim());
+    }
+
+    async fillFromOrder(orderData: Record&lt;string, any&gt;) {
+        await this.fillName(orderData.nombre);
+        await this.fillEmail(orderData.email);
+        await this.fillPhone(orderData.telefono);
+        await this.fillAddress(orderData.direccion);
+        await this.fillCity(orderData.ciudad);
+        await this.selectDepartment(orderData.departamento);
+
+        if (orderData.metodo_pago === 'Tarjeta') {
+            await this.selectPayment('Tarjeta de crédito');
+            await this.fillCard(
+                orderData.tarjeta.numero,
+                orderData.tarjeta.expiry,
+                orderData.tarjeta.cvv
+            );
+        } else {
+            await this.selectPayment(orderData.metodo_pago);
+        }
+        return this;
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>🏗️ 4. Builders</h3>
-        <pre><code class="python"># builders/order_builder.py
+        <div class="code-tabs" data-code-id="L059-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># builders/order_builder.py
 from utils.test_data import TestData
 
 class OrderBuilder:
@@ -452,9 +853,89 @@ class OrderBuilder:
 
     def build(self):
         return dict(self._data)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// builders/order-builder.ts
+import { TestData } from '../utils/test-data';
+
+interface CardData {
+    numero: string;
+    expiry: string;
+    cvv: string;
+}
+
+interface OrderData {
+    nombre: string;
+    email: string;
+    telefono: string;
+    direccion: string;
+    ciudad: string;
+    departamento: string;
+    metodo_pago: string;
+    tarjeta: CardData | null;
+    cupon: string | null;
+}
+
+export class OrderBuilder {
+    private data: OrderData;
+
+    constructor() {
+        this.data = {
+            nombre: 'Test Customer',
+            email: TestData.randomEmail(),
+            telefono: TestData.randomPhone(),
+            direccion: 'Calle 10 #25-30',
+            ciudad: 'Cali',
+            departamento: 'Valle del Cauca',
+            metodo_pago: 'PSE',
+            tarjeta: null,
+            cupon: null,
+        };
+    }
+
+    withName(nombre: string) { this.data.nombre = nombre; return this; }
+    withEmail(email: string) { this.data.email = email; return this; }
+
+    inCity(ciudad: string, departamento: string) {
+        this.data.ciudad = ciudad;
+        this.data.departamento = departamento;
+        return this;
+    }
+
+    payWithCard(number = '4111111111111111', expiry = '12/28', cvv = '123') {
+        this.data.metodo_pago = 'Tarjeta';
+        this.data.tarjeta = { numero: number, expiry, cvv };
+        return this;
+    }
+
+    payWithPse() {
+        this.data.metodo_pago = 'PSE';
+        this.data.tarjeta = null;
+        return this;
+    }
+
+    withCoupon(code: string) { this.data.cupon = code; return this; }
+    asBogotaCustomer() { return this.inCity('Bogotá', 'Cundinamarca'); }
+    asCaliCustomer() { return this.inCity('Cali', 'Valle del Cauca'); }
+
+    build(): OrderData { return { ...this.data }; }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>⚙️ 5. Fixtures (conftest.py)</h3>
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L059-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/conftest.py
 import pytest
 from pages.login_page import LoginPage
 from pages.catalog_page import CatalogPage
@@ -512,9 +993,93 @@ def checkout_with_items(customer_page, api_helper):
 @pytest.fixture
 def api_helper(customer_page):
     return ApiHelper(customer_page)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/fixtures.ts
+import { test as base, Page, BrowserContext } from '@playwright/test';
+import { LoginPage } from '../pages/login-page';
+import { CatalogPage } from '../pages/catalog-page';
+import { CheckoutPage } from '../pages/checkout-page';
+import { ApiHelper } from '../utils/api-helper';
+
+// ── Autenticación reutilizable ──
+// En playwright.config.ts → globalSetup:
+// async function globalSetup() {
+//   const browser = await chromium.launch();
+//   const context = await browser.newContext();
+//   const page = await context.newPage();
+//   const login = new LoginPage(page);
+//   await login.navigate();
+//   await login.loginAsCustomer();
+//   await page.waitForURL('**/products');
+//   await context.storageState({ path: '.auth/customer.json' });
+//   await context.close();
+// }
+
+// ── Custom fixtures con test.extend ──
+type TestFixtures = {
+    loginPage: LoginPage;
+    catalogPage: CatalogPage;
+    checkoutWithItems: CheckoutPage;
+    apiHelper: ApiHelper;
+};
+
+export const test = base.extend&lt;TestFixtures&gt;({
+    loginPage: async ({ page }, use) => {
+        const lp = new LoginPage(page);
+        await lp.navigate();
+        await use(lp);
+    },
+
+    catalogPage: async ({ browser }, use) => {
+        const context = await browser.newContext({
+            storageState: '.auth/customer.json'
+        });
+        const page = await context.newPage();
+        const cp = new CatalogPage(page);
+        await cp.navigate();
+        await use(cp);
+        await context.close();
+    },
+
+    apiHelper: async ({ browser }, use) => {
+        const context = await browser.newContext({
+            storageState: '.auth/customer.json'
+        });
+        const page = await context.newPage();
+        await use(new ApiHelper(page));
+        await context.close();
+    },
+
+    checkoutWithItems: async ({ browser, apiHelper }, use) => {
+        await apiHelper.addToCart('product-001');
+        await apiHelper.addToCart('product-002');
+        const context = await browser.newContext({
+            storageState: '.auth/customer.json'
+        });
+        const page = await context.newPage();
+        const cp = new CheckoutPage(page);
+        await cp.navigate();
+        await use(cp);
+        await context.close();
+    },
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🧪 6. Tests del proyecto</h3>
-        <pre><code class="python"># tests/test_catalog.py
+        <div class="code-tabs" data-code-id="L059-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># tests/test_catalog.py
 
 def test_buscar_producto(catalog_page):
     """Verificar búsqueda de productos."""
@@ -595,6 +1160,90 @@ def test_compra_con_cupon(checkout_with_items):
 
     # El total debería ser menor con cupón
     assert "pedido" in checkout_with_items.page.url</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// tests/test-catalog.spec.ts
+import { test } from './fixtures';
+import { expect } from '@playwright/test';
+
+test('buscar producto', async ({ catalogPage }) => {
+    await catalogPage.header.search('laptop');
+    expect(await catalogPage.getProductCount()).toBeGreaterThan(0);
+    expect(await catalogPage.hasResults()).toBe(true);
+});
+
+test('filtrar por categoría', async ({ catalogPage }) => {
+    await catalogPage.filterByCategory('Electrónica');
+    const count = await catalogPage.getProductCount();
+    expect(count).toBeGreaterThan(0);
+});
+
+test('ordenar por precio', async ({ catalogPage }) => {
+    await catalogPage.sortBy('Precio: menor a mayor');
+    const prices = await catalogPage.getAllPrices();
+    expect(prices).toEqual([...prices].sort((a, b) => a - b));
+});
+
+test('agregar al carrito', async ({ catalogPage }) => {
+    const product = catalogPage.getProduct(0);
+    const productName = await product.getName();
+    await product.addToCart();
+
+    const msg = await catalogPage.toast.getMessage();
+    expect(msg).toContain(productName);
+    expect(await catalogPage.header.getCartCount()).toBe(1);
+});
+
+
+// tests/test-checkout.spec.ts
+import { OrderBuilder } from '../builders/order-builder';
+
+test('compra con tarjeta', async ({ checkoutWithItems }) => {
+    const order = new OrderBuilder()
+        .withName('Juan Reina')
+        .asCaliCustomer()
+        .payWithCard()
+        .build();
+
+    await checkoutWithItems.fillFromOrder(order);
+    await checkoutWithItems.acceptTerms();
+    await checkoutWithItems.placeOrder();
+
+    expect(checkoutWithItems.page.url()).toContain('pedido');
+});
+
+test('compra con PSE', async ({ checkoutWithItems }) => {
+    const order = new OrderBuilder()
+        .withName('Carlos Díaz')
+        .asBogotaCustomer()
+        .payWithPse()
+        .build();
+
+    await checkoutWithItems.fillFromOrder(order);
+    await checkoutWithItems.acceptTerms();
+    await checkoutWithItems.placeOrder();
+
+    expect(checkoutWithItems.page.url()).toContain('pedido');
+});
+
+test('compra con cupón', async ({ checkoutWithItems }) => {
+    const order = new OrderBuilder()
+        .withName('Alejandro Bravo')
+        .asCaliCustomer()
+        .payWithCard()
+        .withCoupon('DESCUENTO20')
+        .build();
+
+    const totalBefore = await checkoutWithItems.getTotal();
+    await checkoutWithItems.fillFromOrder(order);
+    await checkoutWithItems.acceptTerms();
+    await checkoutWithItems.placeOrder();
+
+    // El total debería ser menor con cupón
+    expect(checkoutWithItems.page.url()).toContain('pedido');
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📊 Resumen de patrones aplicados</h3>
         <div style="background: #e8eaf6; padding: 15px; border-radius: 8px; margin: 15px 0;">

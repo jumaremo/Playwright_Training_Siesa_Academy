@@ -74,7 +74,18 @@ touch proyecto_flaky_debug/tests/test_checkout_fixed.py</code></pre>
             e intenta identificar los problemas <strong>antes</strong> de ver las correcciones.</p>
         </div>
 
-        <pre><code class="python"># tests/test_checkout_broken.py
+        <div class="code-tabs" data-code-id="L098-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># tests/test_checkout_broken.py
 """
 Suite de tests INESTABLE para el checkout de e-commerce.
 Contiene 6 anti-patrones comunes que causan flaky tests.
@@ -267,6 +278,215 @@ class TestAssertionsDebiles:
         # ❌ PROBLEMA: No hay assertion — si el clic falla silenciosamente,
         # el test pasa igual
 </code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// tests/test_checkout_broken.spec.ts
+/**
+ * Suite de tests INESTABLE para el checkout de e-commerce.
+ * Contiene 6 anti-patrones comunes que causan flaky tests.
+ * NO usar en producción — este archivo es para diagnóstico.
+ */
+import { test, Page } from '@playwright/test';
+
+// ============================================================
+// PROBLEMA 1: Hardcoded sleep en lugar de espera inteligente
+// ============================================================
+
+test.describe('TestAgregarAlCarrito', () => {
+    // Falla ~30% de las veces por timing.
+
+    test('agregar producto', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/products');
+
+        // ❌ PROBLEMA: Hardcoded sleep — puede ser muy poco o demasiado
+        await page.click('text=Laptop Pro 15');
+        await page.waitForTimeout(2000); // Espera "a ojo" para que cargue la página
+        await page.click('#add-to-cart');
+        await page.waitForTimeout(3000); // Espera "a ojo" para la animación del carrito
+
+        // ❌ PROBLEMA: Verificación frágil por texto exacto
+        const cartCount = await page.textContent('#cart-count');
+        expect(cartCount).toBe('1'); // Falla si hay espacio: " 1 "
+    });
+});
+
+// ============================================================
+// PROBLEMA 2: Selectores frágiles que dependen de estructura
+// ============================================================
+
+test.describe('TestNavegacionProductos', () => {
+    // Falla cuando el diseño cambia ligeramente.
+
+    test('ver detalle producto', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/products');
+
+        // ❌ PROBLEMA: Selector por posición absoluta en el DOM
+        await page.click('div.products-grid > div:nth-child(3) > a.product-link');
+
+        // ❌ PROBLEMA: Selector por clase CSS generada
+        const title = await page.textContent('h1.css-1a2b3c4'); // Clase auto-generada
+        expect(title).not.toBeNull();
+    });
+
+    test('filtrar por categoria', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/products');
+
+        // ❌ PROBLEMA: XPath frágil con posición absoluta
+        await page.click('xpath=/html/body/div[2]/aside/ul/li[3]/a');
+        await page.waitForTimeout(1000);
+
+        // ❌ PROBLEMA: Contar elementos sin esperar a que carguen
+        const productos = await page.$$('.product-card');
+        expect(productos.length).toBe(6); // Número exacto que puede variar
+    });
+});
+
+// ============================================================
+// PROBLEMA 3: Race condition — acción antes de que la UI esté lista
+// ============================================================
+
+test.describe('TestCheckout', () => {
+    // Falla ~50% de las veces por race conditions.
+
+    test('completar checkout', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/cart');
+
+        // ❌ PROBLEMA: Clic sin esperar que el botón esté habilitado
+        await page.click('#checkout-button');
+
+        // ❌ PROBLEMA: Llenar form sin esperar la transición de página
+        await page.fill('#shipping-name', 'Juan Pérez');
+        await page.fill('#shipping-address', 'Calle 123');
+        await page.fill('#shipping-city', 'Cali');
+
+        // ❌ PROBLEMA: No esperar la validación del formulario
+        await page.click('#continue-to-payment');
+
+        await page.fill('#card-number', '4111111111111111');
+        await page.fill('#card-expiry', '12/28');
+        await page.fill('#card-cvv', '123');
+
+        // ❌ PROBLEMA: Clic en botón que puede estar deshabilitado
+        await page.click('#place-order');
+        await page.waitForTimeout(5000); // Espera larga "por si acaso"
+
+        // ❌ PROBLEMA: Verificación por texto que puede no haber cargado
+        const content = await page.content();
+        expect(content).toContain('Pedido confirmado');
+    });
+});
+
+// ============================================================
+// PROBLEMA 4: Timing de red — no esperar respuestas API
+// ============================================================
+
+test.describe('TestBusqueda', () => {
+    // Falla cuando la API tarda más de lo esperado.
+
+    test('buscar producto', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com');
+
+        await page.fill('#search-input', 'laptop');
+        await page.click('#search-button');
+
+        // ❌ PROBLEMA: No esperar la respuesta de la API de búsqueda
+        await page.waitForTimeout(1000); // A veces la API tarda más de 1 segundo
+
+        // ❌ PROBLEMA: Verificar resultados antes de que terminen de renderizar
+        const results = await page.$$('.search-result');
+        expect(results.length).toBeGreaterThan(0);
+    });
+
+    test('aplicar filtro precio', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/products');
+
+        await page.fill('#price-min', '100');
+        await page.fill('#price-max', '500');
+        await page.click('#apply-filters');
+
+        // ❌ PROBLEMA: No esperar la recarga con los filtros aplicados
+        // Los productos se actualizan vía AJAX, no recarga de página
+
+        // ❌ PROBLEMA: Verificar el número exacto de resultados
+        const countText = await page.textContent('#results-count');
+        expect(countText).toBe('Mostrando 12 productos');
+    });
+});
+
+// ============================================================
+// PROBLEMA 5: Estado compartido entre tests
+// ============================================================
+
+test.describe('TestCarritoEstadoCompartido', () => {
+    // Falla cuando los tests se ejecutan en cierto orden.
+
+    // ❌ PROBLEMA: Variable compartida entre tests
+    let itemsAdded = 0;
+
+    test('agregar primer producto', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/products/laptop-1');
+        await page.click('#add-to-cart');
+        itemsAdded += 1; // ❌ Estado mutable compartido
+        await page.waitForTimeout(1000);
+    });
+
+    test('agregar segundo producto', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/products/mouse-1');
+        await page.click('#add-to-cart');
+        itemsAdded += 1;
+    });
+
+    test('verificar carrito', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/cart');
+        await page.waitForTimeout(1000);
+        // ❌ PROBLEMA: Depende del orden de ejecución de tests anteriores
+        const cartCount = await page.textContent('#cart-count');
+        expect(cartCount).toBe(String(itemsAdded));
+    });
+
+    test('vaciar carrito', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/cart');
+        // ❌ PROBLEMA: Asume que hay items — falla si tests anteriores fallaron
+        await page.click('#clear-cart');
+        await page.waitForTimeout(2000);
+        const cartCount = await page.textContent('#cart-count');
+        expect(cartCount).toBe('0');
+    });
+});
+
+// ============================================================
+// PROBLEMA 6: Assertions débiles o ausentes
+// ============================================================
+
+test.describe('TestAssertionsDebiles', () => {
+    // Tests que 'pasan' pero no verifican nada útil.
+
+    test('pagina carga', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com');
+        // ❌ PROBLEMA: No verifica nada — siempre pasa si no hay error 500
+        expect(true).toBeTruthy();
+    });
+
+    test('formulario registro', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/register');
+        await page.fill('#name', 'Test User');
+        await page.fill('#email', 'test@example.com');
+        await page.fill('#password', 'password123');
+        await page.click('#register-button');
+        await page.waitForTimeout(2000);
+        // ❌ PROBLEMA: Solo verifica que la URL cambió, no el resultado
+        expect(page.url()).not.toContain('register');
+    });
+
+    test('eliminar producto', async ({ page }) => {
+        await page.goto('https://demo-ecommerce.example.com/cart');
+        await page.click('.remove-item');
+        // ❌ PROBLEMA: No hay assertion — si el clic falla silenciosamente,
+        // el test pasa igual
+    });
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔍 Ejercicio de identificación</h4>
@@ -312,7 +532,18 @@ $env:PWDEBUG="1"; pytest tests/test_checkout_broken.py::TestAgregarAlCarrito -v 
             </ul>
         </div>
 
-        <pre><code class="python"># Agregar puntos de pausa para diagnóstico manual
+        <div class="code-tabs" data-code-id="L098-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># Agregar puntos de pausa para diagnóstico manual
 def test_diagnostico_agregar_carrito(page: Page):
     """Versión de diagnóstico con page.pause() en puntos clave."""
     page.goto("https://demo-ecommerce.example.com/products")
@@ -332,6 +563,31 @@ def test_diagnostico_agregar_carrito(page: Page):
 
     cart_count = page.text_content("#cart-count")
     print(f"Valor del carrito: '{cart_count}'")  # Revelar espacios ocultos</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// Agregar puntos de pausa para diagnóstico manual
+test('diagnostico agregar carrito', async ({ page }) => {
+    // Versión de diagnóstico con page.pause() en puntos clave.
+    await page.goto('https://demo-ecommerce.example.com/products');
+
+    // Pausa 1: Verificar que la página cargó completamente
+    await page.pause(); // Inspeccionar el DOM y la red
+
+    await page.click('text=Laptop Pro 15');
+
+    // Pausa 2: ¿La página de detalle cargó? ¿Los elementos existen?
+    await page.pause(); // Verificar selectores antes de interactuar
+
+    await page.click('#add-to-cart');
+
+    // Pausa 3: ¿El carrito se actualizó? ¿Qué dice #cart-count?
+    await page.pause(); // Inspeccionar el valor del contador
+
+    const cartCount = await page.textContent('#cart-count');
+    console.log(\`Valor del carrito: '\${cartCount}'\`); // Revelar espacios ocultos
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🎬 Paso 4: Grabar el flujo correcto con Codegen</h3>
         <p>Usa <strong>Playwright Codegen</strong> para grabar el flujo de checkout manualmente
@@ -365,7 +621,18 @@ playwright codegen --viewport-size=1280,720 https://demo-ecommerce.example.com
         <p>El <strong>Trace Viewer</strong> es la herramienta más poderosa para diagnosticar tests
         inestables. Captura un registro completo de cada acción, screenshot, red y consola.</p>
 
-        <pre><code class="python"># tests/conftest.py — Configuración con Trace Viewer
+        <div class="code-tabs" data-code-id="L098-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># tests/conftest.py — Configuración con Trace Viewer
 """
 Configuración completa de debugging para diagnosticar tests inestables.
 Incluye: tracing, screenshots, videos, logging y hooks de diagnóstico.
@@ -556,6 +823,115 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// playwright.config.ts — Configuración con Trace Viewer
+/**
+ * Configuración completa de debugging para diagnosticar tests inestables.
+ * Incluye: tracing, screenshots, videos y timeouts.
+ */
+import { defineConfig, devices } from '@playwright/test';
+import path from 'path';
+
+// --- Rutas de artefactos ---
+const RESULTS_DIR = path.join(__dirname, 'test-results');
+
+export default defineConfig({
+    testDir: './tests',
+    timeout: 60_000,
+    expect: { timeout: 15_000 },
+
+    // Opciones de reporte
+    reporter: [
+        ['html', { open: 'never' }],
+        ['list'],
+    ],
+
+    use: {
+        // Base URL para navegación
+        baseURL: 'https://demo-ecommerce.example.com',
+
+        // Viewport consistente
+        viewport: { width: 1280, height: 720 },
+
+        // =====================================================
+        // Tracing — grabación de traces por test
+        // =====================================================
+        trace: 'retain-on-failure', // Captura screenshots, DOM y red
+
+        // =====================================================
+        // Screenshot automático en fallos
+        // =====================================================
+        screenshot: 'only-on-failure',
+
+        // =====================================================
+        // Video de cada test
+        // =====================================================
+        video: 'retain-on-failure',
+
+        // =====================================================
+        // Timeouts controlados
+        // =====================================================
+        actionTimeout: 15_000,   // 15s para acciones
+        navigationTimeout: 30_000, // 30s para navegación
+    },
+
+    outputDir: RESULTS_DIR,
+
+    projects: [
+        {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'] },
+        },
+    ],
+});
+
+// =====================================================
+// Fixture global: Listener de errores de consola
+// =====================================================
+// En un archivo tests/fixtures.ts:
+import { test as base, expect } from '@playwright/test';
+
+export const test = base.extend({
+    // Capturar errores de consola del navegador durante el test
+    page: async ({ page }, use, testInfo) => {
+        const consoleErrors: string[] = [];
+
+        page.on('console', (msg) => {
+            if (msg.type() === 'error') {
+                consoleErrors.push(\`[CONSOLE ERROR] \${msg.text()}\`);
+                console.warn(\`Error de consola: \${msg.text()}\`);
+            }
+        });
+
+        // Capturar requests HTTP que fallaron durante el test
+        page.on('requestfailed', (req) => {
+            console.warn(
+                \`[REQ FAILED] \${req.method()} \${req.url()} — \${req.failure()?.errorText}\`
+            );
+        });
+
+        console.log('='.repeat(70));
+        console.log(\`INICIO TEST: \${testInfo.title}\`);
+        console.log('='.repeat(70));
+
+        const startTime = Date.now();
+        await use(page);
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(2);
+
+        const status = testInfo.status === 'passed' ? 'PASSED' : 'FAILED';
+        console.log(\`FIN TEST: \${testInfo.title} — \${status} (\${elapsed}s)\`);
+
+        if (consoleErrors.length > 0) {
+            console.warn(
+                \`Test '\${testInfo.title}' tuvo \${consoleErrors.length} errores de consola:\`
+            );
+            consoleErrors.forEach((e) => console.warn(\`  \${e}\`));
+        }
+    },
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA: Infraestructura de debugging en CI</h4>
@@ -614,7 +990,18 @@ playwright show-trace (Get-ChildItem test-results/traces/*.zip | Sort-Object Las
             </table>
         </div>
 
-        <pre><code class="python"># Ejemplo: Lo que revela el Trace Viewer para cada problema
+        <div class="code-tabs" data-code-id="L098-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># Ejemplo: Lo que revela el Trace Viewer para cada problema
 
 # PROBLEMA 1 (Hardcoded sleep):
 # En el timeline de Actions verás:
@@ -635,6 +1022,31 @@ playwright show-trace (Get-ChildItem test-results/traces/*.zip | Sort-Object Las
 # de página aún no completó — el formulario de shipping no es visible.
 # En la pestaña Network, verás un POST /api/validate-cart que aún
 # está en progreso cuando el test intenta llenar el formulario.</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// Ejemplo: Lo que revela el Trace Viewer para cada problema
+
+// PROBLEMA 1 (Hardcoded sleep):
+// En el timeline de Actions verás:
+//   1. page.click('text=Laptop Pro 15')     — 50ms
+//   2. [idle 2000ms]                         — page.waitForTimeout(2000)
+//   3. page.click('#add-to-cart')            — FAIL: element not found
+//
+// El Trace muestra que la página de detalle tardó 2.5s en cargar,
+// pero el waitForTimeout solo esperó 2s. El screenshot "Before" de
+// la acción 3 muestra la página aún cargando.
+
+// PROBLEMA 3 (Race condition):
+// En el timeline verás:
+//   1. page.click('#checkout-button')        — 45ms
+//   2. page.fill('#shipping-name', ...)      — FAIL: element not visible
+//
+// El screenshot "Before" de la acción 2 muestra que la transición
+// de página aún no completó — el formulario de shipping no es visible.
+// En la pestaña Network, verás un POST /api/validate-cart que aún
+// está en progreso cuando el test intenta llenar el formulario.</code></pre>
+        </div>
+        </div>
 
         <h3>📸 Paso 7: Configurar recolección de screenshots y videos para CI</h3>
         <pre><code class="python"># pytest.ini — Configuración completa para CI
@@ -712,7 +1124,18 @@ pytest tests/ -v --reruns=3 --reruns-delay=2 \\
             <p>Compara este código con la versión rota para entender exactamente qué cambió y por qué.</p>
         </div>
 
-        <pre><code class="python"># tests/test_checkout_fixed.py
+        <div class="code-tabs" data-code-id="L098-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># tests/test_checkout_fixed.py
 """
 Suite de tests CORREGIDA para el checkout de e-commerce.
 Cada corrección está documentada con el problema original.
@@ -997,6 +1420,301 @@ class TestAssertionsRobustasFixed:
         expect(page.locator("[data-testid='cart-item']")).to_have_count(0)
         expect(page.locator("[data-testid='cart-count']")).to_have_text("0")
         expect(page.get_by_text("Tu carrito está vacío")).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// tests/test_checkout_fixed.spec.ts
+/**
+ * Suite de tests CORREGIDA para el checkout de e-commerce.
+ * Cada corrección está documentada con el problema original.
+ */
+import { test, expect, Page } from '@playwright/test';
+
+
+// ============================================================
+// FIX 1: Auto-waiting en lugar de waitForTimeout()
+// ============================================================
+
+test.describe('TestAgregarAlCarritoFixed', () => {
+    /**
+     * ANTES: waitForTimeout(2000) y waitForTimeout(3000) con assertion frágil.
+     * AHORA: Auto-waiting de Playwright + expect() con timeout.
+     */
+
+    test('agregar producto @checkout @smoke', async ({ page }) => {
+        await page.goto('/products');
+
+        // ✅ FIX: getByRole en lugar de 'text=...' — más semántico
+        await page.getByRole('link', { name: 'Laptop Pro 15' }).click();
+
+        // ✅ FIX: waitForLoadState en lugar de waitForTimeout(2000)
+        await page.waitForLoadState('networkidle');
+
+        // ✅ FIX: getByRole para el botón — resiliente a cambios de ID
+        await page.getByRole('button', { name: 'Agregar al carrito' }).click();
+
+        // ✅ FIX: expect() con auto-retry en lugar de textContent + assert
+        //    expect() reintenta automáticamente durante el timeout
+        const cartBadge = page.locator('[data-testid="cart-count"]');
+        await expect(cartBadge).toHaveText('1', { timeout: 5000 });
+    });
+});
+
+
+// ============================================================
+// FIX 2: Selectores resilientes en lugar de frágiles
+// ============================================================
+
+test.describe('TestNavegacionProductosFixed', () => {
+    /**
+     * ANTES: nth-child, clases CSS generadas, XPath absolutos.
+     * AHORA: Roles ARIA, data-testid, texto visible.
+     */
+
+    test('ver detalle producto @checkout', async ({ page }) => {
+        await page.goto('/products');
+
+        // ✅ FIX: Selector por texto visible en lugar de nth-child(3)
+        //    Identificado con "Pick locator" del Inspector
+        await page.getByRole('link', { name: 'Laptop Pro 15' }).click();
+
+        // ✅ FIX: Selector semántico en lugar de clase CSS generada
+        const titulo = page.getByRole('heading', { level: 1 });
+        await expect(titulo).toBeVisible();
+        await expect(titulo).toContainText('Laptop Pro 15');
+    });
+
+    test('filtrar por categoria @checkout', async ({ page }) => {
+        await page.goto('/products');
+
+        // ✅ FIX: Texto visible en lugar de XPath absoluto
+        await page.getByRole('link', { name: 'Electrónicos' }).click();
+
+        // ✅ FIX: Esperar a que los productos se recarguen vía AJAX
+        await page.waitForLoadState('networkidle');
+
+        // ✅ FIX: expect() con auto-retry en lugar de $$
+        //    No verificamos número exacto — usamos "mayor que 0"
+        const productos = page.locator('[data-testid="product-card"]');
+        await expect(productos.first()).toBeVisible();
+        expect(await productos.count()).toBeGreaterThan(0);
+    });
+});
+
+
+// ============================================================
+// FIX 3: Esperas explícitas para evitar race conditions
+// ============================================================
+
+test.describe('TestCheckoutFixed', () => {
+    /**
+     * ANTES: Clics sin esperar que los elementos estén listos.
+     * AHORA: expect() + waitForURL + waitForSelector antes de actuar.
+     */
+
+    test('completar checkout @checkout @smoke', async ({ page }) => {
+        await page.goto('/cart');
+
+        // ✅ FIX: Esperar que el botón esté habilitado antes de hacer clic
+        const checkoutBtn = page.getByRole('button', { name: 'Proceder al pago' });
+        await expect(checkoutBtn).toBeEnabled({ timeout: 10_000 });
+        await checkoutBtn.click();
+
+        // ✅ FIX: Esperar la navegación a la página de shipping
+        await page.waitForURL('**/checkout/shipping');
+
+        // ✅ FIX: Esperar que el formulario esté visible antes de llenar
+        const shippingForm = page.locator('[data-testid="shipping-form"]');
+        await expect(shippingForm).toBeVisible();
+
+        await page.getByLabel('Nombre completo').fill('Juan Pérez');
+        await page.getByLabel('Dirección').fill('Calle 123');
+        await page.getByLabel('Ciudad').fill('Cali');
+
+        // ✅ FIX: Esperar a que la validación del formulario termine
+        const continueBtn = page.getByRole('button', { name: 'Continuar al pago' });
+        await expect(continueBtn).toBeEnabled();
+        await continueBtn.click();
+
+        // ✅ FIX: Esperar la transición a la página de pago
+        await page.waitForURL('**/checkout/payment');
+
+        await page.getByLabel('Número de tarjeta').fill('4111111111111111');
+        await page.getByLabel('Fecha de expiración').fill('12/28');
+        await page.getByLabel('CVV').fill('123');
+
+        // ✅ FIX: Esperar que el botón esté habilitado (la validación es async)
+        const placeOrderBtn = page.getByRole('button', { name: 'Confirmar pedido' });
+        await expect(placeOrderBtn).toBeEnabled({ timeout: 5000 });
+        await placeOrderBtn.click();
+
+        // ✅ FIX: Esperar la respuesta de la API Y el texto de confirmación
+        await page.waitForURL('**/checkout/confirmation');
+        const confirmacion = page.getByText('Pedido confirmado');
+        await expect(confirmacion).toBeVisible({ timeout: 15_000 });
+    });
+});
+
+
+// ============================================================
+// FIX 4: Esperar respuestas de red para timing de API
+// ============================================================
+
+test.describe('TestBusquedaFixed', () => {
+    /**
+     * ANTES: waitForTimeout(1000) para esperar la API.
+     * AHORA: waitForResponse() y expect() con auto-retry.
+     */
+
+    test('buscar producto @search', async ({ page }) => {
+        await page.goto('/');
+
+        await page.getByPlaceholder('Buscar productos...').fill('laptop');
+
+        // ✅ FIX: Esperar la respuesta de la API de búsqueda
+        const [response] = await Promise.all([
+            page.waitForResponse(
+                (resp) => resp.url().includes('/api/search') && resp.status() === 200
+            ),
+            page.getByRole('button', { name: 'Buscar' }).click(),
+        ]);
+
+        // ✅ FIX: Verificar que la respuesta tiene resultados
+        const data = await response.json();
+        expect(data.results.length).toBeGreaterThan(0);
+
+        // ✅ FIX: Esperar que los resultados se rendericen en el DOM
+        const resultados = page.locator('[data-testid="search-result"]');
+        await expect(resultados.first()).toBeVisible({ timeout: 10_000 });
+    });
+
+    test('aplicar filtro precio @search', async ({ page }) => {
+        await page.goto('/products');
+
+        await page.getByLabel('Precio mínimo').fill('100');
+        await page.getByLabel('Precio máximo').fill('500');
+
+        // ✅ FIX: Interceptar la request de filtrado y esperar la respuesta
+        await Promise.all([
+            page.waitForResponse(
+                (resp) => resp.url().includes('/api/products') && resp.status() === 200
+            ),
+            page.getByRole('button', { name: 'Aplicar filtros' }).click(),
+        ]);
+
+        // ✅ FIX: Verificar texto con patrón flexible, no exacto
+        const countElement = page.locator('[data-testid="results-count"]');
+        await expect(countElement).toContainText('productos');
+        // Verificar que hay un número razonable
+        await expect(countElement).toHaveText(
+            // Regex: "Mostrando X productos" donde X es un número > 0
+            /Mostrando \\d+ productos/
+        );
+    });
+});
+
+
+// ============================================================
+// FIX 5: Aislamiento de estado entre tests
+// ============================================================
+
+test.describe('TestCarritoAisladoFixed', () => {
+    /**
+     * ANTES: Variable compartida entre tests, orden dependiente.
+     * AHORA: Cada test es independiente con su propia navegación y setup.
+     */
+
+    test('agregar producto y verificar @cart', async ({ page }) => {
+        // Test completamente independiente — no depende de otros tests.
+        // ✅ FIX: Cada test configura su propio estado
+        await page.goto('/products/laptop-1');
+        await page.getByRole('button', { name: 'Agregar al carrito' }).click();
+
+        const cartCount = page.locator('[data-testid="cart-count"]');
+        await expect(cartCount).toHaveText('1');
+    });
+
+    test('agregar multiples y verificar @cart', async ({ page }) => {
+        // Test que agrega 2 productos — autónomo.
+        // ✅ FIX: Navegar y agregar desde cero, sin depender de estado previo
+        await page.goto('/products/laptop-1');
+        await page.getByRole('button', { name: 'Agregar al carrito' }).click();
+        await expect(page.locator('[data-testid="cart-count"]')).toHaveText('1');
+
+        await page.goto('/products/mouse-1');
+        await page.getByRole('button', { name: 'Agregar al carrito' }).click();
+        await expect(page.locator('[data-testid="cart-count"]')).toHaveText('2');
+    });
+
+    test('vaciar carrito @cart', async ({ page }) => {
+        // Test que vacía el carrito — configura su propio estado primero.
+        // ✅ FIX: Primero agregar algo, luego vaciar — independiente
+        await page.goto('/products/laptop-1');
+        await page.getByRole('button', { name: 'Agregar al carrito' }).click();
+        await expect(page.locator('[data-testid="cart-count"]')).toHaveText('1');
+
+        // Ahora vaciar
+        await page.goto('/cart');
+        await page.getByRole('button', { name: 'Vaciar carrito' }).click();
+
+        // ✅ FIX: Esperar confirmación con expect()
+        await expect(page.locator('[data-testid="cart-count"]')).toHaveText('0');
+        await expect(page.getByText('Tu carrito está vacío')).toBeVisible();
+    });
+});
+
+
+// ============================================================
+// FIX 6: Assertions robustas y específicas
+// ============================================================
+
+test.describe('TestAssertionsRobustasFixed', () => {
+    /**
+     * ANTES: expect(true), solo verificar URL, sin assertions.
+     * AHORA: Verificar estado visible, contenido específico, cambios en DOM.
+     */
+
+    test('pagina carga correctamente @smoke', async ({ page }) => {
+        await page.goto('/');
+
+        // ✅ FIX: Verificar elementos específicos que confirman la carga correcta
+        await expect(page).toHaveTitle(/.*E-Commerce.*/);
+        await expect(page.getByRole('navigation')).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Productos destacados' })).toBeVisible();
+        await expect(page.locator('[data-testid="product-card"]').first()).toBeVisible();
+    });
+
+    test('formulario registro @checkout', async ({ page }) => {
+        await page.goto('/register');
+        await page.getByLabel('Nombre').fill('Test User');
+        await page.getByLabel('Email').fill('test@example.com');
+        await page.getByLabel('Contraseña').fill('password123');
+        await page.getByRole('button', { name: 'Registrarse' }).click();
+
+        // ✅ FIX: Verificar el resultado específico, no solo la URL
+        await expect(page.getByText('Registro exitoso')).toBeVisible({ timeout: 10_000 });
+        await expect(page).toHaveURL(/.*\\/(dashboard|welcome).*/);
+    });
+
+    test('eliminar producto del carrito @cart', async ({ page }) => {
+        // ✅ FIX: Primero asegurar que hay un producto en el carrito
+        await page.goto('/products/laptop-1');
+        await page.getByRole('button', { name: 'Agregar al carrito' }).click();
+        await expect(page.locator('[data-testid="cart-count"]')).toHaveText('1');
+
+        // Ir al carrito y eliminar
+        await page.goto('/cart');
+        await expect(page.locator('[data-testid="cart-item"]')).toHaveCount(1);
+
+        await page.getByRole('button', { name: 'Eliminar' }).first().click();
+
+        // ✅ FIX: Verificar que el producto se eliminó con assertions específicas
+        await expect(page.locator('[data-testid="cart-item"]')).toHaveCount(0);
+        await expect(page.locator('[data-testid="cart-count"]')).toHaveText('0');
+        await expect(page.getByText('Tu carrito está vacío')).toBeVisible();
+    });
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🔄 Paso 9: Comparación antes/después</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -1052,7 +1770,18 @@ class TestAssertionsRobustasFixed:
         Aquí agregamos una fixture adicional para <strong>reportes de diagnóstico</strong> que
         genera un resumen JSON al final de la ejecución.</p>
 
-        <pre><code class="python"># Agregar al final de tests/conftest.py
+        <div class="code-tabs" data-code-id="L098-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># Agregar al final de tests/conftest.py
 
 # =====================================================
 # FIXTURE: Reporte de diagnóstico JSON
@@ -1141,6 +1870,111 @@ def stability_check():
                 f"Esperado '{expected_text}', obtenido '{actual}'"
             )
     return check</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// Agregar al playwright.config.ts o a un archivo de fixtures
+
+// =====================================================
+// Reporter personalizado: Reporte de diagnóstico JSON
+// =====================================================
+
+import type { Reporter, TestCase, TestResult, FullResult } from '@playwright/test/reporter';
+import fs from 'fs';
+import path from 'path';
+
+class DiagnosticReporter implements Reporter {
+    private reportData = {
+        start_time: new Date().toISOString(),
+        tests: [] as any[],
+        summary: { total: 0, passed: 0, failed: 0, flaky: 0 },
+    };
+
+    onTestEnd(test: TestCase, result: TestResult) {
+        this.reportData.tests.push({
+            title: test.title,
+            status: result.status,
+            duration: result.duration,
+        });
+        this.reportData.summary.total++;
+        if (result.status === 'passed') this.reportData.summary.passed++;
+        if (result.status === 'failed') this.reportData.summary.failed++;
+        if (result.status === 'flaky') this.reportData.summary.flaky++;
+    }
+
+    onEnd(result: FullResult) {
+        (this.reportData as any).end_time = new Date().toISOString();
+        const reportPath = path.join(__dirname, 'test-results', 'diagnostic_report.json');
+        fs.mkdirSync(path.dirname(reportPath), { recursive: true });
+        fs.writeFileSync(reportPath, JSON.stringify(this.reportData, null, 2));
+        console.log(\`Reporte de diagnóstico guardado: \${reportPath}\`);
+    }
+}
+export default DiagnosticReporter;
+
+
+// =====================================================
+// Fixture: Captura de estado de red (útil para flaky)
+// =====================================================
+
+import { test as base, expect, Page } from '@playwright/test';
+
+type NetworkLog = {
+    method: string;
+    url: string;
+    timestamp: string;
+    status?: number;
+};
+
+export const test = base.extend<{ networkMonitor: NetworkLog[] }>({
+    /**
+     * Monitor de red que registra todas las requests durante un test.
+     * Útil para diagnosticar problemas de timing con APIs.
+     */
+    networkMonitor: async ({ page }, use) => {
+        const requestsLog: NetworkLog[] = [];
+
+        page.on('request', (request) => {
+            requestsLog.push({
+                method: request.method(),
+                url: request.url(),
+                timestamp: new Date().toISOString(),
+            });
+        });
+
+        page.on('response', (response) => {
+            const entry = requestsLog.find((r) => r.url === response.url());
+            if (entry) {
+                entry.status = response.status();
+            }
+        });
+
+        await use(requestsLog);
+    },
+});
+
+
+// =====================================================
+// Helper: Verificar estabilidad de un resultado
+// =====================================================
+
+async function stabilityCheck(
+    page: Page,
+    locatorStr: string,
+    expectedText: string,
+    retries = 3
+): Promise<void> {
+    /**
+     * Verifica que un localizador muestra el texto esperado
+     * de forma consistente después de múltiples verificaciones.
+     */
+    for (let i = 0; i < retries; i++) {
+        const element = page.locator(locatorStr);
+        const actual = await element.textContent();
+        expect(actual?.trim()).toBe(expectedText.trim());
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>⚙️ Paso 11: Configuración pytest.ini para artefactos en CI</h3>
         <pre><code class="python"># pytest.ini — Configuración completa

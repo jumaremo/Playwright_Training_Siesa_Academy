@@ -32,7 +32,18 @@ Con 10 segundos cada uno: ~22 minutos
         </div>
 
         <h3>✅ Producto cartesiano completo (cuando es manejable)</h3>
-        <pre><code class="python">import pytest
+        <div class="code-tabs" data-code-id="L086-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">import pytest
 
 # Múltiples @parametrize generan producto cartesiano
 @pytest.mark.parametrize("browser", ["chromium", "firefox", "webkit"])
@@ -40,10 +51,43 @@ Con 10 segundos cada uno: ~22 minutos
 def test_pagina_carga(browser, locale):
     # 3 browsers × 2 locales = 6 tests
     pass</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { test } from '@playwright/test';
+
+// Producto cartesiano: browsers × locales
+const browsers = ['chromium', 'firefox', 'webkit'] as const;
+const locales = ['es-CO', 'en-US'];
+
+for (const browserName of browsers) {
+    for (const locale of locales) {
+        test(\`pagina carga [\${browserName}] [\${locale}]\`, async ({ playwright }) => {
+            const browser = await playwright[browserName].launch();
+            const context = await browser.newContext({ locale });
+            const page = await context.newPage();
+            // 3 browsers × 2 locales = 6 tests
+            await context.close();
+            await browser.close();
+        });
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>🎯 Combinaciones selectivas con pytest.param</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># En vez del producto cartesiano completo,
+            <div class="code-tabs" data-code-id="L086-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># En vez del producto cartesiano completo,
 # seleccionar las combinaciones más relevantes
 
 CRITICAL_COMBINATIONS = [
@@ -75,10 +119,69 @@ def test_combinacion_critica(playwright, browser_name, viewport_name, role, acti
     browser.close()
 
 # Solo 5 tests en vez de 135, cubriendo las combinaciones más importantes</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, BrowserType } from '@playwright/test';
+
+// En vez del producto cartesiano completo,
+// seleccionar las combinaciones más relevantes
+
+interface CriticalCombo {
+    browserName: 'chromium' | 'firefox' | 'webkit';
+    viewport: string;
+    role: string;
+    action: string;
+    id: string;
+}
+
+const CRITICAL_COMBINATIONS: CriticalCombo[] = [
+    // Browser     Viewport    Rol        Escenario
+    { browserName: 'chromium', viewport: 'desktop', role: 'admin',  action: 'crear',    id: 'chrome-desktop-admin-crear' },
+    { browserName: 'chromium', viewport: 'mobile',  role: 'viewer', action: 'ver',      id: 'chrome-mobile-viewer-ver' },
+    { browserName: 'firefox',  viewport: 'desktop', role: 'editor', action: 'editar',   id: 'firefox-desktop-editor-editar' },
+    { browserName: 'webkit',   viewport: 'tablet',  role: 'admin',  action: 'eliminar', id: 'safari-tablet-admin-eliminar' },
+    { browserName: 'chromium', viewport: 'desktop', role: 'viewer', action: 'buscar',   id: 'chrome-desktop-viewer-buscar' },
+];
+
+const VIEWPORTS: Record&lt;string, { width: number; height: number }&gt; = {
+    desktop: { width: 1920, height: 1080 },
+    tablet:  { width: 768,  height: 1024 },
+    mobile:  { width: 375,  height: 812 },
+};
+
+for (const combo of CRITICAL_COMBINATIONS) {
+    test(\`combinación crítica [\${combo.id}]\`, async ({ playwright }) => {
+        const browserType: BrowserType = playwright[combo.browserName];
+        const browser = await browserType.launch();
+        const context = await browser.newContext({
+            viewport: VIEWPORTS[combo.viewport],
+        });
+        const page = await context.newPage();
+
+        // ... ejecutar test según role y action
+        await context.close();
+        await browser.close();
+    });
+}
+
+// Solo 5 tests en vez de 135, cubriendo las combinaciones más importantes</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🧮 Pairwise Testing (cobertura inteligente)</h3>
-        <pre><code class="python"># pip install allpairspy
+        <div class="code-tabs" data-code-id="L086-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pip install allpairspy
 # Pairwise genera el mínimo de combinaciones que cubre
 # todos los pares de valores
 
@@ -104,10 +207,64 @@ def test_pairwise(browser, viewport, role, action):
     # desktop+admin, desktop+editor, desktop+viewer ✓
     # ... todos los pares
     pass</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// npm install allpairs-js  (o generar combinaciones manualmente)
+// Pairwise genera el mínimo de combinaciones que cubre
+// todos los pares de valores
+
+import { test } from '@playwright/test';
+
+const parameters = {
+    browser:  ['chromium', 'firefox', 'webkit'] as const,
+    viewport: ['desktop', 'tablet', 'mobile'],
+    role:     ['admin', 'editor', 'viewer'],
+    action:   ['crear', 'editar', 'ver', 'eliminar'],
+};
+
+// Combinaciones pairwise pre-generadas (~12 en vez de 108)
+const pairwiseCombos = [
+    { browser: 'chromium', viewport: 'desktop', role: 'admin',  action: 'crear' },
+    { browser: 'firefox',  viewport: 'tablet',  role: 'editor', action: 'editar' },
+    { browser: 'webkit',   viewport: 'mobile',  role: 'viewer', action: 'ver' },
+    { browser: 'chromium', viewport: 'tablet',  role: 'viewer', action: 'eliminar' },
+    { browser: 'firefox',  viewport: 'desktop', role: 'viewer', action: 'crear' },
+    { browser: 'webkit',   viewport: 'desktop', role: 'editor', action: 'eliminar' },
+    { browser: 'chromium', viewport: 'mobile',  role: 'editor', action: 'ver' },
+    { browser: 'firefox',  viewport: 'mobile',  role: 'admin',  action: 'eliminar' },
+    { browser: 'webkit',   viewport: 'tablet',  role: 'admin',  action: 'editar' },
+    { browser: 'chromium', viewport: 'desktop', role: 'editor', action: 'eliminar' },
+    { browser: 'firefox',  viewport: 'tablet',  role: 'admin',  action: 'ver' },
+    { browser: 'webkit',   viewport: 'mobile',  role: 'viewer', action: 'crear' },
+] as const;
+
+for (const combo of pairwiseCombos) {
+    const id = \`\${combo.browser.slice(0,2)}-\${combo.viewport.slice(0,3)}-\${combo.role.slice(0,3)}-\${combo.action.slice(0,3)}\`;
+    test(\`pairwise [\${id}]\`, async ({ playwright }) => {
+        // Cada PAR de valores aparece al menos una vez
+        // chromium+desktop, chromium+tablet, chromium+mobile ✓
+        // chromium+admin, chromium+editor, chromium+viewer ✓
+        // desktop+admin, desktop+editor, desktop+viewer ✓
+        // ... todos los pares
+    });
+}</code></pre>
+        </div>
+        </div>
 
         <h3>📊 Matriz de prueba manual (spreadsheet style)</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># Definir la matriz como estructura de datos
+            <div class="code-tabs" data-code-id="L086-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Definir la matriz como estructura de datos
 
 TEST_MATRIX = {
     "checkout_flows": [
@@ -138,6 +295,50 @@ def test_checkout_matrix(page, payment, city, coupon, shipping, expected):
     page.check("#terms")
     page.click("#place-order")
     expect(page.locator(".order-result")).to_contain_text(expected)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+// Definir la matriz como estructura de datos
+
+interface CheckoutRow {
+    payment: string;
+    city: string;
+    coupon: string | null;
+    shipping: string;
+    expected: string;
+}
+
+const TEST_MATRIX: Record&lt;string, CheckoutRow[]&gt; = {
+    checkoutFlows: [
+        // Método pago | Dirección    | Cupón     | Envío      | Resultado esperado
+        { payment: 'PSE',      city: 'Cali',      coupon: null,      shipping: 'Standard', expected: 'Pedido confirmado' },
+        { payment: 'PSE',      city: 'Bogotá',    coupon: 'DESC10',  shipping: 'Express',  expected: 'Pedido confirmado' },
+        { payment: 'Tarjeta',  city: 'Cali',      coupon: null,      shipping: 'Express',  expected: 'Pedido confirmado' },
+        { payment: 'Tarjeta',  city: 'Medellín',  coupon: 'DESC20',  shipping: 'Standard', expected: 'Pedido confirmado' },
+        { payment: 'Tarjeta',  city: 'Cali',      coupon: 'EXPIRED', shipping: 'Standard', expected: 'Cupón expirado' },
+        { payment: 'Efectivo', city: 'Cali',      coupon: null,      shipping: 'Standard', expected: 'Pedido pendiente' },
+    ],
+};
+
+for (const row of TEST_MATRIX.checkoutFlows) {
+    const id = \`\${row.payment}-\${row.city}-\${row.coupon ?? 'sin_cupon'}\`;
+    test(\`checkout matrix [\${id}]\`, async ({ page }) => {
+        await page.goto('https://mi-app.com/checkout');
+        await page.selectOption('#payment', { label: row.payment });
+        await page.fill('#city', row.city);
+        if (row.coupon) {
+            await page.fill('#coupon', row.coupon);
+            await page.click('#apply-coupon');
+        }
+        await page.selectOption('#shipping', { label: row.shipping });
+        await page.check('#terms');
+        await page.click('#place-order');
+        await expect(page.locator('.order-result')).toContainText(row.expected);
+    });
+}</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📋 Matriz desde Excel/CSV</h3>

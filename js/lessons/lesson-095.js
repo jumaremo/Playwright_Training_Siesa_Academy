@@ -37,7 +37,18 @@ const LESSON_095 = {
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Grabación básica</h4>
             <p>El tracing se habilita a nivel de <strong>BrowserContext</strong>, no de página individual:</p>
-            <pre><code class="python"># trace_basico.py
+            <div class="code-tabs" data-code-id="L095-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># trace_basico.py
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
@@ -65,6 +76,37 @@ with sync_playwright() as p:
 
     browser.close()
     print("✅ Trace guardado en traces/login_trace.zip")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// trace_basico.ts
+import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+const context = await browser.newContext();
+
+// 🎬 INICIAR la grabación del trace
+await context.tracing.start({
+    screenshots: true,   // Capturar screenshot en cada acción
+    snapshots: true,     // Capturar snapshot del DOM en cada acción
+    sources: true        // Incluir código fuente en el trace
+});
+
+const page = await context.newPage();
+
+// Acciones que serán grabadas
+await page.goto('https://mi-app.com/login');
+await page.fill('#email', 'admin@siesa.com');
+await page.fill('#password', 'Admin123!');
+await page.click("button[type='submit']");
+await page.waitForURL('**/dashboard');
+
+// ⏹️ DETENER y guardar el trace
+await context.tracing.stop({ path: 'traces/login_trace.zip' });
+
+await browser.close();
+console.log('✅ Trace guardado en traces/login_trace.zip');</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>⚙️ Opciones de grabación</h3>
@@ -112,7 +154,18 @@ with sync_playwright() as p:
                     </tr>
                 </tbody>
             </table>
-            <pre><code class="python"># Grabación completa con título descriptivo
+            <div class="code-tabs" data-code-id="L095-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Grabación completa con título descriptivo
 context.tracing.start(
     screenshots=True,
     snapshots=True,
@@ -133,13 +186,49 @@ context.tracing.start(
     snapshots=True,
     sources=True
 )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Grabación completa con título descriptivo
+await context.tracing.start({
+    screenshots: true,
+    snapshots: true,
+    sources: true,
+    title: 'Test login con credenciales válidas'
+});
+
+// Solo screenshots (más liviano, útil para CI)
+await context.tracing.start({
+    screenshots: true,
+    snapshots: false,
+    sources: false
+});
+
+// Solo DOM snapshots (para depurar selectores)
+await context.tracing.start({
+    screenshots: false,
+    snapshots: true,
+    sources: true
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🔄 Chunks: múltiples traces en una sesión</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>Puedes dividir la grabación en <strong>múltiples archivos</strong> usando
             <code>start_chunk()</code>, útil para generar un trace por cada test dentro del mismo context:</p>
-            <pre><code class="python"># trace_chunks.py
+            <div class="code-tabs" data-code-id="L095-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># trace_chunks.py
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
@@ -176,6 +265,46 @@ with sync_playwright() as p:
     # Detener tracing global
     context.tracing.stop()
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// trace_chunks.ts
+import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+const context = await browser.newContext();
+
+// Iniciar tracing global (una sola vez)
+await context.tracing.start({
+    screenshots: true,
+    snapshots: true,
+    sources: true
+});
+const page = await context.newPage();
+
+// --- Chunk 1: Test de login ---
+await context.tracing.startChunk({ title: 'Test: Login exitoso' });
+await page.goto('https://mi-app.com/login');
+await page.fill('#email', 'admin@siesa.com');
+await page.fill('#password', 'Admin123!');
+await page.click("button[type='submit']");
+await page.waitForURL('**/dashboard');
+// Guardar chunk 1
+await context.tracing.stopChunk({ path: 'traces/login.zip' });
+
+// --- Chunk 2: Test de navegación ---
+await context.tracing.startChunk({ title: 'Test: Navegación dashboard' });
+await page.click('text=Reportes');
+await page.waitForSelector("h1:has-text('Reportes')");
+await page.click('text=Dashboard');
+await page.waitForSelector("h1:has-text('Dashboard')");
+// Guardar chunk 2
+await context.tracing.stopChunk({ path: 'traces/navegacion.zip' });
+
+// Detener tracing global
+await context.tracing.stop();
+await browser.close();</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>👁️ Abrir y navegar el Trace Viewer</h3>
@@ -214,7 +343,18 @@ playwright show-trace traces/login_exitoso.zip traces/login_fallido.zip</code></
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>En CI/CD, guardar traces de <strong>todos</strong> los tests consume mucho espacio.
             La mejor práctica es guardar el trace <strong>solo cuando un test falla</strong>:</p>
-            <pre><code class="python"># conftest.py — Trace automático solo en fallos
+            <div class="code-tabs" data-code-id="L095-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># conftest.py — Trace automático solo en fallos
 import pytest
 import os
 from playwright.sync_api import sync_playwright
@@ -274,6 +414,58 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// playwright.config.ts — Trace automático solo en fallos
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        // 🎬 Graba trace solo cuando el test falla
+        trace: 'on-first-retry',  // o 'retain-on-failure'
+    },
+    // Directorio de salida para traces y artefactos
+    outputDir: 'test-results/traces',
+    retries: 1, // Reintentar 1 vez para capturar trace en el retry
+});
+
+// ─────────────────────────────────────────────────
+// Alternativa: control manual con hooks en cada test
+// tests/example.spec.ts
+import { test, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const TRACE_DIR = 'test-results/traces';
+
+test.beforeEach(async ({ context }, testInfo) => {
+    // 🎬 Iniciar grabación siempre
+    await context.tracing.start({
+        screenshots: true,
+        snapshots: true,
+        sources: true,
+        title: testInfo.title  // Nombre del test como título
+    });
+});
+
+test.afterEach(async ({ context }, testInfo) => {
+    // 📋 Después del test: verificar si falló
+    if (testInfo.status === 'failed') {
+        // Test falló — guardar el trace
+        fs.mkdirSync(TRACE_DIR, { recursive: true });
+        const tracePath = path.join(
+            TRACE_DIR,
+            \`\${testInfo.title.replace(/\\s+/g, '_')}.zip\`
+        );
+        await context.tracing.stop({ path: tracePath });
+        console.log(\`\\n📎 Trace guardado: \${tracePath}\`);
+    } else {
+        // Test pasó — descartar el trace
+        await context.tracing.stop();
+    }
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📁 Contenido de un archivo trace.zip</h3>
@@ -301,7 +493,18 @@ def pytest_runtest_makereport(item, call):
             más difícil de diagnosticar. El Trace Viewer es la herramienta definitiva para resolverlos:</p>
 
             <h4>Estrategia: grabar siempre, comparar después</h4>
-            <pre><code class="python"># conftest.py — Trace para tests flaky (guardar siempre)
+            <div class="code-tabs" data-code-id="L095-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># conftest.py — Trace para tests flaky (guardar siempre)
 import pytest
 import os
 from datetime import datetime
@@ -352,6 +555,69 @@ def test_carga_dashboard(traced_page):
 
     count = cards.count()
     assert count == 4, f"Se esperaban 4 cards, se encontraron {count}"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// playwright.config.ts — Trace para tests flaky (guardar siempre)
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+    use: {
+        // Guardar trace siempre (para análisis de flaky tests)
+        trace: 'on',
+    },
+    outputDir: 'test-results/traces',
+});
+
+// ─────────────────────────────────────────────────
+// Alternativa: control manual con hooks y timestamp
+// tests/flaky.spec.ts
+import { test, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const TRACE_DIR = 'test-results/traces';
+
+test.beforeEach(async ({ context }, testInfo) => {
+    await context.tracing.start({
+        screenshots: true,
+        snapshots: true,
+        sources: true,
+        title: testInfo.title
+    });
+});
+
+test.afterEach(async ({ context }, testInfo) => {
+    // Guardar con timestamp para comparar ejecuciones
+    fs.mkdirSync(TRACE_DIR, { recursive: true });
+    const timestamp = new Date().toISOString()
+        .replace(/[:.]/g, '')
+        .slice(0, 15);
+
+    // Determinar resultado
+    const status = testInfo.status === 'failed' ? 'FAIL' : 'PASS';
+    const safeName = testInfo.title.replace(/\\s+/g, '_');
+
+    const tracePath = path.join(
+        TRACE_DIR,
+        \`\${safeName}_\${status}_\${timestamp}.zip\`
+    );
+    await context.tracing.stop({ path: tracePath });
+});
+
+// Ejemplo: test flaky a diagnosticar
+test('carga dashboard', async ({ page }) => {
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Este test falla intermitentemente...
+    // ¿Es un problema de timing? ¿De datos? ¿De red?
+    const cards = page.locator('.dashboard-card');
+    await cards.first().waitFor({ state: 'visible', timeout: 5000 });
+
+    const count = await cards.count();
+    expect(count).toBe(4);
+});</code></pre>
+            </div>
+            </div>
 
             <h4>Comparar traces: ejecución exitosa vs fallida</h4>
             <pre><code class="bash"># Abrir ambos traces lado a lado
@@ -385,7 +651,18 @@ playwright show-trace \\
 # (Arrastra y suelta el archivo — los datos NO se envían al servidor,
 #  todo se procesa en el navegador)</code></pre>
 
-            <pre><code class="python"># Opción 2: Servir traces desde CI como artefactos
+            <div class="code-tabs" data-code-id="L095-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Opción 2: Servir traces desde CI como artefactos
 # En GitHub Actions, guardar traces como artefactos del job:
 
 # .github/workflows/tests.yml (fragmento relevante)
@@ -396,6 +673,25 @@ playwright show-trace \\
 #     name: playwright-traces
 #     path: test-results/traces/
 #     retention-days: 7</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Opción 2: Servir traces desde CI como artefactos
+// En GitHub Actions, guardar traces como artefactos del job:
+
+// .github/workflows/tests.yml (fragmento relevante)
+// - name: Upload traces on failure
+//   if: failure()
+//   uses: actions/upload-artifact@v4
+//   with:
+//     name: playwright-traces
+//     path: test-results/traces/
+//     retention-days: 7
+
+// Nota: Con @playwright/test, el directorio de traces
+// se configura en playwright.config.ts con outputDir
+// y trace: 'retain-on-failure'</code></pre>
+            </div>
+            </div>
 
             <p>Luego cualquier miembro del equipo puede descargar el artefacto y abrirlo en
             <code>trace.playwright.dev</code> o localmente con <code>playwright show-trace</code>.</p>
@@ -403,7 +699,18 @@ playwright show-trace \\
 
         <h3>🏭 conftest.py completo: tracing automático de producción</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># conftest.py — Tracing robusto para CI/CD
+            <div class="code-tabs" data-code-id="L095-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># conftest.py — Tracing robusto para CI/CD
 import pytest
 import os
 import shutil
@@ -498,6 +805,76 @@ def pytest_sessionfinish(session, exitstatus):
             print(f"\\n   Abrir: playwright show-trace {TRACE_DIR}/<archivo>.zip")
             print(f"   Online: https://trace.playwright.dev")
             print(f"{'='*60}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// playwright.config.ts — Tracing robusto para CI/CD
+import { defineConfig } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+const TRACE_DIR = 'test-results/traces';
+// Controlar tracing por variable de entorno
+const TRACING_MODE = process.env.PW_TRACING ?? 'on-failure';
+// Opciones: "off", "on-failure", "always"
+
+// Mapear modos a opciones de Playwright Test
+function getTraceOption(): 'off' | 'on' | 'retain-on-failure' {
+    switch (TRACING_MODE) {
+        case 'off': return 'off';
+        case 'always': return 'on';
+        case 'on-failure':
+        default: return 'retain-on-failure';
+    }
+}
+
+export default defineConfig({
+    use: {
+        trace: getTraceOption(),
+    },
+    outputDir: TRACE_DIR,
+});
+
+// ─────────────────────────────────────────────────
+// Reporter personalizado para resumen de traces
+// reporters/trace-summary.ts
+import type { Reporter, TestResult } from '@playwright/test/reporter';
+
+class TraceSummaryReporter implements Reporter {
+    onEnd() {
+        if (!fs.existsSync(TRACE_DIR)) return;
+
+        const traces: string[] = [];
+        // Buscar recursivamente archivos .zip
+        const walk = (dir: string) => {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+                const full = path.join(dir, entry.name);
+                if (entry.isDirectory()) walk(full);
+                else if (entry.name.endsWith('.zip')) traces.push(full);
+            }
+        };
+        walk(TRACE_DIR);
+
+        if (traces.length > 0) {
+            console.log(\`\\n\${'='.repeat(60)}\`);
+            console.log(
+                \`📦 \${traces.length} trace(s) guardados en \${TRACE_DIR}/\`
+            );
+            for (const t of traces.sort()) {
+                const sizeKb = fs.statSync(t).size / 1024;
+                const name = path.relative(TRACE_DIR, t);
+                console.log(\`   - \${name} (\${sizeKb.toFixed(0)} KB)\`);
+            }
+            console.log(
+                \`\\n   Abrir: npx playwright show-trace \${TRACE_DIR}/<archivo>.zip\`
+            );
+            console.log('   Online: https://trace.playwright.dev');
+            console.log('='.repeat(60));
+        }
+    }
+}
+export default TraceSummaryReporter;</code></pre>
+            </div>
+            </div>
 
             <pre><code class="bash"># Ejecutar tests con diferentes modos de tracing
 # Default: guardar traces solo en fallos
@@ -525,14 +902,45 @@ PW_TRACING=off pytest tests/
         <h3>⚠️ Errores comunes con tracing</h3>
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>❌ Error 1: Iniciar tracing en la página en vez del context</h4>
-            <pre><code class="python"># ❌ MAL — page no tiene tracing
+            <div class="code-tabs" data-code-id="L095-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># ❌ MAL — page no tiene tracing
 page.tracing.start(screenshots=True)  # AttributeError
 
 # ✅ BIEN — tracing es del context
 context.tracing.start(screenshots=True)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// ❌ MAL — page no tiene tracing
+await page.tracing.start({ screenshots: true });  // TypeError
+
+// ✅ BIEN — tracing es del context
+await context.tracing.start({ screenshots: true });</code></pre>
+            </div>
+            </div>
 
             <h4>❌ Error 2: Olvidar detener el tracing</h4>
-            <pre><code class="python"># ❌ MAL — tracing nunca se detiene, el archivo no se genera
+            <div class="code-tabs" data-code-id="L095-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># ❌ MAL — tracing nunca se detiene, el archivo no se genera
 context.tracing.start(screenshots=True, snapshots=True)
 page.goto("https://mi-app.com")
 # ... acciones ...
@@ -544,9 +952,36 @@ page.goto("https://mi-app.com")
 # ... acciones ...
 context.tracing.stop(path="trace.zip")  # Primero guardar
 context.close()  # Luego cerrar</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// ❌ MAL — tracing nunca se detiene, el archivo no se genera
+await context.tracing.start({ screenshots: true, snapshots: true });
+await page.goto('https://mi-app.com');
+// ... acciones ...
+await context.close();  // ¡El trace se pierde!
+
+// ✅ BIEN — siempre detener antes de cerrar
+await context.tracing.start({ screenshots: true, snapshots: true });
+await page.goto('https://mi-app.com');
+// ... acciones ...
+await context.tracing.stop({ path: 'trace.zip' });  // Primero guardar
+await context.close();  // Luego cerrar</code></pre>
+            </div>
+            </div>
 
             <h4>❌ Error 3: Ruta de destino sin directorio padre</h4>
-            <pre><code class="python"># ❌ MAL — la carpeta no existe, error al guardar
+            <div class="code-tabs" data-code-id="L095-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># ❌ MAL — la carpeta no existe, error al guardar
 context.tracing.stop(path="results/traces/mi_test.zip")
 # FileNotFoundError: No such file or directory
 
@@ -554,9 +989,32 @@ context.tracing.stop(path="results/traces/mi_test.zip")
 import os
 os.makedirs("results/traces", exist_ok=True)
 context.tracing.stop(path="results/traces/mi_test.zip")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// ❌ MAL — la carpeta no existe, error al guardar
+await context.tracing.stop({ path: 'results/traces/mi_test.zip' });
+// Error: ENOENT: no such file or directory
+
+// ✅ BIEN — crear la carpeta antes
+import * as fs from 'fs';
+fs.mkdirSync('results/traces', { recursive: true });
+await context.tracing.stop({ path: 'results/traces/mi_test.zip' });</code></pre>
+            </div>
+            </div>
 
             <h4>❌ Error 4: Traces enormes por screenshots innecesarios</h4>
-            <pre><code class="python"># ❌ PROBLEMÁTICO — screenshots en tests largos generan archivos de 50+ MB
+            <div class="code-tabs" data-code-id="L095-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># ❌ PROBLEMÁTICO — screenshots en tests largos generan archivos de 50+ MB
 context.tracing.start(screenshots=True, snapshots=True, sources=True)
 # ... 200 acciones en un test largo ...
 # Resultado: trace.zip de 80 MB
@@ -564,6 +1022,18 @@ context.tracing.start(screenshots=True, snapshots=True, sources=True)
 # ✅ MEJOR — sin screenshots para tests largos en CI
 context.tracing.start(screenshots=False, snapshots=True, sources=True)
 # Resultado: trace.zip de ~5 MB (igual puedes ver el DOM)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// ❌ PROBLEMÁTICO — screenshots en tests largos generan archivos de 50+ MB
+await context.tracing.start({ screenshots: true, snapshots: true, sources: true });
+// ... 200 acciones en un test largo ...
+// Resultado: trace.zip de 80 MB
+
+// ✅ MEJOR — sin screenshots para tests largos en CI
+await context.tracing.start({ screenshots: false, snapshots: true, sources: true });
+// Resultado: trace.zip de ~5 MB (igual puedes ver el DOM)</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📊 Comparación: herramientas de depuración de Playwright</h3>

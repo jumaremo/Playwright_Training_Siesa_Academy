@@ -29,7 +29,18 @@ const LESSON_078 = {
         </div>
 
         <h3>🐘 PostgreSQL con psycopg2</h3>
-        <pre><code class="python"># pip install psycopg2-binary
+        <div class="code-tabs" data-code-id="L078-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pip install psycopg2-binary
 import psycopg2
 from psycopg2.extras import RealDictCursor
 
@@ -53,9 +64,46 @@ rows = cursor.fetchall()
 # Cerrar
 cursor.close()
 conn.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// npm install pg @types/pg
+import { Client } from 'pg';
+
+// ── Conexión básica ──
+const client = new Client({
+    host: 'localhost',
+    port: 5432,
+    database: 'mi_app_test',
+    user: 'test_user',
+    password: 'test_password',
+});
+await client.connect();
+
+// Ejecutar query (retorna objetos por defecto)
+const result = await client.query(
+    'SELECT * FROM employees WHERE department = $1', ['QA']
+);
+const rows = result.rows;
+// [{ id: 1, name: "Juan", department: "QA" }, ...]
+
+// Cerrar
+await client.end();</code></pre>
+        </div>
+        </div>
 
         <h3>🐬 MySQL con mysql-connector</h3>
-        <pre><code class="python"># pip install mysql-connector-python
+        <div class="code-tabs" data-code-id="L078-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># pip install mysql-connector-python
 import mysql.connector
 
 conn = mysql.connector.connect(
@@ -72,9 +120,41 @@ rows = cursor.fetchall()
 
 cursor.close()
 conn.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// npm install mysql2
+import mysql from 'mysql2/promise';
+
+const conn = await mysql.createConnection({
+    host: 'localhost',
+    port: 3306,
+    database: 'mi_app_test',
+    user: 'test_user',
+    password: 'test_password',
+});
+
+// query retorna [rows, fields] — rows ya son objetos
+const [rows] = await conn.execute(
+    'SELECT * FROM products WHERE price > ?', [100000]
+);
+
+await conn.end();</code></pre>
+        </div>
+        </div>
 
         <h3>🪶 SQLite (ideal para tests locales)</h3>
-        <pre><code class="python"># Incluido en Python — no necesita instalación
+        <div class="code-tabs" data-code-id="L078-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Incluido en Python — no necesita instalación
 import sqlite3
 
 conn = sqlite3.connect("test_database.db")
@@ -85,10 +165,36 @@ cursor.execute("SELECT * FROM users WHERE active = ?", (True,))
 rows = [dict(row) for row in cursor.fetchall()]
 
 conn.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// npm install better-sqlite3 @types/better-sqlite3
+import Database from 'better-sqlite3';
+
+const db = new Database('test_database.db');
+
+// better-sqlite3 es síncrono (más rápido para tests)
+const rows = db.prepare('SELECT * FROM users WHERE active = ?')
+    .all(1);  // SQLite: 1 = true
+// [{ id: 1, name: "Juan", active: 1 }, ...]
+
+db.close();</code></pre>
+        </div>
+        </div>
 
         <h3>🔧 SQL Server con pyodbc</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># pip install pyodbc
+            <div class="code-tabs" data-code-id="L078-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># pip install pyodbc
 import pyodbc
 
 # Conexión a SQL Server (muy usado en SIESA)
@@ -107,10 +213,46 @@ rows = [dict(zip(columns, row)) for row in cursor.fetchall()]
 
 cursor.close()
 conn.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// npm install mssql
+import sql from 'mssql';
+
+// Conexión a SQL Server (muy usado en SIESA)
+const pool = await sql.connect({
+    server: 'localhost',
+    port: 1433,
+    database: 'mi_app_test',
+    user: 'sa',
+    password: 'TestPassword123',
+    options: { trustServerCertificate: true },
+});
+
+const result = await pool.request()
+    .input('dept', sql.NVarChar, 'I+D')
+    .query('SELECT * FROM Empleados WHERE Departamento = @dept');
+
+const rows = result.recordset;
+// [{ Id: 1, Nombre: "Juan", Departamento: "I+D" }, ...]
+
+await pool.close();</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>⚙️ Helper de base de datos reutilizable</h3>
-        <pre><code class="python"># utils/db_helper.py
+        <div class="code-tabs" data-code-id="L078-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># utils/db_helper.py
 import psycopg2
 from psycopg2.extras import RealDictCursor
 from contextlib import contextmanager
@@ -177,10 +319,88 @@ class DatabaseHelper:
             params
         )
         return result["total"]</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// utils/db-helper.ts
+import { Pool, type PoolConfig } from 'pg';
+
+export class DatabaseHelper {
+    private pool: Pool;
+
+    constructor(config: PoolConfig) {
+        this.pool = new Pool(config);
+    }
+
+    async query(sql: string, params: unknown[] = []) {
+        const client = await this.pool.connect();
+        try {
+            const result = await client.query(sql, params);
+            return result.rows;
+        } finally {
+            client.release();
+        }
+    }
+
+    async queryOne(sql: string, params: unknown[] = []) {
+        const rows = await this.query(sql, params);
+        return rows[0] ?? null;
+    }
+
+    async execute(sql: string, params: unknown[] = []) {
+        const client = await this.pool.connect();
+        try {
+            const result = await client.query(sql, params);
+            return result.rowCount ?? 0;
+        } finally {
+            client.release();
+        }
+    }
+
+    async insert(table: string, data: Record&lt;string, unknown&gt;) {
+        const keys = Object.keys(data);
+        const cols = keys.join(', ');
+        const placeholders = keys.map((_, i) => '$' + (i + 1)).join(', ');
+        const sql = 'INSERT INTO ' + table +
+            ' (' + cols + ') VALUES (' + placeholders + ') RETURNING id';
+        const row = await this.queryOne(sql, Object.values(data));
+        return row.id;
+    }
+
+    async delete(table: string, condition: string, params: unknown[] = []) {
+        return this.execute(
+            'DELETE FROM ' + table + ' WHERE ' + condition, params
+        );
+    }
+
+    async count(table: string, condition = '1=1', params: unknown[] = []) {
+        const row = await this.queryOne(
+            'SELECT COUNT(*) as total FROM ' + table + ' WHERE ' + condition,
+            params
+        );
+        return Number(row.total);
+    }
+
+    async close() {
+        await this.pool.end();
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>⚙️ Integración con pytest</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># conftest.py
+            <div class="code-tabs" data-code-id="L078-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest
 from utils.db_helper import DatabaseHelper
 
@@ -221,10 +441,69 @@ def test_verificar_datos_en_bd(db, page):
     )
     assert employee is not None
     assert employee["name"] == "Test BD User"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// fixtures.ts
+import { test as base, expect } from '@playwright/test';
+import { DatabaseHelper } from '../utils/db-helper';
+
+const DB_CONFIG = {
+    host: 'localhost',
+    port: 5432,
+    database: 'mi_app_test',
+    user: 'test_user',
+    password: 'test_password',
+};
+
+// Singleton para reusar el pool en toda la sesión
+const db = new DatabaseHelper(DB_CONFIG);
+
+type DbFixtures = { db: DatabaseHelper };
+
+export const test = base.extend&lt;DbFixtures&gt;({
+    db: async ({}, use) => {
+        await use(db);
+        // Cleanup después de cada test
+        await db.execute(
+            'DELETE FROM employees WHERE email LIKE $1',
+            ['%@playwright-test.com']
+        );
+    },
+});
+
+// ── Uso en tests ──
+test('verificar datos en BD', async ({ db, page }) => {
+    // Interactuar por UI
+    await page.goto('https://mi-app.com/employees/new');
+    await page.fill('[name="name"]', 'Test BD User');
+    await page.fill('[name="email"]', 'bd_test@playwright-test.com');
+    await page.click('[data-testid="save"]');
+
+    // Verificar en la base de datos
+    const employee = await db.queryOne(
+        'SELECT * FROM employees WHERE email = $1',
+        ['bd_test@playwright-test.com']
+    );
+    expect(employee).not.toBeNull();
+    expect(employee.name).toBe('Test BD User');
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🔒 Seguridad: Variables de entorno</h3>
-        <pre><code class="python"># NUNCA hardcodear credenciales de BD
+        <div class="code-tabs" data-code-id="L078-7">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># NUNCA hardcodear credenciales de BD
 import os
 
 DB_CONFIG = {
@@ -237,6 +516,24 @@ DB_CONFIG = {
 
 # En CI/CD, configurar como secrets del pipeline
 # En local, usar archivo .env (NO commitear)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// NUNCA hardcodear credenciales de BD
+// npm install dotenv (para cargar .env en local)
+import 'dotenv/config';
+
+const DB_CONFIG = {
+    host:     process.env.DB_HOST ?? 'localhost',
+    port:     Number(process.env.DB_PORT ?? 5432),
+    database: process.env.DB_NAME ?? 'test_db',
+    user:     process.env.DB_USER ?? 'test_user',
+    password: process.env.DB_PASSWORD!, // Requerido
+};
+
+// En CI/CD, configurar como secrets del pipeline
+// En local, usar archivo .env (NO commitear)</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00bcd4;">
             <strong>💡 Tip SIESA:</strong> En SIESA usamos SQL Server para el ERP.

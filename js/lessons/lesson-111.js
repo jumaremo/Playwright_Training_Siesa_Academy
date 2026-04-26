@@ -162,13 +162,42 @@ jobs:
 
         <p>Un <code>requirements.txt</code> tipico para un proyecto de Playwright con Python:</p>
 
-        <pre><code class="python"># requirements.txt
+        <div class="code-tabs" data-code-id="L111-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># requirements.txt
 playwright==1.49.1
 pytest==8.3.4
 pytest-playwright==0.5.2
 pytest-html==4.1.1
 pytest-xdist==3.5.0        # Ejecucion paralela
 python-dotenv==1.0.1        # Variables de entorno</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// package.json (dependencias equivalentes)
+{
+  "devDependencies": {
+    "@playwright/test": "^1.49.1",
+    "dotenv": "^16.4.5"
+  },
+  "scripts": {
+    "test": "npx playwright test",
+    "test:headed": "npx playwright test --headed",
+    "test:report": "npx playwright show-report"
+  }
+}
+// Nota: @playwright/test ya incluye runner, reporters HTML/JUnit,
+// y ejecucion paralela integrada (no necesita paquetes separados)</code></pre>
+        </div>
+        </div>
 
         <h3>Instalar browsers de Playwright en CI</h3>
         <p>Playwright necesita descargar binarios de browsers. En CI, es recomendable instalar
@@ -221,7 +250,7 @@ python-dotenv==1.0.1        # Variables de entorno</code></pre>
         id: playwright-cache
         with:
           path: ~/.cache/ms-playwright
-          key: playwright-browsers-${{ steps.playwright-version.outputs.version }}-${{ runner.os }}
+          key: playwright-browsers-\${{ steps.playwright-version.outputs.version }}-\${{ runner.os }}
 
       - name: Instalar dependencias
         run: |
@@ -291,7 +320,18 @@ python-dotenv==1.0.1        # Variables de entorno</code></pre>
         <p>Tambien puedes centralizar la configuracion CI en un archivo <code>conftest.py</code>
         que detecte automaticamente el entorno:</p>
 
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L111-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># conftest.py
 import os
 import pytest
 
@@ -325,6 +365,49 @@ def browser_type_launch_args(browser_type_launch_args):
             ]
         }
     return browser_type_launch_args</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
+
+// Detectar si estamos en un entorno de CI
+const isCI = !!process.env.CI || !!process.env.GITHUB_ACTIONS;
+
+export default defineConfig({
+  testDir: './tests',
+  fullyParallel: true,
+  forbidOnly: isCI,
+  retries: isCI ? 2 : 0,
+  workers: isCI ? 1 : undefined,
+
+  use: {
+    // Configuracion del contexto del browser para CI
+    viewport: { width: 1280, height: 720 },
+    ignoreHTTPSErrors: isCI,
+    locale: 'es-CO',
+    timezoneId: 'America/Bogota',
+
+    // Args de lanzamiento del browser para CI
+    launchOptions: isCI
+      ? {
+          args: [
+            '--disable-gpu',
+            '--no-sandbox',
+            '--disable-dev-shm-usage',
+          ],
+        }
+      : {},
+  },
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+});</code></pre>
+        </div>
+        </div>
 
         <h3>Subir artefactos: screenshots, videos, traces y reportes</h3>
         <p>Una de las ventajas clave de GitHub Actions es poder subir <strong>artefactos</strong> que
@@ -513,7 +596,18 @@ on:
 
         <p>En tu codigo Python, accedes a los secrets como variables de entorno normales:</p>
 
-        <pre><code class="python"># tests/conftest.py
+        <div class="code-tabs" data-code-id="L111-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># tests/conftest.py
 import os
 import pytest
 from playwright.sync_api import Page
@@ -532,6 +626,43 @@ def authenticated_page(page: Page):
     page.wait_for_url(f"{base_url}/dashboard")
 
     yield page</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// tests/auth.setup.ts
+import { test as setup, expect } from '@playwright/test';
+
+const BASE_URL = process.env.TEST_BASE_URL || 'http://localhost:3000';
+const USERNAME = process.env.TEST_USERNAME || 'test_user';
+const PASSWORD = process.env.TEST_PASSWORD || 'test_pass';
+
+// Fixture personalizada que realiza login usando credenciales de CI
+setup('authenticate', async ({ page }) => {
+  await page.goto(\`\${BASE_URL}/login\`);
+  await page.fill('#username', USERNAME);
+  await page.fill('#password', PASSWORD);
+  await page.click('button[type="submit"]');
+  await page.waitForURL(\`\${BASE_URL}/dashboard\`);
+
+  // Guardar el estado de autenticacion para reutilizar en otros tests
+  await page.context().storageState({
+    path: './playwright/.auth/user.json',
+  });
+});
+
+// En playwright.config.ts, agregar el proyecto de setup:
+// projects: [
+//   { name: 'setup', testMatch: /.*\\.setup\\.ts/ },
+//   {
+//     name: 'chromium',
+//     dependencies: ['setup'],
+//     use: {
+//       ...devices['Desktop Chrome'],
+//       storageState: './playwright/.auth/user.json',
+//     },
+//   },
+// ]</code></pre>
+        </div>
+        </div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Seguridad con secrets</h4>

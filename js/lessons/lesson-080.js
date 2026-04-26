@@ -27,7 +27,18 @@ const LESSON_080 = {
         </div>
 
         <h3>🏗️ Setup con fixtures de pytest (yield)</h3>
-        <pre><code class="python"># conftest.py — Setup + Cleanup con yield
+        <div class="code-tabs" data-code-id="L080-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># conftest.py — Setup + Cleanup con yield
 
 @pytest.fixture
 def test_user(db):
@@ -77,10 +88,95 @@ def test_usuario_puede_comprar(page, test_user, test_products):
     page.goto("https://mi-app.com/login")
     page.fill("#email", test_user["email"])
     # ... el test usa los datos creados por las fixtures</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// fixtures.ts — Setup + Cleanup con beforeEach/afterEach
+import { test as base, expect } from '@playwright/test';
+import { DbHelper } from './db-helper';
+
+// Definir fixtures personalizadas
+type TestFixtures = {
+    testUser: Record&lt;string, any&gt;;
+    testProducts: Record&lt;string, any&gt;[];
+    db: DbHelper;
+};
+
+const test = base.extend&lt;TestFixtures&gt;({
+    db: async ({}, use) => {
+        const db = new DbHelper();
+        await use(db);
+        await db.close();
+    },
+
+    testUser: async ({ db }, use) => {
+        // Crear usuario de prueba
+        const userId = await db.insert('users', {
+            name: 'Test User',
+            email: 'fixture@playwright-test.com',
+            role: 'user',
+            active: true,
+        });
+
+        const user = await db.queryOne(
+            'SELECT * FROM users WHERE id = $1', [userId]
+        );
+        await use(user); // ← El test recibe el usuario
+
+        // CLEANUP — se ejecuta SIEMPRE (incluso si el test falla)
+        await db.delete('users', 'id = $1', [userId]);
+    },
+
+    testProducts: async ({ db }, use) => {
+        // Crear 3 productos de prueba
+        const productIds: number[] = [];
+        for (let i = 0; i &lt; 3; i++) {
+            const pid = await db.insert('products', {
+                name: \`Test Product \${i + 1}\`,
+                price: (i + 1) * 10000,
+                stock: 10,
+                category: 'Testing',
+            });
+            productIds.push(pid);
+        }
+
+        const products = await db.query(
+            'SELECT * FROM products WHERE id = ANY($1)',
+            [productIds]
+        );
+        await use(products);
+
+        // Cleanup
+        for (const pid of productIds) {
+            await db.delete('products', 'id = $1', [pid]);
+        }
+    },
+});
+
+// Uso en test:
+test('usuario puede comprar', async ({ page, testUser, testProducts }) => {
+    // La fixture provee usuario y productos ya creados
+    // Login con el usuario de prueba
+    await page.goto('https://mi-app.com/login');
+    await page.fill('#email', testUser.email);
+    // ... el test usa los datos creados por las fixtures
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🔃 Transacciones con rollback (patrón más limpio)</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># El patrón más limpio: ejecutar cada test dentro de una
+            <div class="code-tabs" data-code-id="L080-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># El patrón más limpio: ejecutar cada test dentro de una
 # transacción y hacer ROLLBACK al final
 
 @pytest.fixture(autouse=True)
@@ -97,10 +193,50 @@ def db_transaction(db_connection):
 # Ventaja: no necesitas cleanup manual
 # Desventaja: no funciona si el test necesita que la app lea los datos
 # (la app tiene su propia conexión que no ve datos no commiteados)</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// El patrón más limpio: ejecutar cada test dentro de una
+// transacción y hacer ROLLBACK al final
+import { test as base } from '@playwright/test';
+import { Pool, PoolClient } from 'pg';
+
+const test = base.extend&lt;{ dbTransaction: PoolClient }&gt;({
+    dbTransaction: [async ({}, use) => {
+        const pool = new Pool({ connectionString: process.env.DB_URL });
+        const client = await pool.connect();
+
+        // Iniciar transacción
+        await client.query('BEGIN');
+
+        await use(client);
+
+        // Rollback — deshace TODO lo que hizo el test
+        await client.query('ROLLBACK');
+        client.release();
+        await pool.end();
+    }, { auto: true }],
+});
+
+// Ventaja: no necesitas cleanup manual
+// Desventaja: no funciona si el test necesita que la app lea los datos
+// (la app tiene su propia conexión que no ve datos no commiteados)</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🏭 Data Seeder — Poblar con datos base</h3>
-        <pre><code class="python"># utils/data_seeder.py
+        <div class="code-tabs" data-code-id="L080-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># utils/data_seeder.py
 
 class DataSeeder:
     """Poblar la base de datos con datos base para testing."""
@@ -188,6 +324,113 @@ def clean_after_test(db):
     """Limpiar datos de test después de cada test."""
     yield
     DataSeeder(db).clean_test_data()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// utils/data-seeder.ts
+import { Pool } from 'pg';
+
+export class DataSeeder {
+    /** Poblar la base de datos con datos base para testing. */
+    constructor(private pool: Pool) {}
+
+    async seedDepartments(): Promise&lt;void&gt; {
+        /** Insertar departamentos si no existen. */
+        const departments = ['I+D', 'QA', 'Comercial', 'RRHH', 'Contabilidad'];
+        for (const dept of departments) {
+            await this.pool.query(
+                'INSERT INTO departments (name) VALUES ($1) ' +
+                'ON CONFLICT (name) DO NOTHING',
+                [dept]
+            );
+        }
+    }
+
+    async seedRoles(): Promise&lt;void&gt; {
+        /** Insertar roles base. */
+        const roles = [
+            { code: 'admin', name: 'Administrador' },
+            { code: 'editor', name: 'Editor' },
+            { code: 'viewer', name: 'Solo lectura' },
+        ];
+        for (const { code, name } of roles) {
+            await this.pool.query(
+                'INSERT INTO roles (code, name) VALUES ($1, $2) ' +
+                'ON CONFLICT (code) DO NOTHING',
+                [code, name]
+            );
+        }
+    }
+
+    async seedTestUsers(): Promise&lt;void&gt; {
+        /** Insertar usuarios de prueba estándar. */
+        const users = [
+            { name: 'Admin Test', email: 'admin@test.com',
+              role: 'admin', active: true },
+            { name: 'Editor Test', email: 'editor@test.com',
+              role: 'editor', active: true },
+            { name: 'Viewer Test', email: 'viewer@test.com',
+              role: 'viewer', active: true },
+        ];
+        for (const user of users) {
+            await this.pool.query(
+                'INSERT INTO users (name, email, role, active) ' +
+                'VALUES ($1, $2, $3, $4) ' +
+                'ON CONFLICT (email) DO NOTHING',
+                [user.name, user.email, user.role, user.active]
+            );
+        }
+    }
+
+    async seedAll(): Promise&lt;void&gt; {
+        /** Ejecutar todos los seeds. */
+        await this.seedDepartments();
+        await this.seedRoles();
+        await this.seedTestUsers();
+    }
+
+    async cleanTestData(): Promise&lt;void&gt; {
+        /** Eliminar solo datos de prueba (no seeds base). */
+        await this.pool.query(
+            'DELETE FROM users WHERE email LIKE $1',
+            ['%@playwright-test.com']
+        );
+        await this.pool.query(
+            'DELETE FROM products WHERE category = $1',
+            ['Testing']
+        );
+        await this.pool.query(
+            'DELETE FROM orders WHERE id IN (' +
+            '  SELECT o.id FROM orders o ' +
+            '  JOIN users u ON o.user_id = u.id ' +
+            '  WHERE u.email LIKE $1' +
+            ')',
+            ['%@playwright-test.com']
+        );
+    }
+}
+
+// ── Fixtures (global-setup.ts / fixtures.ts) ──
+import { test as base } from '@playwright/test';
+
+// BD con datos base (una vez por worker)
+const test = base.extend&lt;{ seededDb: Pool }&gt;({
+    seededDb: [async ({}, use) => {
+        const pool = new Pool({ connectionString: process.env.DB_URL });
+        const seeder = new DataSeeder(pool);
+        await seeder.seedAll();
+        await use(pool);
+        await pool.end();
+    }, { scope: 'worker' }],
+});
+
+// Limpiar datos de test después de cada test
+test.afterEach(async () => {
+    const pool = new Pool({ connectionString: process.env.DB_URL });
+    await new DataSeeder(pool).cleanTestData();
+    await pool.end();
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📋 Estrategias de cleanup comparadas</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -230,7 +473,18 @@ def clean_after_test(db):
         </div>
 
         <h3>🧪 Ejemplo: Test con setup completo por BD</h3>
-        <pre><code class="python">def test_empleado_aparece_en_departamento(db, page):
+        <div class="code-tabs" data-code-id="L080-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">def test_empleado_aparece_en_departamento(db, page):
     """Setup por BD, verificar en UI."""
     # SETUP: crear departamento y empleados directamente en BD
     dept_id = db.insert("departments", {"name": "QA Testing"})
@@ -251,6 +505,32 @@ def clean_after_test(db):
     expect(page.locator(".employee-row").first).to_contain_text("Carlos")
 
     # CLEANUP se hace automáticamente por clean_after_test fixture</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">test('empleado aparece en departamento', async ({ db, page }) => {
+    // Setup por BD, verificar en UI
+    // SETUP: crear departamento y empleados directamente en BD
+    const deptId = await db.insert('departments', { name: 'QA Testing' });
+    const emp1Id = await db.insert('employees', {
+        name: 'Carlos Díaz', department_id: deptId,
+        email: 'carlos@playwright-test.com',
+        position: 'QA Engineer', status: 'active',
+    });
+    const emp2Id = await db.insert('employees', {
+        name: 'José Bravo', department_id: deptId,
+        email: 'jose@playwright-test.com',
+        position: 'QA Engineer', status: 'active',
+    });
+
+    // TEST: verificar en la UI
+    await page.goto(\`https://mi-app.com/departments/\${deptId}\`);
+    await expect(page.locator('.employee-row')).toHaveCount(2);
+    await expect(page.locator('.employee-row').first()).toContainText('Carlos');
+
+    // CLEANUP se hace automáticamente por afterEach hook
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00bcd4;">
             <strong>💡 Tip:</strong> La estrategia más práctica es usar un

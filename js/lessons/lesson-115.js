@@ -388,7 +388,18 @@ variables:
 
         <p>En Python, accedes a las variables del pipeline como variables de entorno normales:</p>
 
-        <pre><code class="python"># conftest.py - Leer variables de Azure DevOps
+        <div class="code-tabs" data-code-id="L115-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Leer variables de Azure DevOps
 import os
 import pytest
 from playwright.sync_api import sync_playwright
@@ -423,6 +434,37 @@ def browser_context(base_url, credentials):
         )
         yield context
         browser.close()</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Leer variables de Azure DevOps
+import { defineConfig, devices } from '@playwright/test';
+
+// URL base del ambiente bajo prueba, desde variable de pipeline
+const baseURL = process.env.BASE_URL || 'http://localhost:8080';
+console.log(\`Ambiente de pruebas: \${baseURL}\`);
+
+export default defineConfig({
+  use: {
+    baseURL,
+    viewport: { width: 1920, height: 1080 },
+    locale: 'es-CO',
+    headless: true,
+  },
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+});
+
+// helpers/credentials.ts - Credenciales desde variables secretas del pipeline
+export const credentials = {
+  user: process.env.TEST_USER || 'test_default',
+  password: process.env.TEST_PASSWORD || 'default_pass',
+};</code></pre>
+</div>
+</div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Tip SIESA</h4>
@@ -452,7 +494,18 @@ def browser_context(base_url, credentials):
 
         <p>Para generar el JUnit XML correctamente con pytest:</p>
 
-        <pre><code class="python"># pytest.ini - Configuracion para generar JUnit compatible con Azure DevOps
+        <div class="code-tabs" data-code-id="L115-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># pytest.ini - Configuracion para generar JUnit compatible con Azure DevOps
 [pytest]
 addopts =
     --junitxml=test-results/results.xml
@@ -465,6 +518,26 @@ junit_logging = all
 # Los nombres de test se muestran en Azure DevOps como:
 # tests/test_login.py::TestLogin::test_valid_credentials
 # tests/test_search.py::TestSearch::test_search_product</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Configuracion para generar JUnit compatible con Azure DevOps
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  // Reporter JUnit para Azure DevOps
+  reporter: [
+    ['junit', {
+      outputFile: 'test-results/results.xml',
+      // Los nombres de test se muestran en Azure DevOps como:
+      // tests/login.spec.ts > TestLogin > login con credenciales validas
+      // tests/search.spec.ts > TestSearch > buscar producto
+    }],
+    ['html', { outputFolder: 'test-results/html-report' }],
+    ['list'],  // Reporter de consola para ver progreso
+  ],
+});</code></pre>
+</div>
+</div>
 
         <h3>Publicacion de artefactos</h3>
         <p>Azure DevOps ofrece dos tareas para publicar artefactos. La version moderna
@@ -492,7 +565,18 @@ junit_logging = all
 
         <p>Para que los artefactos incluyan screenshots y traces de Playwright:</p>
 
-        <pre><code class="python"># conftest.py - Capturar screenshots y traces en fallos
+        <div class="code-tabs" data-code-id="L115-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Capturar screenshots y traces en fallos
 import pytest
 import os
 from pathlib import Path
@@ -528,6 +612,36 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Capturar screenshots y traces en fallos
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  // Directorio de resultados
+  outputDir: 'test-results',
+
+  use: {
+    // Capturar screenshot solo cuando un test falla
+    screenshot: 'only-on-failure',
+
+    // Capturar trace solo cuando un test falla (retiene screenshots + snapshots)
+    trace: 'retain-on-failure',
+
+    // Capturar video solo cuando un test falla
+    video: 'retain-on-failure',
+  },
+});
+
+// NOTA: En Playwright Test (TypeScript), la captura de screenshots
+// y traces en fallos es AUTOMATICA con la configuracion anterior.
+// No se necesitan hooks manuales como en pytest.
+// Los artefactos se guardan en test-results/ automaticamente.
+//
+// Para ver un trace capturado:
+//   npx playwright show-trace test-results/test-name/trace.zip</code></pre>
+</div>
+</div>
 
         <h3>Azure DevOps Test Plans</h3>
         <p>Si tu organizacion usa <strong>Azure Test Plans</strong> para gestionar los casos de prueba,
@@ -546,7 +660,18 @@ def pytest_runtest_makereport(item, call):
             </ol>
         </div>
 
-        <pre><code class="python"># tests/test_login.py - Tests vinculados a Azure Test Plans
+        <div class="code-tabs" data-code-id="L115-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># tests/test_login.py - Tests vinculados a Azure Test Plans
 import pytest
 from playwright.sync_api import Page, expect
 
@@ -576,6 +701,43 @@ class TestLogin:
         error = page.locator(".error-message")
         expect(error).to_be_visible()
         expect(error).to_contain_text("Credenciales incorrectas")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// tests/login.spec.ts - Tests vinculados a Azure Test Plans
+import { test, expect } from '@playwright/test';
+
+// Credenciales desde variables de entorno (pipeline)
+const credentials = {
+  user: process.env.TEST_USER || 'test_default',
+  password: process.env.TEST_PASSWORD || 'default_pass',
+};
+
+// Suite de login vinculada a Test Suite #1234 en Azure Test Plans
+test.describe('TestLogin', () => {
+
+  test('TC-5678: Verificar login con credenciales validas', async ({ page, baseURL }) => {
+    await page.goto('/login');
+    await page.fill('#username', credentials.user);
+    await page.fill('#password', credentials.password);
+    await page.click("button[type='submit']");
+
+    await expect(page.locator('.dashboard-header')).toBeVisible();
+    await expect(page).toHaveURL(\`\${baseURL}/dashboard\`);
+  });
+
+  test('TC-5679: Verificar mensaje de error con credenciales incorrectas', async ({ page }) => {
+    await page.goto('/login');
+    await page.fill('#username', 'usuario_invalido');
+    await page.fill('#password', 'clave_incorrecta');
+    await page.click("button[type='submit']");
+
+    const error = page.locator('.error-message');
+    await expect(error).toBeVisible();
+    await expect(error).toContainText('Credenciales incorrectas');
+  });
+});</code></pre>
+</div>
+</div>
 
         <h3>Pipeline triggers: validacion de PR, programados y manuales</h3>
         <p>Azure Pipelines soporta multiples tipos de triggers para ejecutar tus tests
@@ -776,7 +938,7 @@ stages:
   - stage: DeployProd
     displayName: 'Deploy a Produccion'
     dependsOn: TestStaging
-    condition: and(succeeded(), eq('${{ parameters.deployToProd }}', 'true'))
+    condition: and(succeeded(), eq('\${{ parameters.deployToProd }}', 'true'))
     jobs:
       - deployment: DeployProduction
         environment: 'Production'  # Requiere aprobacion manual en Azure DevOps
@@ -843,7 +1005,7 @@ steps:
     inputs:
       testResultsFormat: 'JUnit'
       testResultsFiles: '**/results.xml'
-      testRunTitle: '${{ parameters.testRunTitle }} - $(Build.BuildNumber)'
+      testRunTitle: '\${{ parameters.testRunTitle }} - $(Build.BuildNumber)'
       mergeTestResults: true
     condition: always()
     displayName: 'Publicar resultados de tests'
@@ -851,7 +1013,7 @@ steps:
   - task: PublishPipelineArtifact@1
     inputs:
       targetPath: 'test-results'
-      artifact: 'reports-${{ parameters.testRunTitle }}'
+      artifact: 'reports-\${{ parameters.testRunTitle }}'
       publishLocation: 'pipeline'
     condition: always()
     displayName: 'Publicar artefactos'</code></pre>
@@ -859,7 +1021,18 @@ steps:
         <h3>Ejemplo completo: pipeline de produccion</h3>
         <p>Este es un pipeline listo para produccion que combina todas las tecnicas anteriores:</p>
 
-        <pre><code class="python"># conftest.py completo para Azure DevOps
+        <div class="code-tabs" data-code-id="L115-5">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py completo para Azure DevOps
 import os
 import pytest
 from pathlib import Path
@@ -956,6 +1129,82 @@ def pytest_runtest_makereport(item, call):
     outcome = yield
     rep = outcome.get_result()
     setattr(item, f"rep_{rep.when}", rep)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Configuracion completa para Azure DevOps
+import { defineConfig, devices } from '@playwright/test';
+
+// Detectar si estamos en Azure DevOps CI
+const isCI = process.env.TF_BUILD?.toLowerCase() === 'true';
+
+// Directorio de resultados
+const resultsDir = process.env.TEST_RESULTS_DIR || 'test-results';
+
+export default defineConfig({
+  testDir: './tests',
+  outputDir: resultsDir,
+
+  // Reintentar tests fallidos en CI
+  retries: isCI ? 1 : 0,
+
+  // Workers paralelos (1 en CI para estabilidad)
+  workers: isCI ? 1 : undefined,
+
+  // Reporters: JUnit para Azure DevOps + HTML para artefactos
+  reporter: [
+    ['junit', { outputFile: \`\${resultsDir}/results.xml\` }],
+    ['html', { outputFolder: \`\${resultsDir}/html-report\`, open: 'never' }],
+    ['list'],
+  ],
+
+  use: {
+    baseURL: process.env.BASE_URL || 'http://localhost:8080',
+    viewport: { width: 1920, height: 1080 },
+    locale: 'es-CO',
+    timezoneId: 'America/Bogota',
+
+    // Headless en CI, con UI en local
+    headless: isCI,
+
+    // Capturar screenshot solo en fallo
+    screenshot: 'only-on-failure',
+
+    // Capturar trace solo en fallo (incluye screenshots + snapshots + sources)
+    trace: 'retain-on-failure',
+
+    // Video solo en fallo
+    video: 'retain-on-failure',
+  },
+
+  projects: [
+    {
+      name: 'chromium',
+      use: { ...devices['Desktop Chrome'] },
+    },
+  ],
+});
+
+// -----------------------------------------------
+// tests/login.spec.ts - Ejemplo de test con tags
+// -----------------------------------------------
+// import { test, expect } from '@playwright/test';
+//
+// // Tags equivalentes a pytest markers
+// test('TC-5678: login valido @smoke @regression', async ({ page }) => {
+//   await page.goto('/login');
+//   // ...
+// });
+//
+// test('TC-5679: login invalido @regression @e2e', async ({ page }) => {
+//   await page.goto('/login');
+//   // ...
+// });
+//
+// Ejecutar por tag:
+//   npx playwright test --grep @smoke
+//   npx playwright test --grep @regression</code></pre>
+</div>
+</div>
 
         <h3>Ejercicio practico</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -1023,7 +1272,7 @@ stages:
     displayName: 'Ejecutar Playwright Tests'
     jobs:
       - job: RunTests
-        displayName: 'Tests en ${{ parameters.environment }} con ${{ parameters.browser }}'
+        displayName: 'Tests en \${{ parameters.environment }} con \${{ parameters.browser }}'
         steps:
           - task: UsePythonVersion@0
             inputs:
@@ -1033,15 +1282,15 @@ stages:
           - script: |
               python -m pip install --upgrade pip
               pip install -r requirements.txt
-              playwright install --with-deps ${{ parameters.browser }}
-            displayName: 'Instalar dependencias y ${{ parameters.browser }}'
+              playwright install --with-deps \${{ parameters.browser }}
+            displayName: 'Instalar dependencias y \${{ parameters.browser }}'
 
           - script: |
               pytest tests/ \\
                 --junitxml=test-results/results.xml \\
                 --html=test-results/report.html \\
                 --self-contained-html \\
-                --browser ${{ parameters.browser }} \\
+                --browser \${{ parameters.browser }} \\
                 -v --tb=short
             displayName: 'Ejecutar tests de Playwright'
             continueOnError: true
@@ -1054,7 +1303,7 @@ stages:
             inputs:
               testResultsFormat: 'JUnit'
               testResultsFiles: 'test-results/results.xml'
-              testRunTitle: 'Playwright (${{ parameters.browser }}) - ${{ parameters.environment }} - $(Build.BuildNumber)'
+              testRunTitle: 'Playwright (\${{ parameters.browser }}) - \${{ parameters.environment }} - $(Build.BuildNumber)'
               mergeTestResults: true
               failTaskOnFailedTests: true
             condition: always()
@@ -1063,7 +1312,7 @@ stages:
           - task: PublishPipelineArtifact@1
             inputs:
               targetPath: 'test-results'
-              artifact: 'playwright-reports-${{ parameters.environment }}-${{ parameters.browser }}'
+              artifact: 'playwright-reports-\${{ parameters.environment }}-\${{ parameters.browser }}'
               publishLocation: 'pipeline'
             condition: always()
             displayName: 'Publicar artefactos de testing'</code></pre>

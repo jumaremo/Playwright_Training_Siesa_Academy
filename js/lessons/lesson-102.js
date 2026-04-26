@@ -76,7 +76,18 @@ const LESSON_102 = {
         <p>Una auditoría de página completa ejecuta <strong>todas las reglas de axe-core</strong>
         contra el DOM completo, capturando cada violación con su contexto y posible solución.</p>
 
-        <pre><code class="python"># test_full_page_audit.py
+        <div class="code-tabs" data-code-id="L102-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_full_page_audit.py
 """
 Auditoría completa de accesibilidad de una página.
 Ejecuta todas las reglas axe-core y genera un reporte detallado.
@@ -150,12 +161,101 @@ def test_pagina_principal_accesible(page: Page):
     assert len(critical) == 0, (
         f"Se encontraron {len(critical)} violaciones críticas/serias de accesibilidad"
     )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_full_page_audit.ts
+/**
+ * Auditoría completa de accesibilidad de una página.
+ * Ejecuta todas las reglas axe-core y genera un reporte detallado.
+ */
+import { test, expect, Page } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+// Inyectar axe-core desde CDN o archivo local
+const AXE_SCRIPT_URL = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js';
+
+async function injectAxe(page: Page): Promise<void> {
+    /** Inyecta axe-core en la página si no está presente. */
+    const isLoaded = await page.evaluate(() => typeof (window as any).axe !== 'undefined');
+    if (!isLoaded) {
+        await page.addScriptTag({ url: AXE_SCRIPT_URL });
+        await page.waitForFunction(() => typeof (window as any).axe !== 'undefined');
+    }
+}
+
+async function runFullAudit(page: Page): Promise<Record<string, any>> {
+    /** Ejecuta auditoría completa y retorna resultados. */
+    await injectAxe(page);
+    const results = await page.evaluate(async () => {
+        const res = await (window as any).axe.run(document, {
+            runOnly: {
+                type: 'tag',
+                values: ['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa', 'best-practice']
+            },
+            resultTypes: ['violations', 'incomplete', 'passes']
+        });
+        return {
+            violations: res.violations,
+            incomplete: res.incomplete,
+            passes: res.passes.length,
+            url: res.url,
+            timestamp: res.timestamp
+        };
+    });
+    return results;
+}
+
+test('página principal accesible', async ({ page }) => {
+    /** Auditoría completa de la página principal. */
+    await page.goto('https://mi-app.example.com/');
+    await page.waitForLoadState('networkidle');
+
+    const results = await runFullAudit(page);
+
+    // Resumen de resultados
+    console.log(\`\\n\${'='.repeat(60)}\`);
+    console.log(\`AUDITORÍA DE ACCESIBILIDAD — \${results.url}\`);
+    console.log('='.repeat(60));
+    console.log(\`Reglas aprobadas: \${results.passes}\`);
+    console.log(\`Violaciones: \${results.violations.length}\`);
+    console.log(\`Incompletas (requieren revisión manual): \${results.incomplete.length}\`);
+
+    // Detalle de violaciones
+    for (const violation of results.violations) {
+        console.log(\`\\n🔴 [\${violation.impact}] \${violation.id}\`);
+        console.log(\`   Descripción: \${violation.description}\`);
+        console.log(\`   Ayuda: \${violation.helpUrl}\`);
+        console.log(\`   Elementos afectados: \${violation.nodes.length}\`);
+        for (const node of violation.nodes.slice(0, 3)) { // Mostrar máximo 3
+            console.log(\`   - \${node.html.substring(0, 100)}\`);
+        }
+    }
+
+    // Fallo si hay violaciones críticas o serias
+    const critical = results.violations.filter(
+        (v: any) => ['critical', 'serious'].includes(v.impact)
+    );
+    expect(critical).toHaveLength(0);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🗺️ Auditoría de múltiples páginas (sitemap crawling)</h3>
         <p>Para auditar un sitio completo, recorremos un listado de URLs (extraído de un sitemap
         o definido manualmente) y ejecutamos la auditoría en cada una.</p>
 
-        <pre><code class="python"># test_sitemap_audit.py
+        <div class="code-tabs" data-code-id="L102-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_sitemap_audit.py
 """
 Auditoría de accesibilidad de múltiples páginas.
 Recorre una lista de URLs y genera un reporte consolidado.
@@ -250,13 +350,129 @@ def audit_multiple_pages():
         print(f"Reporte guardado en: {report_path}")
 
         assert total_violations == 0, f"Se encontraron {total_violations} violaciones totales"</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_sitemap_audit.ts
+/**
+ * Auditoría de accesibilidad de múltiples páginas.
+ * Recorre una lista de URLs y genera un reporte consolidado.
+ */
+import { chromium, Page } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+import { XMLParser } from 'fast-xml-parser';
+
+async function getUrlsFromSitemap(page: Page, sitemapUrl: string): Promise<string[]> {
+    /** Extrae URLs de un sitemap.xml. */
+    const response = await page.request.get(sitemapUrl);
+    const text = await response.text();
+    const parser = new XMLParser();
+    const parsed = parser.parse(text);
+    const urls: string[] = parsed.urlset.url.map((u: any) => u.loc);
+    return urls;
+}
+
+function getUrlsManual(): string[] {
+    /** Lista manual de URLs a auditar. */
+    const base = 'https://mi-app.example.com';
+    return [
+        \`\${base}/\`,
+        \`\${base}/login\`,
+        \`\${base}/registro\`,
+        \`\${base}/productos\`,
+        \`\${base}/producto/1\`,
+        \`\${base}/carrito\`,
+        \`\${base}/checkout\`,
+        \`\${base}/perfil\`,
+        \`\${base}/contacto\`,
+        \`\${base}/ayuda\`,
+    ];
+}
+
+async function auditMultiplePages(): Promise<void> {
+    /** Audita todas las páginas y genera reporte consolidado. */
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+
+    const urls = getUrlsManual();
+    const allResults: any[] = [];
+    let totalViolations = 0;
+
+    for (const url of urls) {
+        console.log(\`\\nAuditando: \${url}\`);
+        try {
+            await page.goto(url, { timeout: 15000 });
+            await page.waitForLoadState('networkidle');
+
+            const results = await runFullAudit(page);
+            const violationCount = results.violations.length;
+            totalViolations += violationCount;
+
+            allResults.push({
+                url,
+                violations: results.violations,
+                incomplete: results.incomplete,
+                passes: results.passes,
+                status: 'audited'
+            });
+
+            const status = violationCount === 0
+                ? '✅'
+                : \`🔴 \${violationCount} violaciones\`;
+            console.log(\`  \${status}\`);
+
+        } catch (e) {
+            allResults.push({
+                url,
+                status: 'error',
+                error: String(e)
+            });
+            console.log(\`  ⚠️ Error: \${e}\`);
+        }
+    }
+
+    // Guardar reporte consolidado
+    const report = {
+        timestamp: new Date().toISOString(),
+        total_pages: urls.length,
+        total_violations: totalViolations,
+        pages: allResults
+    };
+
+    const reportDir = 'a11y-reports';
+    fs.mkdirSync(reportDir, { recursive: true });
+    const reportPath = path.join(reportDir, 'sitemap-audit.json');
+    fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+
+    await browser.close();
+    console.log(\`\\n\${'='.repeat(60)}\`);
+    console.log(\`RESUMEN: \${totalViolations} violaciones en \${urls.length} páginas\`);
+    console.log(\`Reporte guardado en: \${reportPath}\`);
+
+    if (totalViolations > 0) {
+        throw new Error(\`Se encontraron \${totalViolations} violaciones totales\`);
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>🏗️ Clase AccessibilityAuditor reutilizable</h3>
         <p>Encapsulamos toda la lógica de auditoría en una clase helper que puede reutilizarse
         en cualquier test suite. Esta clase maneja la inyección de axe-core, configuración
         de reglas, ejecución de auditorías y generación de reportes.</p>
 
-        <pre><code class="python"># helpers/accessibility_auditor.py
+        <div class="code-tabs" data-code-id="L102-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># helpers/accessibility_auditor.py
 """
 AccessibilityAuditor — Clase helper para auditorías de accesibilidad.
 Encapsula axe-core injection, configuración de reglas y reportes.
@@ -443,13 +659,250 @@ class AccessibilityAuditor:
         self._include = []
         self._exclude = []
         return self</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// helpers/accessibility-auditor.ts
+/**
+ * AccessibilityAuditor — Clase helper para auditorías de accesibilidad.
+ * Encapsula axe-core injection, configuración de reglas y reportes.
+ */
+import { Page } from '@playwright/test';
+
+interface A11yViolation {
+    ruleId: string;
+    impact: string; // 'critical' | 'serious' | 'moderate' | 'minor'
+    description: string;
+    helpUrl: string;
+    affectedNodes: string[];
+    wcagTags: string[];
+    readonly isCritical: boolean;
+}
+
+interface A11yAuditResult {
+    url: string;
+    timestamp: string;
+    violations: A11yViolation[];
+    incomplete: any[];
+    passesCount: number;
+    readonly criticalCount: number;
+    readonly totalViolations: number;
+    readonly isPassing: boolean;
+}
+
+function createViolation(data: Partial<A11yViolation>): A11yViolation {
+    return {
+        ruleId: data.ruleId ?? '',
+        impact: data.impact ?? '',
+        description: data.description ?? '',
+        helpUrl: data.helpUrl ?? '',
+        affectedNodes: data.affectedNodes ?? [],
+        wcagTags: data.wcagTags ?? [],
+        get isCritical() {
+            return ['critical', 'serious'].includes(this.impact);
+        }
+    };
+}
+
+function createAuditResult(data: Omit<A11yAuditResult,
+    'criticalCount' | 'totalViolations' | 'isPassing'>): A11yAuditResult {
+    return {
+        ...data,
+        get criticalCount() {
+            return this.violations.filter(v => v.isCritical).length;
+        },
+        get totalViolations() {
+            return this.violations.length;
+        },
+        get isPassing() {
+            return this.criticalCount === 0;
+        }
+    };
+}
+
+class AccessibilityAuditor {
+    /**
+     * Auditor de accesibilidad basado en axe-core.
+     *
+     * Uso básico:
+     *   const auditor = new AccessibilityAuditor(page);
+     *   const result = await auditor.audit();
+     *   expect(result.isPassing).toBeTruthy();
+     *
+     * Uso avanzado:
+     *   const auditor = new AccessibilityAuditor(page);
+     *   auditor.disableRules(['color-contrast', 'region']);
+     *   auditor.onlyTags(['wcag2a', 'wcag2aa']);
+     *   auditor.includeSelector('#main-content');
+     *   auditor.excludeSelector('.ads-banner');
+     *   const result = await auditor.audit();
+     */
+
+    static AXE_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/axe-core/4.9.1/axe.min.js';
+
+    private page: Page;
+    private _disabledRules: string[] = [];
+    private _onlyTags: string[] | null = null;
+    private _include: string[] = [];
+    private _exclude: string[] = [];
+    private _injected = false;
+
+    constructor(page: Page) {
+        this.page = page;
+    }
+
+    disableRules(ruleIds: string[]): AccessibilityAuditor {
+        /** Deshabilita reglas específicas de axe-core. */
+        this._disabledRules.push(...ruleIds);
+        return this; // Permite encadenamiento
+    }
+
+    onlyTags(tags: string[]): AccessibilityAuditor {
+        /** Ejecuta solo las reglas que coincidan con estos tags WCAG. */
+        this._onlyTags = tags;
+        return this;
+    }
+
+    includeSelector(selector: string): AccessibilityAuditor {
+        /** Audita solo el contenido dentro de este selector. */
+        this._include.push(selector);
+        return this;
+    }
+
+    excludeSelector(selector: string): AccessibilityAuditor {
+        /** Excluye este selector de la auditoría. */
+        this._exclude.push(selector);
+        return this;
+    }
+
+    private async injectAxe(): Promise<void> {
+        /** Inyecta axe-core en la página. */
+        if (!this._injected) {
+            const isLoaded = await this.page.evaluate(
+                () => typeof (window as any).axe !== 'undefined'
+            );
+            if (!isLoaded) {
+                await this.page.addScriptTag({ url: AccessibilityAuditor.AXE_CDN });
+                await this.page.waitForFunction(
+                    () => typeof (window as any).axe !== 'undefined'
+                );
+            }
+            this._injected = true;
+        }
+    }
+
+    private buildConfig(): Record<string, any> {
+        /** Construye la configuración de axe-core. */
+        const config: Record<string, any> = {
+            resultTypes: ['violations', 'incomplete', 'passes']
+        };
+
+        // Tags WCAG
+        if (this._onlyTags) {
+            config.runOnly = { type: 'tag', values: this._onlyTags };
+        }
+
+        // Reglas deshabilitadas
+        if (this._disabledRules.length > 0) {
+            config.rules = Object.fromEntries(
+                this._disabledRules.map(id => [id, { enabled: false }])
+            );
+        }
+
+        return config;
+    }
+
+    private buildContext(): string {
+        /** Construye el contexto (include/exclude) para axe.run(). */
+        if (this._include.length === 0 && this._exclude.length === 0) {
+            return 'document';
+        }
+
+        const parts: string[] = [];
+        if (this._include.length > 0) {
+            const includes = this._include.map(s => \`'\${s}'\`).join(', ');
+            parts.push(\`include: [\${includes}]\`);
+        }
+        if (this._exclude.length > 0) {
+            const excludes = this._exclude.map(s => \`'\${s}'\`).join(', ');
+            parts.push(\`exclude: [\${excludes}]\`);
+        }
+
+        return '{' + parts.join(', ') + '}';
+    }
+
+    async audit(): Promise<A11yAuditResult> {
+        /** Ejecuta la auditoría de accesibilidad y retorna resultados. */
+        await this.injectAxe();
+
+        const config = this.buildConfig();
+        const context = this.buildContext();
+
+        const results = await this.page.evaluate(
+            ([cfg, ctx]) => {
+                const axeConfig = JSON.parse(cfg);
+                const axeContext = ctx === 'document'
+                    ? document
+                    : JSON.parse(ctx);
+                return (window as any).axe.run(axeContext, axeConfig).then((r: any) => ({
+                    violations: r.violations,
+                    incomplete: r.incomplete,
+                    passes: r.passes.length,
+                    url: r.url,
+                    timestamp: r.timestamp
+                }));
+            },
+            [JSON.stringify(config), context]
+        );
+
+        const violations = results.violations.map((v: any) =>
+            createViolation({
+                ruleId: v.id,
+                impact: v.impact,
+                description: v.description,
+                helpUrl: v.helpUrl,
+                affectedNodes: v.nodes.map((n: any) => n.html),
+                wcagTags: (v.tags ?? []).filter((t: string) => t.includes('wcag'))
+            })
+        );
+
+        return createAuditResult({
+            url: results.url,
+            timestamp: results.timestamp,
+            violations,
+            incomplete: results.incomplete,
+            passesCount: results.passes
+        });
+    }
+
+    reset(): AccessibilityAuditor {
+        /** Resetea la configuración del auditor. */
+        this._disabledRules = [];
+        this._onlyTags = null;
+        this._include = [];
+        this._exclude = [];
+        return this;
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA: Auditor como fixture de pytest</h4>
             <p>En SIESA registramos el <code>AccessibilityAuditor</code> como fixture en
             <code>conftest.py</code> para que cualquier test pueda solicitar una auditoría
             con una sola línea:</p>
-            <pre><code class="python"># conftest.py
+            <div class="code-tabs" data-code-id="L102-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest
 from helpers.accessibility_auditor import AccessibilityAuditor
 
@@ -463,13 +916,46 @@ def test_mi_pagina(page, a11y):
     page.goto("/mi-pagina")
     result = a11y.audit()
     assert result.is_passing</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// fixtures.ts
+import { test as base, expect } from '@playwright/test';
+import { AccessibilityAuditor } from './helpers/accessibility-auditor';
+
+// Extender test con fixture de auditor
+const test = base.extend<{ a11y: AccessibilityAuditor }>({
+    a11y: async ({ page }, use) => {
+        /** Fixture de auditor de accesibilidad. */
+        await use(new AccessibilityAuditor(page));
+    }
+});
+
+// En cualquier test:
+test('mi página', async ({ page, a11y }) => {
+    await page.goto('/mi-pagina');
+    const result = await a11y.audit();
+    expect(result.isPassing).toBeTruthy();
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>⚙️ Configuración de reglas: deshabilitar, filtrar por tags</h3>
         <p>No todas las reglas aplican en todos los contextos. Puedes deshabilitar reglas
         específicas o ejecutar solo las que corresponden a cierto nivel WCAG.</p>
 
-        <pre><code class="python"># test_config_rules.py
+        <div class="code-tabs" data-code-id="L102-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_config_rules.py
 """
 Ejemplos de configuración avanzada de reglas axe-core.
 """
@@ -535,12 +1021,88 @@ def test_wcag_por_nivel(page, a11y: AccessibilityAuditor):
 
     # Nivel A es obligatorio
     assert result_a.is_passing, "Violaciones de nivel A son inaceptables"</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_config_rules.ts
+/**
+ * Ejemplos de configuración avanzada de reglas axe-core.
+ */
+import { test, expect } from './fixtures'; // fixture con a11y
+
+test('solo WCAG 2 nivel AA', async ({ page, a11y }) => {
+    /** Auditoría limitada a WCAG 2.0/2.1 nivel AA. */
+    await page.goto('/productos');
+
+    const result = await a11y
+        .onlyTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .audit();
+
+    expect(result.isPassing).toBeTruthy();
+});
+
+test('ignorar reglas conocidas', async ({ page, a11y }) => {
+    /** Deshabilitar reglas que son falsos positivos conocidos. */
+    await page.goto('/dashboard');
+
+    const result = await a11y
+        .disableRules([
+            'color-contrast',  // Widget de terceros que no controlamos
+            'region',          // Layout legacy que se migrará después
+        ])
+        .audit();
+
+    expect(result.isPassing).toBeTruthy();
+});
+
+test('solo best practices', async ({ page, a11y }) => {
+    /** Ejecutar solo reglas de mejores prácticas (no WCAG obligatorio). */
+    await page.goto('/perfil');
+
+    const result = await a11y.onlyTags(['best-practice']).audit();
+
+    // Best practices son advertencias, no fallos
+    for (const violation of result.violations) {
+        console.log(\`Mejora sugerida: \${violation.ruleId} — \${violation.description}\`);
+    }
+});
+
+test('WCAG por nivel', async ({ page, a11y }) => {
+    /** Ejecutar auditorías separadas por nivel WCAG. */
+    await page.goto('/formulario-contacto');
+
+    // Nivel A — requisitos mínimos (obligatorio)
+    const resultA = await a11y.onlyTags(['wcag2a', 'wcag21a']).audit();
+    a11y.reset();
+
+    // Nivel AA — requisitos estándar (objetivo habitual)
+    const resultAA = await a11y.onlyTags(['wcag2aa', 'wcag21aa']).audit();
+    a11y.reset();
+
+    console.log(\`Nivel A:  \${resultA.totalViolations} violaciones\`);
+    console.log(\`Nivel AA: \${resultAA.totalViolations} violaciones\`);
+
+    // Nivel A es obligatorio
+    expect(resultA.isPassing).toBeTruthy();
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🎯 Auditoría de regiones específicas (include/exclude)</h3>
         <p>A veces solo quieres auditar una sección de la página (por ejemplo, el contenido principal
         excluyendo el header/footer), o excluir widgets de terceros que no controlas.</p>
 
-        <pre><code class="python"># test_region_audit.py
+        <div class="code-tabs" data-code-id="L102-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_region_audit.py
 """
 Auditoría de regiones específicas de la página.
 """
@@ -608,13 +1170,82 @@ def test_auditar_modal(page, a11y: AccessibilityAuditor):
     assert len(dialog_issues) == 0, (
         f"Problemas ARIA en modal: {[v.rule_id for v in dialog_issues]}"
     )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_region_audit.ts
+/**
+ * Auditoría de regiones específicas de la página.
+ */
+import { test, expect } from './fixtures'; // fixture con a11y
+
+test('auditar solo contenido principal', async ({ page, a11y }) => {
+    /** Auditar solo el contenido principal, ignorando nav y footer. */
+    await page.goto('/productos');
+
+    const result = await a11y
+        .includeSelector('main')               // Solo el <main>
+        .excludeSelector('.ads-banner')         // Excluir publicidad
+        .excludeSelector('.third-party-widget') // Excluir widgets externos
+        .audit();
+
+    expect(result.isPassing).toBeTruthy();
+});
+
+test('auditar formulario aislado', async ({ page, a11y }) => {
+    /** Auditoría enfocada en un formulario específico. */
+    await page.goto('/registro');
+
+    const result = await a11y
+        .includeSelector('#registration-form')
+        .audit();
+
+    // Verificar que todos los campos tienen labels
+    const labelIssues = result.violations.filter(
+        v => ['label', 'label-title-only'].includes(v.ruleId)
+    );
+    expect(labelIssues).toHaveLength(0);
+});
+
+test('auditar modal', async ({ page, a11y }) => {
+    /** Auditoría de un modal/diálogo. */
+    await page.goto('/productos');
+    await page.getByRole('button', { name: 'Agregar al carrito' }).first().click();
+
+    // Esperar que el modal aparezca
+    const modal = page.locator("[role='dialog']");
+    await modal.waitFor({ state: 'visible' });
+
+    // Auditar solo el modal
+    const result = await a11y
+        .includeSelector("[role='dialog']")
+        .audit();
+
+    // Verificar que el modal tiene las reglas ARIA correctas
+    const dialogIssues = result.violations.filter(
+        v => v.ruleId.includes('aria') || v.ruleId.includes('dialog')
+    );
+    expect(dialogIssues).toHaveLength(0);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>⌨️ Testing de navegación por teclado</h3>
         <p>La navegación por teclado es esencial para usuarios que no pueden usar ratón.
         Con Playwright podemos simular <strong>Tab, Shift+Tab, Enter y Escape</strong>
         y verificar que todos los elementos interactivos son alcanzables y funcionales.</p>
 
-        <pre><code class="python"># test_keyboard_navigation.py
+        <div class="code-tabs" data-code-id="L102-7">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_keyboard_navigation.py
 """
 Verificación de navegación por teclado con Playwright.
 Tab, Shift+Tab, Enter, Escape — flujos completos.
@@ -726,6 +1357,120 @@ def test_skip_to_content_link(page: Page):
     assert focused_after in ("main-content", "content", "MAIN"), (
         f"Después de skip link, foco en: {focused_after}"
     )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_keyboard_navigation.ts
+/**
+ * Verificación de navegación por teclado con Playwright.
+ * Tab, Shift+Tab, Enter, Escape — flujos completos.
+ */
+import { test, expect } from '@playwright/test';
+
+test('tab order navigation', async ({ page }) => {
+    /** Verificar que Tab recorre los elementos en orden lógico. */
+    await page.goto('/login');
+
+    // Orden esperado de foco al presionar Tab
+    const expectedOrder = [
+        ['input', 'Email'],            // Campo email
+        ['input', 'Contraseña'],       // Campo contraseña
+        ['link', 'Olvidé mi'],         // Link olvidé contraseña
+        ['button', 'Iniciar sesión'],  // Botón submit
+        ['link', 'Registrarse'],       // Link registro
+    ];
+
+    for (let i = 0; i < expectedOrder.length; i++) {
+        const [role, nameFragment] = expectedOrder[i];
+        await page.keyboard.press('Tab');
+        const focused = await page.evaluate(() => {
+            const el = document.activeElement!;
+            return {
+                tag: el.tagName.toLowerCase(),
+                role: el.getAttribute('role') || el.tagName.toLowerCase(),
+                text: el.textContent?.trim().substring(0, 50) || '',
+                name: el.getAttribute('aria-label') ||
+                      el.getAttribute('name') ||
+                      el.getAttribute('placeholder') || ''
+            };
+        });
+        console.log(\`Tab \${i + 1}: [\${focused.tag}] \${focused.text || focused.name}\`);
+
+        // Verificar que el elemento correcto tiene foco
+        const combined = (focused.text + focused.name).toLowerCase();
+        expect(combined).toContain(nameFragment.toLowerCase());
+    }
+});
+
+test('shift+tab reverse navigation', async ({ page }) => {
+    /** Verificar que Shift+Tab navega en orden inverso. */
+    await page.goto('/login');
+
+    // Mover foco al último elemento interactivo
+    await page.getByRole('link', { name: 'Registrarse' }).focus();
+
+    // Navegar hacia atrás
+    await page.keyboard.press('Shift+Tab');
+    const focusedButton = page.locator(':focus');
+    await expect(focusedButton).toHaveRole('button');
+
+    await page.keyboard.press('Shift+Tab');
+    const focusedLink = page.locator(':focus');
+    await expect(focusedLink).toHaveRole('link');
+});
+
+test('enter activa botones', async ({ page }) => {
+    /** Verificar que Enter activa botones y enlaces. */
+    await page.goto('/login');
+    await page.getByLabel('Email').fill('test@example.com');
+    await page.getByLabel('Contraseña').fill('password123');
+
+    // Navegar al botón con Tab y activar con Enter
+    await page.getByRole('button', { name: 'Iniciar sesión' }).focus();
+    await page.keyboard.press('Enter');
+
+    // Verificar que el formulario se envió
+    await page.waitForURL('**/dashboard**', { timeout: 5000 });
+});
+
+test('escape cierra modales', async ({ page }) => {
+    /** Verificar que Escape cierra modales y popups. */
+    await page.goto('/productos');
+
+    // Abrir un modal
+    await page.getByRole('button', { name: 'Filtros avanzados' }).click();
+    const modal = page.locator("[role='dialog']");
+    await expect(modal).toBeVisible();
+
+    // Presionar Escape debe cerrar el modal
+    await page.keyboard.press('Escape');
+    await expect(modal).toBeHidden();
+});
+
+test('skip to content link', async ({ page }) => {
+    /** Verificar que existe un enlace 'Saltar al contenido principal'. */
+    await page.goto('/');
+
+    // El enlace skip suele estar oculto hasta que recibe foco
+    await page.keyboard.press('Tab');
+
+    const skipLink = page.locator(':focus');
+    const skipText = await skipLink.textContent() ?? '';
+    expect(
+        skipText.toLowerCase().includes('saltar') ||
+        skipText.toLowerCase().includes('skip')
+    ).toBeTruthy();
+
+    // Activar el skip link
+    await page.keyboard.press('Enter');
+
+    // El foco debe moverse al contenido principal
+    const focusedAfter = await page.evaluate(
+        () => document.activeElement?.id || document.activeElement?.tagName || ''
+    );
+    expect(['main-content', 'content', 'MAIN']).toContain(focusedAfter);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🎯 Testing de gestión de foco</h3>
         <p>Los <strong>focus traps</strong> (trampa de foco) mantienen la navegación por teclado
@@ -733,7 +1478,18 @@ def test_skip_to_content_link(page: Page):
         el foco se mueve en un orden lógico. Los <strong>indicadores de foco visibles</strong>
         aseguran que el usuario sabe dónde está el foco.</p>
 
-        <pre><code class="python"># test_focus_management.py
+        <div class="code-tabs" data-code-id="L102-8">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_focus_management.py
 """
 Tests de gestión de foco: focus traps, focus order, indicadores visibles.
 """
@@ -845,6 +1601,118 @@ def test_visible_focus_indicators(page: Page):
     assert len(elements_without_focus_style) == 0, (
         f"Elementos sin indicador de foco visible: {elements_without_focus_style}"
     )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_focus_management.ts
+/**
+ * Tests de gestión de foco: focus traps, focus order, indicadores visibles.
+ */
+import { test, expect } from '@playwright/test';
+
+test('focus trap in modal', async ({ page }) => {
+    /** El foco debe quedar atrapado dentro del modal abierto. */
+    await page.goto('/productos');
+
+    // Abrir modal
+    await page.getByRole('button', { name: 'Agregar al carrito' }).first().click();
+    const modal = page.locator("[role='dialog']");
+    await expect(modal).toBeVisible();
+
+    // Recopilar todos los elementos focusables dentro del modal
+    const focusableInModal = modal.locator(
+        "a, button, input, select, textarea, [tabindex]:not([tabindex='-1'])"
+    );
+    const count = await focusableInModal.count();
+    expect(count).toBeGreaterThan(0);
+
+    // Navegar con Tab más allá de los elementos del modal
+    // El foco NO debe salir del modal
+    for (let i = 0; i < count + 2; i++) { // +2 para verificar que el foco vuelve al inicio
+        await page.keyboard.press('Tab');
+    }
+
+    // Verificar que el foco sigue dentro del modal
+    const isInsideModal = await page.evaluate(() => {
+        const modal = document.querySelector("[role='dialog']");
+        return modal?.contains(document.activeElement) ?? false;
+    });
+    expect(isInsideModal).toBeTruthy();
+});
+
+test('focus returns after modal close', async ({ page }) => {
+    /** Al cerrar un modal, el foco debe volver al elemento que lo abrió. */
+    await page.goto('/productos');
+
+    const triggerButton = page.getByRole('button', { name: 'Agregar al carrito' }).first();
+    await triggerButton.click();
+
+    const modal = page.locator("[role='dialog']");
+    await expect(modal).toBeVisible();
+
+    // Cerrar modal con Escape
+    await page.keyboard.press('Escape');
+    await expect(modal).toBeHidden();
+
+    // El foco debe volver al botón que abrió el modal
+    const focused = await page.evaluate(() => {
+        const el = document.activeElement;
+        return el?.textContent?.trim() || el?.getAttribute('aria-label') || '';
+    });
+    expect(
+        focused.toLowerCase().includes('agregar') ||
+        focused.toLowerCase().includes('carrito')
+    ).toBeTruthy();
+});
+
+test('visible focus indicators', async ({ page }) => {
+    /** Verificar que los elementos enfocados tienen indicador visual. */
+    await page.goto('/login');
+
+    const interactiveElements = page.locator(
+        'a, button, input, select, textarea'
+    );
+    const count = await interactiveElements.count();
+
+    const elementsWithoutFocusStyle: string[] = [];
+
+    for (let i = 0; i < Math.min(count, 10); i++) { // Verificar hasta 10 elementos
+        const element = interactiveElements.nth(i);
+
+        // Enfocar el elemento
+        await element.focus();
+
+        // Obtener estilos de foco
+        const focusStyles = await element.evaluate((el) => {
+            const styles = window.getComputedStyle(el);
+            return {
+                outline: styles.outline,
+                outlineWidth: styles.outlineWidth,
+                outlineStyle: styles.outlineStyle,
+                boxShadow: styles.boxShadow,
+                border: styles.border,
+                tag: el.tagName,
+                text: el.textContent?.trim().substring(0, 30) || ''
+            };
+        });
+
+        // Un elemento enfocado debe tener outline o box-shadow visible
+        const hasOutline = (
+            focusStyles.outlineStyle !== 'none' &&
+            focusStyles.outlineWidth !== '0px'
+        );
+        const hasBoxShadow = focusStyles.boxShadow !== 'none';
+
+        if (!hasOutline && !hasBoxShadow) {
+            elementsWithoutFocusStyle.push(
+                \`\${focusStyles.tag}: '\${focusStyles.text}'\`
+            );
+        }
+    }
+
+    expect(elementsWithoutFocusStyle).toHaveLength(0);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🏷️ Verificación de roles y atributos ARIA</h3>
         <p>Los roles y atributos ARIA son fundamentales para que los lectores de pantalla

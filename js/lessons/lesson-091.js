@@ -32,7 +32,18 @@ const LESSON_091 = {
         <p>El método <code>browser.new_context()</code> acepta numerosas opciones que definen el perfil
         del navegador. Cada contexto es independiente — cambiar la configuración de uno no afecta a otros.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -58,12 +69,52 @@ with sync_playwright() as p:
     context_default.close()
     context_custom.close()
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Contexto con configuración mínima (valores por defecto)
+const contextDefault = browser.newContext();
+
+// Contexto con configuración personalizada
+const contextCustom = await browser.newContext({
+    viewport: { width: 1280, height: 720 },
+    locale: 'es-CO',
+    timezoneId: 'America/Bogota',
+    colorScheme: 'dark'
+});
+
+const pageDefault = await contextDefault.newPage();
+const pageCustom = await contextCustom.newPage();
+
+// Cada page hereda la config de su context
+await pageDefault.goto('https://example.com');
+await pageCustom.goto('https://example.com');
+
+await contextDefault.close();
+await contextCustom.close();
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <h3>📐 2. Viewport: width, height y device_scale_factor</h3>
         <p>El viewport controla las dimensiones de la ventana visible del navegador.
         <code>device_scale_factor</code> simula pantallas de alta densidad (Retina, HiDPI).</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -99,6 +150,48 @@ with sync_playwright() as p:
         ctx.close()
 
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Viewport de escritorio estándar
+const ctxDesktop = await browser.newContext({
+    viewport: { width: 1920, height: 1080 }
+});
+
+// Viewport de tablet
+const ctxTablet = await browser.newContext({
+    viewport: { width: 768, height: 1024 },
+    deviceScaleFactor: 2  // Retina display
+});
+
+// Viewport mobile
+const ctxMobile = await browser.newContext({
+    viewport: { width: 375, height: 812 },
+    deviceScaleFactor: 3,
+    isMobile: true,          // Habilita meta viewport
+    hasTouch: true            // Habilita eventos táctiles
+});
+
+// Probar responsive design
+const contexts = [
+    { ctx: ctxDesktop, nombre: 'desktop' },
+    { ctx: ctxTablet, nombre: 'tablet' },
+    { ctx: ctxMobile, nombre: 'mobile' }
+];
+
+for (const { ctx, nombre } of contexts) {
+    const page = await ctx.newPage();
+    await page.goto('https://mi-erp.siesa.com');
+    await page.screenshot({ path: \`screenshot_\${nombre}.png\` });
+    await ctx.close();
+}
+
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -112,7 +205,18 @@ with sync_playwright() as p:
         <p>Playwright incluye un registro de dispositivos predefinidos con viewport, user-agent,
         <code>device_scale_factor</code>, <code>is_mobile</code> y <code>has_touch</code> ya configurados.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -152,10 +256,64 @@ with sync_playwright() as p:
     ctx_ipad.close()
     ctx_custom_iphone.close()
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium, devices } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Emular iPhone 13
+const iPhone = devices['iPhone 13'];
+const ctxIphone = await browser.newContext({ ...iPhone });
+const pageIphone = await ctxIphone.newPage();
+await pageIphone.goto('https://example.com');
+console.log(\`iPhone 13 viewport: \${JSON.stringify(iPhone.viewport)}\`);
+// { width: 390, height: 844 }
+
+// Emular Pixel 5
+const pixel = devices['Pixel 5'];
+const ctxPixel = await browser.newContext({ ...pixel });
+const pagePixel = await ctxPixel.newPage();
+await pagePixel.goto('https://example.com');
+console.log(\`Pixel 5 viewport: \${JSON.stringify(pixel.viewport)}\`);
+// { width: 393, height: 851 }
+
+// Emular iPad Pro
+const iPad = devices['iPad Pro 11'];
+const ctxIpad = await browser.newContext({ ...iPad });
+const pageIpad = await ctxIpad.newPage();
+await pageIpad.goto('https://example.com');
+
+// Se pueden extender las opciones del dispositivo
+const ctxCustomIphone = await browser.newContext({
+    ...iPhone,
+    locale: 'es-CO',
+    timezoneId: 'America/Bogota',
+    colorScheme: 'dark'
+});
+
+await ctxIphone.close();
+await ctxPixel.close();
+await ctxIpad.close();
+await ctxCustomIphone.close();
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Dispositivos disponibles comunes</h4>
-            <pre><code class="python"># Ver todos los dispositivos disponibles
+            <div class="code-tabs" data-code-id="L091-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Ver todos los dispositivos disponibles
 from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
@@ -173,13 +331,47 @@ with sync_playwright() as p:
         if nombre in p.devices:
             d = p.devices[nombre]
             print(f"{nombre}: {d['viewport']} - scale: {d.get('device_scale_factor', 1)}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Ver todos los dispositivos disponibles
+import { devices } from 'playwright';
+
+// Lista parcial de dispositivos predefinidos
+const dispositivosComunes = [
+    'iPhone 13', 'iPhone 13 Pro', 'iPhone 13 Pro Max',
+    'iPhone 14', 'iPhone 14 Pro', 'iPhone 14 Pro Max',
+    'Pixel 5', 'Pixel 7',
+    'Galaxy S8', 'Galaxy S9+', 'Galaxy Tab S4',
+    'iPad (gen 7)', 'iPad Pro 11',
+    'Desktop Chrome', 'Desktop Firefox', 'Desktop Safari'
+];
+
+for (const nombre of dispositivosComunes) {
+    if (nombre in devices) {
+        const d = devices[nombre];
+        console.log(\`\${nombre}: \${JSON.stringify(d.viewport)} - scale: \${d.deviceScaleFactor ?? 1}\`);
+    }
+}</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📍 4. Geolocalización</h3>
         <p>Puedes establecer una ubicación geográfica falsa para el contexto del navegador.
         Esto es fundamental para probar aplicaciones que usan la API de geolocalización.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -213,6 +405,43 @@ with sync_playwright() as p:
 
     context.close()
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Configurar geolocalización para Cali, Colombia
+const context = await browser.newContext({
+    geolocation: { latitude: 3.4516, longitude: -76.5320 },
+    permissions: ['geolocation']  // Conceder permiso automáticamente
+});
+
+const page = await context.newPage();
+await page.goto('https://maps.google.com');
+
+// Obtener coordenadas vía JavaScript
+const coords = await page.evaluate(() => {
+    return new Promise((resolve) => {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => resolve({
+                lat: pos.coords.latitude,
+                lon: pos.coords.longitude
+            })
+        );
+    });
+});
+console.log(\`Lat: \${coords.lat}, Lon: \${coords.lon}\`);
+// Lat: 3.4516, Lon: -76.532
+
+// Cambiar geolocalización durante la sesión
+await context.setGeolocation({ latitude: 4.6097, longitude: -74.0818 });
+// Ahora apunta a Bogotá
+
+await context.close();
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -226,7 +455,18 @@ with sync_playwright() as p:
         <p>Controlar el idioma y la zona horaria permite probar la internacionalización
         y la representación correcta de fechas, números y moneda.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -275,10 +515,73 @@ with sync_playwright() as p:
 
     ctx_us.close()
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Contexto con configuración colombiana
+const ctxColombia = await browser.newContext({
+    locale: 'es-CO',
+    timezoneId: 'America/Bogota'
+});
+
+const page = await ctxColombia.newPage();
+await page.goto('https://example.com');
+
+// Verificar formato de fecha colombiano
+const fecha = await page.evaluate(() => {
+    return new Date('2026-04-04T10:30:00Z').toLocaleString();
+});
+console.log(\`Colombia: \${fecha}\`);
+// "4/4/2026, 5:30:00 a. m." (UTC-5)
+
+// Verificar formato de moneda
+const moneda = await page.evaluate(() => {
+    return new Intl.NumberFormat('es-CO', {
+        style: 'currency', currency: 'COP'
+    }).format(1500000);
+});
+console.log(\`Moneda: \${moneda}\`);
+// "$ 1.500.000,00"
+
+await ctxColombia.close();
+
+// Contexto para pruebas en inglés (mercado internacional)
+const ctxUs = await browser.newContext({
+    locale: 'en-US',
+    timezoneId: 'America/New_York'
+});
+
+const pageUs = await ctxUs.newPage();
+await pageUs.goto('https://example.com');
+
+const fechaUs = await pageUs.evaluate(() => {
+    return new Date('2026-04-04T10:30:00Z').toLocaleString();
+});
+console.log(\`US: \${fechaUs}\`);
+// "4/4/2026, 6:30:00 AM" (UTC-4)
+
+await ctxUs.close();
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>❌ Error común: ignorar timezone en assertions</h4>
-            <pre><code class="python"># MAL: Aserción sin considerar timezone
+            <div class="code-tabs" data-code-id="L091-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># MAL: Aserción sin considerar timezone
 def test_fecha_creacion(page):
     page.goto("/factura/nueva")
     page.click("button#crear")
@@ -296,13 +599,48 @@ def test_fecha_creacion_con_timezone(page, browser):
     # Ahora sabemos que la hora está en zona colombiana (UTC-5)
     assert "05:30" in fecha_texto  # Consistente
     context.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// MAL: Aserción sin considerar timezone
+test('fecha creacion', async ({ page }) => {
+    await page.goto('/factura/nueva');
+    await page.click('button#crear');
+    // La hora mostrada depende del timezone del context!
+    const fechaTexto = await page.textContent('.fecha-creacion');
+    expect(fechaTexto).toContain('10:30'); // Puede fallar si el timezone no es el esperado
+});
+
+// BIEN: Configurar timezone explícito
+test('fecha creacion con timezone', async ({ browser }) => {
+    const context = await browser.newContext({ timezoneId: 'America/Bogota' });
+    const page = await context.newPage();
+    await page.goto('/factura/nueva');
+    await page.click('button#crear');
+    const fechaTexto = await page.textContent('.fecha-creacion');
+    // Ahora sabemos que la hora está en zona colombiana (UTC-5)
+    expect(fechaTexto).toContain('05:30'); // Consistente
+    await context.close();
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🎨 6. Color scheme (dark/light mode)</h3>
         <p>La opción <code>color_scheme</code> controla la preferencia de esquema de colores que
         el navegador reporta a la aplicación mediante <code>prefers-color-scheme</code>.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-8">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -339,12 +677,63 @@ with sync_playwright() as p:
     ctx_none.close()
 
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Probar modo oscuro
+const ctxDark = await browser.newContext({ colorScheme: 'dark' });
+const pageDark = await ctxDark.newPage();
+await pageDark.goto('https://mi-app.siesa.com');
+
+// Verificar que el CSS de dark mode se aplica
+const bgColor = await pageDark.evaluate(() => {
+    return getComputedStyle(document.body).backgroundColor;
+});
+console.log(\`Dark mode background: \${bgColor}\`);
+
+// Verificar media query
+const isDark = await pageDark.evaluate(() => {
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+});
+expect(isDark).toBe(true);
+
+await pageDark.screenshot({ path: 'dark_mode.png' });
+await ctxDark.close();
+
+// Probar modo claro
+const ctxLight = await browser.newContext({ colorScheme: 'light' });
+const pageLight = await ctxLight.newPage();
+await pageLight.goto('https://mi-app.siesa.com');
+await pageLight.screenshot({ path: 'light_mode.png' });
+await ctxLight.close();
+
+// También se puede emular 'no-preference'
+const ctxNone = await browser.newContext({ colorScheme: 'no-preference' });
+await ctxNone.close();
+
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <h3>🔐 7. Permisos del navegador</h3>
         <p>Los permisos controlan el acceso a APIs del navegador que normalmente requieren
         autorización del usuario (diálogos de "Permitir/Bloquear").</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-9">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -376,6 +765,41 @@ with sync_playwright() as p:
 
     context.close()
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Conceder múltiples permisos al crear el contexto
+const context = await browser.newContext({
+    permissions: ['geolocation', 'notifications']
+});
+
+const page = await context.newPage();
+await page.goto('https://mi-app.siesa.com');
+
+// Conceder permisos adicionales después de crear el contexto
+await context.grantPermissions(
+    ['camera', 'microphone'],
+    { origin: 'https://mi-app.siesa.com' }  // Solo para este origen
+);
+
+// Verificar que las notificaciones están permitidas
+const permStatus = await page.evaluate(async () => {
+    const result = await navigator.permissions.query({ name: 'notifications' });
+    return result.state;
+});
+console.log(\`Notificaciones: \${permStatus}\`);
+// "granted"
+
+// Limpiar permisos (volver a estado default)
+await context.clearPermissions();
+
+await context.close();
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>📋 Permisos disponibles</h4>
@@ -415,7 +839,18 @@ with sync_playwright() as p:
         <p>El <code>user_agent</code> identifica al navegador ante el servidor. Cambiarlo permite
         probar respuestas del servidor a diferentes navegadores o bots.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-10">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -450,12 +885,61 @@ with sync_playwright() as p:
     ctx_bot.close()
 
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Simular un navegador móvil específico
+const context = await browser.newContext({
+    userAgent: 'Mozilla/5.0 (Linux; Android 12; Pixel 5) ' +
+               'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+               'Chrome/110.0.0.0 Mobile Safari/537.36'
+});
+
+const page = await context.newPage();
+await page.goto('https://mi-app.siesa.com');
+
+// Verificar que el servidor responde con versión móvil
+const isMobileVersion = await page.isVisible('.mobile-nav');
+console.log(\`Versión móvil: \${isMobileVersion}\`);
+
+// También puedes verificar el user-agent desde JS
+const ua = await page.evaluate(() => navigator.userAgent);
+console.log(\`User-Agent: \${ua}\`);
+
+await context.close();
+
+// Simular un bot/crawler para probar SEO
+const ctxBot = await browser.newContext({
+    userAgent: 'Googlebot/2.1 (+http://www.google.com/bot.html)'
+});
+const pageBot = await ctxBot.newPage();
+await pageBot.goto('https://mi-app.siesa.com');
+// Verificar que el contenido SEO está presente
+await ctxBot.close();
+
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <h3>🔑 9. Credenciales HTTP (Basic Auth)</h3>
         <p>Para sitios protegidos con autenticación HTTP básica, puedes proporcionar
         credenciales directamente en el contexto sin manejar diálogos.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-11">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -491,10 +975,61 @@ with sync_playwright() as p:
     ctx_proxy.close()
 
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Configurar credenciales HTTP
+const context = await browser.newContext({
+    httpCredentials: {
+        username: 'admin',
+        password: 'secreto123'
+    }
+});
+
+const page = await context.newPage();
+
+// El navegador envía las credenciales automáticamente
+// No aparece el diálogo de autenticación
+await page.goto('https://staging.siesa.com/admin');
+
+// Verificar acceso exitoso
+const title = await page.title();
+expect(title).not.toBe('401 Unauthorized');
+console.log('Autenticación HTTP exitosa');
+
+await context.close();
+
+// También se pueden enviar credenciales para un proxy
+const ctxProxy = await browser.newContext({
+    proxy: {
+        server: 'http://proxy.siesa.com:8080',
+        username: 'proxy_user',
+        password: 'proxy_pass'
+    }
+});
+await ctxProxy.close();
+
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>❌ Nunca hardcodees credenciales en el código</h4>
-            <pre><code class="python">import os
+            <div class="code-tabs" data-code-id="L091-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import os
 
 # MAL: credenciales hardcodeadas
 context = browser.new_context(
@@ -508,13 +1043,40 @@ context = browser.new_context(
         "password": os.environ["HTTP_PASS"]
     }
 )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// MAL: credenciales hardcodeadas
+const context = await browser.newContext({
+    httpCredentials: { username: 'admin', password: '123456' }
+});
+
+// BIEN: usar variables de entorno
+const contextSafe = await browser.newContext({
+    httpCredentials: {
+        username: process.env.HTTP_USER!,
+        password: process.env.HTTP_PASS!
+    }
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📡 10. Modo offline</h3>
         <p>Playwright permite simular la pérdida de conexión a internet para probar
         el comportamiento offline de la aplicación.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-13">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -548,12 +1110,61 @@ with sync_playwright() as p:
 
     context.close()
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+const context = await browser.newContext();
+const page = await context.newPage();
+
+// Cargar la aplicación normalmente
+await page.goto('https://mi-app.siesa.com');
+await expect(page.locator('.dashboard')).toBeVisible();
+
+// Activar modo offline
+await context.setOffline(true);
+
+// Intentar navegar — debe fallar o mostrar contenido cacheado
+try {
+    await page.goto('https://mi-app.siesa.com/otra-pagina');
+} catch (e) {
+    console.log(\`Error esperado en modo offline: \${e}\`);
+}
+
+// Verificar comportamiento offline de la app
+// (Service Workers, almacenamiento local, mensajes de error)
+const offlineMsg = await page.isVisible('.offline-indicator');
+console.log(\`Indicador offline visible: \${offlineMsg}\`);
+
+// Restaurar la conexión
+await context.setOffline(false);
+
+// Verificar reconexión
+await page.goto('https://mi-app.siesa.com/dashboard');
+await expect(page.locator('.dashboard')).toBeVisible();
+
+await context.close();
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <h3>📨 11. Extra HTTP headers</h3>
         <p>Puedes agregar headers HTTP personalizados que se enviarán con cada solicitud
         del contexto. Útil para tokens, identificadores de prueba o cabeceras de monitoreo.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-14">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -591,6 +1202,47 @@ with sync_playwright() as p:
 
     context2.close()
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// Agregar headers personalizados al contexto
+const context = await browser.newContext({
+    extraHTTPHeaders: {
+        'X-Test-ID': 'suite-regresion-2026',
+        'X-Environment': 'staging',
+        'Accept-Language': 'es-CO,es;q=0.9'
+    }
+});
+
+const page = await context.newPage();
+
+// Verificar que los headers se envían
+page.on('request', (request) => {
+    const headers = request.headers();
+    if (headers['x-test-id']) {
+        console.log(\`Header enviado: X-Test-ID = \${headers['x-test-id']}\`);
+    }
+});
+await page.goto('https://mi-app.siesa.com');
+
+await context.close();
+
+// También se pueden establecer headers a nivel de página
+const context2 = await browser.newContext();
+const page2 = await context2.newPage();
+await page2.setExtraHTTPHeaders({
+    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiJ9...',
+    'X-Custom-Header': 'valor-personalizado'
+});
+await page2.goto('https://api.siesa.com/dashboard');
+
+await context2.close();
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -604,7 +1256,18 @@ with sync_playwright() as p:
         <p>El poder real está en combinar varias opciones para crear perfiles completos
         que simulan escenarios reales de usuarios.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L091-15">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 import os
 
 with sync_playwright() as p:
@@ -670,10 +1333,89 @@ with sync_playwright() as p:
     ctx_offline.close()
 
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium, devices } from 'playwright';
+
+const browser = await chromium.launch();
+
+// --- Perfil: Usuario móvil colombiano en campo ---
+const iPhone = devices['iPhone 13'];
+const ctxCampo = await browser.newContext({
+    ...iPhone,
+    locale: 'es-CO',
+    timezoneId: 'America/Bogota',
+    geolocation: { latitude: 3.4516, longitude: -76.5320 },
+    permissions: ['geolocation'],
+    colorScheme: 'light',
+    extraHTTPHeaders: {
+        'X-Test-Profile': 'mobile-field-user',
+        'X-Region': 'valle-del-cauca'
+    }
+});
+
+const pageCampo = await ctxCampo.newPage();
+await pageCampo.goto('https://mi-app.siesa.com');
+await pageCampo.screenshot({ path: 'perfil_campo_mobile.png' });
+await ctxCampo.close();
+
+// --- Perfil: Administrador en oficina con dark mode ---
+const ctxAdmin = await browser.newContext({
+    viewport: { width: 1920, height: 1080 },
+    locale: 'es-CO',
+    timezoneId: 'America/Bogota',
+    colorScheme: 'dark',
+    httpCredentials: {
+        username: process.env.ADMIN_USER ?? 'admin',
+        password: process.env.ADMIN_PASS ?? 'pass'
+    },
+    extraHTTPHeaders: {
+        'X-Test-Profile': 'admin-office',
+        'X-Test-ID': 'regression-2026'
+    },
+    permissions: ['clipboard-read', 'clipboard-write', 'notifications']
+});
+
+const pageAdmin = await ctxAdmin.newPage();
+await pageAdmin.goto('https://mi-app.siesa.com/admin');
+await pageAdmin.screenshot({ path: 'perfil_admin_dark.png' });
+await ctxAdmin.close();
+
+// --- Perfil: QA Medellín probando offline ---
+const ctxOffline = await browser.newContext({
+    viewport: { width: 1366, height: 768 },
+    locale: 'es-CO',
+    timezoneId: 'America/Bogota',
+    geolocation: { latitude: 6.2442, longitude: -75.5812 },
+    permissions: ['geolocation']
+});
+
+const pageOffline = await ctxOffline.newPage();
+await pageOffline.goto('https://mi-app.siesa.com');
+// Simular pérdida de conexión
+await ctxOffline.setOffline(true);
+await pageOffline.screenshot({ path: 'perfil_qa_offline.png' });
+await ctxOffline.setOffline(false);
+await ctxOffline.close();
+
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔬 Avanzado: Factory de perfiles con pytest</h4>
-            <pre><code class="python"># conftest.py — Factory de perfiles reutilizables
+            <div class="code-tabs" data-code-id="L091-16">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py — Factory de perfiles reutilizables
 import pytest
 import os
 
@@ -764,6 +1506,105 @@ def test_con_override(profile_context):
         window.matchMedia('(prefers-color-scheme: dark)').matches
     """)
     assert is_dark is True</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// fixtures.ts — Factory de perfiles reutilizables
+import { test as base, devices, BrowserContext } from '@playwright/test';
+
+const PERFILES = {
+    mobile_cali: {
+        device: 'iPhone 13',
+        locale: 'es-CO',
+        timezoneId: 'America/Bogota',
+        geolocation: { latitude: 3.4516, longitude: -76.5320 },
+        permissions: ['geolocation'] as string[],
+        colorScheme: 'light' as const
+    },
+    desktop_bogota: {
+        viewport: { width: 1920, height: 1080 },
+        locale: 'es-CO',
+        timezoneId: 'America/Bogota',
+        colorScheme: 'dark' as const
+    },
+    tablet_medellin: {
+        device: 'iPad Pro 11',
+        locale: 'es-CO',
+        timezoneId: 'America/Bogota',
+        geolocation: { latitude: 6.2442, longitude: -75.5812 },
+        permissions: ['geolocation'] as string[]
+    }
+};
+
+type ProfileName = keyof typeof PERFILES;
+
+// Fixture personalizada que crea un context a partir de un perfil
+const test = base.extend<{
+    profileContext: (name: ProfileName, overrides?: Record&lt;string, any&gt;) => Promise&lt;BrowserContext&gt;;
+}>({
+    profileContext: async ({ browser }, use) => {
+        const contexts: BrowserContext[] = [];
+
+        const create = async (name: ProfileName, overrides: Record&lt;string, any&gt; = {}) => {
+            const profile = { ...PERFILES[name] };
+            let config: Record&lt;string, any&gt; = {};
+
+            // Si incluye un dispositivo, expandirlo
+            if ('device' in profile) {
+                const deviceName = profile.device as string;
+                const deviceConfig = devices[deviceName];
+                config = { ...deviceConfig };
+                delete (profile as any).device;
+            }
+
+            config = { ...config, ...profile, ...overrides };
+            const ctx = await browser.newContext(config);
+            contexts.push(ctx);
+            return ctx;
+        };
+
+        await use(create);
+
+        for (const ctx of contexts) {
+            await ctx.close();
+        }
+    }
+});
+
+// test_perfiles.spec.ts
+test('dashboard mobile Cali', async ({ profileContext }) => {
+    const ctx = await profileContext('mobile_cali');
+    const page = await ctx.newPage();
+    await page.goto('https://mi-app.siesa.com/dashboard');
+    // El dashboard debe adaptarse a viewport móvil
+    await expect(page.locator('.mobile-menu')).toBeVisible();
+    await expect(page.locator('.sidebar-desktop')).not.toBeVisible();
+});
+
+test('dashboard desktop Bogotá', async ({ profileContext }) => {
+    const ctx = await profileContext('desktop_bogota');
+    const page = await ctx.newPage();
+    await page.goto('https://mi-app.siesa.com/dashboard');
+    await expect(page.locator('.sidebar-desktop')).toBeVisible();
+
+    // Verificar dark mode
+    const bg = await page.evaluate(
+        () => getComputedStyle(document.body).backgroundColor
+    );
+    // Color oscuro esperado
+    expect(bg).not.toBe('rgb(255, 255, 255)');
+});
+
+test('con override', async ({ profileContext }) => {
+    const ctx = await profileContext('mobile_cali', { colorScheme: 'dark' });
+    const page = await ctx.newPage();
+    await page.goto('https://mi-app.siesa.com');
+    const isDark = await page.evaluate(() =>
+        window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+    expect(isDark).toBe(true);
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🏋️ Ejercicio práctico</h3>
@@ -772,7 +1613,18 @@ def test_con_override(profile_context):
             <p>Crea un test que verifique la aplicación bajo 3 perfiles distintos usando
             configuraciones combinadas de viewport, locale, timezone y color scheme.</p>
 
-            <pre><code class="python"># ejercicio_perfiles.py
+            <div class="code-tabs" data-code-id="L091-17">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># ejercicio_perfiles.py
 # Objetivo: Crear tests para 3 perfiles de usuario distintos
 from playwright.sync_api import sync_playwright
 import os
@@ -820,10 +1672,70 @@ def test_perfiles():
 if __name__ == "__main__":
     test_perfiles()
     print("Todos los perfiles ejecutados correctamente")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// ejercicio_perfiles.spec.ts
+// Objetivo: Crear tests para 3 perfiles de usuario distintos
+import { chromium, devices } from 'playwright';
+
+async function testPerfiles() {
+    /**
+     * Completa el ejercicio:
+     * 1. Define 3 perfiles: mobile_vendedor, desktop_contador, tablet_gerente
+     * 2. Cada perfil debe tener: viewport, locale, timezoneId, colorScheme
+     * 3. El perfil mobile_vendedor debe incluir geolocalización (Cali)
+     * 4. El perfil desktop_contador debe incluir extraHTTPHeaders
+     * 5. Visita https://example.com con cada perfil
+     * 6. Toma un screenshot con nombre descriptivo para cada uno
+     * 7. Verifica que el viewport actual coincide con el configurado
+     */
+    const browser = await chromium.launch();
+
+    // TODO: Perfil 1 - Vendedor en campo (mobile, Cali)
+    // Usa devices['iPhone 13']
+    // locale: 'es-CO', timezoneId: 'America/Bogota'
+    // geolocation: Cali (3.4516, -76.5320)
+    // colorScheme: 'light'
+
+    // TODO: Perfil 2 - Contador en oficina (desktop, dark mode)
+    // viewport: { width: 1920, height: 1080 }
+    // locale: 'es-CO', timezoneId: 'America/Bogota'
+    // colorScheme: 'dark'
+    // extraHTTPHeaders: { 'X-Role': 'contador' }
+
+    // TODO: Perfil 3 - Gerente con tablet (iPad Pro)
+    // Usa devices['iPad Pro 11']
+    // locale: 'es-CO', timezoneId: 'America/Bogota'
+    // colorScheme: 'light'
+
+    // Para cada perfil:
+    // 1. Crear contexto con browser.newContext(config)
+    // 2. Crear página y navegar a https://example.com
+    // 3. Verificar viewport con page.evaluate(() => ({ w: window.innerWidth, h: window.innerHeight }))
+    // 4. Tomar screenshot
+    // 5. Cerrar contexto
+
+    await browser.close();
+}
+
+testPerfiles().then(() => console.log('Todos los perfiles ejecutados correctamente'));</code></pre>
+            </div>
+            </div>
 
             <details>
                 <summary>Ver solución</summary>
-                <pre><code class="python"># solucion_perfiles.py
+                <div class="code-tabs" data-code-id="L091-18">
+                <div class="code-tabs-header">
+                    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🐍</span> Python
+                    </button>
+                    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                        <span class="code-tab-icon">🔷</span> TypeScript
+                    </button>
+                    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+                </div>
+                <div class="code-panel active" data-lang="python">
+                    <pre><code class="language-python"># solucion_perfiles.py
 from playwright.sync_api import sync_playwright
 
 def test_perfiles():
@@ -889,6 +1801,75 @@ def test_perfiles():
 
 if __name__ == "__main__":
     test_perfiles()</code></pre>
+                </div>
+                <div class="code-panel" data-lang="typescript">
+                    <pre><code class="language-typescript">// solucion_perfiles.spec.ts
+import { chromium, devices } from 'playwright';
+
+async function testPerfiles() {
+    const browser = await chromium.launch();
+
+    // --- Perfil 1: Vendedor en campo (mobile, Cali) ---
+    const iPhone = devices['iPhone 13'];
+    const ctxVendedor = await browser.newContext({
+        ...iPhone,
+        locale: 'es-CO',
+        timezoneId: 'America/Bogota',
+        geolocation: { latitude: 3.4516, longitude: -76.5320 },
+        permissions: ['geolocation'],
+        colorScheme: 'light'
+    });
+    const pageV = await ctxVendedor.newPage();
+    await pageV.goto('https://example.com');
+    const vpV = await pageV.evaluate(() => ({ w: window.innerWidth, h: window.innerHeight }));
+    console.log(\`Vendedor viewport: \${vpV.w}x\${vpV.h}\`);
+    expect(vpV.w).toBe(iPhone.viewport.width);
+    await pageV.screenshot({ path: 'perfil_vendedor_mobile.png' });
+    await ctxVendedor.close();
+
+    // --- Perfil 2: Contador en oficina (desktop, dark) ---
+    const ctxContador = await browser.newContext({
+        viewport: { width: 1920, height: 1080 },
+        locale: 'es-CO',
+        timezoneId: 'America/Bogota',
+        colorScheme: 'dark',
+        extraHTTPHeaders: { 'X-Role': 'contador' }
+    });
+    const pageC = await ctxContador.newPage();
+    await pageC.goto('https://example.com');
+    const vpC = await pageC.evaluate(() => ({ w: window.innerWidth, h: window.innerHeight }));
+    console.log(\`Contador viewport: \${vpC.w}x\${vpC.h}\`);
+    expect(vpC.w).toBe(1920);
+    const isDark = await pageC.evaluate(
+        () => window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+    expect(isDark).toBe(true);
+    await pageC.screenshot({ path: 'perfil_contador_desktop.png' });
+    await ctxContador.close();
+
+    // --- Perfil 3: Gerente con tablet (iPad Pro) ---
+    const iPad = devices['iPad Pro 11'];
+    const ctxGerente = await browser.newContext({
+        ...iPad,
+        locale: 'es-CO',
+        timezoneId: 'America/Bogota',
+        colorScheme: 'light'
+    });
+    const pageG = await ctxGerente.newPage();
+    await pageG.goto('https://example.com');
+    const vpG = await pageG.evaluate(() => ({ w: window.innerWidth, h: window.innerHeight }));
+    console.log(\`Gerente viewport: \${vpG.w}x\${vpG.h}\`);
+    expect(vpG.w).toBe(iPad.viewport.width);
+    await pageG.screenshot({ path: 'perfil_gerente_tablet.png' });
+    await ctxGerente.close();
+
+    await browser.close();
+    console.log('Todos los perfiles verificados correctamente');
+}
+
+testPerfiles();</code></pre>
+                </div>
+                </div>
             </details>
         </div>
 

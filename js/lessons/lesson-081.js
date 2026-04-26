@@ -55,7 +55,18 @@ const LESSON_081 = {
         </div>
 
         <h3>📊 Patrón: Leer BD → Comparar con UI</h3>
-        <pre><code class="python">from playwright.sync_api import expect
+        <div class="code-tabs" data-code-id="L081-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import expect
 import re
 
 def test_tabla_empleados_coincide_con_bd(db, page):
@@ -81,10 +92,50 @@ def test_tabla_empleados_coincide_con_bd(db, page):
         expect(row.locator(".col-name")).to_have_text(emp_db["name"])
         expect(row.locator(".col-email")).to_have_text(emp_db["email"])
         expect(row.locator(".col-dept")).to_have_text(emp_db["department"])</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('tabla empleados coincide con BD', async ({ db, page }) => {
+    // 1. Obtener datos reales de la BD
+    const employeesDb = await db.query(
+        'SELECT name, email, department, status ' +
+        'FROM employees ' +
+        "WHERE status = 'active' " +
+        'ORDER BY name ' +
+        'LIMIT 10'
+    );
+
+    // 2. Navegar a la UI
+    await page.goto('https://mi-app.com/employees');
+    await expect(page.locator('tr.employee-row')).toHaveCount(employeesDb.length);
+
+    // 3. Comparar fila por fila
+    const rows = page.locator('tr.employee-row');
+    for (let i = 0; i < employeesDb.length; i++) {
+        const row = rows.nth(i);
+        await expect(row.locator('.col-name')).toHaveText(employeesDb[i].name);
+        await expect(row.locator('.col-email')).toHaveText(employeesDb[i].email);
+        await expect(row.locator('.col-dept')).toHaveText(employeesDb[i].department);
+    }
+});</code></pre>
+        </div>
+        </div>
 
         <h3>💰 Validar cálculos financieros</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python">def test_totales_pedido_coinciden(db, page, test_order):
+            <div class="code-tabs" data-code-id="L081-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_totales_pedido_coinciden(db, page, test_order):
     """Verificar que los totales mostrados coinciden con BD."""
     order_id = test_order["id"]
 
@@ -128,10 +179,72 @@ def test_tabla_empleados_coincide_con_bd(db, page):
     assert ui_subtotal == float(order_db["subtotal"])
     assert ui_tax == float(order_db["tax_amount"])
     assert ui_total == float(order_db["total"])</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('totales pedido coinciden', async ({ db, page }) => {
+    const orderId = testOrder.id;
+
+    // Datos de BD
+    const orderDb = await db.queryOne(
+        'SELECT subtotal, tax_amount, shipping_cost, total ' +
+        'FROM orders WHERE id = $1',
+        [orderId]
+    );
+    const itemsDb = await db.query(
+        'SELECT quantity, unit_price, ' +
+        '       (quantity * unit_price) as line_total ' +
+        'FROM order_items WHERE order_id = $1',
+        [orderId]
+    );
+
+    // Verificar cálculos en BD
+    const subtotalCalculado = itemsDb.reduce(
+        (sum: number, item: any) => sum + Number(item.line_total), 0
+    );
+    expect(Number(orderDb.subtotal)).toBe(subtotalCalculado);
+    expect(Number(orderDb.total)).toBe(
+        Number(orderDb.subtotal) + Number(orderDb.tax_amount) + Number(orderDb.shipping_cost)
+    );
+
+    // Navegar al detalle del pedido
+    await page.goto(\`https://mi-app.com/orders/\${orderId}\`);
+
+    // Comparar UI con BD
+    function parseMoney(text: string): number {
+        return parseFloat(text.replace(/[^\\d.]/g, ''));
+    }
+
+    const uiSubtotal = parseMoney(
+        await page.locator('[data-testid="subtotal"]').textContent() ?? ''
+    );
+    const uiTax = parseMoney(
+        await page.locator('[data-testid="tax"]').textContent() ?? ''
+    );
+    const uiTotal = parseMoney(
+        await page.locator('[data-testid="total"]').textContent() ?? ''
+    );
+
+    expect(uiSubtotal).toBe(Number(orderDb.subtotal));
+    expect(uiTax).toBe(Number(orderDb.tax_amount));
+    expect(uiTotal).toBe(Number(orderDb.total));
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📈 Validar dashboards y reportes</h3>
-        <pre><code class="python">def test_dashboard_kpis_coinciden_con_bd(db, page):
+        <div class="code-tabs" data-code-id="L081-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">def test_dashboard_kpis_coinciden_con_bd(db, page):
     """Los KPIs del dashboard deben reflejar datos reales."""
 
     # Calcular KPIs desde la BD
@@ -172,9 +285,60 @@ def test_reporte_paginado_total_correcto(db, page):
     total_ui = int(match.group(1))
 
     assert total_ui == total_bd</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">test('dashboard KPIs coinciden con BD', async ({ db, page }) => {
+    // Calcular KPIs desde la BD
+    const kpis = await db.queryOne(
+        "SELECT " +
+        "  (SELECT COUNT(*) FROM employees WHERE status = 'active') as active_employees, " +
+        "  (SELECT COUNT(*) FROM orders " +
+        "   WHERE created_at >= DATE_TRUNC('month', NOW()) " +
+        "   AND status = 'confirmed') as monthly_orders, " +
+        "  (SELECT COALESCE(SUM(total), 0) FROM orders " +
+        "   WHERE created_at >= DATE_TRUNC('month', NOW()) " +
+        "   AND status = 'confirmed') as monthly_revenue"
+    );
+
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Comparar cada KPI
+    const uiEmployees = await page.locator('[data-testid="kpi-employees"]').textContent();
+    expect(uiEmployees).toContain(String(kpis.active_employees));
+
+    const uiOrders = await page.locator('[data-testid="kpi-orders"]').textContent();
+    expect(uiOrders).toContain(String(kpis.monthly_orders));
+});
+
+test('reporte paginado total correcto', async ({ db, page }) => {
+    // El conteo 'Mostrando X de Y' debe coincidir con BD
+    const totalBd = await db.count('products', 'active = true');
+
+    await page.goto('https://mi-app.com/products');
+
+    // Extraer "Mostrando 1-20 de 150 resultados"
+    const paginationText = await page.locator('.pagination-info').textContent();
+    const match = paginationText?.match(/de (\\d+)/);
+    const totalUi = match ? parseInt(match[1]) : 0;
+
+    expect(totalUi).toBe(totalBd);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🔧 Helper de validación cruzada</h3>
-        <pre><code class="python"># utils/cross_validator.py
+        <div class="code-tabs" data-code-id="L081-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># utils/cross_validator.py
 
 class CrossValidator:
     """Helper para validaciones cruzadas UI-DB."""
@@ -223,6 +387,56 @@ def test_tabla_productos(db, page):
         "SELECT name, price, stock FROM products ORDER BY name LIMIT 10",
         {".col-name": "name", ".col-price": "price", ".col-stock": "stock"}
     )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// utils/crossValidator.ts
+import { Page, Locator, expect } from '@playwright/test';
+
+class CrossValidator {
+    /** Helper para validaciones cruzadas UI-DB. */
+    constructor(private db: any, private page: Page) {}
+
+    async validateTable(
+        tableSelector: string,
+        query: string,
+        columnMap: Record&lt;string, string&gt;
+    ): Promise&lt;void&gt; {
+        /** Validar que una tabla HTML coincide con datos de BD. */
+        const dbData = await this.db.query(query);
+        const rows = this.page.locator(tableSelector);
+
+        await expect(rows).toHaveCount(dbData.length);
+
+        for (let i = 0; i &lt; dbData.length; i++) {
+            const uiRow = rows.nth(i);
+            for (const [css, col] of Object.entries(columnMap)) {
+                const expected = String(dbData[i][col]);
+                const actual = (await uiRow.locator(css).textContent())?.trim();
+                expect(actual).toContain(expected);
+            }
+        }
+    }
+
+    async validateCount(selector: string, query: string): Promise&lt;void&gt; {
+        /** Validar que un conteo en UI coincide con BD. */
+        const dbCount = (await this.db.queryOne(query)).total;
+        const uiText = await this.page.locator(selector).textContent();
+        expect(uiText).toContain(String(dbCount));
+    }
+}
+
+// Uso:
+test('tabla productos', async ({ db, page }) => {
+    const cv = new CrossValidator(db, page);
+    await page.goto('https://mi-app.com/products');
+    await cv.validateTable(
+        'tr.product-row',
+        'SELECT name, price, stock FROM products ORDER BY name LIMIT 10',
+        { '.col-name': 'name', '.col-price': 'price', '.col-stock': 'stock' }
+    );
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00bcd4;">
             <strong>💡 Tip SIESA:</strong> La validación cruzada UI-DB es crítica en

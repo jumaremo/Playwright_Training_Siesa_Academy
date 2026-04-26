@@ -100,7 +100,18 @@ def test_generar_reporte(page):
 
         <h3>✅ DESPUÉS: Tests con auto-waiting (best practice)</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># ✅ tests_sin_sleeps.py — ASÍ SE DEBE HACER
+            <div class="code-tabs" data-code-id="L064-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># ✅ tests_sin_sleeps.py — ASÍ SE DEBE HACER
 from playwright.sync_api import expect
 
 def test_login_y_dashboard(page):
@@ -127,9 +138,51 @@ def test_login_y_dashboard(page):
     # Verificar dato específico
     sales = page.locator("#sales-total").text_content()
     assert "$" in sales</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// ✅ tests_sin_sleeps.spec.ts — ASÍ SE DEBE HACER
+import { test, expect } from '@playwright/test';
+
+test('login y dashboard — cero sleeps', async ({ page }) => {
+    await page.goto('https://taskmanager.com/login');
+
+    // fill() auto-espera a que el campo sea visible y editable
+    await page.fill('#email', 'admin@test.com');
+
+    // Esperar que la validación async complete
+    await expect(page.locator('#email-status .valid')).toBeVisible();
+
+    await page.fill('#password', 'admin123');
+    await page.click('#login-btn');
+
+    // Esperar redirección al dashboard
+    await expect(page).toHaveURL('**/dashboard');
+
+    // Esperar que los widgets carguen (cada uno independientemente)
+    await expect(page.locator('#sales-total')).not.toHaveText('$0');
+    await expect(page.locator('#users-active')).not.toHaveText('0');
+    await expect(page.locator('#tasks-pending')).not.toHaveText('0');
+
+    // Verificar dato específico
+    const sales = await page.locator('#sales-total').textContent();
+    expect(sales).toContain('$');
+});</code></pre>
+            </div>
+            </div>
         </div>
 
-        <pre><code class="python">def test_crear_tarea(page):
+        <div class="code-tabs" data-code-id="L064-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">def test_crear_tarea(page):
     """Crear tarea con autocompletado — cero sleeps."""
     page.goto("https://taskmanager.com/tasks/new")
 
@@ -203,6 +256,85 @@ def test_generar_y_descargar_reporte(page):
 
     assert download.value.suggested_filename.endswith(".pdf")
     download.value.save_as("evidence/reporte_semanal.pdf")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">test('crear tarea con autocompletado — cero sleeps', async ({ page }) => {
+    await page.goto('https://taskmanager.com/tasks/new');
+
+    // fill() auto-espera campo visible + editable
+    await page.fill('#titulo', 'Revisar código PR #42');
+    await page.fill('#descripcion', 'Revisar cambios en módulo de auth');
+
+    // Autocompletado: escribir y esperar dropdown
+    await page.fill('#asignado', 'Juan');
+    // expect auto-reintenta hasta que el item aparezca
+    await expect(page.locator('.autocomplete-item')).toHaveCount(1);
+    await page.click('.autocomplete-item:first-child');
+
+    await page.selectOption('#prioridad', { label: 'Alta' });
+
+    // Esperar respuesta de API al guardar
+    const [response] = await Promise.all([
+        page.waitForResponse('**/api/tasks'),
+        page.click('#guardar-btn'),
+    ]);
+
+    expect(response.status()).toBe(201);
+
+    // Verificar toast — expect auto-espera a que aparezca
+    await expect(page.locator('.toast')).toContainText('creada');
+});
+
+test('eliminar tarea con modal animado — cero sleeps', async ({ page }) => {
+    await page.goto('https://taskmanager.com/tasks');
+
+    // Esperar que la lista cargue
+    await expect(page.locator('.task-row')).not.toHaveCount(0);
+
+    const initialCount = await page.locator('.task-row').count();
+
+    // Click en eliminar — auto-espera a que sea clickeable
+    await page.click('.task-row:first-child .delete-btn');
+
+    // Esperar que el modal se abra (incluyendo animación)
+    // click() en el botón del modal auto-espera "stable"
+    await expect(page.locator('#confirm-modal')).toBeVisible();
+    await page.click('#confirm-delete');
+
+    // Esperar que el modal se cierre
+    await expect(page.locator('#confirm-modal')).toBeHidden();
+
+    // Verificar que la tarea fue eliminada
+    await expect(page.locator('.task-row')).toHaveCount(initialCount - 1);
+});
+
+test('generar y descargar reporte — cero sleeps', async ({ page }) => {
+    await page.goto('https://taskmanager.com/reports');
+
+    await page.selectOption('#tipo', { label: 'Semanal' });
+
+    // Esperar respuesta de generación (puede tardar)
+    const [reportResp] = await Promise.all([
+        page.waitForResponse('**/api/reports/generate', { timeout: 60000 }),
+        page.click('#generar-btn'),
+    ]);
+
+    expect(reportResp.status()).toBe(200);
+
+    // Esperar que el botón de descarga se habilite
+    await expect(page.locator('#descargar-pdf')).toBeEnabled();
+
+    // Capturar la descarga
+    const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.click('#descargar-pdf'),
+    ]);
+
+    expect(download.suggestedFilename()).toMatch(/\\.pdf$/);
+    await download.saveAs('evidence/reporte_semanal.pdf');
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📊 Comparación de resultados</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -250,7 +382,18 @@ def test_generar_y_descargar_reporte(page):
         </div>
 
         <h3>🧪 Test avanzado: Flujo E2E completo sin sleeps</h3>
-        <pre><code class="python">def test_flujo_completo_task_manager(page):
+        <div class="code-tabs" data-code-id="L064-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">def test_flujo_completo_task_manager(page):
     """E2E: Login → Crear tarea → Verificar → Eliminar → Reportar.
     Cero time.sleep(), cero wait_for_timeout().
     """
@@ -317,6 +460,87 @@ def test_generar_y_descargar_reporte(page):
     with page.expect_download() as download:
         page.click("#descargar-pdf")
     assert download.value.suggested_filename.endswith(".pdf")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">test('flujo completo task manager — E2E sin sleeps', async ({ page }) => {
+    // E2E: Login → Crear tarea → Verificar → Eliminar → Reportar.
+    // Cero waitForTimeout().
+
+    // ── 1. LOGIN ──
+    await page.goto('https://taskmanager.com/login');
+    await page.fill('#email', 'admin@test.com');
+    await expect(page.locator('#email-status .valid')).toBeVisible();
+    await page.fill('#password', 'admin123');
+    await page.click('#login-btn');
+    await expect(page).toHaveURL('**/dashboard');
+
+    // ── 2. NAVEGAR A TAREAS ──
+    await page.click("nav a:has-text('Tareas')");
+    await expect(page).toHaveURL('**/tasks');
+    await expect(page.locator('.task-row')).not.toHaveCount(0);
+    const initialCount = await page.locator('.task-row').count();
+
+    // ── 3. CREAR TAREA ──
+    await page.click('#new-task-btn');
+    await expect(page).toHaveURL('**/tasks/new');
+
+    await page.fill('#titulo', 'Test E2E Automatizado');
+    await page.fill('#descripcion', 'Creada por Playwright Academy');
+    await page.fill('#asignado', 'Carlos');
+    await expect(page.locator('.autocomplete-item')).toHaveCount(1);
+    await page.click('.autocomplete-item:first-child');
+    await page.selectOption('#prioridad', { label: 'Alta' });
+
+    const [createResp] = await Promise.all([
+        page.waitForResponse('**/api/tasks'),
+        page.click('#guardar-btn'),
+    ]);
+    expect(createResp.status()).toBe(201);
+
+    await expect(page.locator('.toast')).toContainText('creada');
+
+    // ── 4. VERIFICAR EN LISTA ──
+    await page.click("nav a:has-text('Tareas')");
+    await expect(page.locator('.task-row')).toHaveCount(initialCount + 1);
+    await expect(page.locator('.task-row').first()).toContainText(
+        'Test E2E Automatizado'
+    );
+
+    // ── 5. ELIMINAR TAREA ──
+    await page.click('.task-row:first-child .delete-btn');
+    await expect(page.locator('#confirm-modal')).toBeVisible();
+
+    const [deleteResp] = await Promise.all([
+        page.waitForResponse(
+            resp => resp.url().includes('/api/tasks/')
+                && resp.request().method() === 'DELETE'
+        ),
+        page.click('#confirm-delete'),
+    ]);
+
+    await expect(page.locator('#confirm-modal')).toBeHidden();
+    await expect(page.locator('.task-row')).toHaveCount(initialCount);
+
+    // ── 6. GENERAR REPORTE ──
+    await page.click("nav a:has-text('Reportes')");
+    await expect(page).toHaveURL('**/reports');
+
+    await page.selectOption('#tipo', { label: 'Semanal' });
+    const [reportResp] = await Promise.all([
+        page.waitForResponse('**/api/reports/generate', { timeout: 30000 }),
+        page.click('#generar-btn'),
+    ]);
+
+    await expect(page.locator('#descargar-pdf')).toBeEnabled();
+
+    const [download] = await Promise.all([
+        page.waitForEvent('download'),
+        page.click('#descargar-pdf'),
+    ]);
+    expect(download.suggestedFilename()).toMatch(/\\.pdf$/);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>📝 Checklist: ¿Mi test está libre de sleeps?</h3>
         <div style="background: #e8eaf6; padding: 15px; border-radius: 8px; margin: 15px 0;">

@@ -25,7 +25,18 @@ const LESSON_131 = {
 
         <h3>Configuracion multi-browser</h3>
 
-        <pre><code class="python"># conftest.py - Configuracion cross-browser
+        <div class="code-tabs" data-code-id="L131-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># conftest.py - Configuracion cross-browser
 import pytest
 
 # Ejecucion por linea de comandos:
@@ -49,10 +60,58 @@ def browser_context_args(browser_context_args, browser_name):
         config["viewport"] = {"width": 1440, "height": 900}
 
     return config</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// playwright.config.ts - Configuracion cross-browser
+import { defineConfig, devices } from '@playwright/test';
+
+// Ejecucion por linea de comandos:
+// npx playwright test --project=chromium    # Solo Chromium
+// npx playwright test --project=firefox     # Solo Firefox
+// npx playwright test --project=webkit      # Solo WebKit
+// npx playwright test --project=chromium --project=firefox  # Ambos
+
+export default defineConfig({
+    projects: [
+        {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'] },
+        },
+        {
+            name: 'firefox',
+            // Firefox necesita configuracion especifica
+            use: {
+                ...devices['Desktop Firefox'],
+                viewport: { width: 1920, height: 1080 },
+            },
+        },
+        {
+            name: 'webkit',
+            // WebKit (Safari) tiene limitaciones
+            use: {
+                ...devices['Desktop Safari'],
+                viewport: { width: 1440, height: 900 },
+            },
+        },
+    ],
+});</code></pre>
+        </div>
+        </div>
 
         <h3>Emulacion de dispositivos moviles</h3>
 
-        <pre><code class="python"># Playwright incluye perfiles de dispositivos reales
+        <div class="code-tabs" data-code-id="L131-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># Playwright incluye perfiles de dispositivos reales
 from playwright.sync_api import sync_playwright
 
 # Ver todos los dispositivos disponibles:
@@ -63,8 +122,39 @@ with sync_playwright() as p:
     #  'Galaxy S9+', 'Galaxy Tab S4', 'iPad (gen 6)', 'iPad (gen 7)',
     #  'iPad Mini', 'iPad Pro 11', 'iPhone 6', 'iPhone 7', 'iPhone 8',
     #  'iPhone 11', 'iPhone 12', 'iPhone 13', 'iPhone 14', ...]</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// Playwright incluye perfiles de dispositivos reales
+import { devices } from '@playwright/test';
 
-        <pre><code class="python"># conftest.py - Fixtures para dispositivos moviles
+// Ver todos los dispositivos disponibles:
+console.log(Object.keys(devices));
+// ['Blackberry PlayBook', 'BlackBerry Z30', 'Galaxy Note 3',
+//  'Galaxy Note II', 'Galaxy S III', 'Galaxy S5', 'Galaxy S8',
+//  'Galaxy S9+', 'Galaxy Tab S4', 'iPad (gen 6)', 'iPad (gen 7)',
+//  'iPad Mini', 'iPad Pro 11', 'iPhone 6', 'iPhone 7', 'iPhone 8',
+//  'iPhone 11', 'iPhone 12', 'iPhone 13', 'iPhone 14', ...]
+
+// Uso en playwright.config.ts:
+// projects: [
+//     { name: 'iPhone 14', use: { ...devices['iPhone 14'] } },
+//     { name: 'iPad Pro', use: { ...devices['iPad Pro 11'] } },
+// ]</code></pre>
+        </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L131-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># conftest.py - Fixtures para dispositivos moviles
 import pytest
 
 DEVICES = {
@@ -120,10 +210,99 @@ def tablet_page(browser):
     page = context.new_page()
     yield page
     context.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// playwright.config.ts - Proyectos para dispositivos moviles
+import { defineConfig, devices } from '@playwright/test';
+
+// Configuracion de dispositivos personalizados
+const CUSTOM_DEVICES = {
+    iphone14: {
+        viewport: { width: 390, height: 844 },
+        userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
+        deviceScaleFactor: 3,
+        isMobile: true,
+        hasTouch: true,
+    },
+    galaxy_s23: {
+        viewport: { width: 360, height: 780 },
+        userAgent: 'Mozilla/5.0 (Linux; Android 14; SM-S911B) AppleWebKit/537.36',
+        deviceScaleFactor: 3,
+        isMobile: true,
+        hasTouch: true,
+    },
+    ipad_pro: {
+        viewport: { width: 1024, height: 1366 },
+        userAgent: 'Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
+        deviceScaleFactor: 2,
+        isMobile: true,
+        hasTouch: true,
+    },
+    desktop_hd: {
+        viewport: { width: 1920, height: 1080 },
+        isMobile: false,
+        hasTouch: false,
+    },
+};
+
+export default defineConfig({
+    projects: [
+        // Proyecto parametrizado para cada dispositivo
+        {
+            name: 'iphone14',
+            use: { ...CUSTOM_DEVICES.iphone14 },
+        },
+        {
+            name: 'galaxy_s23',
+            use: { ...CUSTOM_DEVICES.galaxy_s23 },
+        },
+        {
+            name: 'ipad_pro',
+            use: { ...CUSTOM_DEVICES.ipad_pro },
+        },
+        {
+            name: 'desktop_hd',
+            use: { ...CUSTOM_DEVICES.desktop_hd },
+        },
+    ],
+});
+
+// --- Fixtures personalizadas en un archivo de test ---
+// tests/fixtures.ts
+import { test as base, Page } from '@playwright/test';
+
+// Fixture para pagina mobile (iPhone 14)
+export const test = base.extend&lt;{ mobilePage: Page; tabletPage: Page }&gt;({
+    mobilePage: async ({ browser }, use) => {
+        const context = await browser.newContext(CUSTOM_DEVICES.iphone14);
+        const page = await context.newPage();
+        await use(page);
+        await context.close();
+    },
+    tabletPage: async ({ browser }, use) => {
+        const context = await browser.newContext(CUSTOM_DEVICES.ipad_pro);
+        const page = await context.newPage();
+        await use(page);
+        await context.close();
+    },
+});</code></pre>
+        </div>
+        </div>
 
         <h3>Tests responsive con breakpoints</h3>
 
-        <pre><code class="python"># tests/responsive/test_responsive_layout.py
+        <div class="code-tabs" data-code-id="L131-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># tests/responsive/test_responsive_layout.py
 import pytest
 from playwright.sync_api import expect
 
@@ -171,6 +350,69 @@ def test_product_grid_columns(browser, bp, base_url):
         assert grid_style.count(" ") >= 2
 
     context.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// tests/responsive/responsive-layout.spec.ts
+import { test, expect } from '@playwright/test';
+
+const BREAKPOINTS = [
+    { name: 'mobile', width: 375, height: 812 },
+    { name: 'tablet', width: 768, height: 1024 },
+    { name: 'desktop', width: 1280, height: 800 },
+    { name: 'wide', width: 1920, height: 1080 },
+];
+
+for (const bp of BREAKPOINTS) {
+    test(\`navbar se adapta al viewport - \${bp.name}\`, async ({ browser }) => {
+        const context = await browser.newContext({
+            viewport: { width: bp.width, height: bp.height },
+        });
+        const page = await context.newPage();
+        await page.goto('/');
+
+        if (bp.width &lt; 768) {
+            // Mobile: menu hamburguesa visible, links ocultos
+            await expect(page.locator('[data-testid="hamburger-menu"]')).toBeVisible();
+            await expect(page.locator('[data-testid="nav-links"]')).toBeHidden();
+        } else {
+            // Desktop/Tablet: links visibles, hamburguesa oculto
+            await expect(page.locator('[data-testid="nav-links"]')).toBeVisible();
+            await expect(page.locator('[data-testid="hamburger-menu"]')).toBeHidden();
+        }
+
+        await context.close();
+    });
+
+    test(\`grid de productos ajusta columnas - \${bp.name}\`, async ({ browser, baseURL }) => {
+        const context = await browser.newContext({
+            viewport: { width: bp.width, height: bp.height },
+        });
+        const page = await context.newPage();
+        await page.goto(\`\${baseURL}/products\`);
+
+        const grid = page.locator('[data-testid="product-grid"]');
+        const gridStyle = await grid.evaluate(
+            (el) => window.getComputedStyle(el).gridTemplateColumns
+        );
+
+        if (bp.width &lt; 768) {
+            // Mobile: 1 columna
+            expect(
+                gridStyle.split(' ').length === 1 || gridStyle.includes('1fr')
+            ).toBeTruthy();
+        } else if (bp.width &lt; 1280) {
+            // Tablet: 2 columnas
+            expect(gridStyle.split(' ').length).toBeGreaterThanOrEqual(2);
+        } else {
+            // Desktop: 3-4 columnas
+            expect(gridStyle.split(' ').length).toBeGreaterThanOrEqual(3);
+        }
+
+        await context.close();
+    });
+}</code></pre>
+        </div>
+        </div>
 
         <h3>Tests touch en mobile</h3>
 

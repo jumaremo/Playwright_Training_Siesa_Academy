@@ -33,7 +33,18 @@ const LESSON_107 = {
         <strong>logs de consola</strong> y <strong>tráfico de red</strong> durante la ejecución
         de un test.</p>
 
-        <pre><code class="python"># Recap: configuración básica de trazas
+        <div class="code-tabs" data-code-id="L107-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># Recap: configuración básica de trazas
 from playwright.sync_api import sync_playwright
 
 
@@ -61,6 +72,40 @@ def test_con_traza_basica():
 
 # Ver la traza:
 # playwright show-trace traces/test-login.zip</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// Recap: configuración básica de trazas
+import { test } from '@playwright/test';
+
+// Opción 1: Via configuración (recomendado)
+// playwright.config.ts → use: { trace: 'on' }
+
+// Opción 2: Manual en un test
+test('test con traza basica', async ({ browser }) => {
+    /** Captura una traza completa del test. */
+    const context = await browser.newContext();
+
+    // Iniciar traza con opciones básicas
+    await context.tracing.start({
+        screenshots: true,  // Captura screenshot por acción
+        snapshots: true,    // Captura DOM snapshot por acción
+        sources: true,      // Incluye código fuente en la traza
+    });
+
+    const page = await context.newPage();
+    await page.goto('https://mi-aplicacion.com');
+    await page.fill('#usuario', 'admin');
+    await page.click('#btn-login');
+
+    // Detener traza y guardar archivo .zip
+    await context.tracing.stop({ path: 'traces/test-login.zip' });
+    await context.close();
+});
+
+// Ver la traza:
+// npx playwright show-trace traces/test-login.zip</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -74,7 +119,18 @@ def test_con_traza_basica():
         <p>Playwright permite configurar trazas con <strong>título</strong> y <strong>nombre</strong>
         para identificarlas fácilmente cuando se trabaja con múltiples archivos de traza.</p>
 
-        <pre><code class="python"># Configuración avanzada con título y nombre
+        <div class="code-tabs" data-code-id="L107-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># Configuración avanzada con título y nombre
 from playwright.sync_api import sync_playwright
 import datetime
 
@@ -106,6 +162,39 @@ def test_traza_con_metadata():
         # El título aparece en la barra superior del Trace Viewer
         context.tracing.stop(path=f"traces/login-{timestamp}.zip")
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// Configuración avanzada con título y nombre
+import { test } from '@playwright/test';
+
+test('traza con metadata', async ({ browser }) => {
+    /** Traza con título personalizado para fácil identificación. */
+    const context = await browser.newContext();
+
+    const timestamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+
+    // Iniciar traza con título descriptivo
+    await context.tracing.start({
+        title: \`Login HCM - \${timestamp}\`,
+        name: 'login-flow',       // Nombre del chunk de traza
+        screenshots: true,
+        snapshots: true,
+        sources: true,
+    });
+
+    const page = await context.newPage();
+    await page.goto('https://hcm.siesa.com/login');
+    await page.fill('#usuario', 'admin');
+    await page.fill('#password', 'secret');
+    await page.click("button[type='submit']");
+    await page.waitForURL('**/dashboard');
+
+    // El título aparece en la barra superior del Trace Viewer
+    await context.tracing.stop({ path: \`traces/login-\${timestamp}.zip\` });
+    await context.close();
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Parámetros de context.tracing.start()</h4>
@@ -152,7 +241,18 @@ def test_traza_con_metadata():
         porciones independientes. Esto es útil cuando un test tiene varias fases (login, navegación,
         operación, verificación) y quieres analizar cada fase por separado.</p>
 
-        <pre><code class="python"># Trace chunks: segmentar trazas dentro de un test
+        <div class="code-tabs" data-code-id="L107-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># Trace chunks: segmentar trazas dentro de un test
 from playwright.sync_api import sync_playwright
 
 
@@ -221,6 +321,77 @@ def test_flujo_completo_con_chunks():
 # playwright show-trace traces/chunk-01-login.zip
 # playwright show-trace traces/chunk-02-navegacion.zip
 # playwright show-trace traces/chunk-03-operacion.zip</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// Trace chunks: segmentar trazas dentro de un test
+import { test, expect } from '@playwright/test';
+
+test('flujo completo con chunks', async ({ browser }) => {
+    /**
+     * Divide un test largo en chunks de traza independientes.
+     * Cada chunk genera un archivo .zip separado para análisis aislado.
+     */
+    const context = await browser.newContext();
+
+    // ── Chunk 1: Login ──────────────────────────
+    await context.tracing.start({
+        name: 'chunk-login',
+        screenshots: true,
+        snapshots: true,
+        sources: true,
+    });
+
+    const page = await context.newPage();
+    await page.goto('https://hcm.siesa.com/login');
+    await page.fill('#usuario', 'admin');
+    await page.fill('#password', 'secret');
+    await page.click("button[type='submit']");
+    await page.waitForURL('**/dashboard');
+
+    // Detener chunk 1 y guardar
+    await context.tracing.stop({ path: 'traces/chunk-01-login.zip' });
+
+    // ── Chunk 2: Navegación al módulo ───────────
+    await context.tracing.start({
+        name: 'chunk-navegacion',
+        screenshots: true,
+        snapshots: true,
+        sources: true,
+    });
+
+    await page.click('nav >> text=Nómina');
+    await page.waitForSelector('.modulo-nomina');
+    await page.click('text=Liquidación mensual');
+    await page.waitForSelector('.formulario-liquidacion');
+
+    // Detener chunk 2 y guardar
+    await context.tracing.stop({ path: 'traces/chunk-02-navegacion.zip' });
+
+    // ── Chunk 3: Operación y verificación ───────
+    await context.tracing.start({
+        name: 'chunk-operacion',
+        screenshots: true,
+        snapshots: true,
+        sources: true,
+    });
+
+    await page.selectOption('#periodo', '2026-03');
+    await page.click('#btn-calcular');
+    await page.waitForSelector('.resultado-calculo');
+    expect(await page.textContent('.total-nomina')).not.toBe('');
+
+    // Detener chunk 3 y guardar
+    await context.tracing.stop({ path: 'traces/chunk-03-operacion.zip' });
+
+    await context.close();
+});
+
+// Cada chunk se analiza por separado:
+// npx playwright show-trace traces/chunk-01-login.zip
+// npx playwright show-trace traces/chunk-02-navegacion.zip
+// npx playwright show-trace traces/chunk-03-operacion.zip</code></pre>
+        </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔬 start_chunk() y stop_chunk() para chunks intermedios</h4>
@@ -229,7 +400,18 @@ def test_flujo_completo_con_chunks():
             útil para mantener una traza "base" activa mientras capturas segmentos específicos.</p>
         </div>
 
-        <pre><code class="python"># start_chunk/stop_chunk: chunks sin reiniciar la traza completa
+        <div class="code-tabs" data-code-id="L107-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># start_chunk/stop_chunk: chunks sin reiniciar la traza completa
 from playwright.sync_api import sync_playwright
 
 
@@ -276,13 +458,73 @@ def test_con_start_stop_chunk():
         # Detener traza completa (incluye el último chunk)
         context.tracing.stop(path="traces/reporte-chunk.zip")
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// startChunk/stopChunk: chunks sin reiniciar la traza completa
+import { test } from '@playwright/test';
+
+test('con start stop chunk', async ({ browser }) => {
+    /**
+     * Usa startChunk/stopChunk para exportar segmentos
+     * sin detener la traza principal.
+     */
+    const context = await browser.newContext();
+
+    // Iniciar traza principal (se mantiene activa)
+    await context.tracing.start({
+        screenshots: true,
+        snapshots: true,
+        sources: true,
+    });
+
+    const page = await context.newPage();
+    await page.goto('https://hcm.siesa.com/login');
+    await page.fill('#usuario', 'admin');
+    await page.click("button[type='submit']");
+
+    // Exportar chunk del login sin detener la traza
+    await context.tracing.stopChunk({ path: 'traces/login-chunk.zip' });
+
+    // Iniciar nuevo chunk para la siguiente fase
+    await context.tracing.startChunk({ title: 'Dashboard navigation' });
+
+    await page.click('nav >> text=Reportes');
+    await page.waitForSelector('.lista-reportes');
+
+    // Exportar chunk de navegación
+    await context.tracing.stopChunk({ path: 'traces/nav-chunk.zip' });
+
+    // Iniciar otro chunk para operaciones
+    await context.tracing.startChunk({ title: 'Report generation' });
+
+    await page.click('text=Reporte Mensual');
+    await page.click('#btn-generar');
+    await page.waitForSelector('.reporte-generado');
+
+    // Detener traza completa (incluye el último chunk)
+    await context.tracing.stop({ path: 'traces/reporte-chunk.zip' });
+    await context.close();
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>❌ Error común con chunks</h4>
             <p>No puedes llamar a <code>start_chunk()</code> sin haber iniciado la traza con
             <code>start()</code> primero. Tampoco puedes llamar a <code>start()</code> dos veces
             sin un <code>stop()</code> intermedio. La secuencia correcta es:</p>
-            <pre><code class="python"># ✅ Correcto
+            <div class="code-tabs" data-code-id="L107-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">&#x1F40D;</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">&#x1F537;</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># ✅ Correcto
 context.tracing.start(...)     # Inicia la traza
 context.tracing.stop_chunk(path="a.zip")  # Exporta chunk
 context.tracing.start_chunk()  # Inicia nuevo chunk
@@ -292,6 +534,20 @@ context.tracing.stop(path="b.zip")  # Detiene todo
 context.tracing.start_chunk()  # Error: traza no iniciada
 context.tracing.start(...)
 context.tracing.start(...)     # Error: traza ya activa</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// ✅ Correcto
+await context.tracing.start({ ... });        // Inicia la traza
+await context.tracing.stopChunk({ path: 'a.zip' }); // Exporta chunk
+await context.tracing.startChunk();          // Inicia nuevo chunk
+await context.tracing.stop({ path: 'b.zip' });      // Detiene todo
+
+// ❌ Incorrecto
+await context.tracing.startChunk();  // Error: traza no iniciada
+await context.tracing.start({ ... });
+await context.tracing.start({ ... });  // Error: traza ya activa</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🌐 Análisis de network waterfall en Trace Viewer</h3>
@@ -299,7 +555,18 @@ context.tracing.start(...)     # Error: traza ya activa</code></pre>
         peticiones HTTP realizadas durante el test en formato <strong>waterfall</strong> (cascada).
         Esto es invaluable para diagnosticar problemas de rendimiento y dependencias de red.</p>
 
-        <pre><code class="python"># Capturar trazas con tráfico de red detallado
+        <div class="code-tabs" data-code-id="L107-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># Capturar trazas con tráfico de red detallado
 from playwright.sync_api import sync_playwright
 
 
@@ -360,6 +627,73 @@ def test_analisis_red():
 # - Filtros por tipo de recurso (XHR, JS, CSS, IMG, etc.)
 # - Tamaño de cada respuesta
 # - Headers de request/response completos</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// Capturar trazas con tráfico de red detallado
+import { test } from '@playwright/test';
+
+test('analisis red', async ({ browser }) => {
+    /**
+     * Captura traza para analizar el waterfall de red.
+     * En el Trace Viewer: pestaña Network.
+     */
+    const context = await browser.newContext();
+
+    await context.tracing.start({
+        title: 'Análisis de red - Dashboard HCM',
+        screenshots: true,
+        snapshots: true,
+        sources: true,
+    });
+
+    const page = await context.newPage();
+
+    // Interceptar requests para logging adicional
+    interface Peticion {
+        url: string; method: string; resourceType: string;
+        status?: number; timing?: Record&lt;string, number&gt;;
+    }
+    const peticiones: Peticion[] = [];
+
+    page.on('request', (request) => {
+        peticiones.push({
+            url: request.url(),
+            method: request.method(),
+            resourceType: request.resourceType(),
+        });
+    });
+
+    page.on('response', (response) => {
+        const req = peticiones.find(r => r.url === response.url());
+        if (req) {
+            req.status = response.status();
+            req.timing = response.request().timing();
+        }
+    });
+
+    await page.goto('https://mi-aplicacion.com/dashboard');
+    await page.waitForLoadState('networkidle');
+
+    // Resumen de peticiones
+    console.log(\`Total peticiones: \${peticiones.length}\`);
+    for (const req of peticiones) {
+        const status = req.status ?? '?';
+        console.log(\`  [\${status}] \${req.method} \${req.resourceType}: \`
+            + req.url.slice(0, 80));
+    }
+
+    await context.tracing.stop({ path: 'traces/red-dashboard.zip' });
+    await context.close();
+});
+
+// En el Trace Viewer, la pestaña Network muestra:
+// - Cada request con método, URL, status y tiempo
+// - Diagrama waterfall con barras de duración
+// - Filtros por tipo de recurso (XHR, JS, CSS, IMG, etc.)
+// - Tamaño de cada respuesta
+// - Headers de request/response completos</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>📊 Qué buscar en el waterfall de red</h4>
@@ -401,7 +735,18 @@ def test_analisis_red():
         el <strong>DOM completo</strong> antes y después de cada acción. No es un screenshot estático:
         es un snapshot interactivo del HTML que puedes inspeccionar con las DevTools del visor.</p>
 
-        <pre><code class="python"># Habilitar snapshots para inspección de DOM
+        <div class="code-tabs" data-code-id="L107-7">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># Habilitar snapshots para inspección de DOM
 from playwright.sync_api import sync_playwright
 
 
@@ -439,6 +784,46 @@ def test_con_snapshots_detallados():
 # 3. Panel "After" muestra el DOM después de la acción
 # 4. Puedes usar la lupa para inspeccionar elementos
 # 5. Los cambios en el DOM se resaltan visualmente</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// Habilitar snapshots para inspección de DOM
+import { test } from '@playwright/test';
+
+test('con snapshots detallados', async ({ browser }) => {
+    /**
+     * Con snapshots: true, el Trace Viewer captura el DOM
+     * completo antes y después de cada acción.
+     */
+    const context = await browser.newContext();
+
+    await context.tracing.start({
+        title: 'Snapshots de formulario',
+        screenshots: true,
+        snapshots: true,   // CRUCIAL para DOM snapshots
+        sources: true,
+    });
+
+    const page = await context.newPage();
+    await page.goto('https://mi-aplicacion.com/formulario');
+
+    // Cada una de estas acciones genera un snapshot antes/después
+    await page.fill('#nombre', 'Juan Manuel');     // Snapshot: campo vacío → con texto
+    await page.fill('#email', 'jm@siesa.com');     // Snapshot: email vacío → con texto
+    await page.check('#acepto-terminos');           // Snapshot: checkbox off → on
+    await page.click("button[type='submit']");     // Snapshot: formulario → resultado
+
+    await context.tracing.stop({ path: 'traces/formulario-snapshots.zip' });
+    await context.close();
+});
+
+// En el Trace Viewer:
+// 1. Click en cualquier acción en el timeline
+// 2. Panel "Before" muestra el DOM antes de la acción
+// 3. Panel "After" muestra el DOM después de la acción
+// 4. Puedes usar la lupa para inspeccionar elementos
+// 5. Los cambios en el DOM se resaltan visualmente</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>

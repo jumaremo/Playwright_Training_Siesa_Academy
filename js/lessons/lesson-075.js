@@ -54,7 +54,18 @@ const LESSON_075 = {
 
         <h3>📦 Patrón 1: API Setup → UI Test</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># Crear datos via API (rápido), verificar en UI
+            <div class="code-tabs" data-code-id="L075-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Crear datos via API (rápido), verificar en UI
 
 def test_producto_creado_aparece_en_catalogo(page):
     """Crear producto por API y verificar que aparece en la UI."""
@@ -84,10 +95,57 @@ def test_producto_creado_aparece_en_catalogo(page):
 
     # CLEANUP via API
     api.delete(f"https://mi-app.com/api/products/{product_id}")</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Crear datos via API (rápido), verificar en UI
+import { test, expect } from '@playwright/test';
+
+test('producto creado aparece en catálogo', async ({ page }) => {
+    // SETUP via API (instantáneo, sin navegar por formularios)
+    const api = page.context().request;
+    const createResponse = await api.post('https://mi-app.com/api/products', {
+        data: {
+            name: 'Laptop Test E2E',
+            price: 2500000,
+            category: 'Electrónica',
+            stock: 10,
+        },
+    });
+    expect(createResponse.status()).toBe(201);
+    const productId = (await createResponse.json()).id;
+
+    // TEST en UI
+    await page.goto('https://mi-app.com/products');
+    await page.fill('[data-testid="search"]', 'Laptop Test E2E');
+    await page.click('[data-testid="search-btn"]');
+
+    // Verificar que el producto aparece
+    const productCard = page.locator('[data-testid="product-card"]').filter({
+        hasText: 'Laptop Test E2E',
+    });
+    await expect(productCard).toBeVisible();
+    await expect(productCard).toContainText('$2,500,000');
+
+    // CLEANUP via API
+    await api.delete('https://mi-app.com/api/products/' + productId);
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🖱️ Patrón 2: UI Action → API Verify</h3>
-        <pre><code class="python"># Interactuar por UI y verificar resultado via API
+        <div class="code-tabs" data-code-id="L075-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Interactuar por UI y verificar resultado via API
 
 def test_formulario_guarda_datos_correctamente(page):
     """Llenar formulario por UI y verificar datos guardados via API."""
@@ -119,10 +177,58 @@ def test_formulario_guarda_datos_correctamente(page):
 
     # Cleanup
     api.delete(f"https://mi-app.com/api/users/{user_id}")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Interactuar por UI y verificar resultado via API
+import { test, expect } from '@playwright/test';
+
+test('formulario guarda datos correctamente', async ({ page }) => {
+    await page.goto('https://mi-app.com/users/new');
+
+    // ACCIÓN por UI
+    await page.fill('[name="nombre"]', 'Carlos Díaz');
+    await page.fill('[name="email"]', 'carlos@siesa.com');
+    await page.fill('[name="telefono"]', '3001234567');
+    await page.selectOption('[name="rol"]', { label: 'QA Engineer' });
+
+    // Capturar la response del POST para obtener el ID
+    const respPromise = page.waitForResponse('**/api/users');
+    await page.click('[data-testid="save-btn"]');
+    const resp = await respPromise;
+
+    const userId = (await resp.json()).id;
+
+    // VERIFICACIÓN via API (más confiable que solo la UI)
+    const api = page.context().request;
+    const verify = await api.get('https://mi-app.com/api/users/' + userId);
+    expect(verify.ok()).toBeTruthy();
+
+    const user = await verify.json();
+    expect(user.nombre).toBe('Carlos Díaz');
+    expect(user.email).toBe('carlos@siesa.com');
+    expect(user.telefono).toBe('3001234567');
+    expect(user.rol).toBe('qa_engineer');
+
+    // Cleanup
+    await api.delete('https://mi-app.com/api/users/' + userId);
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🔄 Patrón 3: API Setup → UI Test → API Cleanup</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># Fixture que maneja setup y cleanup completo
+            <div class="code-tabs" data-code-id="L075-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Fixture que maneja setup y cleanup completo
 
 @pytest.fixture
 def test_task(page):
@@ -162,10 +268,71 @@ def test_editar_tarea_por_ui(page, test_task):
     updated = verify.json()
     assert updated["title"] == "Título modificado por UI"
     assert updated["priority"] == "low"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Fixture que maneja setup y cleanup completo
+import { test as base, expect } from '@playwright/test';
+
+type TaskFixture = { testTask: Record&lt;string, unknown&gt; };
+
+const test = base.extend&lt;TaskFixture&gt;({
+    testTask: async ({ page }, use) => {
+        const api = page.context().request;
+
+        // SETUP
+        const resp = await api.post('https://mi-app.com/api/tasks', {
+            data: {
+                title: 'Tarea para test UI',
+                description: 'Creada por fixture',
+                priority: 'high',
+                status: 'pending',
+            },
+        });
+        const task = await resp.json();
+
+        await use(task);
+
+        // CLEANUP (siempre se ejecuta, incluso si el test falla)
+        await api.delete('https://mi-app.com/api/tasks/' + task.id);
+    },
+});
+
+// Test limpio que usa la fixture
+test('editar tarea por UI', async ({ page, testTask }) => {
+    await page.goto('https://mi-app.com/tasks/' + testTask.id + '/edit');
+
+    await page.fill('[name="title"]', 'Título modificado por UI');
+    await page.selectOption('[name="priority"]', { label: 'Baja' });
+    await page.click('[data-testid="save"]');
+
+    await expect(page.locator('.toast-success')).toBeVisible();
+
+    // Verificar via API que los cambios se guardaron
+    const api = page.context().request;
+    const verify = await api.get(
+        'https://mi-app.com/api/tasks/' + testTask.id
+    );
+    const updated = await verify.json();
+    expect(updated.title).toBe('Título modificado por UI');
+    expect(updated.priority).toBe('low');
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🔐 Patrón 4: API Login → UI Test</h3>
-        <pre><code class="python"># Autenticarse via API para no pasar por el formulario de login
+        <div class="code-tabs" data-code-id="L075-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Autenticarse via API para no pasar por el formulario de login
 
 @pytest.fixture
 def fast_login(page):
@@ -190,9 +357,50 @@ def test_dashboard_muestra_datos(fast_login):
     expect(page.locator("[data-testid='welcome']")).to_contain_text(
         "Bienvenido"
     )</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Autenticarse via API para no pasar por el formulario de login
+import { test as base, expect } from '@playwright/test';
+
+const test = base.extend&lt;{ fastLogin: any }&gt;({
+    fastLogin: async ({ page }, use) => {
+        const api = page.context().request;
+
+        // Login via API
+        const loginResp = await api.post(
+            'https://mi-app.com/api/auth/login',
+            { data: { email: 'admin@test.com', password: 'admin123' } }
+        );
+        expect(loginResp.ok()).toBeTruthy();
+        // Las cookies se guardan automáticamente en el context
+
+        await use(page);
+    },
+});
+
+test('dashboard muestra datos', async ({ fastLogin: page }) => {
+    // Ya estamos autenticados — ir directo al dashboard
+    await page.goto('https://mi-app.com/dashboard');
+    await expect(page.locator('[data-testid="welcome"]')).toContainText(
+        'Bienvenido'
+    );
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🧪 Ejemplo completo: Flujo E2E con API + UI</h3>
-        <pre><code class="python">from playwright.sync_api import expect
+        <div class="code-tabs" data-code-id="L075-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import expect
 
 def test_flujo_completo_pedido(page):
     """E2E: Crear producto (API) → Comprarlo (UI) → Verificar pedido (API)."""
@@ -251,6 +459,69 @@ def test_flujo_completo_pedido(page):
     # ── 6. CLEANUP ──
     api.delete(f"{base}/api/orders/{order_id}")
     api.delete(f"{base}/api/products/{product['id']}")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+const BASE = 'https://mi-app.com';
+
+test('flujo completo pedido', async ({ page }) => {
+    const api = page.context().request;
+
+    // ── 1. SETUP: Crear producto via API ──
+    const product = await (await api.post(BASE + '/api/products', {
+        data: { name: 'Producto E2E Test', price: 50000, stock: 5 },
+    })).json();
+
+    // ── 2. LOGIN via API (rápido) ──
+    await api.post(BASE + '/api/auth/login', {
+        data: { email: 'cliente@test.com', password: 'cliente123' },
+    });
+
+    // ── 3. COMPRAR por UI ──
+    await page.goto(BASE + '/products');
+    await page.fill('[data-testid="search"]', 'Producto E2E Test');
+    await page.click('[data-testid="search-btn"]');
+
+    const card = page.locator('[data-testid="product-card"]').filter({
+        hasText: 'Producto E2E Test',
+    });
+    await card.locator('[data-testid="add-to-cart"]').click();
+    await expect(page.locator('.toast')).toContainText('agregado');
+
+    await page.goto(BASE + '/checkout');
+    await page.fill('[data-testid="address"]', 'Calle 5 #38, Cali');
+    await page.selectOption('[data-testid="payment"]', { label: 'PSE' });
+    await page.check('[data-testid="terms"]');
+
+    const orderRespPromise = page.waitForResponse('**/api/orders');
+    await page.click('[data-testid="place-order"]');
+    const orderResp = await orderRespPromise;
+
+    const orderId = (await orderResp.json()).id;
+    await expect(page.locator('[data-testid="order-success"]')).toBeVisible();
+
+    // ── 4. VERIFICAR PEDIDO via API ──
+    const order = await (await api.get(
+        BASE + '/api/orders/' + orderId
+    )).json();
+    expect(order.status).toBe('confirmed');
+    expect(order.total).toBe(50000);
+    expect(order.items).toHaveLength(1);
+    expect(order.items[0].product_id).toBe(product.id);
+
+    // ── 5. VERIFICAR STOCK ACTUALIZADO via API ──
+    const updatedProduct = await (await api.get(
+        BASE + '/api/products/' + product.id
+    )).json();
+    expect(updatedProduct.stock).toBe(4); // Era 5, compró 1
+
+    // ── 6. CLEANUP ──
+    await api.delete(BASE + '/api/orders/' + orderId);
+    await api.delete(BASE + '/api/products/' + product.id);
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00bcd4;">
             <strong>💡 Regla de oro:</strong> Usa API para <strong>setup y cleanup</strong>

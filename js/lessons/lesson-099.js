@@ -76,7 +76,18 @@ mi_proyecto/
             de la pagina completa (viewport visible) y lo compara contra una imagen baseline almacenada.</p>
         </div>
 
-        <pre><code class="python"># test_visual.py
+        <div class="code-tabs" data-code-id="L099-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_visual.py
 from playwright.sync_api import Page, expect
 
 def test_home_page_visual(page: Page):
@@ -87,6 +98,21 @@ def test_home_page_visual(page: Page):
     # Ejecuciones posteriores: compara contra la baseline
     expect(page).to_have_screenshot()
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_visual.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('home page visual', async ({ page }) => {
+    // Verifica que la pagina principal no tenga cambios visuales.
+    await page.goto('https://mi-app.com');
+
+    // Primera ejecucion: genera la imagen baseline (golden screenshot)
+    // Ejecuciones posteriores: compara contra la baseline
+    await expect(page).toHaveScreenshot();
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -98,7 +124,18 @@ def test_home_page_visual(page: Page):
         </div>
 
         <h4>Asignar nombre al screenshot</h4>
-        <pre><code class="python">def test_dashboard_visual(page: Page):
+        <div class="code-tabs" data-code-id="L099-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_dashboard_visual(page: Page):
     page.goto("https://mi-app.com/dashboard")
 
     # Sin nombre: Playwright genera uno basado en el nombre del test
@@ -109,6 +146,21 @@ def test_home_page_visual(page: Page):
     # Archivo: dashboard-principal.png
     expect(page).to_have_screenshot("dashboard-principal.png")
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('dashboard visual', async ({ page }) => {
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Sin nombre: Playwright genera uno basado en el nombre del test
+    // Archivo: dashboard-visual-1-chromium-linux.png
+    await expect(page).toHaveScreenshot();
+
+    // Con nombre explicito: mas claro y predecible
+    // Archivo: dashboard-principal.png
+    await expect(page).toHaveScreenshot('dashboard-principal.png');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🎯 expect(locator).to_have_screenshot() — Comparacion a nivel de elemento</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -117,7 +169,18 @@ def test_home_page_visual(page: Page):
             falsos positivos por cambios en areas no relacionadas.</p>
         </div>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L099-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_navbar_visual(page: Page):
     """Verifica que el navbar no cambie visualmente."""
@@ -142,6 +205,37 @@ def test_footer_visual(page: Page):
     footer = page.locator("footer")
     expect(footer).to_have_screenshot("footer-principal.png")
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('navbar visual', async ({ page }) => {
+    // Verifica que el navbar no cambie visualmente.
+    await page.goto('https://mi-app.com');
+
+    const navbar = page.locator('nav.navbar-principal');
+    await expect(navbar).toHaveScreenshot('navbar.png');
+});
+
+
+test('tarjeta producto', async ({ page }) => {
+    // Verifica la apariencia de una tarjeta de producto.
+    await page.goto('https://mi-app.com/productos/1');
+
+    const tarjeta = page.getByTestId('tarjeta-producto');
+    await expect(tarjeta).toHaveScreenshot('tarjeta-producto-detalle.png');
+});
+
+
+test('footer visual', async ({ page }) => {
+    // Verifica el footer con comparacion de elemento.
+    await page.goto('https://mi-app.com');
+
+    const footer = page.locator('footer');
+    await expect(footer).toHaveScreenshot('footer-principal.png');
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -205,7 +299,18 @@ git add tests/   # Agregar las nuevas baselines al repositorio</code></pre>
             diferencias minimas de renderizado (anti-aliasing, subpixel rendering, etc.).</p>
         </div>
 
-        <pre><code class="python">from playwright.sync_api import Page, expect
+        <div class="code-tabs" data-code-id="L099-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import Page, expect
 
 def test_visual_con_opciones(page: Page):
     page.goto("https://mi-app.com")
@@ -234,6 +339,39 @@ def test_visual_con_opciones(page: Page):
         threshold=0.3  # Menos sensible a cambios sutiles de color
     )
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('visual con opciones', async ({ page }) => {
+    await page.goto('https://mi-app.com');
+
+    // --- maxDiffPixels ---
+    // Numero maximo de pixeles que pueden diferir
+    // Util para tolerar diferencias minimas de anti-aliasing
+    await expect(page).toHaveScreenshot(
+        'home-tolerante.png',
+        { maxDiffPixels: 100 }  // Permite hasta 100 pixeles diferentes
+    );
+
+    // --- maxDiffPixelRatio ---
+    // Proporcion maxima de pixeles diferentes (0 a 1)
+    // Mejor para resoluciones variables
+    await expect(page).toHaveScreenshot(
+        'home-ratio.png',
+        { maxDiffPixelRatio: 0.01 }  // Permite hasta 1% de pixeles diferentes
+    );
+
+    // --- threshold ---
+    // Sensibilidad de comparacion por pixel (0 a 1)
+    // 0 = identico, 0.2 = valor por defecto, 1 = cualquier color pasa
+    await expect(page).toHaveScreenshot(
+        'home-threshold.png',
+        { threshold: 0.3 }  // Menos sensible a cambios sutiles de color
+    );
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>📊 Guia rapida de opciones</h4>
@@ -269,7 +407,18 @@ def test_visual_con_opciones(page: Page):
         <p>Por defecto, <code>to_have_screenshot()</code> captura solo el <strong>viewport visible</strong>.
         Puedes capturar la pagina completa (incluyendo scroll) con la opcion <code>full_page</code>.</p>
 
-        <pre><code class="python">def test_pagina_completa_vs_viewport(page: Page):
+        <div class="code-tabs" data-code-id="L099-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_pagina_completa_vs_viewport(page: Page):
     page.goto("https://mi-app.com/pagina-larga")
 
     # Solo el viewport visible (default)
@@ -281,6 +430,22 @@ def test_visual_con_opciones(page: Page):
         full_page=True
     )
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('pagina completa vs viewport', async ({ page }) => {
+    await page.goto('https://mi-app.com/pagina-larga');
+
+    // Solo el viewport visible (default)
+    await expect(page).toHaveScreenshot('vista-viewport.png');
+
+    // Pagina completa con scroll (toda la altura del documento)
+    await expect(page).toHaveScreenshot(
+        'vista-fullpage.png',
+        { fullPage: true }
+    );
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ Cuidado con full_page</h4>
@@ -307,7 +472,18 @@ tests/
     ├── navbar.png
     └── tarjeta-producto-detalle.png</code></pre>
 
-        <pre><code class="python"># Nomenclatura automatica:
+        <div class="code-tabs" data-code-id="L099-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Nomenclatura automatica:
 # {nombre-del-test}-{numero-secuencial}-{browser}-{plataforma}.png
 
 # Ejemplo: test_login_visual -> test-login-visual-1-chromium-linux.png
@@ -316,6 +492,19 @@ tests/
 expect(page).to_have_screenshot("mi-screenshot.png")
 # -> tests/test_visual-snapshots/mi-screenshot.png
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Nomenclatura automatica:
+// {nombre-del-test}-{numero-secuencial}-{browser}-{plataforma}.png
+
+// Ejemplo: login-visual-1-chromium-linux.png
+
+// Con nombre explicito: se usa tal cual
+await expect(page).toHaveScreenshot('mi-screenshot.png');
+// -> tests/test_visual.spec.ts-snapshots/mi-screenshot.png
+</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -332,7 +521,18 @@ expect(page).to_have_screenshot("mi-screenshot.png")
         causan falsos positivos constantes.</p>
 
         <h4>Estrategia 1: Deshabilitar animaciones</h4>
-        <pre><code class="python">def test_sin_animaciones(page: Page):
+        <div class="code-tabs" data-code-id="L099-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_sin_animaciones(page: Page):
     page.goto("https://mi-app.com")
 
     # Opcion A: Inyectar CSS que deshabilita todas las animaciones
@@ -357,9 +557,50 @@ def test_animaciones_deshabilitadas(page: Page):
         animations="disabled"  # Playwright detiene CSS animations y Web Animations
     )
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('sin animaciones', async ({ page }) => {
+    await page.goto('https://mi-app.com');
+
+    // Opcion A: Inyectar CSS que deshabilita todas las animaciones
+    await page.addStyleTag({ content: \`
+        *, *::before, *::after {
+            animation-duration: 0s !important;
+            animation-delay: 0s !important;
+            transition-duration: 0s !important;
+            transition-delay: 0s !important;
+        }
+    \` });
+
+    await expect(page).toHaveScreenshot('home-sin-animaciones.png');
+});
+
+
+// Opcion B: Usar la opcion animations directamente
+test('animaciones deshabilitadas', async ({ page }) => {
+    await page.goto('https://mi-app.com');
+
+    await expect(page).toHaveScreenshot(
+        'home-disabled-animations.png',
+        { animations: 'disabled' }  // Playwright detiene CSS animations y Web Animations
+    );
+});</code></pre>
+            </div>
+        </div>
 
         <h4>Estrategia 2: Ocultar elementos dinamicos con mask</h4>
-        <pre><code class="python">def test_con_mascara(page: Page):
+        <div class="code-tabs" data-code-id="L099-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_con_mascara(page: Page):
     page.goto("https://mi-app.com")
 
     # Ocultar elementos que cambian con cada ejecucion
@@ -376,9 +617,43 @@ def test_animaciones_deshabilitadas(page: Page):
     # Los elementos enmascarados se reemplazan por un rectangulo de color solido
     # Por defecto el color es rosa (#FF00FF) para que sea evidente
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('con mascara', async ({ page }) => {
+    await page.goto('https://mi-app.com');
+
+    // Ocultar elementos que cambian con cada ejecucion
+    await expect(page).toHaveScreenshot(
+        'home-masked.png',
+        {
+            mask: [
+                page.locator('.reloj-tiempo-real'),
+                page.locator('.banner-publicidad'),
+                page.locator('.fecha-actual'),
+                page.locator('.avatar-usuario'),
+            ]
+        }
+    );
+
+    // Los elementos enmascarados se reemplazan por un rectangulo de color solido
+    // Por defecto el color es rosa (#FF00FF) para que sea evidente
+});</code></pre>
+            </div>
+        </div>
 
         <h4>Estrategia 3: Esperar estabilidad antes de capturar</h4>
-        <pre><code class="python">def test_esperar_estabilidad(page: Page):
+        <div class="code-tabs" data-code-id="L099-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_esperar_estabilidad(page: Page):
     page.goto("https://mi-app.com/dashboard")
 
     # Esperar a que carguen los datos
@@ -393,9 +668,39 @@ def test_animaciones_deshabilitadas(page: Page):
     # Ahora si, comparar
     expect(page).to_have_screenshot("dashboard-completo.png")
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('esperar estabilidad', async ({ page }) => {
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Esperar a que carguen los datos
+    await page.waitForLoadState('networkidle');
+
+    // Esperar a que un spinner desaparezca
+    await page.locator('.loading-spinner').waitFor({ state: 'hidden' });
+
+    // Esperar a que un grafico termine de renderizar
+    await page.locator('.chart-container canvas').waitFor({ state: 'visible' });
+
+    // Ahora si, comparar
+    await expect(page).toHaveScreenshot('dashboard-completo.png');
+});</code></pre>
+            </div>
+        </div>
 
         <h4>Estrategia 4: Fijar datos dinamicos con JavaScript</h4>
-        <pre><code class="python">def test_fecha_fija(page: Page):
+        <div class="code-tabs" data-code-id="L099-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_fecha_fija(page: Page):
     # Inyectar una fecha fija ANTES de navegar
     page.add_init_script("""
         // Congelar Date para que siempre retorne la misma fecha
@@ -413,6 +718,30 @@ def test_animaciones_deshabilitadas(page: Page):
     page.goto("https://mi-app.com")
     expect(page).to_have_screenshot("home-fecha-fija.png")
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">test('fecha fija', async ({ page }) => {
+    // Inyectar una fecha fija ANTES de navegar
+    await page.addInitScript(() => {
+        // Congelar Date para que siempre retorne la misma fecha
+        const FECHA_FIJA = new Date('2026-01-15T10:30:00');
+        const OriginalDate = Date;
+        // @ts-ignore
+        Date = class extends OriginalDate {
+            constructor(...args: any[]) {
+                if (args.length === 0) return new OriginalDate(FECHA_FIJA);
+                // @ts-ignore
+                return new OriginalDate(...args);
+            }
+            static now() { return FECHA_FIJA.getTime(); }
+        };
+    });
+
+    await page.goto('https://mi-app.com');
+    await expect(page).toHaveScreenshot('home-fecha-fija.png');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🏗️ Configuracion en conftest.py</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -420,7 +749,18 @@ def test_animaciones_deshabilitadas(page: Page):
             para no repetir opciones en cada test.</p>
         </div>
 
-        <pre><code class="python"># conftest.py
+        <div class="code-tabs" data-code-id="L099-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py
 import pytest
 from playwright.sync_api import Page
 
@@ -448,8 +788,53 @@ def visual_config():
         "threshold": 0.25,
     }
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts
+import { defineConfig } from '@playwright/test';
 
-        <pre><code class="python"># test_visual.py - Usando la configuracion centralizada
+export default defineConfig({
+    expect: {
+        toHaveScreenshot: {
+            // Opciones default para screenshots
+            animations: 'disabled',
+            maxDiffPixelRatio: 0.01,
+            threshold: 0.25,
+        },
+    },
+    use: {
+        // Deshabilitar animaciones via CSS en todos los tests
+        contextOptions: {
+            reducedMotion: 'reduce',
+        },
+    },
+});
+
+// Alternativa: usar beforeEach en un archivo de test
+// test.beforeEach(async ({ page }) => {
+//     await page.addStyleTag({ content: \`
+//         *, *::before, *::after {
+//             animation-duration: 0s !important;
+//             transition-duration: 0s !important;
+//             scroll-behavior: auto !important;
+//         }
+//     \` });
+// });</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L099-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_visual.py - Usando la configuracion centralizada
 from playwright.sync_api import Page, expect
 
 def test_home_visual(page: Page, visual_config: dict):
@@ -460,6 +845,23 @@ def test_login_visual(page: Page, visual_config: dict):
     page.goto("https://mi-app.com/login")
     expect(page).to_have_screenshot("login.png", **visual_config)
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_visual.spec.ts - Usa la config centralizada de playwright.config.ts
+import { test, expect } from '@playwright/test';
+
+test('home visual', async ({ page }) => {
+    await page.goto('https://mi-app.com');
+    // Las opciones de toHaveScreenshot se toman de playwright.config.ts
+    await expect(page).toHaveScreenshot('home.png');
+});
+
+test('login visual', async ({ page }) => {
+    await page.goto('https://mi-app.com/login');
+    await expect(page).toHaveScreenshot('login.png');
+});</code></pre>
+            </div>
+        </div>
 
         <h3>🧩 Screenshot comparison con multiples navegadores</h3>
         <p>Las baselines son <strong>especificas por navegador y plataforma</strong> porque cada
@@ -475,13 +877,38 @@ addopts = --browser chromium --browser firefox --browser webkit
 # ├── home-firefox-linux.png
 # └── home-webkit-linux.png</code></pre>
 
-        <pre><code class="python"># Alternativa: parametrizar en conftest.py
+        <div class="code-tabs" data-code-id="L099-13">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Alternativa: parametrizar en conftest.py
 import pytest
 
 @pytest.fixture(params=["chromium", "firefox", "webkit"])
 def browser_name(request):
     return request.param
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts - Multiples navegadores
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+    projects: [
+        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+        { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
+        { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    ],
+});</code></pre>
+            </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -566,7 +993,18 @@ def browser_name(request):
             manejo de contenido dinamico y configuracion centralizada.</p>
         </div>
 
-        <pre><code class="python"># conftest.py - Configuracion base para visual testing
+        <div class="code-tabs" data-code-id="L099-14">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># conftest.py - Configuracion base para visual testing
 import pytest
 from playwright.sync_api import Page
 
@@ -596,8 +1034,56 @@ def opciones_screenshot():
         "max_diff_pixel_ratio": 0.005,
     }
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// playwright.config.ts - Configuracion base para visual testing
+import { defineConfig } from '@playwright/test';
 
-        <pre><code class="python"># test_visual_regression.py
+export default defineConfig({
+    expect: {
+        toHaveScreenshot: {
+            // Opciones estandar de comparacion para el equipo
+            animations: 'disabled',
+            threshold: 0.25,
+            maxDiffPixelRatio: 0.005,
+        },
+    },
+    use: {
+        // Deshabilitar animaciones y transiciones globalmente
+        contextOptions: {
+            reducedMotion: 'reduce',
+        },
+    },
+});
+
+// Alternativa con beforeEach para inyectar CSS directamente:
+// import { test } from '@playwright/test';
+// test.beforeEach(async ({ page }) => {
+//     await page.addStyleTag({ content: \`
+//         *, *::before, *::after {
+//             animation-duration: 0s !important;
+//             animation-delay: 0s !important;
+//             transition-duration: 0s !important;
+//             transition-delay: 0s !important;
+//             caret-color: transparent !important;
+//         }
+//     \` });
+// });</code></pre>
+            </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L099-15">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># test_visual_regression.py
 from playwright.sync_api import Page, expect
 
 
@@ -684,6 +1170,92 @@ def test_mascaras_contenido_dinamico(page: Page, opciones_screenshot: dict):
         **opciones_screenshot
     )
 </code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// test_visual_regression.spec.ts
+import { test, expect } from '@playwright/test';
+
+
+test('pagina principal visual', async ({ page }) => {
+    /**
+     * EJERCICIO 1: Comparar la pagina principal completa.
+     * - Navegar a la pagina principal
+     * - Enmascarar elementos dinamicos (banner, reloj)
+     * - Comparar screenshot del viewport
+     */
+    await page.goto('https://the-internet.herokuapp.com');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page).toHaveScreenshot('pagina-principal.png');
+});
+
+
+test('formulario login visual', async ({ page }) => {
+    /**
+     * EJERCICIO 2: Comparar un componente especifico.
+     * - Navegar al formulario de login
+     * - Capturar solo el formulario (no toda la pagina)
+     */
+    await page.goto('https://the-internet.herokuapp.com/login');
+    await page.waitForLoadState('networkidle');
+
+    const formulario = page.locator('#login');
+    await expect(formulario).toHaveScreenshot('formulario-login.png');
+});
+
+
+test('tabla datos visual', async ({ page }) => {
+    /**
+     * EJERCICIO 3: Comparar una tabla con datos.
+     * - Navegar a la pagina de tablas
+     * - Capturar la primera tabla como componente
+     * - Usar fullPage: false (default)
+     */
+    await page.goto('https://the-internet.herokuapp.com/tables');
+    await page.waitForLoadState('networkidle');
+
+    const tabla = page.locator('#table1');
+    await expect(tabla).toHaveScreenshot('tabla-datos.png');
+});
+
+
+test('pagina completa full scroll', async ({ page }) => {
+    /**
+     * EJERCICIO 4: Capturar la pagina completa incluyendo scroll.
+     * - Navegar a una pagina con contenido largo
+     * - Usar fullPage: true para capturar todo
+     */
+    await page.goto('https://the-internet.herokuapp.com/large');
+    await page.waitForLoadState('networkidle');
+
+    await expect(page).toHaveScreenshot(
+        'pagina-larga-completa.png',
+        { fullPage: true }
+    );
+});
+
+
+test('mascaras contenido dinamico', async ({ page }) => {
+    /**
+     * EJERCICIO 5: Enmascarar elementos que cambian.
+     * - Identificar elementos dinamicos
+     * - Aplicar mask para excluirlos de la comparacion
+     */
+    await page.goto('https://the-internet.herokuapp.com/dynamic_content');
+    await page.waitForLoadState('networkidle');
+
+    // Enmascarar las imagenes que cambian aleatoriamente
+    await expect(page).toHaveScreenshot(
+        'contenido-dinamico-masked.png',
+        {
+            mask: [
+                page.locator('img'),  // Todas las imagenes dinamicas
+            ],
+        }
+    );
+});</code></pre>
+            </div>
+        </div>
 
         <pre><code class="bash"># Ejecutar los tests de visual regression
 

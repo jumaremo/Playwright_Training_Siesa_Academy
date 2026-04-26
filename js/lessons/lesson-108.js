@@ -66,7 +66,18 @@ const LESSON_108 = {
         <h3>📐 1. Métricas clave de QA</h3>
         <p>Antes de recolectar datos, definamos las métricas fundamentales:</p>
 
-        <pre><code class="python"># metrics/models.py - Modelos de métricas
+        <div class="code-tabs" data-code-id="L108-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># metrics/models.py - Modelos de métricas
 """Definiciones de métricas clave para QA."""
 
 from dataclasses import dataclass, field
@@ -134,6 +145,86 @@ class FlakyTestRecord:
         if self.total_runs == 0:
             return 0.0
         return (self.failures / self.total_runs) * 100.0</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// metrics/models.ts - Modelos de métricas
+/** Definiciones de métricas clave para QA. */
+
+/** Resultado individual de un test. */
+interface TestResult {
+    name: string;
+    status: string;           // "passed", "failed", "skipped", "timedOut"
+    duration: number;         // Segundos
+    module: string;           // Módulo o feature
+    timestamp: string;
+    error_message: string;
+    markers: string[];
+}
+
+/** Crea un TestResult con valores por defecto. */
+function createTestResult(
+    params: Pick&lt;TestResult, 'name' | 'status' | 'duration' | 'module'&gt; &amp;
+            Partial&lt;TestResult&gt;
+): TestResult {
+    return {
+        timestamp: params.timestamp ?? new Date().toISOString(),
+        error_message: params.error_message ?? '',
+        markers: params.markers ?? [],
+        ...params,
+    };
+}
+
+/** Métricas agregadas de una ejecución completa. */
+interface SuiteMetrics {
+    run_id: string;
+    timestamp: string;
+    total_tests: number;
+    passed: number;
+    failed: number;
+    skipped: number;
+    errors: number;
+    duration_seconds: number;
+    pass_rate: number;           // 0.0 - 100.0
+    avg_test_duration: number;
+    slowest_tests: Array&lt;{ name: string; duration: number }&gt;;  // Top 5
+    failed_tests: Array&lt;{ name: string; error: string }&gt;;
+    environment: string;         // "local" por defecto
+    branch: string;              // "main" por defecto
+}
+
+/** Funciones auxiliares para SuiteMetrics */
+function getFailRate(metrics: SuiteMetrics): number {
+    return 100.0 - metrics.pass_rate;
+}
+
+function isHealthy(metrics: SuiteMetrics): boolean {
+    /** Suite saludable: &gt;95% pass rate. */
+    return metrics.pass_rate &gt;= 95.0;
+}
+
+/** Registro de test flaky (alterna pass/fail). */
+interface FlakyTestRecord {
+    test_name: string;
+    total_runs: number;
+    passes: number;
+    failures: number;
+    flaky_score: number;  // 0.0 (estable) - 1.0 (muy flaky)
+    last_results: string[];   // Últimos N resultados
+}
+
+/** Porcentaje de veces que falló. */
+function getFlakyRate(record: FlakyTestRecord): number {
+    if (record.total_runs === 0) return 0.0;
+    return (record.failures / record.total_runs) * 100.0;
+}
+
+export {
+    TestResult, createTestResult,
+    SuiteMetrics, getFailRate, isHealthy,
+    FlakyTestRecord, getFlakyRate,
+};</code></pre>
+</div>
+</div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Buena práctica</h4>
@@ -147,7 +238,18 @@ class FlakyTestRecord:
         <code>pytest_runtest_makereport</code> se ejecuta en cada fase (setup, call, teardown)
         de cada test:</p>
 
-        <pre><code class="python"># conftest.py - Recolección de métricas con hooks de pytest
+        <div class="code-tabs" data-code-id="L108-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Recolección de métricas con hooks de pytest
 """Hooks de pytest para recolectar métricas de ejecución."""
 
 import json
@@ -274,6 +376,126 @@ def pytest_sessionfinish(session, exitstatus):
     print(f"\\n📊 Métricas guardadas en: {metrics_file}")
     print(f"   Total: {total} | Pass: {passed} | Fail: {failed} | "
           f"Skip: {skipped} | Rate: {pass_rate:.1f}%")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// metrics-reporter.ts - Recolección de métricas con Custom Reporter
+/**
+ * En Playwright, el equivalente a los hooks de pytest es un Custom Reporter.
+ * Se implementa la interfaz Reporter para interceptar cada resultado.
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+import type {
+    Reporter, FullConfig, Suite, TestCase, TestResult, FullResult
+} from '@playwright/test/reporter';
+
+// Interfaz para resultados individuales
+interface TestMetric {
+    name: string;
+    nodeid: string;
+    status: string;       // "passed", "failed", "skipped", "timedOut"
+    duration: number;     // Segundos
+    module: string;
+    markers: string[];
+    timestamp: string;
+    error_message?: string;
+}
+
+class MetricsCollectorReporter implements Reporter {
+    private testResults: TestMetric[] = [];
+    private sessionStart: number = 0;
+
+    /** Se ejecuta al inicio de la sesión de tests. */
+    onBegin(config: FullConfig, suite: Suite): void {
+        this.sessionStart = Date.now();
+        console.log('\\n Recolector de métricas iniciado');
+    }
+
+    /**
+     * Se ejecuta al finalizar cada test (equivale a pytest_runtest_makereport).
+     * A diferencia de pytest, Playwright reporta una sola vez por test.
+     */
+    onTestEnd(test: TestCase, result: TestResult): void {
+        const metric: TestMetric = {
+            name: test.title,
+            nodeid: test.titlePath().join(' &gt; '),
+            status: result.status,
+            duration: Math.round(result.duration) / 1000,
+            module: test.location.file,
+            markers: test.tags,
+            timestamp: new Date().toISOString(),
+        };
+
+        // Capturar mensaje de error si falló
+        if (result.status === 'failed' || result.status === 'timedOut') {
+            metric.error_message = (result.error?.message ?? '').slice(0, 500);
+        }
+
+        this.testResults.push(metric);
+    }
+
+    /** Se ejecuta al final de la sesión. Genera el archivo de métricas. */
+    async onEnd(result: FullResult): Promise&lt;void&gt; {
+        const duration = (Date.now() - this.sessionStart) / 1000;
+        const total = this.testResults.length;
+        const passed = this.testResults.filter(r =&gt; r.status === 'passed').length;
+        const failed = this.testResults.filter(r =&gt; r.status === 'failed').length;
+        const skipped = this.testResults.filter(r =&gt; r.status === 'skipped').length;
+        const errors = this.testResults.filter(r =&gt; r.status === 'timedOut').length;
+
+        // Calcular métricas agregadas
+        const passRate = total &gt; 0 ? (passed / total) * 100 : 0;
+        const avgDuration = total &gt; 0
+            ? this.testResults.reduce((s, r) =&gt; s + r.duration, 0) / total
+            : 0;
+
+        // Top 5 tests más lentos
+        const sortedByTime = [...this.testResults]
+            .sort((a, b) =&gt; b.duration - a.duration);
+        const slowest = sortedByTime.slice(0, 5)
+            .map(r =&gt; ({ name: r.name, duration: r.duration }));
+
+        // Tests fallidos
+        const failures = this.testResults
+            .filter(r =&gt; ['failed', 'timedOut'].includes(r.status))
+            .map(r =&gt; ({
+                name: r.name,
+                error: (r.error_message ?? '').slice(0, 200),
+            }));
+
+        // Construir reporte de métricas
+        const now = new Date();
+        const runId = now.toISOString().replace(/[-:T]/g, '').slice(0, 15);
+        const metrics = {
+            run_id: runId,
+            timestamp: now.toISOString(),
+            environment: process.env.TEST_ENV ?? 'local',
+            total_tests: total,
+            passed, failed, skipped, errors,
+            pass_rate: Math.round(passRate * 100) / 100,
+            total_duration_seconds: Math.round(duration * 100) / 100,
+            avg_test_duration: Math.round(avgDuration * 1000) / 1000,
+            slowest_tests: slowest,
+            failed_tests: failures,
+            results: this.testResults,
+        };
+
+        // Guardar métricas en JSON
+        const metricsDir = 'metrics';
+        fs.mkdirSync(metricsDir, { recursive: true });
+        const metricsFile = path.join(metricsDir, \`run_\${runId}.json\`);
+        fs.writeFileSync(metricsFile, JSON.stringify(metrics, null, 2));
+
+        console.log(\`\\n Métricas guardadas en: \${metricsFile}\`);
+        console.log(\`   Total: \${total} | Pass: \${passed} | Fail: \${failed} | \` +
+            \`Skip: \${skipped} | Rate: \${passRate.toFixed(1)}%\`);
+    }
+}
+
+export default MetricsCollectorReporter;</code></pre>
+</div>
+</div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip</h4>
@@ -286,7 +508,18 @@ def pytest_sessionfinish(session, exitstatus):
         <p>Para análisis de tendencias, necesitamos acumular métricas de múltiples ejecuciones.
         Usamos un archivo JSON histórico y opcionalmente CSV para análisis en Excel:</p>
 
-        <pre><code class="python"># metrics/storage.py - Almacenamiento histórico de métricas
+        <div class="code-tabs" data-code-id="L108-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># metrics/storage.py - Almacenamiento histórico de métricas
 """Persistencia de métricas en JSON y CSV para análisis histórico."""
 
 import csv
@@ -369,13 +602,145 @@ class MetricsStorage:
              "duration": r["total_duration"]}
             for r in runs
         ]</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// metrics/storage.ts - Almacenamiento histórico de métricas
+/** Persistencia de métricas en JSON y CSV para análisis histórico. */
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface RunSummary {
+    run_id: string;
+    timestamp: string;
+    environment: string;
+    total_tests: number;
+    passed: number;
+    failed: number;
+    skipped: number;
+    errors: number;
+    pass_rate: number;
+    total_duration: number;
+    avg_duration: number;
+    slowest_test: string;
+}
+
+class MetricsStorage {
+    /** Almacena y consulta métricas históricas de ejecuciones. */
+
+    private baseDir: string;
+    private historyFile: string;
+    private csvFile: string;
+
+    constructor(baseDir: string = 'metrics') {
+        this.baseDir = baseDir;
+        fs.mkdirSync(baseDir, { recursive: true });
+        this.historyFile = path.join(baseDir, 'history.json');
+        this.csvFile = path.join(baseDir, 'history.csv');
+    }
+
+    /** Carga el historial completo de ejecuciones. */
+    loadHistory(): RunSummary[] {
+        if (fs.existsSync(this.historyFile)) {
+            return JSON.parse(fs.readFileSync(this.historyFile, 'utf-8'));
+        }
+        return [];
+    }
+
+    /** Agrega una ejecución al historial JSON y CSV. */
+    appendRun(metrics: Record&lt;string, unknown&gt;): void {
+        // Actualizar JSON
+        const history = this.loadHistory();
+        const slowestTests = metrics.slowest_tests as Array&lt;{ name: string }&gt; ?? [];
+
+        const summary: RunSummary = {
+            run_id: metrics.run_id as string,
+            timestamp: metrics.timestamp as string,
+            environment: (metrics.environment as string) ?? 'local',
+            total_tests: metrics.total_tests as number,
+            passed: metrics.passed as number,
+            failed: metrics.failed as number,
+            skipped: metrics.skipped as number,
+            errors: (metrics.errors as number) ?? 0,
+            pass_rate: metrics.pass_rate as number,
+            total_duration: metrics.total_duration_seconds as number,
+            avg_duration: metrics.avg_test_duration as number,
+            slowest_test: slowestTests.length ? slowestTests[0].name : '',
+        };
+
+        history.push(summary);
+        fs.writeFileSync(
+            this.historyFile,
+            JSON.stringify(history, null, 2),
+            'utf-8'
+        );
+
+        // Actualizar CSV (para análisis en Excel o Google Sheets)
+        const csvExists = fs.existsSync(this.csvFile);
+        const keys = Object.keys(summary) as (keyof RunSummary)[];
+        const header = keys.join(',') + '\\n';
+        const row = keys.map(k =&gt; {
+            const val = String(summary[k]);
+            return val.includes(',') ? \`"\${val}"\` : val;
+        }).join(',') + '\\n';
+
+        if (!csvExists) {
+            fs.writeFileSync(this.csvFile, header + row, 'utf-8');
+        } else {
+            fs.appendFileSync(this.csvFile, row, 'utf-8');
+        }
+    }
+
+    /** Retorna las últimas N ejecuciones. */
+    getLastNRuns(n: number = 10): RunSummary[] {
+        const history = this.loadHistory();
+        return history.slice(-n);
+    }
+
+    /** Retorna la tendencia del pass rate (últimas N ejecuciones). */
+    getPassRateTrend(n: number = 20): Array&lt;{
+        run_id: string; date: string; pass_rate: number;
+    }&gt; {
+        return this.getLastNRuns(n).map(r =&gt; ({
+            run_id: r.run_id,
+            date: r.timestamp.slice(0, 10),
+            pass_rate: r.pass_rate,
+        }));
+    }
+
+    /** Retorna la tendencia de duración total. */
+    getDurationTrend(n: number = 20): Array&lt;{
+        run_id: string; date: string; duration: number;
+    }&gt; {
+        return this.getLastNRuns(n).map(r =&gt; ({
+            run_id: r.run_id,
+            date: r.timestamp.slice(0, 10),
+            duration: r.total_duration,
+        }));
+    }
+}
+
+export { MetricsStorage };</code></pre>
+</div>
+</div>
 
         <h3>🖥️ 4. Dashboard HTML con Jinja2</h3>
         <p>Generamos un dashboard HTML estático que puede verse en cualquier navegador,
         compartirse por correo o servirse desde CI/CD. Usamos <strong>Jinja2</strong> para
         las plantillas y <strong>Chart.js</strong> (CDN) para gráficas interactivas:</p>
 
-        <pre><code class="python"># metrics/dashboard.py - Generador de dashboard HTML
+        <div class="code-tabs" data-code-id="L108-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># metrics/dashboard.py - Generador de dashboard HTML
 """Genera un dashboard HTML interactivo con métricas de testing."""
 
 import json
@@ -570,6 +935,158 @@ DASHBOARD_TEMPLATE = """&lt;!DOCTYPE html&gt;
 &lt;/body&gt;
 &lt;/html&gt;
 """</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// metrics/dashboard.ts - Generador de dashboard HTML
+/** Genera un dashboard HTML interactivo con métricas de testing. */
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface RunMetrics {
+    run_id: string;
+    pass_rate: number;
+    total_tests: number;
+    failed: number;
+    total_duration_seconds: number;
+    slowest_tests: Array&lt;{ name: string; duration: number }&gt;;
+    failed_tests: Array&lt;{ name: string; error: string }&gt;;
+}
+
+interface HistoryEntry {
+    timestamp: string;
+    pass_rate: number;
+    total_duration: number;
+}
+
+class DashboardGenerator {
+    /** Genera dashboard HTML con métricas históricas y de ejecución. */
+
+    private metricsDir: string;
+    private outputDir: string;
+
+    constructor(metricsDir: string = 'metrics') {
+        this.metricsDir = metricsDir;
+        this.outputDir = path.join(metricsDir, 'dashboard');
+        fs.mkdirSync(this.outputDir, { recursive: true });
+    }
+
+    /**
+     * Genera el dashboard HTML completo.
+     * Usa template literals en lugar de Jinja2.
+     */
+    generate(currentRun: RunMetrics, history: HistoryEntry[]): string {
+        const recent = history.slice(-20);
+        const trendLabels = JSON.stringify(recent.map(h =&gt; h.timestamp.slice(0, 10)));
+        const passRates = JSON.stringify(recent.map(h =&gt; h.pass_rate));
+        const durations = JSON.stringify(recent.map(h =&gt; h.total_duration));
+        const generatedAt = new Date().toISOString().replace('T', ' ').slice(0, 19);
+
+        // Filas de tests lentos
+        const slowestRows = currentRun.slowest_tests
+            .map(t =&gt; \`&lt;tr&gt;&lt;td&gt;\${t.name}&lt;/td&gt;&lt;td&gt;\${t.duration}s&lt;/td&gt;&lt;/tr&gt;\`)
+            .join('\\n');
+
+        // Filas de tests fallidos
+        const failedRows = currentRun.failed_tests
+            .map(t =&gt; \`&lt;tr&gt;
+                &lt;td&gt;&lt;span class="status-fail"&gt;\${t.name}&lt;/span&gt;&lt;/td&gt;
+                &lt;td&gt;\${t.error.slice(0, 100)}...&lt;/td&gt;
+            &lt;/tr&gt;\`)
+            .join('\\n');
+
+        const html = \`&lt;!DOCTYPE html&gt;
+&lt;html lang="es"&gt;
+&lt;head&gt;
+    &lt;meta charset="UTF-8"&gt;
+    &lt;title&gt;QA Dashboard - Playwright Tests&lt;/title&gt;
+    &lt;script src="https://cdn.jsdelivr.net/npm/chart.js"&gt;&lt;/script&gt;
+    &lt;style&gt;
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f5f5f5;
+               padding: 20px; color: #333; }
+        .header { background: #009688; color: white; padding: 20px;
+                  border-radius: 8px; margin-bottom: 20px; }
+        .cards { display: grid; grid-template-columns: repeat(4, 1fr);
+                 gap: 15px; margin-bottom: 20px; }
+        .card { background: white; padding: 20px; border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1); text-align: center; }
+        .card .value { font-size: 2.5em; font-weight: bold; }
+        .card .label { color: #666; margin-top: 5px; }
+        .card.green .value { color: #4caf50; }
+        .card.red .value { color: #f44336; }
+        .card.blue .value { color: #2196f3; }
+        .card.orange .value { color: #ff9800; }
+        .chart-row { display: grid; grid-template-columns: 1fr 1fr;
+                     gap: 15px; margin-bottom: 20px; }
+        .chart-box { background: white; padding: 20px; border-radius: 8px;
+                     box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; text-align: left; }
+        th { background: #009688; color: white; }
+        .status-fail { color: #f44336; font-weight: bold; }
+        .footer { text-align: center; color: #999; margin-top: 20px; }
+    &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;div class="header"&gt;
+        &lt;h1&gt;QA Dashboard - Playwright Tests&lt;/h1&gt;
+        &lt;p&gt;Ejecución: \${currentRun.run_id} | Generado: \${generatedAt}&lt;/p&gt;
+    &lt;/div&gt;
+    &lt;div class="cards"&gt;
+        &lt;div class="card green"&gt;&lt;div class="value"&gt;\${currentRun.pass_rate}%&lt;/div&gt;
+            &lt;div class="label"&gt;Pass Rate&lt;/div&gt;&lt;/div&gt;
+        &lt;div class="card blue"&gt;&lt;div class="value"&gt;\${currentRun.total_tests}&lt;/div&gt;
+            &lt;div class="label"&gt;Tests Totales&lt;/div&gt;&lt;/div&gt;
+        &lt;div class="card red"&gt;&lt;div class="value"&gt;\${currentRun.failed}&lt;/div&gt;
+            &lt;div class="label"&gt;Fallidos&lt;/div&gt;&lt;/div&gt;
+        &lt;div class="card orange"&gt;&lt;div class="value"&gt;\${currentRun.total_duration_seconds}s&lt;/div&gt;
+            &lt;div class="label"&gt;Duración Total&lt;/div&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="chart-row"&gt;
+        &lt;div class="chart-box"&gt;&lt;h3&gt;Tendencia Pass Rate&lt;/h3&gt;
+            &lt;canvas id="passRateChart"&gt;&lt;/canvas&gt;&lt;/div&gt;
+        &lt;div class="chart-box"&gt;&lt;h3&gt;Tendencia Duración&lt;/h3&gt;
+            &lt;canvas id="durationChart"&gt;&lt;/canvas&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="chart-row"&gt;
+        &lt;div class="chart-box"&gt;&lt;h3&gt;Tests Más Lentos&lt;/h3&gt;
+            &lt;table&gt;&lt;tr&gt;&lt;th&gt;Test&lt;/th&gt;&lt;th&gt;Duración&lt;/th&gt;&lt;/tr&gt;
+            \${slowestRows}&lt;/table&gt;&lt;/div&gt;
+        &lt;div class="chart-box"&gt;&lt;h3&gt;Tests Fallidos&lt;/h3&gt;
+            &lt;table&gt;&lt;tr&gt;&lt;th&gt;Test&lt;/th&gt;&lt;th&gt;Error&lt;/th&gt;&lt;/tr&gt;
+            \${failedRows}&lt;/table&gt;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="footer"&gt;Total ejecuciones: \${history.length} | SIESA QA Team&lt;/div&gt;
+    &lt;script&gt;
+    new Chart(document.getElementById('passRateChart'), {
+        type: 'line',
+        data: { labels: \${trendLabels},
+            datasets: [{ label: 'Pass Rate (%)', data: \${passRates},
+                borderColor: '#4caf50', backgroundColor: 'rgba(76,175,80,0.1)',
+                fill: true, tension: 0.3 }] },
+        options: { scales: { y: { min: 0, max: 100 } },
+            plugins: { legend: { display: false } } }
+    });
+    new Chart(document.getElementById('durationChart'), {
+        type: 'bar',
+        data: { labels: \${trendLabels},
+            datasets: [{ label: 'Duración (s)', data: \${durations},
+                backgroundColor: '#2196f3' }] },
+        options: { plugins: { legend: { display: false } } }
+    });
+    &lt;/script&gt;
+&lt;/body&gt;&lt;/html&gt;\`;
+
+        const outputFile = path.join(this.outputDir, 'index.html');
+        fs.writeFileSync(outputFile, html, 'utf-8');
+        return outputFile;
+    }
+}
+
+export { DashboardGenerator };</code></pre>
+</div>
+</div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA</h4>
@@ -583,7 +1100,18 @@ DASHBOARD_TEMPLATE = """&lt;!DOCTYPE html&gt;
         <p>Identificar tests lentos es clave para mantener la suite ágil. Implementamos un
         colector de tiempos que genera análisis detallado:</p>
 
-        <pre><code class="python"># metrics/timing.py - Análisis de tiempos de ejecución
+        <div class="code-tabs" data-code-id="L108-5">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># metrics/timing.py - Análisis de tiempos de ejecución
 """Analiza tiempos de ejecución para identificar cuellos de botella."""
 
 import statistics
@@ -686,13 +1214,180 @@ class TimingAnalyzer:
         sorted_d = sorted(self.durations)
         idx = int(len(sorted_d) * p / 100)
         return sorted_d[min(idx, len(sorted_d) - 1)]</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// metrics/timing.ts - Análisis de tiempos de ejecución
+/** Analiza tiempos de ejecución para identificar cuellos de botella. */
+
+interface TestResultEntry {
+    name: string;
+    duration: number;
+    module?: string;
+}
+
+interface TimingSummary {
+    total_tests: number;
+    total_time: number;
+    avg_time: number;
+    median_time: number;
+    std_dev: number;
+    min_time: number;
+    max_time: number;
+    p90: number;
+    p95: number;
+}
+
+class TimingAnalyzer {
+    /** Analiza tiempos de ejecución de tests. */
+
+    private results: TestResultEntry[];
+    private durations: number[];
+
+    constructor(results: TestResultEntry[]) {
+        this.results = results;
+        this.durations = results
+            .filter(r =&gt; r.duration != null)
+            .map(r =&gt; r.duration);
+    }
+
+    /** Resumen estadístico de tiempos. */
+    summary(): TimingSummary | { error: string } {
+        if (!this.durations.length) {
+            return { error: 'No hay datos de duración' };
+        }
+
+        const sorted = [...this.durations].sort((a, b) =&gt; a - b);
+        const sum = sorted.reduce((acc, v) =&gt; acc + v, 0);
+        const mean = sum / sorted.length;
+
+        // Calcular mediana
+        const mid = Math.floor(sorted.length / 2);
+        const median = sorted.length % 2 === 0
+            ? (sorted[mid - 1] + sorted[mid]) / 2
+            : sorted[mid];
+
+        // Desviación estándar
+        const variance = sorted.length &gt; 1
+            ? sorted.reduce((acc, v) =&gt; acc + (v - mean) ** 2, 0) / (sorted.length - 1)
+            : 0;
+        const stdDev = Math.sqrt(variance);
+
+        return {
+            total_tests: sorted.length,
+            total_time: Math.round(sum * 100) / 100,
+            avg_time: Math.round(mean * 1000) / 1000,
+            median_time: Math.round(median * 1000) / 1000,
+            std_dev: Math.round(stdDev * 1000) / 1000,
+            min_time: Math.round(sorted[0] * 1000) / 1000,
+            max_time: Math.round(sorted[sorted.length - 1] * 1000) / 1000,
+            p90: Math.round(this.percentile(90) * 1000) / 1000,
+            p95: Math.round(this.percentile(95) * 1000) / 1000,
+        };
+    }
+
+    /** Top N tests más lentos. */
+    slowest(n: number = 10): Array&lt;{ name: string; duration: number; module: string }&gt; {
+        return [...this.results]
+            .sort((a, b) =&gt; (b.duration ?? 0) - (a.duration ?? 0))
+            .slice(0, n)
+            .map(r =&gt; ({
+                name: r.name,
+                duration: r.duration,
+                module: r.module ?? '',
+            }));
+    }
+
+    /** Agrupa tiempos por módulo/archivo. */
+    byModule(): Record&lt;string, {
+        tests: number; total_time: number;
+        avg_time: number; names: string[];
+    }&gt; {
+        const modules: Record&lt;string, {
+            tests: number; total_time: number; names: string[];
+        }&gt; = {};
+
+        for (const r of this.results) {
+            const mod = r.module ?? 'unknown';
+            if (!modules[mod]) {
+                modules[mod] = { tests: 0, total_time: 0, names: [] };
+            }
+            modules[mod].tests += 1;
+            modules[mod].total_time += r.duration ?? 0;
+            modules[mod].names.push(r.name);
+        }
+
+        // Calcular promedio y ordenar por tiempo total
+        const entries = Object.entries(modules)
+            .map(([mod, data]) =&gt; [mod, {
+                ...data,
+                avg_time: Math.round((data.total_time / data.tests) * 1000) / 1000,
+                total_time: Math.round(data.total_time * 100) / 100,
+            }] as const)
+            .sort((a, b) =&gt; b[1].total_time - a[1].total_time);
+
+        return Object.fromEntries(entries);
+    }
+
+    /** Genera sugerencias de optimización basadas en los datos. */
+    optimizationSuggestions(): string[] {
+        const suggestions: string[] = [];
+        const s = this.summary();
+        if ('error' in s) return suggestions;
+
+        if (s.p95 &gt; 30) {
+            const slow = this.slowest(3);
+            const names = slow.map(t =&gt; t.name).join(', ');
+            suggestions.push(
+                \`Los tests más lentos superan 30s (P95=\${s.p95}s). Revisa: \${names}\`
+            );
+        }
+
+        if (s.std_dev &gt; s.avg_time * 0.5) {
+            suggestions.push(
+                'Alta variabilidad en tiempos. Algunos tests pueden tener ' +
+                'waits innecesarios o dependencias externas lentas.'
+            );
+        }
+
+        if (s.total_time &gt; 600) {
+            suggestions.push(
+                \`Suite total: \${s.total_time}s (&gt;10 min). \` +
+                'Considera ejecutar en paralelo con --workers en Playwright.'
+            );
+        }
+
+        return suggestions;
+    }
+
+    /** Calcula el percentil p de las duraciones. */
+    private percentile(p: number): number {
+        const sorted = [...this.durations].sort((a, b) =&gt; a - b);
+        const idx = Math.floor(sorted.length * p / 100);
+        return sorted[Math.min(idx, sorted.length - 1)];
+    }
+}
+
+export { TimingAnalyzer };</code></pre>
+</div>
+</div>
 
         <h3>🔄 6. Detección de tests flaky</h3>
         <p>Un test <strong>flaky</strong> es aquel que alterna entre pass y fail sin cambios en el código.
         Son la pesadilla de cualquier equipo de QA. Implementamos un detector que analiza
         el historial:</p>
 
-        <pre><code class="python"># metrics/flaky_detector.py - Detección de tests flaky
+        <div class="code-tabs" data-code-id="L108-6">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># metrics/flaky_detector.py - Detección de tests flaky
 """Detecta tests intermitentes analizando historial de resultados."""
 
 import json
@@ -778,6 +1473,124 @@ class FlakyDetector:
         return sorted(
             flaky_tests, key=lambda t: t["flaky_score"], reverse=True
         )</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// metrics/flaky-detector.ts - Detección de tests flaky
+/** Detecta tests intermitentes analizando historial de resultados. */
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface FlakyTestResult {
+    test_name: string;
+    total_runs: number;
+    passes: number;
+    failures: number;
+    flaky_score: number;
+    transition_rate: number;
+    last_5: string[];
+}
+
+class FlakyDetector {
+    /** Detecta tests flaky analizando múltiples ejecuciones. */
+
+    private metricsDir: string;
+
+    constructor(metricsDir: string = 'metrics') {
+        this.metricsDir = metricsDir;
+    }
+
+    /**
+     * Analiza las últimas N ejecuciones para detectar tests flaky.
+     * @param minRuns - Mínimo de ejecuciones para considerar un test
+     * @param window - Cantidad de ejecuciones recientes a analizar
+     * @returns Lista de tests flaky con su flaky_score
+     */
+    analyze(minRuns: number = 5, window: number = 20): FlakyTestResult[] {
+        // Cargar todos los archivos de ejecución recientes
+        const files = fs.readdirSync(this.metricsDir)
+            .filter(f =&gt; f.startsWith('run_') &amp;&amp; f.endsWith('.json'))
+            .sort()
+            .slice(-window);
+
+        if (files.length &lt; minRuns) return [];
+
+        // Acumular resultados por test
+        const testHistory = new Map&lt;string, string[]&gt;();
+        for (const file of files) {
+            const raw = fs.readFileSync(
+                path.join(this.metricsDir, file), 'utf-8'
+            );
+            const data = JSON.parse(raw);
+            for (const result of (data.results ?? [])) {
+                if (!testHistory.has(result.name)) {
+                    testHistory.set(result.name, []);
+                }
+                testHistory.get(result.name)!.push(result.status);
+            }
+        }
+
+        // Calcular flaky score para cada test
+        const flakyTests: FlakyTestResult[] = [];
+
+        for (const [testName, statuses] of testHistory) {
+            if (statuses.length &lt; minRuns) continue;
+
+            const passes = statuses.filter(s =&gt; s === 'passed').length;
+            const failures = statuses.filter(
+                s =&gt; s === 'failed' || s === 'timedOut'
+            ).length;
+            const total = passes + failures;
+
+            if (total === 0) continue;
+
+            // Flaky score: 1.0 = máxima flakiness (50/50)
+            const maxVal = Math.max(passes, failures);
+            const minVal = Math.min(passes, failures);
+            const ratio = maxVal &gt; 0 ? minVal / maxVal : 0;
+
+            // Contar "cambios de estado" (pass-&gt;fail o fail-&gt;pass)
+            let transitions = 0;
+            const validStatuses = ['passed', 'failed'];
+            for (let i = 1; i &lt; statuses.length; i++) {
+                if (
+                    statuses[i] !== statuses[i - 1] &amp;&amp;
+                    validStatuses.includes(statuses[i]) &amp;&amp;
+                    validStatuses.includes(statuses[i - 1])
+                ) {
+                    transitions++;
+                }
+            }
+            const transitionRate = statuses.length &gt; 1
+                ? transitions / (statuses.length - 1)
+                : 0;
+
+            // Score combinado: ratio de fallos + frecuencia de cambios
+            const flakyScore = Math.round(
+                (ratio * 0.4 + transitionRate * 0.6) * 1000
+            ) / 1000;
+
+            if (flakyScore &gt; 0.1) {  // Umbral mínimo de flakiness
+                flakyTests.push({
+                    test_name: testName,
+                    total_runs: statuses.length,
+                    passes,
+                    failures,
+                    flaky_score: flakyScore,
+                    transition_rate: Math.round(transitionRate * 1000) / 1000,
+                    last_5: statuses.slice(-5),
+                });
+            }
+        }
+
+        // Ordenar por flaky_score descendente
+        return flakyTests.sort((a, b) =&gt; b.flaky_score - a.flaky_score);
+    }
+}
+
+export { FlakyDetector };</code></pre>
+</div>
+</div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ Errores comunes con tests flaky</h4>
@@ -798,7 +1611,18 @@ class FlakyDetector:
         y páginas están cubiertas</strong> por tests automatizados. Usamos markers de pytest
         para rastrear esto:</p>
 
-        <pre><code class="python"># conftest.py - Markers para cobertura funcional
+        <div class="code-tabs" data-code-id="L108-7">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Markers para cobertura funcional
 """Definir markers que rastrean qué features y páginas se testean."""
 
 import pytest
@@ -834,8 +1658,55 @@ def test_login_credenciales_invalidas(page):
     page.fill("#password", "wrong")
     page.click("button[type='submit']")
     expect(page.locator(".error")).to_be_visible()</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// En Playwright, los tags se definen con @tag en el título del test
+// o con test.describe y tag annotations.
+// No se necesita conftest.py — los tags van directamente en los tests.
 
-        <pre><code class="python"># metrics/coverage.py - Análisis de cobertura funcional
+// --- Ejemplo de uso en tests ---
+
+// tests/test_login.spec.ts
+import { test, expect } from '@playwright/test';
+
+// Tags como annotations en test.describe
+test.describe('Login @feature:autenticacion @page:login @priority:P0', () => {
+
+    test('login exitoso', async ({ page }) => {
+        await page.goto('https://example.com/login');
+        await page.fill('#username', 'admin');
+        await page.fill('#password', 'secret');
+        await page.click('button[type="submit"]');
+        await expect(page).toHaveURL('/dashboard');
+    });
+
+    test('login credenciales invalidas', async ({ page }) => {
+        await page.goto('https://example.com/login');
+        await page.fill('#username', 'admin');
+        await page.fill('#password', 'wrong');
+        await page.click('button[type="submit"]');
+        await expect(page.locator('.error')).toBeVisible();
+    });
+});
+
+// Ejecutar solo tests con cierto tag:
+// npx playwright test --grep "@priority:P0"
+// npx playwright test --grep "@feature:autenticacion"</code></pre>
+</div>
+</div>
+
+        <div class="code-tabs" data-code-id="L108-8">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># metrics/coverage.py - Análisis de cobertura funcional
 """Analiza cobertura funcional basada en markers de pytest."""
 
 import json
@@ -915,12 +1786,141 @@ class CoverageAnalyzer:
             lines.append(f"  {pg}: {data['total']} tests ({rate:.0f}% pass)")
 
         return "\\n".join(lines)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// metrics/coverage.ts - Análisis de cobertura funcional
+/** Analiza cobertura funcional basada en tags de Playwright. */
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface CoverageData {
+    total: number;
+    passed: number;
+    tests: string[];
+}
+
+interface CoverageResult {
+    features: Record&lt;string, CoverageData&gt;;
+    pages: Record&lt;string, CoverageData&gt;;
+    priorities: Record&lt;string, { total: number; passed: number }&gt;;
+    total_features: number;
+    total_pages: number;
+}
+
+class CoverageAnalyzer {
+    /** Analiza qué features y páginas tienen cobertura de tests. */
+
+    private metricsDir: string;
+
+    constructor(metricsDir: string = 'metrics') {
+        this.metricsDir = metricsDir;
+    }
+
+    /**
+     * Analiza cobertura desde un archivo de ejecución.
+     * En Playwright, los tags se definen con @tag en test.describe o test()
+     */
+    analyzeFromRun(runFile: string): CoverageResult {
+        const raw = fs.readFileSync(runFile, 'utf-8');
+        const data = JSON.parse(raw);
+        const results: Array&lt;Record&lt;string, unknown&gt;&gt; = data.results ?? [];
+
+        const features = new Map&lt;string, CoverageData&gt;();
+        const pages = new Map&lt;string, CoverageData&gt;();
+        const priorities = new Map&lt;string, { total: number; passed: number }&gt;();
+
+        for (const r of results) {
+            const markers = (r.markers as string[]) ?? [];
+
+            for (const marker of markers) {
+                // Detectar tags de feature
+                if (marker.startsWith('feature')) {
+                    if (!features.has(marker)) {
+                        features.set(marker, { total: 0, passed: 0, tests: [] });
+                    }
+                    const feat = features.get(marker)!;
+                    feat.total += 1;
+                    if (r.status === 'passed') feat.passed += 1;
+                    feat.tests.push(r.name as string);
+                }
+                // Detectar tags de página
+                else if (marker.startsWith('page')) {
+                    if (!pages.has(marker)) {
+                        pages.set(marker, { total: 0, passed: 0, tests: [] });
+                    }
+                    const pg = pages.get(marker)!;
+                    pg.total += 1;
+                    if (r.status === 'passed') pg.passed += 1;
+                    pg.tests.push(r.name as string);
+                }
+                // Detectar prioridad
+                else if (marker.startsWith('priority')) {
+                    if (!priorities.has(marker)) {
+                        priorities.set(marker, { total: 0, passed: 0 });
+                    }
+                    const prio = priorities.get(marker)!;
+                    prio.total += 1;
+                    if (r.status === 'passed') prio.passed += 1;
+                }
+            }
+        }
+
+        return {
+            features: Object.fromEntries(features),
+            pages: Object.fromEntries(pages),
+            priorities: Object.fromEntries(priorities),
+            total_features: features.size,
+            total_pages: pages.size,
+        };
+    }
+
+    /** Genera una matriz de cobertura en texto para consola. */
+    coverageMatrix(runFile: string): string {
+        const analysis = this.analyzeFromRun(runFile);
+        const lines: string[] = ['\\n=== Matriz de Cobertura Funcional ===\\n'];
+
+        lines.push('Features:');
+        for (const [feat, data] of Object.entries(analysis.features)) {
+            const rate = data.total ? (data.passed / data.total) * 100 : 0;
+            const status = rate === 100 ? '✅' : rate &gt;= 80 ? '⚠️' : '❌';
+            lines.push(
+                \`  \${status} \${feat}: \${data.passed}/\${data.total} (\${rate.toFixed(0)}%)\`
+            );
+        }
+
+        lines.push('\\nPáginas:');
+        for (const [pg, data] of Object.entries(analysis.pages)) {
+            const rate = data.total ? (data.passed / data.total) * 100 : 0;
+            lines.push(
+                \`  \${pg}: \${data.total} tests (\${rate.toFixed(0)}% pass)\`
+            );
+        }
+
+        return lines.join('\\n');
+    }
+}
+
+export { CoverageAnalyzer };</code></pre>
+</div>
+</div>
 
         <h3>📤 8. Enviando métricas a sistemas externos</h3>
         <p>Las métricas son más útiles cuando llegan al equipo automáticamente. Implementamos
         notificadores para Slack, email y webhooks genéricos:</p>
 
-        <pre><code class="python"># metrics/notifiers.py - Envío de métricas a sistemas externos
+        <div class="code-tabs" data-code-id="L108-9">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># metrics/notifiers.py - Envío de métricas a sistemas externos
 """Envía resúmenes de métricas a Slack, email y webhooks."""
 
 import json
@@ -1065,6 +2065,177 @@ class EmailNotifier:
         except Exception as e:
             print(f"Error enviando email: {e}")
             return False</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// metrics/notifiers.ts - Envío de métricas a sistemas externos
+/** Envía resúmenes de métricas a Slack, email y webhooks. */
+
+import * as https from 'https';
+import * as nodemailer from 'nodemailer';
+// npm install nodemailer @types/nodemailer
+
+interface MetricsSummary {
+    run_id: string;
+    pass_rate: number;
+    total_tests: number;
+    failed: number;
+    total_duration_seconds: number;
+    failed_tests?: Array&lt;{ name: string; error?: string }&gt;;
+}
+
+class SlackNotifier {
+    /** Envía resúmenes de ejecución a un canal de Slack. */
+
+    constructor(private webhookUrl: string) {}
+
+    async sendSummary(metrics: MetricsSummary): Promise&lt;boolean&gt; {
+        const statusEmoji = metrics.pass_rate &gt;= 95 ? '✅'
+            : metrics.pass_rate &gt;= 80 ? '⚠️' : '❌';
+
+        const blocks: Record&lt;string, unknown&gt;[] = [
+            {
+                type: 'header',
+                text: {
+                    type: 'plain_text',
+                    text: \`\${statusEmoji} QA Report - \${metrics.run_id}\`,
+                },
+            },
+            {
+                type: 'section',
+                fields: [
+                    { type: 'mrkdwn', text: \`*Pass Rate:* \${metrics.pass_rate}%\` },
+                    { type: 'mrkdwn', text: \`*Total:* \${metrics.total_tests} tests\` },
+                    { type: 'mrkdwn', text: \`*Fallidos:* \${metrics.failed}\` },
+                    { type: 'mrkdwn', text: \`*Duración:* \${metrics.total_duration_seconds}s\` },
+                ],
+            },
+        ];
+
+        // Agregar tests fallidos si los hay
+        if (metrics.failed_tests?.length) {
+            const failureText = metrics.failed_tests
+                .slice(0, 5)
+                .map(t =&gt; \`• \${t.name}\`)
+                .join('\\n');
+            blocks.push({
+                type: 'section',
+                text: { type: 'mrkdwn', text: \`*Tests fallidos:*\\n\${failureText}\` },
+            });
+        }
+
+        try {
+            const payload = JSON.stringify({ blocks });
+            await this.postJson(this.webhookUrl, payload);
+            return true;
+        } catch (error) {
+            console.error(\`Error enviando a Slack: \${error}\`);
+            return false;
+        }
+    }
+
+    private postJson(url: string, body: string): Promise&lt;void&gt; {
+        return new Promise((resolve, reject) =&gt; {
+            const urlObj = new URL(url);
+            const req = https.request({
+                hostname: urlObj.hostname,
+                path: urlObj.pathname,
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                timeout: 10000,
+            }, (res) =&gt; {
+                res.statusCode === 200 ? resolve() : reject(res.statusCode);
+            });
+            req.on('error', reject);
+            req.write(body);
+            req.end();
+        });
+    }
+}
+
+class WebhookNotifier {
+    /** Envía métricas a un endpoint webhook genérico (Teams, Discord, etc.). */
+
+    constructor(
+        private url: string,
+        private headers: Record&lt;string, string&gt; = { 'Content-Type': 'application/json' }
+    ) {}
+
+    async send(metrics: MetricsSummary): Promise&lt;boolean&gt; {
+        try {
+            const payload = JSON.stringify(metrics);
+            const urlObj = new URL(this.url);
+            await new Promise&lt;void&gt;((resolve, reject) =&gt; {
+                const req = https.request({
+                    hostname: urlObj.hostname,
+                    path: urlObj.pathname,
+                    method: 'POST',
+                    headers: this.headers,
+                    timeout: 10000,
+                }, (res) =&gt; {
+                    res.statusCode === 200 ? resolve() : reject(res.statusCode);
+                });
+                req.on('error', reject);
+                req.write(payload);
+                req.end();
+            });
+            return true;
+        } catch (error) {
+            console.error(\`Error enviando webhook: \${error}\`);
+            return false;
+        }
+    }
+}
+
+class EmailNotifier {
+    /** Envía resumen de métricas por email (SMTP con nodemailer). */
+    private transporter: nodemailer.Transporter;
+
+    constructor(
+        smtpHost: string,
+        smtpPort: number,
+        private username: string,
+        password: string
+    ) {
+        this.transporter = nodemailer.createTransport({
+            host: smtpHost,
+            port: smtpPort,
+            secure: false,
+            auth: { user: username, pass: password },
+        });
+    }
+
+    async sendReport(toEmails: string[], metrics: MetricsSummary): Promise&lt;boolean&gt; {
+        const status = metrics.pass_rate &gt;= 95 ? 'PASS' : 'FAIL';
+        const subject = \`[QA \${status}] Playwright Tests - \${metrics.pass_rate}% pass rate\`;
+
+        const html = \`
+        &lt;h2&gt;QA Test Report - \${metrics.run_id}&lt;/h2&gt;
+        &lt;table border="1" cellpadding="8"&gt;
+            &lt;tr&gt;&lt;td&gt;Pass Rate&lt;/td&gt;&lt;td&gt;\${metrics.pass_rate}%&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;td&gt;Total Tests&lt;/td&gt;&lt;td&gt;\${metrics.total_tests}&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;td&gt;Failed&lt;/td&gt;&lt;td&gt;\${metrics.failed}&lt;/td&gt;&lt;/tr&gt;
+            &lt;tr&gt;&lt;td&gt;Duration&lt;/td&gt;&lt;td&gt;\${metrics.total_duration_seconds}s&lt;/td&gt;&lt;/tr&gt;
+        &lt;/table&gt;
+        \`;
+
+        try {
+            await this.transporter.sendMail({
+                from: this.username,
+                to: toEmails.join(', '),
+                subject,
+                html,
+            });
+            return true;
+        } catch (error) {
+            console.error(\`Error enviando email: \${error}\`);
+            return false;
+        }
+    }
+}
+
+export { SlackNotifier, WebhookNotifier, EmailNotifier };</code></pre>
+</div>
+</div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Buena práctica</h4>
@@ -1077,7 +2248,18 @@ class EmailNotifier:
         <p>Si prefieres no escribir hooks personalizados, <code>pytest-json-report</code> genera
         un JSON detallado automáticamente. Lo combinamos con nuestro sistema de métricas:</p>
 
-        <pre><code class="python"># Instalar el plugin
+        <div class="code-tabs" data-code-id="L108-10">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Instalar el plugin
 # pip install pytest-json-report
 
 # Ejecutar con reporte JSON automático
@@ -1087,8 +2269,39 @@ class EmailNotifier:
 # - Metadatos del entorno (Python, plataforma, plugins)
 # - Resumen (passed, failed, total, duration)
 # - Detalle de cada test (nodeid, outcome, duration, longrepr)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Playwright incluye reporter JSON nativo (sin plugins adicionales)
 
-        <pre><code class="python"># metrics/plugin_adapter.py
+// Configurar en playwright.config.ts:
+// export default defineConfig({
+//     reporter: [
+//         ['json', { outputFile: 'metrics/latest_run.json' }],
+//     ],
+// });
+
+// O ejecutar desde CLI:
+// npx playwright test --reporter=json > metrics/latest_run.json
+
+// El reporter JSON nativo genera un JSON completo con:
+// - Metadatos del entorno (Playwright version, plataforma, workers)
+// - Suites y specs con resultados (status, duration, error)
+// - Adjuntos (screenshots, traces, videos)</code></pre>
+</div>
+</div>
+
+        <div class="code-tabs" data-code-id="L108-11">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># metrics/plugin_adapter.py
 """Adaptador para convertir pytest-json-report al formato de nuestro dashboard."""
 
 import json
@@ -1187,12 +2400,167 @@ class JsonReportAdapter:
 # storage.append_run(metrics)
 # dashboard = DashboardGenerator()
 # dashboard.generate(metrics, storage.load_history())</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// metrics/plugin-adapter.ts
+/**
+ * Adaptador para convertir el JSON nativo de Playwright al formato
+ * de nuestro dashboard.
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface PlaywrightJsonResult {
+    suites: Array&lt;{
+        title: string;
+        specs: Array&lt;{
+            title: string;
+            file: string;
+            tests: Array&lt;{
+                results: Array&lt;{
+                    status: string;
+                    duration: number;
+                    error?: { message: string };
+                }&gt;;
+            }&gt;;
+        }&gt;;
+    }&gt;;
+    stats: {
+        expected: number;
+        unexpected: number;
+        skipped: number;
+        duration: number;
+    };
+    config: {
+        metadata?: Record&lt;string, string&gt;;
+    };
+}
+
+interface MetricsFormat {
+    run_id: string;
+    timestamp: string;
+    environment: string;
+    total_tests: number;
+    passed: number;
+    failed: number;
+    skipped: number;
+    errors: number;
+    pass_rate: number;
+    total_duration_seconds: number;
+    avg_test_duration: number;
+    slowest_tests: Array&lt;{ name: string; duration: number }&gt;;
+    failed_tests: Array&lt;{ name: string; error: string }&gt;;
+    results: Array&lt;Record&lt;string, unknown&gt;&gt;;
+}
+
+class JsonReportAdapter {
+    /**
+     * Convierte el JSON de Playwright (--reporter=json) al formato del dashboard.
+     * @param jsonReportPath - Ruta al archivo generado por Playwright JSON reporter
+     * @returns Métricas en nuestro formato estándar
+     */
+    convert(jsonReportPath: string): MetricsFormat {
+        const raw = fs.readFileSync(jsonReportPath, 'utf-8');
+        const data: PlaywrightJsonResult = JSON.parse(raw);
+
+        // Extraer resultados individuales aplanando suites
+        const results: Array&lt;Record&lt;string, unknown&gt;&gt; = [];
+        for (const suite of data.suites) {
+            for (const spec of suite.specs) {
+                for (const test of spec.tests) {
+                    const lastResult = test.results[test.results.length - 1];
+                    results.push({
+                        name: spec.title,
+                        nodeid: \`\${spec.file} &gt; \${suite.title} &gt; \${spec.title}\`,
+                        status: lastResult.status,
+                        duration: Math.round(lastResult.duration) / 1000,
+                        module: spec.file,
+                        markers: [],
+                        timestamp: new Date().toISOString(),
+                        error_message: lastResult.status === 'failed'
+                            ? (lastResult.error?.message ?? '').slice(0, 500)
+                            : '',
+                    });
+                }
+            }
+        }
+
+        // Calcular métricas agregadas
+        const total = results.length;
+        const passed = results.filter(r =&gt; r.status === 'expected' || r.status === 'passed').length;
+        const failed = results.filter(r =&gt; r.status === 'unexpected' || r.status === 'failed').length;
+        const skipped = results.filter(r =&gt; r.status === 'skipped').length;
+        const passRate = total &gt; 0 ? Math.round((passed / total) * 10000) / 100 : 0;
+        const totalDuration = results.reduce((s, r) =&gt; s + (r.duration as number), 0);
+
+        // Top 5 más lentos
+        const sortedByTime = [...results].sort(
+            (a, b) =&gt; (b.duration as number) - (a.duration as number)
+        );
+        const slowest = sortedByTime.slice(0, 5).map(r =&gt; ({
+            name: r.name as string,
+            duration: r.duration as number,
+        }));
+
+        // Tests fallidos
+        const failures = results
+            .filter(r =&gt; ['failed', 'unexpected', 'timedOut'].includes(r.status as string))
+            .map(r =&gt; ({
+                name: r.name as string,
+                error: ((r.error_message as string) ?? '').slice(0, 200),
+            }));
+
+        const now = new Date();
+        const runId = now.toISOString().replace(/[-:T]/g, '').slice(0, 15);
+
+        return {
+            run_id: runId,
+            timestamp: now.toISOString(),
+            environment: data.config?.metadata?.['Platform'] ?? 'unknown',
+            total_tests: total,
+            passed, failed, skipped,
+            errors: 0,
+            pass_rate: passRate,
+            total_duration_seconds: Math.round(totalDuration * 100) / 100,
+            avg_test_duration: total &gt; 0
+                ? Math.round((totalDuration / total) * 1000) / 1000
+                : 0,
+            slowest_tests: slowest,
+            failed_tests: failures,
+            results,
+        };
+    }
+}
+
+// Uso: integrar con nuestro sistema de dashboard
+// const adapter = new JsonReportAdapter();
+// const metrics = adapter.convert('test-results.json');
+// const storage = new MetricsStorage();
+// storage.appendRun(metrics);
+// const dashboard = new DashboardGenerator();
+// dashboard.generate(metrics, storage.loadHistory());
+
+export { JsonReportAdapter };</code></pre>
+</div>
+</div>
 
         <h3>🔗 10. Integración completa: conftest.py + dashboard</h3>
         <p>Unimos todas las piezas en un <code>conftest.py</code> que recolecta métricas,
         detecta tests flaky y genera el dashboard automáticamente al final de cada ejecución:</p>
 
-        <pre><code class="python"># conftest.py - Integración completa de métricas + dashboard
+        <div class="code-tabs" data-code-id="L108-12">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Integración completa de métricas + dashboard
 """
 Configuración completa de pytest con:
 - Recolección de métricas por test
@@ -1321,6 +2689,147 @@ def pytest_sessionfinish(session, exitstatus):
 
     print(f"\\n📊 Métricas: {run_file}")
     print(f"   {passed}/{total} passed ({pass_rate}%) en {duration:.1f}s")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts + metrics-reporter.ts - Integración completa
+/**
+ * Configuración completa de Playwright con:
+ * - Recolección de métricas por test (Custom Reporter)
+ * - Almacenamiento histórico
+ * - Detección de tests flaky
+ * - Generación automática de dashboard
+ */
+
+import * as fs from 'fs';
+import * as path from 'path';
+import type {
+    Reporter, FullConfig, Suite, TestCase, TestResult, FullResult
+} from '@playwright/test/reporter';
+
+// --- Custom Reporter: metrics-reporter.ts ---
+
+interface TestMetric {
+    name: string;
+    nodeid: string;
+    status: string;
+    duration: number;
+    module: string;
+    markers: string[];
+    timestamp: string;
+    error_message: string;
+}
+
+class MetricsReporter implements Reporter {
+    private testResults: TestMetric[] = [];
+    private sessionStart: number = 0;
+    private metricsDir: string;
+    private generateDashboard: boolean;
+    private slackWebhook: string | undefined;
+
+    constructor(options?: {
+        metricsDir?: string;
+        dashboard?: boolean;
+        notifySlack?: string;
+    }) {
+        this.metricsDir = options?.metricsDir ?? 'metrics';
+        this.generateDashboard = options?.dashboard ?? false;
+        this.slackWebhook = options?.notifySlack;
+    }
+
+    onBegin(config: FullConfig, suite: Suite): void {
+        this.sessionStart = Date.now();
+    }
+
+    onTestEnd(test: TestCase, result: TestResult): void {
+        this.testResults.push({
+            name: test.title,
+            nodeid: test.titlePath().join(' &gt; '),
+            status: result.status,
+            duration: Math.round(result.duration) / 1000,
+            module: test.location.file,
+            markers: test.tags,
+            timestamp: new Date().toISOString(),
+            error_message: result.status === 'failed'
+                ? (result.error?.message ?? '').slice(0, 500)
+                : '',
+        });
+    }
+
+    async onEnd(result: FullResult): Promise&lt;void&gt; {
+        const duration = (Date.now() - this.sessionStart) / 1000;
+        const total = this.testResults.length;
+        if (total === 0) return;
+
+        const passed = this.testResults.filter(r =&gt; r.status === 'passed').length;
+        const failed = this.testResults.filter(r =&gt; r.status === 'failed').length;
+        const skipped = this.testResults.filter(r =&gt; r.status === 'skipped').length;
+        const errors = this.testResults.filter(r =&gt; r.status === 'timedOut').length;
+        const passRate = Math.round((passed / total) * 10000) / 100;
+
+        const sortedByTime = [...this.testResults]
+            .sort((a, b) =&gt; b.duration - a.duration);
+
+        const now = new Date();
+        const runId = now.toISOString().replace(/[-:T]/g, '').slice(0, 15);
+
+        const metrics = {
+            run_id: runId,
+            timestamp: now.toISOString(),
+            total_tests: total,
+            passed, failed, skipped, errors,
+            pass_rate: passRate,
+            total_duration_seconds: Math.round(duration * 100) / 100,
+            avg_test_duration: Math.round(
+                this.testResults.reduce((s, r) =&gt; s + r.duration, 0) / total * 1000
+            ) / 1000,
+            slowest_tests: sortedByTime.slice(0, 5).map(r =&gt; ({
+                name: r.name, duration: r.duration
+            })),
+            failed_tests: this.testResults
+                .filter(r =&gt; ['failed', 'timedOut'].includes(r.status))
+                .map(r =&gt; ({
+                    name: r.name,
+                    error: r.error_message.slice(0, 200)
+                })),
+            results: this.testResults,
+        };
+
+        // 1. Guardar ejecución individual
+        fs.mkdirSync(this.metricsDir, { recursive: true });
+        const runFile = path.join(this.metricsDir, \`run_\${runId}.json\`);
+        fs.writeFileSync(runFile, JSON.stringify(metrics, null, 2));
+
+        // 2. Agregar al historial
+        // const storage = new MetricsStorage(this.metricsDir);
+        // storage.appendRun(metrics);
+
+        // 3. Generar dashboard si se solicitó
+        // if (this.generateDashboard) { ... }
+
+        // 4. Notificar a Slack si hay webhook
+        // if (this.slackWebhook) { ... }
+
+        console.log(\`\\n Métricas: \${runFile}\`);
+        console.log(\`   \${passed}/\${total} passed (\${passRate}%) en \${duration.toFixed(1)}s\`);
+    }
+}
+
+export default MetricsReporter;
+
+// --- playwright.config.ts ---
+// import { defineConfig } from '@playwright/test';
+// export default defineConfig({
+//     reporter: [
+//         ['list'],
+//         ['./metrics-reporter.ts', {
+//             metricsDir: 'metrics',
+//             dashboard: true,
+//             notifySlack: 'https://hooks.slack.com/services/...'
+//         }],
+//     ],
+// });</code></pre>
+</div>
+</div>
 
         <pre><code class="bash"># Ejecución con todas las opciones de métricas
 pytest tests/ \\
@@ -1349,7 +2858,18 @@ pytest tests/ \\
         <p>Si necesitas gráficas como imágenes (para email o PDF), usa matplotlib en lugar
         de Chart.js:</p>
 
-        <pre><code class="python"># metrics/charts.py - Gráficas con matplotlib
+        <div class="code-tabs" data-code-id="L108-13">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># metrics/charts.py - Gráficas con matplotlib
 """Genera gráficas estáticas de métricas para reportes offline."""
 
 # pip install matplotlib
@@ -1439,6 +2959,164 @@ def generate_flaky_chart(flaky_tests: list, output_dir: str = "metrics"):
     fig.savefig(output_path, dpi=150)
     plt.close(fig)
     return str(output_path)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// metrics/charts.ts - Gráficas con Node.js canvas (alternativa offline)
+// npm install canvas chart.js chartjs-node-canvas
+
+import { ChartJSNodeCanvas } from 'chartjs-node-canvas';
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface HistoryEntry {
+    timestamp: string;
+    pass_rate: number;
+    total_duration: number;
+}
+
+interface FlakyTest {
+    test_name: string;
+    flaky_score: number;
+}
+
+const chartJSNodeCanvas = new ChartJSNodeCanvas({
+    width: 1200, height: 500, backgroundColour: 'white'
+});
+
+/**
+ * Genera gráfica de tendencia del pass rate.
+ * @param history - Lista de ejecuciones con timestamp y pass_rate
+ * @param outputDir - Directorio de salida
+ * @returns Ruta al archivo PNG generado
+ */
+async function generatePassRateChart(
+    history: HistoryEntry[],
+    outputDir: string = 'metrics'
+): Promise&lt;string&gt; {
+    const recent = history.slice(-20);
+    const dates = recent.map(h =&gt; h.timestamp.slice(0, 10));
+    const rates = recent.map(h =&gt; h.pass_rate);
+
+    const buffer = await chartJSNodeCanvas.renderToBuffer({
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Pass Rate (%)',
+                data: rates,
+                borderColor: '#4caf50',
+                backgroundColor: 'rgba(76,175,80,0.1)',
+                fill: true,
+                tension: 0.3,
+            }]
+        },
+        options: {
+            scales: { y: { min: 0, max: 105 } },
+            plugins: {
+                title: { display: true, text: 'Tendencia del Pass Rate' },
+                annotation: {
+                    annotations: {
+                        threshold: {
+                            type: 'line', yMin: 95, yMax: 95,
+                            borderColor: '#f44336', borderDash: [5, 5],
+                            label: { content: 'Umbral 95%', display: true }
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    const outputPath = path.join(outputDir, 'pass_rate_trend.png');
+    fs.writeFileSync(outputPath, buffer);
+    return outputPath;
+}
+
+/**
+ * Genera gráfica de barras con duración por ejecución.
+ */
+async function generateDurationChart(
+    history: HistoryEntry[],
+    outputDir: string = 'metrics'
+): Promise&lt;string&gt; {
+    const recent = history.slice(-20);
+    const dates = recent.map(h =&gt; h.timestamp.slice(0, 10));
+    const durations = recent.map(h =&gt; h.total_duration);
+
+    // Colorear barras según umbral
+    const colors = durations.map(d =&gt;
+        d &gt; 600 ? '#f44336' : d &gt; 300 ? '#ff9800' : '#2196f3'
+    );
+
+    const buffer = await chartJSNodeCanvas.renderToBuffer({
+        type: 'bar',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: 'Duración (s)',
+                data: durations,
+                backgroundColor: colors,
+            }]
+        },
+        options: {
+            plugins: {
+                title: { display: true, text: 'Duración Total por Ejecución' }
+            }
+        }
+    });
+
+    const outputPath = path.join(outputDir, 'duration_trend.png');
+    fs.writeFileSync(outputPath, buffer);
+    return outputPath;
+}
+
+/**
+ * Genera gráfica horizontal de barras con tests flaky.
+ */
+async function generateFlakyChart(
+    flakyTests: FlakyTest[],
+    outputDir: string = 'metrics'
+): Promise&lt;string | null&gt; {
+    if (!flakyTests.length) return null;
+
+    const top10 = flakyTests.slice(0, 10);
+    const names = top10.map(t =&gt; t.test_name.slice(0, 30));
+    const scores = top10.map(t =&gt; t.flaky_score);
+    const colors = scores.map(s =&gt;
+        s &gt; 0.5 ? '#f44336' : s &gt; 0.3 ? '#ff9800' : '#ffc107'
+    );
+
+    const buffer = await chartJSNodeCanvas.renderToBuffer({
+        type: 'bar',
+        data: {
+            labels: names,
+            datasets: [{
+                label: 'Flaky Score',
+                data: scores,
+                backgroundColor: colors,
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: { x: { min: 0, max: 1 } },
+            plugins: {
+                title: { display: true, text: 'Tests con Mayor Flakiness' }
+            }
+        }
+    });
+
+    const outputPath = path.join(outputDir, 'flaky_tests.png');
+    fs.writeFileSync(outputPath, buffer);
+    return outputPath;
+}
+
+export {
+    generatePassRateChart,
+    generateDurationChart,
+    generateFlakyChart,
+};</code></pre>
+</div>
+</div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔮 Avanzado: Chart.js vs matplotlib</h4>
@@ -1485,7 +3163,18 @@ def generate_flaky_chart(flaky_tests: list, output_dir: str = "metrics"):
             </ol>
 
             <p><strong>Parte 2: Tests de ejemplo con markers</strong></p>
-            <pre><code class="python"># tests/test_demo_metrics.py
+            <div class="code-tabs" data-code-id="L108-14">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># tests/test_demo_metrics.py
 """Tests de demostración para generar métricas variadas."""
 
 import time
@@ -1548,6 +3237,66 @@ def test_dropdown_seleccion(page):
     page.goto("https://the-internet.herokuapp.com/dropdown")
     page.select_option("#dropdown", "1")
     expect(page.locator("#dropdown")).to_have_value("1")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// tests/test_demo_metrics.spec.ts
+// Tests de demostración para generar métricas variadas
+
+import { test, expect } from '@playwright/test';
+
+test.describe('navegacion @feature:navegacion @page:home @priority:P0', () => {
+    test('home carga', async ({ page }) => {
+        /** Test rápido que siempre pasa. */
+        await page.goto('https://the-internet.herokuapp.com');
+        await expect(page.locator('h1')).toContainText('Welcome');
+    });
+});
+
+test.describe('autenticacion @feature:autenticacion @page:login @priority:P0', () => {
+    test('login exitoso', async ({ page }) => {
+        /** Test de login con duración media. */
+        await page.goto('https://the-internet.herokuapp.com/login');
+        await page.fill('#username', 'tomsmith');
+        await page.fill('#password', 'SuperSecretPassword!');
+        await page.click('button[type="submit"]');
+        await expect(page.locator('.flash.success')).toBeVisible();
+    });
+});
+
+test.describe('tablas @feature:tablas @page:tables @priority:P1', () => {
+    test('tabla ordenamiento', async ({ page }) => {
+        /** Test de tabla que puede ser lento. */
+        await page.goto('https://the-internet.herokuapp.com/tables');
+        const headers = page.locator('#table1 th');
+        await expect(headers).toHaveCount(6);
+
+        // Ordenar por apellido
+        await page.click('#table1 th:nth-child(1)');
+        const firstCell = page.locator('#table1 tbody tr:first-child td:first-child');
+        await expect(firstCell).toHaveText('Bach');
+    });
+});
+
+test.describe('formularios @feature:formularios @page:checkboxes @priority:P2', () => {
+    test('checkbox toggle', async ({ page }) => {
+        /** Test de interacción con checkboxes. */
+        await page.goto('https://the-internet.herokuapp.com/checkboxes');
+        const checkbox1 = page.locator('input[type="checkbox"]').first();
+        await checkbox1.check();
+        await expect(checkbox1).toBeChecked();
+    });
+});
+
+test.describe('navegacion @feature:navegacion @page:dropdown @priority:P1', () => {
+    test('dropdown seleccion', async ({ page }) => {
+        /** Test de dropdown. */
+        await page.goto('https://the-internet.herokuapp.com/dropdown');
+        await page.selectOption('#dropdown', '1');
+        await expect(page.locator('#dropdown')).toHaveValue('1');
+    });
+});</code></pre>
+</div>
+</div>
 
             <p><strong>Parte 3: Dashboard y análisis</strong></p>
             <ol>

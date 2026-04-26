@@ -63,7 +63,18 @@ const LESSON_122 = {
 
         <h3>Medir tiempos de carga con Playwright</h3>
 
-        <pre><code class="python"># tests/performance/test_page_load.py
+        <div class="code-tabs" data-code-id="L122-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># tests/performance/test_page_load.py
 """Medir tiempos de carga usando la Performance API del navegador."""
 from playwright.sync_api import expect
 
@@ -106,10 +117,71 @@ def test_dashboard_load_time(page):
         f"Dashboard tardo {metrics['loadComplete']}ms (max: 3000ms)"
     assert metrics["ttfb"] < 500, \\
         f"TTFB: {metrics['ttfb']}ms (max: 500ms)"</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// tests/performance/page-load.spec.ts
+// Medir tiempos de carga usando la Performance API del navegador
+import { test, expect } from '@playwright/test';
+
+test('dashboard load time', async ({ page }) => {
+    // Verificar que el dashboard carga en menos de 3 segundos
+
+    // Navegar y esperar carga completa
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+
+    // Obtener metricas de Performance API
+    const metrics = await page.evaluate(() => {
+        const perf = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        return {
+            // Tiempos clave
+            dns: perf.domainLookupEnd - perf.domainLookupStart,
+            tcp: perf.connectEnd - perf.connectStart,
+            ttfb: perf.responseStart - perf.requestStart,
+            download: perf.responseEnd - perf.responseStart,
+            domParsing: perf.domInteractive - perf.responseEnd,
+            domComplete: perf.domComplete - perf.navigationStart,
+            loadComplete: perf.loadEventEnd - perf.navigationStart,
+            // Transferencia
+            transferSize: perf.transferSize,
+            encodedBodySize: perf.encodedBodySize,
+        };
+    });
+
+    console.log(\`DNS:          \${metrics.dns.toFixed(0)}ms\`);
+    console.log(\`TCP:          \${metrics.tcp.toFixed(0)}ms\`);
+    console.log(\`TTFB:         \${metrics.ttfb.toFixed(0)}ms\`);
+    console.log(\`Download:     \${metrics.download.toFixed(0)}ms\`);
+    console.log(\`DOM Parsing:  \${metrics.domParsing.toFixed(0)}ms\`);
+    console.log(\`DOM Complete: \${metrics.domComplete.toFixed(0)}ms\`);
+    console.log(\`Load Total:   \${metrics.loadComplete.toFixed(0)}ms\`);
+    console.log(\`Transfer:     \${(metrics.transferSize / 1024).toFixed(1)} KB\`);
+
+    // Assertions de performance
+    expect(metrics.loadComplete,
+        \`Dashboard tardo \${metrics.loadComplete}ms (max: 3000ms)\`)
+        .toBeLessThan(3000);
+    expect(metrics.ttfb,
+        \`TTFB: \${metrics.ttfb}ms (max: 500ms)\`)
+        .toBeLessThan(500);
+});</code></pre>
+</div>
+</div>
 
         <h3>Medir Core Web Vitals con PerformanceObserver</h3>
 
-        <pre><code class="python"># tests/performance/test_web_vitals.py
+        <div class="code-tabs" data-code-id="L122-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># tests/performance/test_web_vitals.py
 """Medir Core Web Vitals con PerformanceObserver."""
 
 def test_core_web_vitals(page):
@@ -158,10 +230,83 @@ def test_core_web_vitals(page):
     assert vitals["lcp"] < 2500, f"LCP {vitals['lcp']}ms > 2500ms (pobre)"
     assert vitals["cls"] < 0.1, f"CLS {vitals['cls']} > 0.1 (pobre)"
     assert vitals["fcp"] < 1800, f"FCP {vitals['fcp']}ms > 1800ms (pobre)"</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// tests/performance/web-vitals.spec.ts
+// Medir Core Web Vitals con PerformanceObserver
+import { test, expect } from '@playwright/test';
+
+// Interfaz para tipar las metricas de Web Vitals
+interface WebVitals {
+    lcp: number;
+    cls: number;
+    fcp: number;
+}
+
+test('core web vitals', async ({ page }) => {
+    // Verificar que los Core Web Vitals estan dentro de limites aceptables
+
+    // Inyectar observadores ANTES de navegar
+    await page.addInitScript(() => {
+        (window as any).__webVitals = { lcp: 0, cls: 0, fcp: 0 };
+
+        // LCP - Largest Contentful Paint
+        new PerformanceObserver((list) => {
+            const entries = list.getEntries();
+            (window as any).__webVitals.lcp = entries[entries.length - 1].startTime;
+        }).observe({ type: 'largest-contentful-paint', buffered: true });
+
+        // CLS - Cumulative Layout Shift
+        new PerformanceObserver((list) => {
+            for (const entry of list.getEntries()) {
+                if (!(entry as any).hadRecentInput) {
+                    (window as any).__webVitals.cls += (entry as any).value;
+                }
+            }
+        }).observe({ type: 'layout-shift', buffered: true });
+
+        // FCP - First Contentful Paint
+        new PerformanceObserver((list) => {
+            (window as any).__webVitals.fcp = list.getEntries()[0].startTime;
+        }).observe({ type: 'paint', buffered: true });
+    });
+
+    // Navegar a la pagina
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+
+    // Esperar un momento para que CLS se estabilice
+    await page.waitForTimeout(2000);
+
+    // Obtener las metricas
+    const vitals = await page.evaluate(() => (window as any).__webVitals as WebVitals);
+
+    console.log(\`LCP: \${vitals.lcp.toFixed(0)}ms\`);
+    console.log(\`CLS: \${vitals.cls.toFixed(4)}\`);
+    console.log(\`FCP: \${vitals.fcp.toFixed(0)}ms\`);
+
+    // Assertions basadas en umbrales de Google
+    expect(vitals.lcp, \`LCP \${vitals.lcp}ms > 2500ms (pobre)\`).toBeLessThan(2500);
+    expect(vitals.cls, \`CLS \${vitals.cls} > 0.1 (pobre)\`).toBeLessThan(0.1);
+    expect(vitals.fcp, \`FCP \${vitals.fcp}ms > 1800ms (pobre)\`).toBeLessThan(1800);
+});</code></pre>
+</div>
+</div>
 
         <h3>Monitoreo de requests de red</h3>
 
-        <pre><code class="python"># tests/performance/test_network_performance.py
+        <div class="code-tabs" data-code-id="L122-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># tests/performance/test_network_performance.py
 """Analizar el rendimiento de red durante la carga."""
 
 def test_network_requests_analysis(page):
@@ -202,10 +347,89 @@ def test_network_requests_analysis(page):
     assert len(failed) == 0, f"{len(failed)} requests fallidos"
     assert total_requests < 100, f"Demasiados requests: {total_requests}"
     assert total_size < 5 * 1024 * 1024, f"Payload excesivo: {total_size / 1024 / 1024:.1f} MB"</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// tests/performance/network-performance.spec.ts
+// Analizar el rendimiento de red durante la carga
+import { test, expect } from '@playwright/test';
+
+// Interfaz para datos de cada request capturado
+interface RequestData {
+    url: string;
+    status: number;
+    size: number;
+    timing: { responseEnd?: number };
+}
+
+test('network requests analysis', async ({ page }) => {
+    // Analizar cantidad, tamano y tiempo de requests
+
+    const requestsData: RequestData[] = [];
+
+    page.on('response', async (response) => {
+        let size = 0;
+        if (response.ok()) {
+            try {
+                const body = await response.body();
+                size = body.length;
+            } catch { /* ignorar si el body no esta disponible */ }
+        }
+        requestsData.push({
+            url: response.url(),
+            status: response.status(),
+            size,
+            timing: response.request().timing(),
+        });
+    });
+
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+
+    // Analisis
+    const totalRequests = requestsData.length;
+    const totalSize = requestsData.reduce((sum, r) => sum + r.size, 0);
+    const failed = requestsData.filter(r => r.status >= 400);
+    const slow = requestsData.filter(
+        r => (r.timing.responseEnd ?? 0) > 1000
+    );
+
+    console.log(\`Total requests: \${totalRequests}\`);
+    console.log(\`Total transferido: \${(totalSize / 1024).toFixed(1)} KB\`);
+    console.log(\`Requests fallidos: \${failed.length}\`);
+    console.log(\`Requests lentos (>1s): \${slow.length}\`);
+
+    if (slow.length > 0) {
+        console.log('Requests mas lentos:');
+        slow.sort((a, b) => (b.timing.responseEnd ?? 0) - (a.timing.responseEnd ?? 0))
+            .slice(0, 5)
+            .forEach(r => {
+                console.log(\`  \${(r.timing.responseEnd ?? 0).toFixed(0)}ms - \${r.url.slice(0, 80)}\`);
+            });
+    }
+
+    // Assertions
+    expect(failed.length, \`\${failed.length} requests fallidos\`).toBe(0);
+    expect(totalRequests, \`Demasiados requests: \${totalRequests}\`).toBeLessThan(100);
+    expect(totalSize, \`Payload excesivo: \${(totalSize / 1024 / 1024).toFixed(1)} MB\`)
+        .toBeLessThan(5 * 1024 * 1024);
+});</code></pre>
+</div>
+</div>
 
         <h3>Performance baselines y regresion</h3>
 
-        <pre><code class="python"># tests/performance/conftest.py
+        <div class="code-tabs" data-code-id="L122-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># tests/performance/conftest.py
 """Fixtures para tests de performance con baselines."""
 import pytest
 import json
@@ -254,6 +478,74 @@ def test_dashboard_perf_regression(page, assert_performance):
 
     assert_performance("dashboard", "load_time", load_time)
     assert_performance("dashboard", "max_load", load_time, tolerance=0.1)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// tests/performance/perf-fixtures.ts
+// Fixtures para tests de performance con baselines
+import { test as base, expect } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Interfaz para baselines
+interface PerfBaselines {
+    [key: string]: number;
+}
+
+const BASELINES_FILE = path.resolve('data/performance_baselines.json');
+
+// Cargar baselines de performance
+function loadBaselines(): PerfBaselines {
+    if (fs.existsSync(BASELINES_FILE)) {
+        return JSON.parse(fs.readFileSync(BASELINES_FILE, 'utf-8'));
+    }
+    return {};
+}
+
+// Funcion para comparar contra baselines con tolerancia
+function assertPerformance(
+    baselines: PerfBaselines,
+    pageName: string,
+    metric: string,
+    value: number,
+    tolerance: number = 0.2
+): void {
+    const key = \`\${pageName}.\${metric}\`;
+    const baseline = baselines[key];
+
+    if (baseline === undefined) {
+        console.log(\`  [INFO] Sin baseline para \${key} = \${value.toFixed(1)}\`);
+        return;
+    }
+
+    const maxAllowed = baseline * (1 + tolerance);
+    expect(value, \`Regresion de performance en \${key}: \` +
+        \`\${value.toFixed(1)} > \${maxAllowed.toFixed(1)} \` +
+        \`(baseline: \${baseline.toFixed(1)}, tolerancia: \${(tolerance * 100)}%)\`)
+        .toBeLessThanOrEqual(maxAllowed);
+}
+
+// Extender test con fixture de performance
+const test = base.extend<{ perfBaselines: PerfBaselines }>({
+    perfBaselines: async ({}, use) => {
+        await use(loadBaselines());
+    },
+});
+
+// Uso en test:
+test('dashboard perf regression', async ({ page, perfBaselines }) => {
+    await page.goto('/dashboard');
+    await page.waitForLoadState('networkidle');
+
+    const loadTime = await page.evaluate(() => {
+        const nav = performance.getEntriesByType('navigation')[0] as PerformanceNavigationTiming;
+        return nav.loadEventEnd - nav.navigationStart;
+    });
+
+    assertPerformance(perfBaselines, 'dashboard', 'load_time', loadTime);
+    assertPerformance(perfBaselines, 'dashboard', 'max_load', loadTime, 0.1);
+});</code></pre>
+</div>
+</div>
 
         <pre><code class="json">// data/performance_baselines.json
 {
@@ -274,7 +566,18 @@ def test_dashboard_perf_regression(page, assert_performance):
 
         <h3>Integracion con Lighthouse CI</h3>
 
-        <pre><code class="python"># scripts/lighthouse_check.py
+        <div class="code-tabs" data-code-id="L122-5">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># scripts/lighthouse_check.py
 """Ejecutar Lighthouse CI y verificar umbrales."""
 import subprocess
 import json
@@ -306,6 +609,58 @@ def run_lighthouse(url, output="reports/lighthouse.json"):
 scores = run_lighthouse("http://localhost:3000/dashboard")
 assert scores["performance"] >= 80, f"Performance score: {scores['performance']}"
 assert scores["lcp"] < 2500, f"LCP: {scores['lcp']}ms"</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// scripts/lighthouse-check.ts
+// Ejecutar Lighthouse CI y verificar umbrales
+import { execSync } from 'child_process';
+import * as fs from 'fs';
+
+interface LighthouseScores {
+    performance: number;
+    fcp: number;
+    lcp: number;
+    cls: number;
+    tbt: number;
+}
+
+function runLighthouse(
+    url: string,
+    output: string = 'reports/lighthouse.json'
+): LighthouseScores {
+    // Ejecutar Lighthouse en modo headless
+    execSync(
+        \`npx lighthouse \${url} \` +
+        \`--output=json \` +
+        \`--output-path=\${output} \` +
+        \`--chrome-flags='--headless --no-sandbox' \` +
+        \`--only-categories=performance\`,
+        { stdio: 'inherit' }
+    );
+
+    const result = JSON.parse(fs.readFileSync(output, 'utf-8'));
+
+    return {
+        performance: result.categories.performance.score * 100,
+        fcp: result.audits['first-contentful-paint'].numericValue,
+        lcp: result.audits['largest-contentful-paint'].numericValue,
+        cls: result.audits['cumulative-layout-shift'].numericValue,
+        tbt: result.audits['total-blocking-time'].numericValue,
+    };
+}
+
+// Verificar umbrales
+const scores = runLighthouse('http://localhost:3000/dashboard');
+console.assert(
+    scores.performance >= 80,
+    \`Performance score: \${scores.performance}\`
+);
+console.assert(
+    scores.lcp < 2500,
+    \`LCP: \${scores.lcp}ms\`
+);</code></pre>
+</div>
+</div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Ejercicio Practico</h4>

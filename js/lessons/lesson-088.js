@@ -56,7 +56,18 @@ const LESSON_088 = {
         Es el nivel más alto y costoso en recursos. Normalmente lanzas <strong>un solo Browser</strong>
         por suite de tests.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L088-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     # Lanzar una instancia de Chromium
@@ -76,6 +87,29 @@ with sync_playwright() as p:
     browser.close()
     browser_ff.close()
     browser_wk.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium, firefox, webkit } from 'playwright';
+
+// Lanzar una instancia de Chromium
+const browser = await chromium.launch({
+    headless: true,          // Sin ventana visible (default en CI)
+    slowMo: 500,             // Ralentizar acciones 500ms (para debug)
+    args: ['--start-maximized'],  // Argumentos del navegador
+});
+
+// También puedes lanzar Firefox o WebKit
+const browserFf = await firefox.launch({ headless: true });
+const browserWk = await webkit.launch({ headless: true });
+
+console.log(\`Chromium versión: \${browser.version()}\`);
+// Chromium versión: 121.0.6167.57
+
+await browser.close();
+await browserFf.close();
+await browserWk.close();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>📋 Opciones de lanzamiento del Browser</h4>
@@ -128,7 +162,18 @@ with sync_playwright() as p:
         sessionStorage), permisos y configuración. Dos contexts dentro del mismo Browser <strong>no
         comparten absolutamente nada</strong>.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L088-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -155,6 +200,36 @@ with sync_playwright() as p:
     context_admin.close()
     context_user.close()
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+
+// ── Context 1: usuario administrador ──
+const contextAdmin = await browser.newContext({
+    viewport: { width: 1920, height: 1080 },
+    locale: 'es-CO',
+    timezoneId: 'America/Bogota',
+});
+
+// ── Context 2: usuario regular ──
+const contextUser = await browser.newContext({
+    viewport: { width: 375, height: 812 },  // iPhone X
+    locale: 'es-CO',
+    timezoneId: 'America/Bogota',
+    permissions: ['geolocation'],
+    geolocation: { latitude: 3.4516, longitude: -76.5320 },  // Cali
+});
+
+// Cada context tiene sus propias cookies y storage
+// ¡Son completamente independientes!
+
+await contextAdmin.close();
+await contextUser.close();
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Lo que controla un BrowserContext</h4>
@@ -176,7 +251,18 @@ with sync_playwright() as p:
         Es el objeto con el que más interactúas: navegar, hacer clic, llenar formularios, verificar contenido.
         Las pages dentro del <strong>mismo context comparten cookies y storage</strong>.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L088-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     browser = p.chromium.launch()
@@ -206,10 +292,54 @@ with sync_playwright() as p:
 
     context.close()  # Cierra todas las páginas del context
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+const browser = await chromium.launch();
+const context = await browser.newContext();
+
+// Crear múltiples páginas (tabs) en el mismo context
+const page1 = await context.newPage();
+const page2 = await context.newPage();
+const page3 = await context.newPage();
+
+// Todas las páginas comparten cookies del context
+await page1.goto('https://mi-app.com/login');
+await page1.fill('#user', 'admin');
+await page1.fill('#pass', 'secret');
+await page1.click('#login-btn');
+// Después del login, la cookie de sesión está en el context
+
+// page2 ya está autenticada (misma cookie de sesión)
+await page2.goto('https://mi-app.com/dashboard');
+// ¡No necesita hacer login de nuevo!
+
+// page3 también tiene acceso
+await page3.goto('https://mi-app.com/settings');
+
+console.log(\`Páginas abiertas: \${context.pages().length}\`);
+// Páginas abiertas: 3
+
+await context.close();  // Cierra todas las páginas del context
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <h3>🔄 Creación completa de la jerarquía</h3>
         <p>Veamos el flujo completo desde cero, creando cada nivel explícitamente:</p>
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L088-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 with sync_playwright() as p:
     # ── Nivel 1: Lanzar el navegador ──
@@ -251,6 +381,51 @@ with sync_playwright() as p:
 
     # 3. Cerrar el browser (cierra todo automáticamente)
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+// ── Nivel 1: Lanzar el navegador ──
+const browser = await chromium.launch({ headless: false });
+console.log(\`Browser conectado: \${browser.isConnected()}\`);
+
+// ── Nivel 2: Crear contextos aislados ──
+const contextA = await browser.newContext({
+    viewport: { width: 1280, height: 720 },
+    locale: 'es-CO',
+});
+const contextB = await browser.newContext({
+    viewport: { width: 1920, height: 1080 },
+    locale: 'en-US',
+});
+
+// ── Nivel 3: Crear páginas dentro de cada contexto ──
+const pageA1 = await contextA.newPage();
+const pageA2 = await contextA.newPage();
+const pageB1 = await contextB.newPage();
+
+// Navegar
+await pageA1.goto('https://mi-app.com');
+await pageA2.goto('https://mi-app.com/admin');
+await pageB1.goto('https://mi-app.com');
+
+// pageA1 y pageA2 comparten cookies (mismo context)
+// pageB1 está completamente aislada (otro context)
+
+// ── Cerrar en orden inverso ──
+// 1. Cerrar páginas individuales (opcional si cierras el context)
+await pageA1.close();
+await pageA2.close();
+await pageB1.close();
+
+// 2. Cerrar contextos (cierra sus páginas automáticamente)
+await contextA.close();
+await contextB.close();
+
+// 3. Cerrar el browser (cierra todo automáticamente)
+await browser.close();</code></pre>
+        </div>
+        </div>
 
         <h3>⚡ Atajo: browser.new_page()</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">

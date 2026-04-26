@@ -70,7 +70,18 @@ const LESSON_089 = {
         <p>El patrón fundamental: a partir de un mismo <code>browser</code>, crear dos (o más)
         contexts, cada uno con su propia <code>page</code>.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L089-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 def test_dos_usuarios_basico():
     """Ejemplo básico: dos contexts = dos usuarios."""
@@ -105,12 +116,65 @@ def test_dos_usuarios_basico():
         context_a.close()
         context_b.close()
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+async function testDosUsuariosBasico() {
+    // Ejemplo básico: dos contexts = dos usuarios
+    const browser = await chromium.launch();
+
+    try {
+        // Context 1 → Usuario A
+        const contextA = await browser.newContext();
+        const pageA = await contextA.newPage();
+
+        // Context 2 → Usuario B
+        const contextB = await browser.newContext();
+        const pageB = await contextB.newPage();
+
+        // Cada uno navega independientemente
+        await pageA.goto('https://example.com/login');
+        await pageB.goto('https://example.com/login');
+
+        // Login como usuarios diferentes
+        await pageA.fill('#username', 'admin');
+        await pageA.fill('#password', 'admin123');
+        await pageA.click("button[type='submit']");
+
+        await pageB.fill('#username', 'usuario_regular');
+        await pageB.fill('#password', 'user123');
+        await pageB.click("button[type='submit']");
+
+        // Ahora ambos están logueados con sesiones independientes
+        // ... realizar acciones cruzadas ...
+
+        // Limpieza
+        await contextA.close();
+        await contextB.close();
+    } finally {
+        await browser.close();
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>💬 Ejemplo: Dos usuarios en una aplicación de chat</h3>
         <p>Este es el caso de uso clásico. Un usuario envía un mensaje y el otro lo recibe
         en tiempo real.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright, expect
+        <div class="code-tabs" data-code-id="L089-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python">from playwright.sync_api import sync_playwright, expect
 
 def test_chat_entre_dos_usuarios():
     """
@@ -169,6 +233,72 @@ def test_chat_entre_dos_usuarios():
         ctx_remitente.close()
         ctx_destinatario.close()
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">import { chromium, expect } from '@playwright/test';
+
+async function testChatEntreDosUsuarios() {
+    /**
+     * Simula un chat entre dos usuarios.
+     * Usuario A envía un mensaje → Usuario B lo ve en su pantalla.
+     */
+    const browser = await chromium.launch();
+
+    try {
+        // --- Context del remitente ---
+        const ctxRemitente = await browser.newContext();
+        const pageRemitente = await ctxRemitente.newPage();
+
+        // --- Context del destinatario ---
+        const ctxDestinatario = await browser.newContext();
+        const pageDestinatario = await ctxDestinatario.newPage();
+
+        // Ambos acceden al chat
+        await pageRemitente.goto('https://mi-app.com/login');
+        await pageRemitente.fill('#username', 'ana');
+        await pageRemitente.fill('#password', 'pass123');
+        await pageRemitente.click('#btn-login');
+        await pageRemitente.goto('https://mi-app.com/chat/sala-general');
+
+        await pageDestinatario.goto('https://mi-app.com/login');
+        await pageDestinatario.fill('#username', 'carlos');
+        await pageDestinatario.fill('#password', 'pass456');
+        await pageDestinatario.click('#btn-login');
+        await pageDestinatario.goto('https://mi-app.com/chat/sala-general');
+
+        // Ana envía un mensaje
+        const mensaje = 'Hola Carlos, ¿cómo va el sprint?';
+        await pageRemitente.fill('#input-mensaje', mensaje);
+        await pageRemitente.click('#btn-enviar');
+
+        // Verificar que Ana ve su propio mensaje
+        await expect(
+            pageRemitente.locator('.mensaje-enviado').last()
+        ).toHaveText(mensaje);
+
+        // Verificar que Carlos recibe el mensaje (puede requerir espera)
+        await expect(
+            pageDestinatario.locator('.mensaje-recibido').last()
+        ).toHaveText(mensaje, { timeout: 10_000 });
+
+        // Carlos responde
+        const respuesta = '¡Todo bien! Estamos al 80%.';
+        await pageDestinatario.fill('#input-mensaje', respuesta);
+        await pageDestinatario.click('#btn-enviar');
+
+        // Ana recibe la respuesta
+        await expect(
+            pageRemitente.locator('.mensaje-recibido').last()
+        ).toHaveText(respuesta, { timeout: 10_000 });
+
+        await ctxRemitente.close();
+        await ctxDestinatario.close();
+    } finally {
+        await browser.close();
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip: Timeouts en tests multi-context</h4>

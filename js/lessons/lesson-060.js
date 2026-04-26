@@ -62,7 +62,18 @@ assert text == "50 registros"</code></pre>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <p>En Playwright, el mismo flujo es limpio y estable <strong>sin ninguna espera
             explícita</strong>:</p>
-            <pre><code class="python"># ✅ Playwright — auto-waiting hace todo el trabajo
+            <div class="code-tabs" data-code-id="L060-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># ✅ Playwright — auto-waiting hace todo el trabajo
 from playwright.sync_api import sync_playwright, expect
 
 with sync_playwright() as p:
@@ -82,6 +93,27 @@ with sync_playwright() as p:
     expect(page.locator(".data-count")).to_have_text("50 registros")
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// ✅ Playwright — auto-waiting hace todo el trabajo
+import { test, expect } from '@playwright/test';
+
+test('dashboard auto-waiting', async ({ page }) => {
+    await page.goto('https://mi-app.com/dashboard');
+
+    // Playwright espera automáticamente a que el botón:
+    // ✓ Exista en el DOM
+    // ✓ Sea visible
+    // ✓ Sea estable (no en animación)
+    // ✓ Esté habilitado
+    // ✓ No esté oculto por otro elemento
+    await page.click('.load-data-btn');
+
+    // expect() también espera automáticamente
+    await expect(page.locator('.data-count')).toHaveText('50 registros');
+});</code></pre>
+            </div>
+            </div>
             <p><strong>Cero sleeps. Cero WebDriverWait. Cero flakiness.</strong></p>
         </div>
 
@@ -150,7 +182,18 @@ Si no se cumple en 30s → TimeoutError con mensaje claro</code></pre>
         </table>
 
         <h3>⏱️ Configurando timeouts</h3>
-        <pre><code class="python"># Timeout por defecto: 30 segundos
+        <div class="code-tabs" data-code-id="L060-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Timeout por defecto: 30 segundos
 # Se puede ajustar a nivel global, por contexto o por acción
 
 # ── Nivel global (pytest.ini o conftest.py) ──
@@ -169,6 +212,33 @@ page.click(".boton-lento", timeout=60000)  # 60s solo para este click
 # ── Para navegación (separado de acciones) ──
 page.set_default_navigation_timeout(30000)
 page.goto("https://mi-app.com", timeout=45000)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Timeout por defecto: 30 segundos
+// Se puede ajustar a nivel global, por contexto o por acción
+
+// ── Nivel global (playwright.config.ts) ──
+// import { defineConfig } from '@playwright/test';
+// export default defineConfig({
+//     timeout: 60_000,  // 60 segundos por test
+//     expect: { timeout: 10_000 },  // 10s para assertions
+// });
+
+// ── Nivel de contexto ──
+const context = await browser.newContext();
+context.setDefaultTimeout(15_000);  // 15 segundos para todo
+
+// ── Nivel de página ──
+page.setDefaultTimeout(10_000);  // 10 segundos para esta página
+
+// ── Nivel de acción individual ──
+await page.click('.boton-lento', { timeout: 60_000 });  // 60s solo para este click
+
+// ── Para navegación (separado de acciones) ──
+page.setDefaultNavigationTimeout(30_000);
+await page.goto('https://mi-app.com', { timeout: 45_000 });</code></pre>
+        </div>
+        </div>
 
         <h3>🔄 Auto-waiting vs Selenium: Comparación directa</h3>
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -211,7 +281,18 @@ page.goto("https://mi-app.com", timeout=45000)</code></pre>
         </div>
 
         <h3>🧪 Ejemplo completo: Formulario dinámico</h3>
-        <pre><code class="python"># Sin sleeps ni esperas manuales — todo funciona
+        <div class="code-tabs" data-code-id="L060-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Sin sleeps ni esperas manuales — todo funciona
 from playwright.sync_api import sync_playwright, expect
 
 with sync_playwright() as p:
@@ -243,6 +324,39 @@ with sync_playwright() as p:
     )
 
     browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Sin sleeps ni esperas manuales — todo funciona
+import { test, expect } from '@playwright/test';
+
+test('formulario dinámico', async ({ page }) => {
+    await page.goto('https://mi-app.com/formulario-dinamico');
+
+    // El formulario carga con un spinner de 2 segundos
+    // Playwright espera automáticamente a que el campo exista y sea visible
+    await page.fill('#nombre', 'Juan Reina');
+    await page.fill('#email', 'juan@siesa.com');
+
+    // Al seleccionar "Colombia", se cargan departamentos via AJAX
+    await page.selectOption('#pais', { label: 'Colombia' });
+
+    // Playwright espera a que el select de departamento
+    // se llene con las opciones del AJAX
+    await page.selectOption('#departamento', { label: 'Valle del Cauca' });
+
+    // Al seleccionar departamento, se cargan ciudades
+    await page.selectOption('#ciudad', { label: 'Cali' });
+
+    // Submit — espera a que el botón esté habilitado
+    await page.click('#submit-btn');
+
+    // Verificar mensaje de éxito — espera a que aparezca
+    await expect(page.locator('.success-message')).toHaveText(
+        'Registro exitoso'
+    );
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00bcd4;">
             <strong>💡 Tip:</strong> El auto-waiting es la razón principal por la que los tests

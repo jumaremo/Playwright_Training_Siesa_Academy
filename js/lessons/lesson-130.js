@@ -46,7 +46,18 @@ const LESSON_130 = {
 
         <h3>API Client base</h3>
 
-        <pre><code class="python"># services/api_client.py
+        <div class="code-tabs" data-code-id="L130-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># services/api_client.py
 from playwright.sync_api import APIRequestContext
 from config.settings import settings
 import logging
@@ -92,10 +103,80 @@ class APIClient:
     def delete(self, path, **kwargs):
         url = f"{self.base}{path}"
         return self.api.delete(url, headers=self._headers(), **kwargs)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// services/api-client.ts
+import { APIRequestContext } from '@playwright/test';
+import { settings } from '../config/settings';
+
+export class APIClient {
+    /** Cliente base para interactuar con APIs de microservicios. */
+    private api: APIRequestContext;
+    private base: string;
+    public token: string | null = null;
+
+    constructor(apiContext: APIRequestContext, baseUrl?: string) {
+        this.api = apiContext;
+        this.base = baseUrl ?? settings.apiUrl;
+    }
+
+    async authenticate(email: string, password: string): Promise&lt;this&gt; {
+        const resp = await this.api.post(\`\${this.base}/auth/login\`, {
+            data: { email, password }
+        });
+        expect(resp.ok()).toBeTruthy();
+        const body = await resp.json();
+        this.token = body.token;
+        return this;
+    }
+
+    private headers(): Record&lt;string, string&gt; {
+        const h: Record&lt;string, string&gt; = { 'Content-Type': 'application/json' };
+        if (this.token) {
+            h['Authorization'] = \`Bearer \${this.token}\`;
+        }
+        return h;
+    }
+
+    async get(path: string, options?: object) {
+        const url = \`\${this.base}\${path}\`;
+        console.debug(\`GET \${url}\`);
+        return this.api.get(url, { headers: this.headers(), ...options });
+    }
+
+    async post(path: string, data?: object, options?: object) {
+        const url = \`\${this.base}\${path}\`;
+        console.debug(\`POST \${url}\`);
+        return this.api.post(url, { data, headers: this.headers(), ...options });
+    }
+
+    async put(path: string, data?: object, options?: object) {
+        const url = \`\${this.base}\${path}\`;
+        return this.api.put(url, { data, headers: this.headers(), ...options });
+    }
+
+    async delete(path: string, options?: object) {
+        const url = \`\${this.base}\${path}\`;
+        return this.api.delete(url, { headers: this.headers(), ...options });
+    }
+}</code></pre>
+</div>
+</div>
 
         <h3>Fixtures de API</h3>
 
-        <pre><code class="python"># fixtures/api_fixtures.py
+        <div class="code-tabs" data-code-id="L130-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># fixtures/api_fixtures.py
 import pytest
 from services.api_client import APIClient
 
@@ -142,10 +223,93 @@ def create_order_api(api, create_product_api):
     yield _create
     for oid in created:
         api.delete(f"/orders/{oid}")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// fixtures/api-fixtures.ts
+import { test as base, expect } from '@playwright/test';
+import { APIClient } from '../services/api-client';
+
+// Definir tipos para los fixtures
+type APIFixtures = {
+    api: APIClient;
+    createProductApi: (overrides?: Partial&lt;Product&gt;) =&gt; Promise&lt;Product&gt;;
+    createOrderApi: (productId?: string, quantity?: number) =&gt; Promise&lt;Order&gt;;
+};
+
+interface Product {
+    id: string; name: string; price: number; stock: number; category: string;
+}
+interface Order {
+    id: string; product_id: string; quantity: number; total: number; status: string;
+}
+
+export const test = base.extend&lt;APIFixtures&gt;({
+    // API Client autenticado como admin
+    api: async ({ playwright }, use) =&gt; {
+        const context = await playwright.request.newContext();
+        const client = new APIClient(context);
+        await client.authenticate('admin@siesa.com', 'Admin1234!');
+        await use(client);
+        await context.dispose();
+    },
+
+    // Factory para crear productos y limpiar despues
+    createProductApi: async ({ api }, use) =&gt; {
+        const created: string[] = [];
+        const factory = async (overrides: Partial&lt;Product&gt; = {}) =&gt; {
+            const defaults = { name: 'Test Product', price: 99.99, stock: 50 };
+            const data = { ...defaults, ...overrides };
+            const resp = await api.post('/products', data);
+            expect(resp.ok()).toBeTruthy();
+            const product = await resp.json();
+            created.push(product.id);
+            return product as Product;
+        };
+        await use(factory);
+        for (const pid of created) {
+            await api.delete(\`/products/\${pid}\`);
+        }
+    },
+
+    // Factory para crear ordenes completas
+    createOrderApi: async ({ api, createProductApi }, use) =&gt; {
+        const created: string[] = [];
+        const factory = async (productId?: string, quantity = 1) =&gt; {
+            if (!productId) {
+                const product = await createProductApi();
+                productId = product.id;
+            }
+            const resp = await api.post('/orders', {
+                product_id: productId, quantity
+            });
+            expect(resp.ok()).toBeTruthy();
+            const order = await resp.json();
+            created.push(order.id);
+            return order as Order;
+        };
+        await use(factory);
+        for (const oid of created) {
+            await api.delete(\`/orders/\${oid}\`);
+        }
+    },
+});</code></pre>
+</div>
+</div>
 
         <h3>Tests de CRUD</h3>
 
-        <pre><code class="python"># tests/api/test_products_crud.py
+        <div class="code-tabs" data-code-id="L130-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># tests/api/test_products_crud.py
 
 class TestProductsCRUD:
     def test_create_product_returns_201(self, api):
@@ -193,10 +357,82 @@ class TestProductsCRUD:
         products = resp.json()
         assert isinstance(products, list)
         assert len(products) >= 2</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// tests/api/products-crud.spec.ts
+import { test } from '../../fixtures/api-fixtures';
+import { expect } from '@playwright/test';
+
+test.describe('Products CRUD', () =&gt; {
+    test('crear producto retorna 201', async ({ api }) =&gt; {
+        const resp = await api.post('/products', {
+            name: 'Laptop Dell XPS',
+            price: 2999.99,
+            stock: 10,
+            category: 'electronics'
+        });
+        expect(resp.status()).toBe(201);
+        const product = await resp.json();
+        expect(product.name).toBe('Laptop Dell XPS');
+        expect(product.price).toBe(2999.99);
+        expect(product).toHaveProperty('id');
+        // Cleanup
+        await api.delete(\`/products/\${product.id}\`);
+    });
+
+    test('obtener producto por ID', async ({ api, createProductApi }) =&gt; {
+        const product = await createProductApi({ name: 'Mouse Logitech' });
+        const resp = await api.get(\`/products/\${product.id}\`);
+        expect(resp.ok()).toBeTruthy();
+        const data = await resp.json();
+        expect(data.name).toBe('Mouse Logitech');
+        expect(data.id).toBe(product.id);
+    });
+
+    test('actualizar precio de producto', async ({ api, createProductApi }) =&gt; {
+        const product = await createProductApi({ name: 'Teclado', price: 59.99 });
+        const resp = await api.put(\`/products/\${product.id}\`, { price: 49.99 });
+        expect(resp.ok()).toBeTruthy();
+        const updated = await resp.json();
+        expect(updated.price).toBe(49.99);
+    });
+
+    test('eliminar producto retorna 204', async ({ api, createProductApi }) =&gt; {
+        const product = await createProductApi({ name: 'Para Eliminar' });
+        const resp = await api.delete(\`/products/\${product.id}\`);
+        expect(resp.status()).toBe(204);
+        // Verificar que ya no existe
+        const getResp = await api.get(\`/products/\${product.id}\`);
+        expect(getResp.status()).toBe(404);
+    });
+
+    test('listar productos retorna array', async ({ api, createProductApi }) =&gt; {
+        await createProductApi({ name: 'Prod A' });
+        await createProductApi({ name: 'Prod B' });
+        const resp = await api.get('/products');
+        expect(resp.ok()).toBeTruthy();
+        const products = await resp.json();
+        expect(Array.isArray(products)).toBeTruthy();
+        expect(products.length).toBeGreaterThanOrEqual(2);
+    });
+});</code></pre>
+</div>
+</div>
 
         <h3>Tests de autenticacion</h3>
 
-        <pre><code class="python"># tests/api/test_auth.py
+        <div class="code-tabs" data-code-id="L130-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># tests/api/test_auth.py
 import pytest
 
 class TestAuthentication:
@@ -230,6 +466,55 @@ class TestAuthentication:
         api_copy.token = "expired.token.here"
         resp = api_copy.get("/products")
         assert resp.status == 401</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// tests/api/auth.spec.ts
+import { test } from '../../fixtures/api-fixtures';
+import { expect } from '@playwright/test';
+import { APIClient } from '../../services/api-client';
+import { settings } from '../../config/settings';
+
+test.describe('Authentication', () =&gt; {
+    test('login retorna token', async ({ api }) =&gt; {
+        const resp = await api.post('/auth/login', {
+            email: 'admin@siesa.com',
+            password: 'Admin1234!'
+        });
+        expect(resp.ok()).toBeTruthy();
+        const body = await resp.json();
+        expect(body).toHaveProperty('token');
+        expect(body.token.length).toBeGreaterThan(20);
+    });
+
+    test('login con credenciales invalidas retorna 401', async ({ api }) =&gt; {
+        const resp = await api.post('/auth/login', {
+            email: 'admin@siesa.com',
+            password: 'wrongpassword'
+        });
+        expect(resp.status()).toBe(401);
+    });
+
+    test('endpoint protegido sin token retorna 401', async ({ playwright }) =&gt; {
+        const ctx = await playwright.request.newContext();
+        const client = new APIClient(ctx); // Sin autenticacion
+        const resp = await client.get('/products');
+        expect(resp.status()).toBe(401);
+        await ctx.dispose();
+    });
+
+    test('token expirado retorna 401', async ({ api }) =&gt; {
+        // Usar un token invalido/expirado
+        const apiCopy = new APIClient(
+            (api as any).api,
+            (api as any).base
+        );
+        apiCopy.token = 'expired.token.here';
+        const resp = await apiCopy.get('/products');
+        expect(resp.status()).toBe(401);
+    });
+});</code></pre>
+</div>
+</div>
 
         <h3>Tests de contrato</h3>
 

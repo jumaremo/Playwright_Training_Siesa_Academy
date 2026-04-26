@@ -74,7 +74,18 @@ const LESSON_114 = {
         <p>Playwright tiene el mejor sistema de auto-waiting del mercado. Antes de agregar retries,
         asegurate de aprovechar estas capacidades nativas:</p>
 
-        <pre><code class="python"># Playwright espera automaticamente a que los elementos esten:
+        <div class="code-tabs" data-code-id="L114-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Playwright espera automaticamente a que los elementos esten:
 # - Visibles
 # - Habilitados
 # - Estables (sin animaciones)
@@ -98,12 +109,50 @@ page.wait_for_url("**/dashboard")
 import time
 time.sleep(3)  # NUNCA hagas esto
 page.click("#submit-button")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Playwright espera automaticamente a que los elementos esten:
+// - Visibles
+// - Habilitados
+// - Estables (sin animaciones)
+// - Que reciban eventos
+
+import { test, expect } from '@playwright/test';
+
+// BIEN: Playwright espera automaticamente
+await page.click('#submit-button'); // Espera hasta 30s por defecto
+
+// BIEN: Assertions con auto-retry integrado
+// expect() reintenta la asercion hasta que pase o expire el timeout
+await expect(page.locator('.success-message')).toBeVisible({ timeout: 10000 });
+await expect(page.locator('.item-count')).toHaveText('5 items', { timeout: 5000 });
+
+// BIEN: Esperar a un estado especifico de la pagina
+await page.waitForLoadState('networkidle');
+await page.waitForURL('**/dashboard');
+
+// MAL: No uses delays manuales - es fragil e innecesario
+await page.waitForTimeout(3000); // NUNCA hagas esto
+await page.click('#submit-button');</code></pre>
+</div>
+</div>
 
         <h3>pytest-rerunfailures: Retry a nivel de test</h3>
         <p>El plugin <code>pytest-rerunfailures</code> permite reintentar tests fallidos
         automaticamente. Es la solucion mas popular para manejar flakiness:</p>
 
-        <pre><code class="python"># Instalacion
+        <div class="code-tabs" data-code-id="L114-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Instalacion
 # pip install pytest-rerunfailures
 
 # Uso basico: reintentar todos los tests fallidos hasta 2 veces
@@ -115,12 +164,48 @@ page.click("#submit-button")</code></pre>
 # Solo reintentar ciertos errores
 # pytest tests/ --reruns 2 --only-rerun "TimeoutError"
 # pytest tests/ --reruns 2 --only-rerun "AssertionError" --only-rerun "TimeoutError"</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// En Playwright, el retry esta integrado en la configuracion
+// No se necesita plugin adicional
+
+// playwright.config.ts - Configuracion de retries
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  // Uso basico: reintentar todos los tests fallidos hasta 2 veces
+  retries: 2,
+
+  // Con retry diferenciado por entorno
+  retries: process.env.CI ? 2 : 0,
+});
+
+// Ejecucion desde CLI:
+// npx playwright test --retries=2
+// npx playwright test --retries=3
+
+// Nota: Playwright no filtra por tipo de error en retry,
+// pero puedes usar testInfo.retry dentro del test para
+// ajustar comportamiento en reintentos</code></pre>
+</div>
+</div>
 
         <h3>Retry con markers de pytest</h3>
         <p>Para control granular, puedes marcar tests individuales que sabes que son propensos
         a flakiness (mientras trabajas en la correccion definitiva):</p>
 
-        <pre><code class="python">import pytest
+        <div class="code-tabs" data-code-id="L114-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python">import pytest
 
 # Marcar un test especifico para retry
 @pytest.mark.flaky(reruns=3, reruns_delay=1)
@@ -146,10 +231,58 @@ def test_payment_webhook(page):
     page.goto("/payments")
     page.click("#trigger-webhook")
     expect(page.locator(".webhook-received")).to_be_visible()</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+// Marcar un test especifico para retry (3 reintentos)
+test.describe.configure({ retries: 3 });
+
+test('dashboard load', async ({ page }) => {
+  // Test que a veces falla por carga lenta del dashboard
+  await page.goto('/dashboard');
+  await expect(page.locator('.widget-container')).toBeVisible();
+  await expect(page.locator('.chart-loaded')).toHaveCount(4);
+});
+
+// Retry condicional: configurar en playwright.config.ts
+// retries: process.env.CI ? 2 : 0
+
+test('external api integration', async ({ page }) => {
+  // Test que depende de API externa - mas inestable en CI
+  await page.goto('/integrations');
+  await page.click('#sync-button');
+  await expect(page.locator('.sync-complete')).toBeVisible({ timeout: 15000 });
+});
+
+// Combinar con tag de cuarentena y retry por describe
+test.describe('quarantine - payment', () => {
+  test.describe.configure({ retries: 5 });
+
+  test('payment webhook @quarantine', async ({ page }) => {
+    // Test en cuarentena - investigar causa raiz
+    await page.goto('/payments');
+    await page.click('#trigger-webhook');
+    await expect(page.locator('.webhook-received')).toBeVisible();
+  });
+});</code></pre>
+</div>
+</div>
 
         <h3>Configuracion centralizada en conftest.py</h3>
 
-        <pre><code class="python"># conftest.py - Configuracion de retry centralizada
+        <div class="code-tabs" data-code-id="L114-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Configuracion de retry centralizada
 import pytest
 import os
 import json
@@ -207,6 +340,77 @@ def pytest_terminal_summary(terminalreporter, config):
         os.makedirs("reports", exist_ok=True)
         with open("reports/flaky-tests.json", "w") as f:
             json.dump(flaky_report, f, indent=2)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Configuracion de retry centralizada
+import { defineConfig, type ReporterDescription } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+export default defineConfig({
+  // ---------- Configuracion de retry para CI ----------
+  retries: process.env.CI ? 3 : 0,
+
+  // Reporter personalizado para rastrear flaky tests
+  reporter: [
+    ['list'],
+    ['json', { outputFile: 'reports/test-results.json' }],
+    ['./flaky-reporter.ts'],
+  ],
+});
+
+// ---------- flaky-reporter.ts - Reporter para registrar flaky tests ----------
+import type {
+  FullConfig, FullResult, Reporter, Suite, TestCase, TestResult
+} from '@playwright/test/reporter';
+
+class FlakyReporter implements Reporter {
+  private flakyTests: Array&lt;{
+    test: string;
+    retries: number;
+    timestamp: string;
+  }&gt; = [];
+
+  onTestEnd(test: TestCase, result: TestResult): void {
+    // Si el test paso pero necesito reintentos, es flaky
+    if (test.outcome() === 'flaky') {
+      this.flakyTests.push({
+        test: test.titlePath().join(' > '),
+        retries: test.results.length - 1,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  }
+
+  onEnd(result: FullResult): void {
+    if (this.flakyTests.length > 0) {
+      console.log('\\n=== FLAKY TESTS DETECTADOS ===');
+      console.log(
+        \`Tests que necesitaron retry: \${this.flakyTests.length}\`
+      );
+      for (const item of this.flakyTests) {
+        console.log(\`  - \${item.test} (reintentos: \${item.retries})\`);
+      }
+
+      // Guardar reporte de flaky tests
+      const flakyReport = {
+        date: new Date().toISOString(),
+        total_flaky: this.flakyTests.length,
+        tests: this.flakyTests,
+      };
+
+      fs.mkdirSync('reports', { recursive: true });
+      fs.writeFileSync(
+        path.join('reports', 'flaky-tests.json'),
+        JSON.stringify(flakyReport, null, 2)
+      );
+    }
+  }
+}
+
+export default FlakyReporter;</code></pre>
+</div>
+</div>
 
         <h3>Retry a nivel de CI/CD</h3>
         <p>Ademas del retry en pytest, puedes configurar retry a nivel del pipeline:</p>
@@ -254,7 +458,18 @@ stage('Tests') {
         <p>Un sistema de cuarentena aisla tests inestables del pipeline principal
         mientras se investiga y corrige la causa raiz:</p>
 
-        <pre><code class="python"># markers.py o conftest.py - Sistema de cuarentena
+        <div class="code-tabs" data-code-id="L114-5">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># markers.py o conftest.py - Sistema de cuarentena
 import pytest
 
 # Registrar el marcador de cuarentena
@@ -284,6 +499,47 @@ def test_intermittent_notification(page):
 
 # Pipeline de cuarentena (separado, no bloquea):
 # pytest tests/ -m "quarantine" --reruns 5</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Sistema de cuarentena con tags
+import { defineConfig } from '@playwright/test';
+
+export default defineConfig({
+  // Configuracion de proyectos para separar cuarentena
+  projects: [
+    {
+      name: 'main',
+      // Excluir tests con tag @quarantine
+      grep: /^(?!.*@quarantine)/,
+      retries: 2,
+    },
+    {
+      name: 'quarantine',
+      // Solo ejecutar tests con tag @quarantine
+      grep: /@quarantine/,
+      retries: 5,
+    },
+  ],
+});
+
+// ---------- Uso en tests ----------
+import { test, expect } from '@playwright/test';
+
+test('intermittent notification @quarantine', async ({ page }) => {
+  // Este test falla ~10% de las veces por timing de notificaciones
+  await page.goto('/settings');
+  await page.click('#save');
+  await expect(page.locator('.toast-notification')).toBeVisible();
+});
+
+// ---------- Ejecucion ----------
+// Pipeline principal: excluir tests en cuarentena
+// npx playwright test --project=main
+
+// Pipeline de cuarentena (separado, no bloquea):
+// npx playwright test --project=quarantine</code></pre>
+</div>
+</div>
 
         <pre><code class="yaml"># GitHub Actions - Pipeline separado para cuarentena
 name: Quarantine Tests
@@ -317,7 +573,18 @@ jobs:
 
         <h3>Decorador personalizado para retry inteligente</h3>
 
-        <pre><code class="python"># utils/retry.py - Decorador de retry con logica personalizada
+        <div class="code-tabs" data-code-id="L114-6">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># utils/retry.py - Decorador de retry con logica personalizada
 import functools
 import time
 import logging
@@ -367,10 +634,78 @@ from utils.retry import smart_retry
 def test_dashboard_widgets(page):
     page.goto("/dashboard")
     expect(page.locator(".widget")).to_have_count(6, timeout=10000)</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// En Playwright TS, el retry esta integrado nativamente.
+// Para logica personalizada de retry con backoff, usa testInfo.retry
+// y configura retries por describe o en playwright.config.ts
+
+import { test, expect } from '@playwright/test';
+
+// ---------- Retry con logica personalizada usando testInfo ----------
+test.describe('dashboard widgets', () => {
+  // Configurar 2 reintentos para este grupo
+  test.describe.configure({ retries: 2 });
+
+  test('should load all widgets', async ({ page }, testInfo) => {
+    // testInfo.retry indica el numero de reintento actual (0, 1, 2...)
+    if (testInfo.retry > 0) {
+      console.log(
+        \`Reintento \${testInfo.retry}/\${testInfo.project.retries} \` +
+        \`para: \${testInfo.title}\`
+      );
+      // Backoff exponencial manual entre reintentos
+      await page.waitForTimeout(1000 * Math.pow(2, testInfo.retry - 1));
+    }
+
+    await page.goto('/dashboard');
+    await expect(page.locator('.widget')).toHaveCount(6, { timeout: 10000 });
+  });
+});
+
+// ---------- Helper reutilizable para acciones con retry ----------
+async function withRetry&lt;T&gt;(
+  action: () => Promise&lt;T&gt;,
+  options: { maxRetries?: number; delay?: number; backoff?: number } = {}
+): Promise&lt;T&gt; {
+  const { maxRetries = 3, delay = 1000, backoff = 2 } = options;
+  let lastError: Error | undefined;
+  let currentDelay = delay;
+
+  for (let attempt = 0; attempt &lt;= maxRetries; attempt++) {
+    try {
+      return await action();
+    } catch (e) {
+      lastError = e as Error;
+      if (attempt &lt; maxRetries) {
+        console.warn(
+          \`Intento \${attempt + 1}/\${maxRetries + 1} fallo: \${lastError.message}. \` +
+          \`Reintentando en \${currentDelay}ms...\`
+        );
+        await new Promise(r =&gt; setTimeout(r, currentDelay));
+        currentDelay *= backoff;
+      }
+    }
+  }
+  throw lastError;
+}</code></pre>
+</div>
+</div>
 
         <h3>Metricas y monitoreo de estabilidad</h3>
 
-        <pre><code class="python"># scripts/stability_report.py - Generar metricas de estabilidad
+        <div class="code-tabs" data-code-id="L114-7">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># scripts/stability_report.py - Generar metricas de estabilidad
 import json
 import os
 from collections import Counter
@@ -424,6 +759,86 @@ def get_recommendation(flaky_rate):
 if __name__ == "__main__":
     report = analyze_flaky_history()
     print(json.dumps(report, indent=2))</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// scripts/stability-report.ts - Generar metricas de estabilidad
+import * as fs from 'fs';
+import * as path from 'path';
+
+interface FlakyReport {
+  date: string;
+  total_flaky: number;
+  tests: Array&lt;{ test: string; retries: number; timestamp: string }&gt;;
+}
+
+interface StabilityEntry {
+  test: string;
+  flakyCount: number;
+  flakyRate: string;
+  recommendation: string;
+}
+
+function analyzeFlakyHistory(reportsDir = 'reports/history'): object {
+  /** Analizar historial de tests flaky de los ultimos 30 dias */
+
+  const flakyCounter = new Map&lt;string, number&gt;();
+  let totalRuns = 0;
+
+  const files = fs.readdirSync(reportsDir)
+    .filter(f =&gt; f.startsWith('flaky-') &amp;&amp; f.endsWith('.json'))
+    .sort();
+
+  for (const filename of files) {
+    const filepath = path.join(reportsDir, filename);
+    const report: FlakyReport = JSON.parse(
+      fs.readFileSync(filepath, 'utf-8')
+    );
+
+    totalRuns++;
+    for (const entry of report.tests) {
+      const testName = entry.test;
+      flakyCounter.set(testName, (flakyCounter.get(testName) || 0) + 1);
+    }
+  }
+
+  // Calcular tasa de flakiness por test
+  const flakyTests: StabilityEntry[] = [...flakyCounter.entries()]
+    .sort((a, b) =&gt; b[1] - a[1]) // Ordenar por frecuencia descendente
+    .map(([testName, flakyCount]) =&gt; {
+      const flakyRate = (flakyCount / totalRuns) * 100;
+      return {
+        test: testName,
+        flakyCount,
+        flakyRate: \`\${flakyRate.toFixed(1)}%\`,
+        recommendation: getRecommendation(flakyRate),
+      };
+    });
+
+  return {
+    generated: new Date().toISOString(),
+    totalPipelineRuns: totalRuns,
+    flakyTests,
+  };
+}
+
+function getRecommendation(flakyRate: number): string {
+  /** Recomendar accion basada en la tasa de flakiness */
+  if (flakyRate &gt; 30) {
+    return 'CUARENTENA INMEDIATA - Investigar causa raiz';
+  } else if (flakyRate &gt; 15) {
+    return 'ALTA PRIORIDAD - Agregar retry + investigar';
+  } else if (flakyRate &gt; 5) {
+    return 'MEDIA - Monitorear, agregar retry temporal';
+  } else {
+    return 'BAJA - Monitorear, posible falso positivo';
+  }
+}
+
+// Ejecutar como script
+const report = analyzeFlakyHistory();
+console.log(JSON.stringify(report, null, 2));</code></pre>
+</div>
+</div>
 
         <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Configuracion recomendada por entorno</h4>
@@ -472,7 +887,18 @@ if __name__ == "__main__":
                 <li>Configura un workflow de GitHub Actions con pipeline separado para cuarentena</li>
             </ol>
 
-            <pre><code class="python"># Verificacion del ejercicio
+            <div class="code-tabs" data-code-id="L114-8">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Verificacion del ejercicio
 # conftest.py debe incluir:
 # - Marcador quarantine registrado
 # - Hook pytest_terminal_summary para reporte
@@ -485,6 +911,27 @@ if __name__ == "__main__":
 # Verificar que funciona:
 # pytest tests/ -v  -> NO ejecuta tests @quarantine
 # pytest tests/ -m "quarantine" --reruns 5  -> SOLO ejecuta quarantine</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Verificacion del ejercicio
+// playwright.config.ts debe incluir:
+// - Proyecto 'main' con grep excluyendo @quarantine
+// - Proyecto 'quarantine' con grep incluyendo @quarantine
+// - Reporter personalizado para flaky tests
+// - Generacion de flaky-tests.json
+
+// playwright.config.ts debe incluir:
+// retries: process.env.CI ? 2 : 0,
+// projects: [
+//   { name: 'main', grep: /^(?!.*@quarantine)/, retries: 2 },
+//   { name: 'quarantine', grep: /@quarantine/, retries: 5 },
+// ]
+
+// Verificar que funciona:
+// npx playwright test --project=main  -> NO ejecuta tests @quarantine
+// npx playwright test --project=quarantine  -> SOLO ejecuta quarantine</code></pre>
+</div>
+</div>
         </div>
 
         <div style="background: #fce4ec; padding: 15px; border-radius: 8px; margin: 15px 0;">

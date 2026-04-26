@@ -97,7 +97,18 @@ const LESSON_129 = {
 
         <h3>Page Objects clave</h3>
 
-        <pre><code class="python"># pages/catalog_page.py
+        <div class="code-tabs" data-code-id="L129-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># pages/catalog_page.py
 from pages.base_page import BasePage
 from playwright.sync_api import expect
 
@@ -151,8 +162,95 @@ class CatalogPage(BasePage):
 
     def should_show_no_results(self):
         expect(self.locator(self._no_results)).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// pages/catalog-page.ts
+import { type Page, type Locator, expect } from '@playwright/test';
+import { BasePage } from './base-page';
 
-        <pre><code class="python"># pages/cart_page.py
+export class CatalogPage extends BasePage {
+    private readonly url = '/products';
+
+    // Locators
+    private readonly searchInput: Locator;
+    private readonly searchBtn: Locator;
+    private readonly productCards: Locator;
+    private readonly categoryFilter: Locator;
+    private readonly priceRangeMin: Locator;
+    private readonly priceRangeMax: Locator;
+    private readonly sortSelect: Locator;
+    private readonly resultCount: Locator;
+    private readonly noResults: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.searchInput = page.locator("[data-testid='search-input']");
+        this.searchBtn = page.locator("[data-testid='search-button']");
+        this.productCards = page.locator("[data-testid='product-card']");
+        this.categoryFilter = page.locator("[data-testid='category-filter']");
+        this.priceRangeMin = page.locator("[data-testid='price-min']");
+        this.priceRangeMax = page.locator("[data-testid='price-max']");
+        this.sortSelect = page.locator("[data-testid='sort-select']");
+        this.resultCount = page.locator("[data-testid='result-count']");
+        this.noResults = page.locator("[data-testid='no-results']");
+    }
+
+    async search(query: string): Promise&lt;this&gt; {
+        await this.searchInput.fill(query);
+        await this.searchBtn.click();
+        await this.page.waitForLoadState('networkidle');
+        return this;
+    }
+
+    async filterByCategory(category: string): Promise&lt;this&gt; {
+        await this.categoryFilter.selectOption(category);
+        await this.page.waitForLoadState('networkidle');
+        return this;
+    }
+
+    async setPriceRange(minPrice: number, maxPrice: number): Promise&lt;this&gt; {
+        await this.priceRangeMin.fill(String(minPrice));
+        await this.priceRangeMax.fill(String(maxPrice));
+        await this.searchBtn.click();
+        return this;
+    }
+
+    async sortBy(option: string): Promise&lt;this&gt; {
+        await this.sortSelect.selectOption(option);
+        return this;
+    }
+
+    async getProductCount(): Promise&lt;number&gt; {
+        return await this.productCards.count();
+    }
+
+    async getResultCountText(): Promise&lt;string&gt; {
+        return await this.resultCount.innerText();
+    }
+
+    async clickProduct(index: number = 0): Promise&lt;void&gt; {
+        await this.productCards.nth(index).click();
+    }
+
+    async shouldShowNoResults(): Promise&lt;void&gt; {
+        await expect(this.noResults).toBeVisible();
+    }
+}</code></pre>
+        </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L129-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># pages/cart_page.py
 from pages.base_page import BasePage
 from playwright.sync_api import expect
 
@@ -196,10 +294,84 @@ class CartPage(BasePage):
 
     def should_have_items(self, count: int):
         expect(self.locator(self._cart_items)).to_have_count(count)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// pages/cart-page.ts
+import { type Page, type Locator, expect } from '@playwright/test';
+import { BasePage } from './base-page';
+
+export class CartPage extends BasePage {
+    private readonly url = '/cart';
+
+    private readonly cartItems: Locator;
+    private readonly quantityInput: Locator;
+    private readonly removeBtn: Locator;
+    private readonly subtotal: Locator;
+    private readonly total: Locator;
+    private readonly checkoutBtn: Locator;
+    private readonly emptyCart: Locator;
+
+    constructor(page: Page) {
+        super(page);
+        this.cartItems = page.locator("[data-testid='cart-item']");
+        this.quantityInput = page.locator("[data-testid='quantity-input']");
+        this.removeBtn = page.locator("[data-testid='remove-item']");
+        this.subtotal = page.locator("[data-testid='subtotal']");
+        this.total = page.locator("[data-testid='cart-total']");
+        this.checkoutBtn = page.locator("[data-testid='checkout-button']");
+        this.emptyCart = page.locator("[data-testid='empty-cart']");
+    }
+
+    async getItemCount(): Promise&lt;number&gt; {
+        return await this.cartItems.count();
+    }
+
+    async updateQuantity(itemIndex: number, quantity: number): Promise&lt;this&gt; {
+        const item = this.cartItems.nth(itemIndex);
+        await item.locator("[data-testid='quantity-input']").fill(String(quantity));
+        await item.locator("[data-testid='quantity-input']").press('Enter');
+        await this.page.waitForLoadState('networkidle');
+        return this;
+    }
+
+    async removeItem(itemIndex: number): Promise&lt;this&gt; {
+        await this.cartItems.nth(itemIndex).locator("[data-testid='remove-item']").click();
+        return this;
+    }
+
+    async getTotal(): Promise&lt;string&gt; {
+        return await this.total.innerText();
+    }
+
+    async proceedToCheckout(): Promise&lt;void&gt; {
+        await this.checkoutBtn.click();
+    }
+
+    async shouldBeEmpty(): Promise&lt;void&gt; {
+        await expect(this.emptyCart).toBeVisible();
+    }
+
+    async shouldHaveItems(count: number): Promise&lt;void&gt; {
+        await expect(this.cartItems).toHaveCount(count);
+    }
+}</code></pre>
+        </div>
+        </div>
 
         <h3>Fixtures del proyecto</h3>
 
-        <pre><code class="python"># fixtures/product_fixtures.py
+        <div class="code-tabs" data-code-id="L129-3">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># fixtures/product_fixtures.py
 import pytest
 
 @pytest.fixture
@@ -230,10 +402,94 @@ def product_in_cart(authenticated_page, create_product):
     page.click("[data-testid='add-to-cart']")
     page.wait_for_load_state("networkidle")
     return {"page": page, "product": product}</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// fixtures/product-fixtures.ts
+import { test as base, type APIRequestContext, type Page } from '@playwright/test';
+
+// Interfaz para producto
+interface Product {
+    id: string;
+    name: string;
+    price: number;
+    stock: number;
+    category: string;
+}
+
+// Tipo para las fixtures personalizadas
+type ProductFixtures = {
+    createProduct: (options?: {
+        name?: string;
+        price?: number;
+        stock?: number;
+        category?: string;
+    }) =&gt; Promise&lt;Product&gt;;
+    productInCart: { page: Page; product: Product };
+};
+
+// Extender test con fixtures de producto
+export const test = base.extend&lt;ProductFixtures&gt;({
+    // Factory fixture para crear productos via API
+    createProduct: async ({ request }, use) =&gt; {
+        const created: string[] = [];
+        const authToken = process.env.AUTH_TOKEN ?? '';
+
+        const factory = async (options?: {
+            name?: string;
+            price?: number;
+            stock?: number;
+            category?: string;
+        }): Promise&lt;Product&gt; =&gt; {
+            const resp = await request.post('/api/products', {
+                data: {
+                    name: options?.name ?? 'Test Product',
+                    price: options?.price ?? 99.99,
+                    stock: options?.stock ?? 50,
+                    category: options?.category ?? 'electronics',
+                },
+                headers: { Authorization: \`Bearer \${authToken}\` },
+            });
+            const product = await resp.json() as Product;
+            created.push(product.id);
+            return product;
+        };
+
+        await use(factory);
+
+        // Cleanup: eliminar productos creados
+        for (const pid of created) {
+            await request.delete(\`/api/products/\${pid}\`, {
+                headers: { Authorization: \`Bearer \${authToken}\` },
+            });
+        }
+    },
+
+    // Producto ya agregado al carrito
+    productInCart: async ({ page, createProduct }, use) =&gt; {
+        const product = await createProduct({ name: 'Laptop Test', price: 1999.99 });
+        await page.goto(\`/products/\${product.id}\`);
+        await page.click("[data-testid='add-to-cart']");
+        await page.waitForLoadState('networkidle');
+        await use({ page, product });
+    },
+});</code></pre>
+        </div>
+        </div>
 
         <h3>Tests de ejemplo</h3>
 
-        <pre><code class="python"># tests/catalog/test_search.py
+        <div class="code-tabs" data-code-id="L129-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># tests/catalog/test_search.py
 import pytest
 from playwright.sync_api import expect
 
@@ -272,8 +528,69 @@ class TestProductSearch:
         catalog.navigate()
         catalog.filter_by_category(category)
         assert catalog.get_product_count() >= expected_min</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// tests/catalog/search.spec.ts
+import { expect } from '@playwright/test';
+import { test } from '../../fixtures/product-fixtures';
+import { CatalogPage } from '../../pages/catalog-page';
 
-        <pre><code class="python"># tests/checkout/test_checkout_flow.py
+test.describe('Product Search', () =&gt; {
+    test('busqueda por nombre retorna productos coincidentes', async ({ page, createProduct }) =&gt; {
+        // ARRANGE
+        await createProduct({ name: 'Laptop Dell XPS 15', category: 'electronics' });
+        await createProduct({ name: 'Mouse Logitech MX', category: 'electronics' });
+        const catalog = new CatalogPage(page);
+        await catalog.navigate();
+
+        // ACT
+        await catalog.search('Laptop');
+
+        // ASSERT
+        expect(await catalog.getProductCount()).toBeGreaterThanOrEqual(1);
+    });
+
+    test('busqueda sin resultados muestra mensaje', async ({ page }) =&gt; {
+        // ARRANGE
+        const catalog = new CatalogPage(page);
+        await catalog.navigate();
+
+        // ACT
+        await catalog.search('xyznonexistent12345');
+
+        // ASSERT
+        await catalog.shouldShowNoResults();
+    });
+
+    // Data-driven: filtrar por categoria
+    for (const { category, expectedMin } of [
+        { category: 'electronics', expectedMin: 1 },
+        { category: 'clothing', expectedMin: 1 },
+        { category: 'books', expectedMin: 1 },
+    ]) {
+        test(\`filtrar por categoria: \${category}\`, async ({ page }) =&gt; {
+            const catalog = new CatalogPage(page);
+            await catalog.navigate();
+            await catalog.filterByCategory(category);
+            expect(await catalog.getProductCount()).toBeGreaterThanOrEqual(expectedMin);
+        });
+    }
+});</code></pre>
+        </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L129-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F40D;</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">&#x1F537;</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+        <pre><code class="language-python"># tests/checkout/test_checkout_flow.py
 from playwright.sync_api import expect
 
 def test_complete_checkout_creates_order(authenticated_page, product_in_cart, pages):
@@ -304,6 +621,46 @@ def test_complete_checkout_creates_order(authenticated_page, product_in_cart, pa
     # ASSERT
     expect(page.locator("[data-testid='order-confirmation']")).to_be_visible()
     expect(page.locator("[data-testid='order-status']")).to_have_text("Confirmada")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+        <pre><code class="language-typescript">// tests/checkout/checkout-flow.spec.ts
+import { expect } from '@playwright/test';
+import { test } from '../../fixtures/product-fixtures';
+import { CartPage } from '../../pages/cart-page';
+import { CheckoutPage } from '../../pages/checkout-page';
+
+test('checkout completo crea una orden', async ({ page, productInCart }) =&gt; {
+    // Flujo completo: carrito -&gt; checkout -&gt; confirmacion
+    const { product } = productInCart;
+
+    // ARRANGE: ir al carrito
+    await page.goto('/cart');
+    const cart = new CartPage(page);
+    await cart.shouldHaveItems(1);
+
+    // ACT: completar checkout
+    await cart.proceedToCheckout();
+    const checkout = new CheckoutPage(page);
+    await checkout.fillShippingInfo({
+        name: 'Juan Reina',
+        address: 'Calle 45 #12-34',
+        city: 'Cali',
+        phone: '+57 300 1234567',
+    });
+    await checkout.selectPaymentMethod('credit_card');
+    await checkout.fillCardInfo({
+        number: '4111111111111111',
+        expiry: '12/28',
+        cvv: '123',
+    });
+    await checkout.submitOrder();
+
+    // ASSERT
+    await expect(page.locator("[data-testid='order-confirmation']")).toBeVisible();
+    await expect(page.locator("[data-testid='order-status']")).toHaveText('Confirmada');
+});</code></pre>
+        </div>
+        </div>
 
         <pre><code class="python"># tests/responsive/test_mobile_views.py
 import pytest

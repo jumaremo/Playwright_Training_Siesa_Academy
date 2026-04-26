@@ -78,7 +78,18 @@ pytest -n 4 --dist loadgroup
 # no: sin distribucion (util para debugging)
 pytest -n 4 --dist no</code></pre>
 
-        <pre><code class="python"># Usar xdist_group para agrupar tests relacionados
+        <div class="code-tabs" data-code-id="L113-1">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Usar xdist_group para agrupar tests relacionados
 import pytest
 
 @pytest.mark.xdist_group("modulo_facturacion")
@@ -96,12 +107,51 @@ def test_reporte_facturacion(page):
     """Este test va al mismo worker que la clase TestFacturacion."""
     page.goto("/facturacion/reportes")
     # ...</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Agrupar tests relacionados con test.describe
+// En Playwright TS, los tests de un mismo archivo se ejecutan en el mismo worker
+// por defecto con fullyParallel: false. Para agrupacion explicita, usa archivos separados.
+import { test, expect } from '@playwright/test';
+
+// tests/facturacion.spec.ts
+// Todos los tests en este describe corren en el mismo worker
+test.describe('Modulo Facturacion', () => {
+    test('crear factura', async ({ page }) => {
+        await page.goto('/facturacion/nueva');
+        // ...
+    });
+
+    test('anular factura', async ({ page }) => {
+        await page.goto('/facturacion/anular');
+        // ...
+    });
+
+    test('reporte facturacion', async ({ page }) => {
+        // Este test va al mismo worker que los anteriores del describe
+        await page.goto('/facturacion/reportes');
+        // ...
+    });
+});</code></pre>
+</div>
+</div>
 
         <h3>3. Aislamiento de workers: cada uno con su navegador</h3>
         <p>Con Playwright y pytest-xdist, cada worker obtiene su propio contexto de navegador.
         Las fixtures de Playwright manejan esto automaticamente.</p>
 
-        <pre><code class="python"># conftest.py - Configuracion para ejecucion paralela
+        <div class="code-tabs" data-code-id="L113-2">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Configuracion para ejecucion paralela
 import pytest
 from playwright.sync_api import sync_playwright
 
@@ -128,6 +178,43 @@ def page(browser):
     page = context.new_page()
     yield page
     context.close()</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Configuracion para ejecucion paralela
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+    // Cada worker obtiene su propia instancia de navegador automaticamente
+    // Playwright aisla cada test con un BrowserContext independiente
+    fullyParallel: true,
+    workers: 4, // Numero de workers paralelos
+
+    use: {
+        headless: true,
+        // Argumentos de lanzamiento del navegador
+        launchOptions: {
+            args: ['--disable-gpu', '--no-sandbox'],
+        },
+    },
+
+    projects: [
+        {
+            name: 'chromium',
+            use: { ...devices['Desktop Chrome'] },
+        },
+    ],
+});
+
+// En Playwright TS, NO necesitas configurar fixtures de browser/page manualmente.
+// Cada test recibe automaticamente un \`page\` con un BrowserContext nuevo
+// (aislamiento total). Ejemplo:
+//
+// test('mi test', async ({ page }) => {
+//     // \`page\` ya esta aislada en su propio BrowserContext
+//     await page.goto('/mi-pagina');
+// });</code></pre>
+</div>
+</div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Tip SIESA</h4>
@@ -168,7 +255,18 @@ def page(browser):
             </tr>
         </table>
 
-        <pre><code class="python"># conftest.py - Fixture session-scoped con xdist
+        <div class="code-tabs" data-code-id="L113-3">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Fixture session-scoped con xdist
 import pytest
 import os
 
@@ -187,6 +285,42 @@ def datos_iniciales(tmp_path_factory):
 def base_url():
     """URL base - igual para todos los workers."""
     return os.environ.get("BASE_URL", "http://localhost:3000")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// playwright.config.ts - Configuracion equivalente a session-scoped fixtures
+import { defineConfig } from '@playwright/test';
+import * as os from 'os';
+import * as path from 'path';
+
+export default defineConfig({
+    fullyParallel: true,
+    workers: 4,
+
+    // URL base - igual para todos los workers
+    use: {
+        baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    },
+});
+
+// Para datos iniciales por worker, usa test.beforeAll en un fixture global
+// global-setup.ts
+import { test as base } from '@playwright/test';
+import * as fs from 'fs';
+import * as path from 'path';
+
+// Cada worker ejecuta beforeAll independientemente
+// Playwright asigna un workerIndex unico a cada worker
+export const test = base.extend<{}, { datosIniciales: { worker: string; tmp: string } }>({
+    datosIniciales: [async ({}, use, workerInfo) => {
+        const workerId = \`worker-\${workerInfo.workerIndex}\`;
+        const baseTmp = path.join(os.tmpdir(), \`pw-test-\${workerId}\`);
+        fs.mkdirSync(baseTmp, { recursive: true });
+        console.log(\`Worker \${workerId} inicializando datos en \${baseTmp}\`);
+        await use({ worker: workerId, tmp: baseTmp });
+    }, { scope: 'worker' }],
+});</code></pre>
+</div>
+</div>
 
         <h3>5. Sharding: distribuir tests entre maquinas CI</h3>
         <p>El <strong>sharding</strong> divide el test suite completo en fragmentos (shards) que
@@ -220,7 +354,18 @@ pytest --shard-id=1 --num-shards=3
 pytest --shard-id=2 --num-shards=3</code></pre>
 
         <h4>Sharding manual con pytest y seleccion de archivos</h4>
-        <pre><code class="python"># scripts/shard_tests.py
+        <div class="code-tabs" data-code-id="L113-4">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># scripts/shard_tests.py
 """Script para dividir tests en shards por archivos."""
 import subprocess
 import sys
@@ -256,6 +401,51 @@ if __name__ == "__main__":
         print(f"  {f}")
     # Ejecutar pytest solo con estos archivos
     subprocess.run(["pytest"] + archivos + ["-v"])</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// En Playwright TS, el sharding es BUILT-IN. No necesitas scripts manuales.
+// Simplemente usa el flag --shard al ejecutar:
+//
+//   npx playwright test --shard=1/3
+//   npx playwright test --shard=2/3
+//   npx playwright test --shard=3/3
+//
+// Playwright distribuye automaticamente los archivos de test entre shards.
+
+// Si aun asi necesitas un script personalizado para listar shards:
+// scripts/shard-tests.ts
+import { execSync } from 'child_process';
+
+function obtenerArchivosTest(): string[] {
+    // Listar tests disponibles sin ejecutarlos
+    const result = execSync('npx playwright test --list', { encoding: 'utf-8' });
+    const archivos = new Set&lt;string&gt;();
+    for (const linea of result.trim().split('\\n')) {
+        // Formato: "  archivo.spec.ts:linea:columna > describe > test"
+        const match = linea.match(/\\s+(.+\\.spec\\.ts)/);
+        if (match) archivos.add(match[1]);
+    }
+    return [...archivos].sort();
+}
+
+function obtenerShard(shardId: number, totalShards: number): string[] {
+    const archivos = obtenerArchivosTest();
+    const tamano = Math.ceil(archivos.length / totalShards);
+    const inicio = shardId * tamano;
+    const fin = Math.min(inicio + tamano, archivos.length);
+    return archivos.slice(inicio, fin);
+}
+
+// Uso: npx ts-node scripts/shard-tests.ts 0 3
+const shardId = parseInt(process.argv[2]);    // 0, 1, 2...
+const totalShards = parseInt(process.argv[3]); // 3
+const archivos = obtenerShard(shardId, totalShards);
+console.log(\`Shard \${shardId + 1}/\${totalShards}: \${archivos.length} archivos\`);
+archivos.forEach(f => console.log(\`  \${f}\`));
+// Ejecutar Playwright solo con estos archivos
+execSync(\`npx playwright test \${archivos.join(' ')} --reporter=list\`, { stdio: 'inherit' });</code></pre>
+</div>
+</div>
 
         <h3>6. Sharding en GitHub Actions con matrix strategy</h3>
         <pre><code class="yaml"># .github/workflows/playwright-tests.yml
@@ -479,7 +669,18 @@ jobs:
             </tr>
         </table>
 
-        <pre><code class="python"># Ejemplo: agrupar por marca para evitar conflictos
+        <div class="code-tabs" data-code-id="L113-5">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Ejemplo: agrupar por marca para evitar conflictos
 import pytest
 
 # Tests que modifican la tabla "usuarios" - van al mismo worker
@@ -503,6 +704,42 @@ def test_listar_productos(page):
 def test_ver_dashboard(page):
     page.goto("/dashboard")
     expect(page.get_by_role("heading", name="Dashboard")).to_be_visible()</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Ejemplo: agrupar tests por archivo para evitar conflictos
+// En Playwright TS, con fullyParallel: false, los tests de un mismo archivo
+// corren secuencialmente en el mismo worker (equivalente a xdist_group)
+import { test, expect } from '@playwright/test';
+
+// tests/db-usuarios.spec.ts
+// Tests que modifican la tabla "usuarios" - van en el mismo archivo/worker
+test.describe.serial('DB Usuarios', () => {
+    test('crear usuario', async ({ page }) => {
+        await page.goto('/admin/usuarios/nuevo');
+        await page.getByLabel('Nombre').fill('Test User');
+        await page.getByRole('button', { name: 'Crear' }).click();
+    });
+
+    test('editar usuario', async ({ page }) => {
+        await page.goto('/admin/usuarios/1/editar');
+        await page.getByLabel('Nombre').fill('Updated User');
+        await page.getByRole('button', { name: 'Guardar' }).click();
+    });
+});
+
+// tests/lectura.spec.ts (archivo separado)
+// Tests de solo lectura - pueden ir a cualquier worker
+test('listar productos', async ({ page }) => {
+    await page.goto('/productos');
+    await expect(page.getByRole('table')).toBeVisible();
+});
+
+test('ver dashboard', async ({ page }) => {
+    await page.goto('/dashboard');
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
+});</code></pre>
+</div>
+</div>
 
         <h3>10. Manejo de recursos compartidos</h3>
         <p>El principal desafio del paralelismo es evitar conflictos cuando multiples tests
@@ -518,7 +755,18 @@ def test_ver_dashboard(page):
             </ul>
         </div>
 
-        <pre><code class="python"># conftest.py - Estrategias para manejar recursos compartidos
+        <div class="code-tabs" data-code-id="L113-6">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># conftest.py - Estrategias para manejar recursos compartidos
 import pytest
 import os
 
@@ -556,8 +804,68 @@ def db_schema(worker_id):
     yield schema
     # Limpiar schema
     # ejecutar_sql(f"DROP SCHEMA {schema} CASCADE")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// fixtures.ts - Estrategias para manejar recursos compartidos
+import { test as base, expect } from '@playwright/test';
+import { randomUUID } from 'crypto';
 
-        <pre><code class="python"># Uso de file locks para recursos que no se pueden duplicar
+// Interfaz para datos de usuario unico
+interface UsuarioUnico {
+    nombre: string;
+    email: string;
+    password: string;
+}
+
+// Fixture personalizada con datos aislados por worker
+export const test = base.extend&lt;{
+    usuarioUnico: UsuarioUnico;
+}, {
+    baseURL: string;
+    dbSchema: string;
+}&gt;({
+    // Cada worker usa un puerto diferente del servidor de testing
+    baseURL: [async ({}, use, workerInfo) => {
+        const puerto = 3000 + workerInfo.workerIndex;
+        await use(\`http://localhost:\${puerto}\`);
+    }, { scope: 'worker' }],
+
+    // Generar datos de test unicos por test para evitar conflictos
+    usuarioUnico: async ({}, use, workerInfo) => {
+        const workerId = \`worker-\${workerInfo.workerIndex}\`;
+        const sufijo = randomUUID().slice(0, 8);
+        await use({
+            nombre: \`test_user_\${workerId}_\${sufijo}\`,
+            email: \`test_\${workerId}_\${sufijo}@test.com\`,
+            password: 'Test1234!',
+        });
+    },
+
+    // Cada worker usa un schema de BD diferente
+    dbSchema: [async ({}, use, workerInfo) => {
+        const schema = \`test_worker_\${workerInfo.workerIndex}\`;
+        // Crear schema aislado
+        // await ejecutarSql(\`CREATE SCHEMA IF NOT EXISTS \${schema}\`);
+        await use(schema);
+        // Limpiar schema
+        // await ejecutarSql(\`DROP SCHEMA \${schema} CASCADE\`);
+    }, { scope: 'worker' }],
+});</code></pre>
+</div>
+</div>
+
+        <div class="code-tabs" data-code-id="L113-7">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Uso de file locks para recursos que no se pueden duplicar
 import filelock
 import pytest
 
@@ -580,6 +888,48 @@ def recurso_compartido(tmp_path_factory):
 
     import json
     return json.loads(data_file.read_text())</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Uso de global-setup para recursos que no se pueden duplicar
+// En Playwright TS, global-setup.ts se ejecuta UNA SOLA VEZ antes de todos los workers
+import * as fs from 'fs';
+import * as path from 'path';
+
+// global-setup.ts - Se ejecuta una vez antes de todos los tests
+async function globalSetup() {
+    const dataFile = path.join(__dirname, 'datos_compartidos.json');
+
+    if (!fs.existsSync(dataFile)) {
+        // Solo se ejecuta una vez (global-setup es single-threaded)
+        const datos = { inicializado: true, registros: 100 };
+        fs.writeFileSync(dataFile, JSON.stringify(datos));
+        console.log('Recurso compartido inicializado');
+    }
+}
+export default globalSetup;
+
+// global-teardown.ts - Se ejecuta una vez al final
+async function globalTeardown() {
+    const dataFile = path.join(__dirname, 'datos_compartidos.json');
+    if (fs.existsSync(dataFile)) {
+        fs.unlinkSync(dataFile);
+    }
+}
+export default globalTeardown;
+
+// playwright.config.ts - Registrar global setup/teardown
+// import { defineConfig } from '@playwright/test';
+// export default defineConfig({
+//     globalSetup: './global-setup.ts',
+//     globalTeardown: './global-teardown.ts',
+//     workers: 4,
+// });
+
+// Leer el recurso compartido en cualquier test:
+// import * as fs from 'fs';
+// const datos = JSON.parse(fs.readFileSync('datos_compartidos.json', 'utf-8'));</code></pre>
+</div>
+</div>
 
         <h3>11. Benchmarks: serial vs paralelo vs sharded</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -621,7 +971,18 @@ def recurso_compartido(tmp_path_factory):
             (navegador) se benefician mas que tests CPU-bound.</p>
         </div>
 
-        <pre><code class="python"># scripts/benchmark_parallelism.py
+        <div class="code-tabs" data-code-id="L113-8">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># scripts/benchmark_parallelism.py
 """
 Compara tiempos de ejecucion con diferentes niveles de paralelismo.
 Ejecutar: python scripts/benchmark_parallelism.py
@@ -658,6 +1019,64 @@ base_time = resultados[0][1]
 for nombre, duracion, exito in resultados:
     speedup = base_time / duracion if duracion > 0 else 0
     print(f"{nombre:20s} | {duracion:7.1f}s | {speedup:5.1f}x | {'PASS' if exito else 'FAIL'}")</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// scripts/benchmark-parallelism.ts
+// Compara tiempos de ejecucion con diferentes niveles de paralelismo.
+// Ejecutar: npx ts-node scripts/benchmark-parallelism.ts
+import { execSync } from 'child_process';
+
+interface Configuracion {
+    nombre: string;
+    cmd: string;
+}
+
+const configuraciones: Configuracion[] = [
+    { nombre: 'Serial (1 worker)', cmd: 'npx playwright test --workers=1' },
+    { nombre: '2 workers', cmd: 'npx playwright test --workers=2' },
+    { nombre: '4 workers', cmd: 'npx playwright test --workers=4' },
+    { nombre: 'auto workers', cmd: 'npx playwright test' }, // auto por defecto
+];
+
+interface Resultado {
+    nombre: string;
+    duracion: number;
+    exito: boolean;
+}
+
+const resultados: Resultado[] = [];
+
+for (const { nombre, cmd } of configuraciones) {
+    console.log(\`\\n\${'='.repeat(50)}\`);
+    console.log(\`Ejecutando: \${nombre}\`);
+    console.log(\`Comando: \${cmd}\`);
+    console.log('='.repeat(50));
+
+    const inicio = Date.now();
+    let exito = true;
+    try {
+        execSync(cmd, { stdio: 'pipe' });
+    } catch {
+        exito = false;
+    }
+    const duracion = (Date.now() - inicio) / 1000;
+
+    resultados.push({ nombre, duracion, exito });
+    console.log(\`Tiempo: \${duracion.toFixed(1)}s - \${exito ? 'PASS' : 'FAIL'}\`);
+}
+
+console.log(\`\\n\${'='.repeat(50)}\`);
+console.log('RESUMEN DE BENCHMARKS');
+console.log('='.repeat(50));
+const baseTime = resultados[0].duracion;
+for (const { nombre, duracion, exito } of resultados) {
+    const speedup = duracion > 0 ? baseTime / duracion : 0;
+    console.log(
+        \`\${nombre.padEnd(20)} | \${duracion.toFixed(1).padStart(7)}s | \${speedup.toFixed(1).padStart(5)}x | \${exito ? 'PASS' : 'FAIL'}\`
+    );
+}</code></pre>
+</div>
+</div>
 
         <div style="background: #fff3e0; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>Tip SIESA</h4>
@@ -673,7 +1092,18 @@ for nombre, duracion, exito in resultados:
             distribuir en shards para CI.</p>
         </div>
 
-        <pre><code class="python"># Paso 1: Estructura del proyecto
+        <div class="code-tabs" data-code-id="L113-9">
+<div class="code-tabs-header">
+    <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F40D;</span> Python
+    </button>
+    <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+        <span class="code-tab-icon">&#x1F537;</span> TypeScript
+    </button>
+    <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar codigo">&#x1F4CB;</button>
+</div>
+<div class="code-panel active" data-lang="python">
+<pre><code class="language-python"># Paso 1: Estructura del proyecto
 # tests/
 #   conftest.py
 #   test_modulo_a.py
@@ -742,6 +1172,84 @@ def test_completar_tarea(page: Page):
 #
 # benchmark:
 #     python scripts/benchmark_parallelism.py</code></pre>
+</div>
+<div class="code-panel" data-lang="typescript">
+<pre><code class="language-typescript">// Paso 1: Estructura del proyecto
+// tests/
+//   modulo-a.spec.ts
+//   modulo-b.spec.ts
+//   modulo-c.spec.ts
+// playwright.config.ts
+// package.json
+
+// Paso 2: playwright.config.ts con soporte para paralelismo
+// playwright.config.ts
+import { defineConfig, devices } from '@playwright/test';
+
+export default defineConfig({
+    testDir: './tests',
+    fullyParallel: true,  // Paralelismo a nivel de test (no solo archivo)
+    workers: 4,           // Numero de workers paralelos
+    retries: 1,
+    reporter: [['list'], ['html']],
+    use: {
+        baseURL: 'https://demo.playwright.dev/todomvc/',
+        trace: 'on-first-retry',
+    },
+    projects: [
+        { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    ],
+});
+
+// Paso 3: Tests independientes
+// tests/modulo-a.spec.ts
+import { test, expect } from '@playwright/test';
+import { randomUUID } from 'crypto';
+
+// Fixture de datos unicos por test (evita conflictos entre workers)
+test.beforeEach(async ({}, testInfo) => {
+    const uid = randomUUID().slice(0, 6);
+    // Datos disponibles via testInfo.annotations o variables locales
+    console.log(\`Worker \${testInfo.workerIndex} - Test: \${testInfo.title}\`);
+});
+
+test('pagina inicio', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.getByRole('heading', { name: 'todos' })).toBeVisible();
+});
+
+test('agregar tarea', async ({ page }) => {
+    await page.goto('/');
+    await page.getByPlaceholder('What needs to be done?').fill('Tarea de prueba');
+    await page.getByPlaceholder('What needs to be done?').press('Enter');
+    await expect(page.getByTestId('todo-title')).toHaveText('Tarea de prueba');
+});
+
+test('completar tarea', async ({ page }) => {
+    await page.goto('/');
+    await page.getByPlaceholder('What needs to be done?').fill('Tarea completa');
+    await page.getByPlaceholder('What needs to be done?').press('Enter');
+    await page.getByRole('checkbox').first().check();
+    await expect(page.getByTestId('todo-item')).toHaveClass(/completed/);
+});
+
+// Paso 4: Ejecutar en paralelo (built-in, usa config o CLI)
+// npx playwright test --workers=4
+
+// Paso 5: Ejecutar como shard (built-in, sin plugins!)
+// npx playwright test --shard=1/3 --workers=2
+
+// Paso 6: Scripts en package.json para simplificar
+// {
+//   "scripts": {
+//     "test": "npx playwright test",
+//     "test:parallel": "npx playwright test --workers=4",
+//     "test:shard": "npx playwright test --shard=$SHARD/$TOTAL --workers=2",
+//     "test:benchmark": "npx ts-node scripts/benchmark-parallelism.ts"
+//   }
+// }</code></pre>
+</div>
+</div>
 
         <pre><code class="yaml"># Paso 7: GitHub Actions con sharding + xdist
 # .github/workflows/test.yml

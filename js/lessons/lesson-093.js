@@ -166,7 +166,18 @@ PWDEBUG=1 python -m pytest tests/ -k "test_login" -s</code></pre>
         <p>En lugar de activar <code>PWDEBUG=1</code> globalmente, puedes insertar
         <code>page.pause()</code> en puntos específicos de tu test para pausar justo donde necesitas inspeccionar.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L093-1">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 def test_login_debug():
     with sync_playwright() as p:
@@ -198,6 +209,42 @@ def test_login_debug():
         assert page.url.endswith("/dashboard")
 
         browser.close()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { chromium } from 'playwright';
+
+async function testLoginDebug() {
+    const browser = await chromium.launch({ headless: false });
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto('https://mi-app.siesa.com/login');
+
+    // Pausar aquí para inspeccionar el formulario
+    await page.pause();
+
+    // El Inspector se abre y puedes:
+    // 1. Usar el locator picker para encontrar selectores
+    // 2. Evaluar localizadores en el campo de input
+    // 3. Step over para ejecutar línea por línea
+
+    await page.getByLabel('Usuario').fill('admin@siesa.com');
+    await page.getByLabel('Contraseña').fill('password123');
+
+    // Otra pausa para verificar el estado antes del submit
+    await page.pause();
+
+    await page.getByRole('button', { name: 'Iniciar sesión' }).click();
+
+    // Pausa final para verificar que se redirigió correctamente
+    await page.pause();
+
+    expect(page.url()).toContain('/dashboard');
+
+    await browser.close();
+}</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Ventajas de page.pause() sobre PWDEBUG=1</h4>
@@ -209,7 +256,18 @@ def test_login_debug():
             </ul>
         </div>
 
-        <pre><code class="python"># page.pause() condicional — pausar solo cuando falla algo
+        <div class="code-tabs" data-code-id="L093-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># page.pause() condicional — pausar solo cuando falla algo
 def test_buscar_producto(page):
     page.goto("https://erp.siesa.com/productos")
     page.get_by_placeholder("Buscar producto").fill("Widget X")
@@ -222,13 +280,43 @@ def test_buscar_producto(page):
         page.pause()
 
     expect(resultados).to_have_count(1, timeout=5000)</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// page.pause() condicional — pausar solo cuando falla algo
+test('buscar producto', async ({ page }) => {
+    await page.goto('https://erp.siesa.com/productos');
+    await page.getByPlaceholder('Buscar producto').fill('Widget X');
+    await page.getByRole('button', { name: 'Buscar' }).click();
+
+    // Pausar solo si no aparece resultado
+    const resultados = page.locator('.resultado-producto');
+    if (await resultados.count() === 0) {
+        console.log('⚠️ No se encontraron resultados, pausando para inspección...');
+        await page.pause();
+    }
+
+    await expect(resultados).toHaveCount(1, { timeout: 5000 });
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>⚠️ Cuidado: No dejar page.pause() en producción</h4>
             <p>Un <code>page.pause()</code> olvidado en el código hará que la ejecución en CI se quede
             colgada indefinidamente (o hasta que el timeout de la pipeline lo mate). Siempre retira los
             <code>page.pause()</code> antes de hacer commit, o usa un flag para habilitarlos solo en modo debug:</p>
-            <pre><code class="python">import os
+            <div class="code-tabs" data-code-id="L093-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import os
 
 DEBUG_MODE = os.environ.get("DEBUG_TESTS", "0") == "1"
 
@@ -240,13 +328,40 @@ def test_login(page):
 
     page.get_by_label("Usuario").fill("admin")
     # ...</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">const DEBUG_MODE = process.env.DEBUG_TESTS === '1';
+
+test('login', async ({ page }) => {
+    await page.goto('https://mi-app.siesa.com/login');
+
+    if (DEBUG_MODE) {
+        await page.pause(); // Solo pausa si DEBUG_TESTS=1
+    }
+
+    await page.getByLabel('Usuario').fill('admin');
+    // ...
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>⏭️ Ejecución paso a paso en el Inspector</h3>
         <p>El flujo de debugging paso a paso te permite ejecutar cada acción del test una por una,
         observando exactamente qué sucede en el navegador en cada paso:</p>
 
-        <pre><code class="python"># Test para depurar paso a paso
+        <div class="code-tabs" data-code-id="L093-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Test para depurar paso a paso
 from playwright.sync_api import sync_playwright, expect
 
 def test_crear_registro(page):
@@ -268,6 +383,32 @@ def test_crear_registro(page):
     # Paso 4: Verificar
     expect(page.get_by_text("Registro creado exitosamente")).to_be_visible()
     expect(page.locator(".registro-id")).to_have_text("REG-001")</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Test para depurar paso a paso
+import { test, expect } from '@playwright/test';
+
+test('crear registro', async ({ page }) => {
+    // Con PWDEBUG=1, cada línea se ejecuta solo cuando
+    // presionas "Step Over" en el Inspector.
+
+    // Paso 1: Navegar
+    await page.goto('https://erp.siesa.com/registros/nuevo');
+
+    // Paso 2: Llenar formulario
+    await page.getByLabel('Código').fill('REG-001');
+    await page.getByLabel('Descripción').fill('Registro de prueba');
+    await page.getByLabel('Categoría').selectOption('Ventas');
+
+    // Paso 3: Enviar
+    await page.getByRole('button', { name: 'Guardar' }).click();
+
+    // Paso 4: Verificar
+    await expect(page.getByText('Registro creado exitosamente')).toBeVisible();
+    await expect(page.locator('.registro-id')).toHaveText('REG-001');
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip: Flujo de Step Over</h4>
@@ -322,7 +463,18 @@ def test_crear_registro(page):
         <p>El campo <strong>Locator Input</strong> en la parte inferior del Inspector permite escribir
         localizadores y verificar en tiempo real cuántos elementos coinciden en la página actual.</p>
 
-        <pre><code class="python"># Escribe estos localizadores en el Locator Input del Inspector
+        <div class="code-tabs" data-code-id="L093-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Escribe estos localizadores en el Locator Input del Inspector
 # para verificar si coinciden con elementos en la página:
 
 # Verificar un botón por role
@@ -348,6 +500,36 @@ page.get_by_role("row").filter(has_text="Juan Reina")
 # Localizador CSS como alternativa
 page.locator("#btn-submit")
 # → "1 match" ✓</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Escribe estos localizadores en el Locator Input del Inspector
+// para verificar si coinciden con elementos en la página:
+
+// Verificar un botón por role
+page.getByRole('button', { name: 'Guardar' })
+// → "1 match" ✓
+
+// Verificar un campo de texto
+page.getByLabel('Correo electrónico')
+// → "1 match" ✓
+
+// Localizador ambiguo
+page.getByRole('button')
+// → "5 matches" ⚠️ demasiados
+
+// Localizador que no encuentra nada
+page.getByText('Texto inexistente')
+// → "0 matches" ❌
+
+// Refinar con filtros
+page.getByRole('row').filter({ hasText: 'Juan Reina' })
+// → "1 match" ✓
+
+// Localizador CSS como alternativa
+page.locator('#btn-submit')
+// → "1 match" ✓</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>💡 Tip SIESA: Validar localizadores antes de escribir el test</h4>
@@ -360,7 +542,18 @@ page.locator("#btn-submit")
         <p>Mientras el Inspector está pausado, puedes usar las DevTools del navegador (F12) para
         inspeccionar el tráfico de red. Esto es útil para diagnosticar problemas con APIs.</p>
 
-        <pre><code class="python">from playwright.sync_api import sync_playwright
+        <div class="code-tabs" data-code-id="L093-6">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python">from playwright.sync_api import sync_playwright
 
 def test_verificar_api_con_debug(page):
     """
@@ -390,6 +583,40 @@ def test_verificar_api_con_debug(page):
 
     page.get_by_role("button", name="Actualizar lista").click()
     page.pause()  # Ver los responses en la consola</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">import { test } from '@playwright/test';
+
+test('verificar API con debug', async ({ page }) => {
+    // Workflow:
+    // 1. Ejecutar con PWDEBUG=1
+    // 2. Cuando el Inspector pause, abrir DevTools (F12)
+    // 3. Ir a la pestaña Network
+    // 4. Step over para ver cada request
+
+    await page.goto('https://erp.siesa.com/api-demo');
+
+    // Pausa para abrir DevTools > Network antes de la acción
+    await page.pause();
+
+    // Esta acción debería disparar un POST al backend
+    await page.getByRole('button', { name: 'Crear pedido' }).click();
+
+    // Pausa para inspeccionar el request/response en Network
+    await page.pause();
+
+    // También puedes escuchar eventos de red programáticamente
+    page.on('response', (response) => {
+        if (response.url().includes('/api/')) {
+            console.log(\`  Response: \${response.status()} \${response.url()}\`);
+        }
+    });
+
+    await page.getByRole('button', { name: 'Actualizar lista' }).click();
+    await page.pause(); // Ver los responses en la consola
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔬 Combinación avanzada: Inspector + DevTools</h4>
@@ -416,7 +643,18 @@ waiting for get_by_role("button", name="Submit")
 ============================================================</code></pre>
         </div>
 
-        <pre><code class="python"># Diagnóstico con el Inspector:
+        <div class="code-tabs" data-code-id="L093-7">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Diagnóstico con el Inspector:
 def test_diagnosticar_localizador(page):
     page.goto("https://mi-app.siesa.com/formulario")
 
@@ -433,6 +671,28 @@ def test_diagnosticar_localizador(page):
 
     # 4. Corregir el localizador:
     page.get_by_role("button", name="Enviar").click()  # ✓ Correcto</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Diagnóstico con el Inspector:
+test('diagnosticar localizador', async ({ page }) => {
+    await page.goto('https://mi-app.siesa.com/formulario');
+
+    // 1. Pausar antes de la acción que falla
+    await page.pause();
+
+    // 2. En el Inspector, escribir el localizador en el Locator Input:
+    //    page.getByRole('button', { name: 'Submit' })
+    //    → "0 matches" ← ¡No existe!
+
+    // 3. Usar el Pick Locator para hacer clic en el botón real
+    //    → page.getByRole('button', { name: 'Enviar' })
+    //    ¡El botón dice "Enviar", no "Submit"!
+
+    // 4. Corregir el localizador:
+    await page.getByRole('button', { name: 'Enviar' }).click(); // ✓ Correcto
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Checklist: Localizador no encontrado</h4>
@@ -452,7 +712,18 @@ def test_diagnosticar_localizador(page):
             no se ejecuta.</p>
         </div>
 
-        <pre><code class="python"># Diagnóstico paso a paso:
+        <div class="code-tabs" data-code-id="L093-8">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Diagnóstico paso a paso:
 def test_diagnosticar_click(page):
     page.goto("https://erp.siesa.com/pedidos")
 
@@ -476,6 +747,35 @@ def test_diagnosticar_click(page):
     # Pausa 3: Verificar que la acción se ejecutó
     page.pause()
     expect(page.get_by_text("Nuevo pedido")).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Diagnóstico paso a paso:
+test('diagnosticar click', async ({ page }) => {
+    await page.goto('https://erp.siesa.com/pedidos');
+
+    // Pausa 1: Verificar que el botón es el correcto
+    await page.pause();
+    // En el Inspector: Pick Locator → clic en el botón
+    // Verificar que el localizador devuelve 1 match
+
+    const btn = page.getByRole('button', { name: 'Nuevo pedido' });
+
+    // Pausa 2: Verificar estado del botón antes del clic
+    await page.pause();
+    // En DevTools Console:
+    // document.querySelector('[data-testid="btn-nuevo"]').disabled
+    // → true ← ¡El botón está deshabilitado!
+
+    // Solución: Esperar a que el botón esté habilitado
+    await expect(btn).toBeEnabled({ timeout: 10000 });
+    await btn.click();
+
+    // Pausa 3: Verificar que la acción se ejecutó
+    await page.pause();
+    await expect(page.getByText('Nuevo pedido')).toBeVisible();
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Checklist: Clic sin efecto</h4>
@@ -562,7 +862,18 @@ pw:api     performing click action +3ms</code></pre>
         <h3>🧩 Ejemplo completo: Flujo de debugging de principio a fin</h3>
         <p>Veamos un caso real donde un test falla y usamos el Inspector para diagnosticar y corregir:</p>
 
-        <pre><code class="python"># test_crear_cliente.py — Test que falla
+        <div class="code-tabs" data-code-id="L093-9">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_crear_cliente.py — Test que falla
 from playwright.sync_api import expect
 
 def test_crear_cliente(page):
@@ -583,8 +894,44 @@ def test_crear_cliente(page):
     page.get_by_role("button", name="Guardar").click()
 
     expect(page.get_by_text("Cliente creado")).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_crear_cliente.spec.ts — Test que falla
+import { test, expect } from '@playwright/test';
 
-        <pre><code class="python"># test_crear_cliente_debug.py — Versión con debugging
+test('crear cliente', async ({ page }) => {
+    // Escenario: Crear un nuevo cliente en el módulo CRM
+    // Problema: El test falla con timeout en el botón "Guardar"
+
+    await page.goto('https://erp.siesa.com/crm/clientes/nuevo');
+
+    // Llenar datos del cliente
+    await page.getByLabel('NIT').fill('900123456-7');
+    await page.getByLabel('Razón social').fill('Empresa Demo S.A.S.');
+    await page.getByLabel('Ciudad').selectOption('Cali');
+    await page.getByLabel('Teléfono').fill('3001234567');
+    await page.getByLabel('Email').fill('contacto@demo.com');
+
+    // ❌ FALLA AQUÍ: TimeoutError
+    await page.getByRole('button', { name: 'Guardar' }).click();
+
+    await expect(page.getByText('Cliente creado')).toBeVisible();
+});</code></pre>
+        </div>
+        </div>
+
+        <div class="code-tabs" data-code-id="L093-10">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># test_crear_cliente_debug.py — Versión con debugging
 from playwright.sync_api import expect
 import os
 
@@ -621,6 +968,46 @@ def test_crear_cliente_debug(page):
     page.pause()
     # 🔍 Verificar que el mensaje de éxito apareció
     expect(page.get_by_text("Cliente creado")).to_be_visible()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// test_crear_cliente_debug.spec.ts — Versión con debugging
+import { test, expect } from '@playwright/test';
+
+test('crear cliente debug', async ({ page }) => {
+    // Versión de debugging del test.
+    // Ejecutar: PWDEBUG=1 npx playwright test test_crear_cliente_debug.spec.ts
+
+    await page.goto('https://erp.siesa.com/crm/clientes/nuevo');
+
+    // PASO 1: Verificar que la página cargó completamente
+    await page.pause();
+    // 🔍 En el Inspector: ¿la URL es correcta? ¿El formulario está visible?
+
+    await page.getByLabel('NIT').fill('900123456-7');
+    await page.getByLabel('Razón social').fill('Empresa Demo S.A.S.');
+    await page.getByLabel('Ciudad').selectOption('Cali');
+    await page.getByLabel('Teléfono').fill('3001234567');
+    await page.getByLabel('Email').fill('contacto@demo.com');
+
+    // PASO 2: Verificar estado del formulario antes del clic
+    await page.pause();
+    // 🔍 En el Inspector Locator Input:
+    //    page.getByRole('button', { name: 'Guardar' })
+    //    → "0 matches" 😱
+    //
+    // 🔍 Usar Pick Locator → clic en el botón
+    //    → page.getByRole('button', { name: 'Guardar registro' })
+    //    ¡El botón dice "Guardar registro", no solo "Guardar"!
+
+    // PASO 3: Corregir y verificar
+    await page.getByRole('button', { name: 'Guardar registro' }).click();
+
+    await page.pause();
+    // 🔍 Verificar que el mensaje de éxito apareció
+    await expect(page.getByText('Cliente creado')).toBeVisible();
+});</code></pre>
+        </div>
+        </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Resumen del diagnóstico</h4>
@@ -655,7 +1042,18 @@ def test_crear_cliente_debug(page):
             en un test que falla.</p>
 
             <p><strong>Paso 1:</strong> Crea el siguiente archivo de test con errores intencionales:</p>
-            <pre><code class="python"># tests/test_debug_exercise.py
+            <div class="code-tabs" data-code-id="L093-11">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_debug_exercise.py
 from playwright.sync_api import sync_playwright, expect
 
 def test_formulario_debug():
@@ -690,6 +1088,45 @@ def test_formulario_debug():
         expect(page.get_by_text("You logged into a secure area!")).to_be_visible()
 
         browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/test_debug_exercise.spec.ts
+import { chromium, expect } from 'playwright';
+
+async function testFormularioDebug() {
+    const browser = await chromium.launch({ headless: false });
+    const page = await browser.newPage();
+
+    await page.goto('https://the-internet.herokuapp.com/login');
+
+    // 🔍 Punto de inspección 1
+    await page.pause();
+
+    // ERROR 1: Localizador incorrecto para el username
+    // Usa el Pick Locator para encontrar el correcto
+    await page.getByLabel('Username').fill('tomsmith');
+
+    // ERROR 2: Localizador incorrecto para el password
+    // Usa el Locator Input para verificar matches
+    await page.getByLabel('Password').fill('SuperSecretPassword!');
+
+    // 🔍 Punto de inspección 2
+    await page.pause();
+
+    // ERROR 3: Texto del botón incorrecto
+    // Usa Step Over para ver qué pasa
+    await page.getByRole('button', { name: 'Sign In' }).click();
+
+    // 🔍 Punto de inspección 3
+    await page.pause();
+
+    // Verificar login exitoso
+    await expect(page.getByText('You logged into a secure area!')).toBeVisible();
+
+    await browser.close();
+}</code></pre>
+            </div>
+            </div>
 
             <p><strong>Paso 2:</strong> Ejecuta el test con el Inspector:</p>
             <pre><code class="bash">PWDEBUG=1 python -m pytest tests/test_debug_exercise.py -s</code></pre>
@@ -708,7 +1145,18 @@ def test_formulario_debug():
             </ol>
 
             <p><strong>Paso 4:</strong> Corrige los tres errores y crea la versión final sin <code>page.pause()</code>:</p>
-            <pre><code class="python"># tests/test_formulario_corregido.py
+            <div class="code-tabs" data-code-id="L093-12">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_formulario_corregido.py
 from playwright.sync_api import sync_playwright, expect
 
 def test_formulario_corregido():
@@ -732,6 +1180,34 @@ def test_formulario_corregido():
 
         print("✅ Test corregido exitosamente con ayuda del Inspector")
         browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/test_formulario_corregido.spec.ts
+import { chromium, expect } from 'playwright';
+
+async function testFormularioCorregido() {
+    const browser = await chromium.launch({ headless: false });
+    const page = await browser.newPage();
+
+    await page.goto('https://the-internet.herokuapp.com/login');
+
+    // Corregido: usar localizador correcto para username
+    await page.locator('#username').fill('tomsmith');
+
+    // Corregido: usar localizador correcto para password
+    await page.locator('#password').fill('SuperSecretPassword!');
+
+    // Corregido: usar texto real del botón
+    await page.getByRole('button', { name: 'Login' }).click();
+
+    // Verificar login exitoso
+    await expect(page.getByText('You logged into a secure area!')).toBeVisible();
+
+    console.log('✅ Test corregido exitosamente con ayuda del Inspector');
+    await browser.close();
+}</code></pre>
+            </div>
+            </div>
 
             <p><strong>Criterios de éxito:</strong></p>
             <ul>

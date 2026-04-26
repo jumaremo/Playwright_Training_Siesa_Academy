@@ -19,7 +19,18 @@ const LESSON_073 = {
 
         <h3>🔑 Estrategia 1: API Key</h3>
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># La forma más simple: API Key en headers
+            <div class="code-tabs" data-code-id="L073-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># La forma más simple: API Key en headers
 from playwright.sync_api import Playwright
 import pytest
 
@@ -40,10 +51,49 @@ def api_with_key(playwright: Playwright):
 def test_con_api_key_en_url(api):
     response = api.get("/data", params={"api_key": "mi-key-123"})
     assert response.ok</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// La forma más simple: API Key en headers
+import { test as base, expect } from '@playwright/test';
+
+const test = base.extend&lt;{}, { apiWithKey: any }&gt;({
+    apiWithKey: [async ({ playwright }, use) => {
+        const ctx = await playwright.request.newContext({
+            baseURL: 'https://api.ejemplo.com',
+            extraHTTPHeaders: {
+                'X-API-Key': 'mi-api-key-secreta-123',
+                'Accept': 'application/json',
+            },
+        });
+        await use(ctx);
+        await ctx.dispose();
+    }, { scope: 'worker' }],
+});
+
+// También puede ir como query parameter
+test('con api key en url', async ({ apiWithKey: api }) => {
+    const response = await api.get('/data', {
+        params: { api_key: 'mi-key-123' },
+    });
+    expect(response.ok()).toBeTruthy();
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🎫 Estrategia 2: Bearer Token (JWT)</h3>
-        <pre><code class="python"># Obtener token via login y usarlo en requests subsecuentes
+        <div class="code-tabs" data-code-id="L073-2">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Obtener token via login y usarlo en requests subsecuentes
 
 @pytest.fixture(scope="session")
 def auth_token(playwright: Playwright):
@@ -110,10 +160,88 @@ def test_refresh_token(api, playwright):
     response = new_ctx.get("/api/profile")
     assert response.ok
     new_ctx.dispose()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Obtener token via login y usarlo en requests subsecuentes
+import { test as base, expect } from '@playwright/test';
+
+const test = base.extend&lt;{}, { authToken: string; api: any }&gt;({
+    authToken: [async ({ playwright }, use) => {
+        const ctx = await playwright.request.newContext({
+            baseURL: 'https://api.mi-app.com',
+        });
+
+        // Login para obtener el token
+        const response = await ctx.post('/auth/login', {
+            data: { email: 'admin@test.com', password: 'admin123' },
+        });
+        expect(response.status()).toBe(200);
+
+        const token = (await response.json()).access_token;
+        await ctx.dispose();
+        await use(token);
+    }, { scope: 'worker' }],
+
+    api: [async ({ playwright, authToken }, use) => {
+        const ctx = await playwright.request.newContext({
+            baseURL: 'https://api.mi-app.com',
+            extraHTTPHeaders: {
+                'Authorization': 'Bearer ' + authToken,
+                'Accept': 'application/json',
+            },
+        });
+        await use(ctx);
+        await ctx.dispose();
+    }, { scope: 'worker' }],
+});
+
+// ── Test con refresh token ──
+test('refresh token', async ({ playwright }) => {
+    // Simular token expirado
+    const ctx = await playwright.request.newContext({
+        baseURL: 'https://api.mi-app.com',
+        extraHTTPHeaders: { Authorization: 'Bearer token-expirado' },
+    });
+
+    // Request con token expirado → 401
+    const response = await ctx.get('/api/profile');
+    expect(response.status()).toBe(401);
+
+    // Refresh
+    const refresh = await ctx.post('/auth/refresh', {
+        data: { refresh_token: 'mi-refresh-token' },
+    });
+    expect(refresh.ok()).toBeTruthy();
+    const newToken = (await refresh.json()).access_token;
+
+    await ctx.dispose();
+
+    // Nuevo context con token fresco
+    const newCtx = await playwright.request.newContext({
+        baseURL: 'https://api.mi-app.com',
+        extraHTTPHeaders: { Authorization: 'Bearer ' + newToken },
+    });
+    const resp = await newCtx.get('/api/profile');
+    expect(resp.ok()).toBeTruthy();
+    await newCtx.dispose();
+});</code></pre>
+        </div>
+        </div>
 
         <h3>🍪 Estrategia 3: Cookies de sesión</h3>
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python"># Login por UI y reutilizar cookies para API calls
+            <div class="code-tabs" data-code-id="L073-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># Login por UI y reutilizar cookies para API calls
 
 @pytest.fixture(scope="session")
 def auth_state(browser):
@@ -150,10 +278,62 @@ def test_api_con_sesion_de_ui(api_with_cookies):
     )
     assert response.ok
     assert response.json()["email"] == "admin@test.com"</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// Login por UI y reutilizar cookies para API calls
+import { test as base, expect } from '@playwright/test';
+
+const test = base.extend&lt;{}, { authState: string }&gt;({
+    authState: [async ({ browser }, use) => {
+        const context = await browser.newContext();
+        const page = await context.newPage();
+
+        // Login real por la UI
+        await page.goto('https://mi-app.com/login');
+        await page.fill('#email', 'admin@test.com');
+        await page.fill('#password', 'admin123');
+        await page.click('#login-btn');
+        await page.waitForURL('**/dashboard');
+
+        // Guardar estado (cookies + localStorage)
+        const state = await context.storageState();
+        await context.close();
+        // storageState() retorna un objeto; guardarlo como path requiere archivo
+        await use(JSON.stringify(state));
+    }, { scope: 'worker' }],
+});
+
+test('API con sesión de UI', async ({ browser, authState }) => {
+    const context = await browser.newContext({
+        storageState: JSON.parse(authState),
+    });
+    const page = await context.newPage();
+
+    // context.request hereda las cookies automáticamente
+    const response = await context.request.get(
+        'https://mi-app.com/api/profile'
+    );
+    expect(response.ok()).toBeTruthy();
+    expect((await response.json()).email).toBe('admin@test.com');
+    await context.close();
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🔄 Estrategia 4: OAuth 2.0 (Client Credentials)</h3>
-        <pre><code class="python"># OAuth 2.0 Client Credentials flow (para APIs server-to-server)
+        <div class="code-tabs" data-code-id="L073-4">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># OAuth 2.0 Client Credentials flow (para APIs server-to-server)
 
 @pytest.fixture(scope="session")
 def oauth_token(playwright: Playwright):
@@ -184,9 +364,60 @@ def api_oauth(playwright: Playwright, oauth_token):
     )
     yield ctx
     ctx.dispose()</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// OAuth 2.0 Client Credentials flow (para APIs server-to-server)
+import { test as base, expect } from '@playwright/test';
+
+const test = base.extend&lt;{}, { oauthToken: string; apiOAuth: any }&gt;({
+    oauthToken: [async ({ playwright }, use) => {
+        const ctx = await playwright.request.newContext();
+
+        const response = await ctx.post(
+            'https://auth.mi-app.com/oauth/token',
+            {
+                form: {
+                    grant_type: 'client_credentials',
+                    client_id: 'mi-client-id',
+                    client_secret: 'mi-client-secret',
+                    scope: 'read write',
+                },
+            }
+        );
+
+        expect(response.status()).toBe(200);
+        const tokenData = await response.json();
+        await ctx.dispose();
+        await use(tokenData.access_token);
+    }, { scope: 'worker' }],
+
+    apiOAuth: [async ({ playwright, oauthToken }, use) => {
+        const ctx = await playwright.request.newContext({
+            baseURL: 'https://api.mi-app.com',
+            extraHTTPHeaders: {
+                Authorization: 'Bearer ' + oauthToken,
+            },
+        });
+        await use(ctx);
+        await ctx.dispose();
+    }, { scope: 'worker' }],
+});</code></pre>
+        </div>
+        </div>
 
         <h3>👥 Múltiples roles de usuario</h3>
-        <pre><code class="python"># Fixture parametrizada para testear con diferentes roles
+        <div class="code-tabs" data-code-id="L073-5">
+        <div class="code-tabs-header">
+            <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🐍</span> Python
+            </button>
+            <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                <span class="code-tab-icon">🔷</span> TypeScript
+            </button>
+            <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+        </div>
+        <div class="code-panel active" data-lang="python">
+            <pre><code class="language-python"># Fixture parametrizada para testear con diferentes roles
 
 CREDENTIALS = {
     "admin": {"email": "admin@test.com", "password": "admin123"},
@@ -232,10 +463,71 @@ def test_todos_pueden_leer(api_for_role):
     api, role = api_for_role
     response = api.get("/api/tasks")
     assert response.ok  # Todos los roles pueden leer</code></pre>
+        </div>
+        <div class="code-panel" data-lang="typescript">
+            <pre><code class="language-typescript">// Test parametrizado para diferentes roles
+import { test, expect, type APIRequestContext } from '@playwright/test';
+
+const CREDENTIALS: Record&lt;string, { email: string; password: string }&gt; = {
+    admin:  { email: 'admin@test.com',  password: 'admin123' },
+    editor: { email: 'editor@test.com', password: 'editor123' },
+    viewer: { email: 'viewer@test.com', password: 'viewer123' },
+};
+
+async function apiForRole(playwright: any, role: string) {
+    const ctx = await playwright.request.newContext({
+        baseURL: 'https://api.mi-app.com',
+    });
+    const login = await ctx.post('/auth/login', {
+        data: CREDENTIALS[role],
+    });
+    const token = (await login.json()).access_token;
+    await ctx.dispose();
+
+    return await playwright.request.newContext({
+        baseURL: 'https://api.mi-app.com',
+        extraHTTPHeaders: { Authorization: 'Bearer ' + token },
+    });
+}
+
+// Este test se ejecuta 3 veces (admin, editor, viewer)
+for (const role of ['admin', 'editor', 'viewer']) {
+    test('acceso por rol - ' + role, async ({ playwright }) => {
+        const api = await apiForRole(playwright, role);
+        const response = await api.get('/api/admin/settings');
+
+        if (role === 'admin') {
+            expect(response.ok()).toBeTruthy();
+        } else {
+            expect(response.status()).toBe(403);
+        }
+        await api.dispose();
+    });
+
+    test('todos pueden leer - ' + role, async ({ playwright }) => {
+        const api = await apiForRole(playwright, role);
+        const response = await api.get('/api/tasks');
+        expect(response.ok()).toBeTruthy();
+        await api.dispose();
+    });
+}</code></pre>
+        </div>
+        </div>
 
         <h3>🔒 Tests de seguridad de autenticación</h3>
         <div style="background: #ffebee; padding: 15px; border-radius: 8px; margin: 15px 0;">
-            <pre><code class="python">def test_endpoint_sin_auth_retorna_401(playwright):
+            <div class="code-tabs" data-code-id="L073-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">def test_endpoint_sin_auth_retorna_401(playwright):
     """Endpoints protegidos rechazan requests sin auth."""
     ctx = playwright.request.new_context(
         base_url="https://api.mi-app.com"
@@ -271,6 +563,47 @@ def test_sql_injection_en_login(playwright):
     })
     assert response.status in [401, 422]  # Rechazado
     ctx.dispose()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { test, expect } from '@playwright/test';
+
+test('endpoint sin auth retorna 401', async ({ playwright }) => {
+    const ctx = await playwright.request.newContext({
+        baseURL: 'https://api.mi-app.com',
+    });
+    const endpoints = ['/api/tasks', '/api/users', '/api/profile'];
+    for (const endpoint of endpoints) {
+        const response = await ctx.get(endpoint);
+        expect(response.status(), endpoint + ' debería requerir auth')
+            .toBe(401);
+    }
+    await ctx.dispose();
+});
+
+test('token expirado retorna 401', async ({ playwright }) => {
+    const ctx = await playwright.request.newContext({
+        baseURL: 'https://api.mi-app.com',
+        extraHTTPHeaders: {
+            Authorization: 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJleHAiOjEwMDAwMDAwMDB9.fake',
+        },
+    });
+    const response = await ctx.get('/api/tasks');
+    expect(response.status()).toBe(401);
+    await ctx.dispose();
+});
+
+test('SQL injection en login', async ({ playwright }) => {
+    const ctx = await playwright.request.newContext({
+        baseURL: 'https://api.mi-app.com',
+    });
+    const response = await ctx.post('/auth/login', {
+        data: { email: "' OR 1=1 --", password: 'anything' },
+    });
+    expect([401, 422]).toContain(response.status()); // Rechazado
+    await ctx.dispose();
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #00bcd4;">

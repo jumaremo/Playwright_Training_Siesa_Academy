@@ -154,7 +154,18 @@ print('axe.min.js descargado')
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Usando axe-playwright-python</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L101-1">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 from axe_playwright_python.sync_playwright import Axe
 
 with sync_playwright() as p:
@@ -173,11 +184,43 @@ with sync_playwright() as p:
     print(f"Reglas que pasan: {len(results.passes)}")
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium } from 'playwright';
+import AxeBuilder from '@axe-core/playwright';
+
+(async () => {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.goto('https://mi-app.com/login');
+
+    // Crear instancia de AxeBuilder y ejecutar análisis
+    const results = await new AxeBuilder({ page }).analyze();
+
+    // Los resultados contienen violations, passes, etc.
+    console.log(\`Violaciones encontradas: \${results.violations.length}\`);
+    console.log(\`Reglas que pasan: \${results.passes.length}\`);
+
+    await browser.close();
+})();</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Inyección manual (sin dependencia externa)</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L101-2">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 from pathlib import Path
 
 def inyectar_axe(page):
@@ -206,6 +249,46 @@ with sync_playwright() as p:
     print(f"Inapplicable: {len(results['inapplicable'])}")
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium, Page } from 'playwright';
+import * as fs from 'fs';
+
+function inyectarAxe(page: Page): Promise<void> {
+    /** Inyecta axe-core en la página actual. */
+    const axeScript = fs.readFileSync('axe.min.js', 'utf-8');
+    return page.evaluate(axeScript);
+}
+
+async function ejecutarAxe(page: Page, opciones?: object) {
+    /** Ejecuta axe-core y retorna los resultados. */
+    if (opciones) {
+        return page.evaluate(
+            (opts) => (window as any).axe.run(document, opts),
+            opciones
+        );
+    }
+    return page.evaluate(() => (window as any).axe.run());
+}
+
+(async () => {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.goto('https://mi-app.com/login');
+
+    // Inyectar y ejecutar
+    await inyectarAxe(page);
+    const results = await ejecutarAxe(page);
+
+    console.log(\`Violaciones: \${results.violations.length}\`);
+    console.log(\`Passes: \${results.passes.length}\`);
+    console.log(\`Incomplete: \${results.incomplete.length}\`);
+    console.log(\`Inapplicable: \${results.inapplicable.length}\`);
+
+    await browser.close();
+})();</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📊 Entendiendo los resultados de axe</h3>
@@ -248,7 +331,18 @@ with sync_playwright() as p:
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Explorar resultados en detalle</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L101-3">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 from axe_playwright_python.sync_playwright import Axe
 
 with sync_playwright() as p:
@@ -284,6 +378,48 @@ with sync_playwright() as p:
         print()
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium } from 'playwright';
+import AxeBuilder from '@axe-core/playwright';
+
+(async () => {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.goto('https://mi-app.com/dashboard');
+
+    const results = await new AxeBuilder({ page }).analyze();
+
+    // Resumen general
+    console.log('=== Resumen de Accesibilidad ===');
+    console.log(\`Violations:   \${results.violations.length}\`);
+    console.log(\`Passes:       \${results.passes.length}\`);
+    console.log(\`Incomplete:   \${results.incomplete.length}\`);
+    console.log(\`Inapplicable: \${results.inapplicable.length}\`);
+    console.log();
+
+    // Detalle de cada violación
+    for (const violation of results.violations) {
+        console.log(\`--- Violación: \${violation.id} ---\`);
+        console.log(\`  Descripción: \${violation.description}\`);
+        console.log(\`  Impacto:     \${violation.impact}\`);
+        console.log(\`  Help:        \${violation.help}\`);
+        console.log(\`  Help URL:    \${violation.helpUrl}\`);
+        console.log(\`  Tags:        \${violation.tags}\`);
+        console.log(\`  Elementos afectados: \${violation.nodes.length}\`);
+
+        for (const node of violation.nodes) {
+            console.log(\`    - HTML:     \${node.html}\`);
+            console.log(\`      Target:   \${node.target}\`);
+            console.log(\`      Mensaje:  \${node.failureSummary}\`);
+        }
+        console.log();
+    }
+
+    await browser.close();
+})();</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>⚡ Filtrar por nivel de impacto</h3>
@@ -326,7 +462,18 @@ with sync_playwright() as p:
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Filtrar violaciones por impacto</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L101-4">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 from axe_playwright_python.sync_playwright import Axe
 
 
@@ -362,6 +509,50 @@ with sync_playwright() as p:
     print(f"\\nMejoras sugeridas: {len(mejoras)}")
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium } from 'playwright';
+import AxeBuilder from '@axe-core/playwright';
+import type { Result } from 'axe-core';
+
+function filtrarPorImpacto(
+    violations: Result[],
+    niveles: string[]
+): Result[] {
+    /** Filtra violaciones por niveles de impacto. */
+    return violations.filter(v => niveles.includes(v.impact!));
+}
+
+(async () => {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.goto('https://mi-app.com/formulario');
+
+    const results = await new AxeBuilder({ page }).analyze();
+
+    // Solo violaciones críticas y serias (bloqueantes)
+    const bloqueantes = filtrarPorImpacto(
+        results.violations,
+        ['critical', 'serious']
+    );
+    console.log(\`Violaciones bloqueantes: \${bloqueantes.length}\`);
+
+    for (const v of bloqueantes) {
+        console.log(\`  [\${v.impact!.toUpperCase()}] \${v.id}: \${v.help}\`);
+        console.log(\`    Elementos: \${v.nodes.length}\`);
+    }
+
+    // Solo violaciones moderadas y menores (mejoras)
+    const mejoras = filtrarPorImpacto(
+        results.violations,
+        ['moderate', 'minor']
+    );
+    console.log(\`\\nMejoras sugeridas: \${mejoras.length}\`);
+
+    await browser.close();
+})();</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🏷️ Filtrar por etiquetas WCAG</h3>
@@ -370,7 +561,18 @@ with sync_playwright() as p:
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Ejecutar axe con filtros WCAG</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L101-5">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 from pathlib import Path
 import json
 
@@ -415,6 +617,41 @@ with sync_playwright() as p:
     print(f"Best practices - Violaciones: {len(results_bp['violations'])}")
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium } from 'playwright';
+import AxeBuilder from '@axe-core/playwright';
+
+(async () => {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+    await page.goto('https://mi-app.com');
+
+    // Solo reglas WCAG 2.1 AA (el estándar más común)
+    const resultsAa = await new AxeBuilder({ page })
+        .withTags([
+            'wcag2a',    // WCAG 2.0 nivel A
+            'wcag2aa',   // WCAG 2.0 nivel AA
+            'wcag21a',   // WCAG 2.1 nivel A
+            'wcag21aa',  // WCAG 2.1 nivel AA
+        ])
+        .analyze();
+    console.log(
+        \`WCAG 2.1 AA - Violaciones: \${resultsAa.violations.length}\`
+    );
+
+    // Solo mejores prácticas (no WCAG obligatorio)
+    const resultsBp = await new AxeBuilder({ page })
+        .withTags(['best-practice'])
+        .analyze();
+    console.log(
+        \`Best practices - Violaciones: \${resultsBp.violations.length}\`
+    );
+
+    await browser.close();
+})();</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
@@ -467,7 +704,18 @@ with sync_playwright() as p:
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Detector automático de violaciones comunes</h4>
-            <pre><code class="python">from playwright.sync_api import sync_playwright
+            <div class="code-tabs" data-code-id="L101-6">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">from playwright.sync_api import sync_playwright
 from axe_playwright_python.sync_playwright import Axe
 
 
@@ -523,6 +771,70 @@ with sync_playwright() as p:
         analizar_pagina(page, url)
 
     browser.close()</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import { chromium, Page } from 'playwright';
+import AxeBuilder from '@axe-core/playwright';
+import type { AxeResults } from 'axe-core';
+
+const VIOLACIONES_CRITICAS = [
+    'image-alt',
+    'color-contrast',
+    'label',
+    'heading-order',
+    'link-name',
+    'button-name',
+    'document-title',
+    'html-has-lang',
+];
+
+async function analizarPagina(
+    page: Page, url: string
+): Promise<AxeResults> {
+    /** Analiza una página y reporta violaciones comunes. */
+    await page.goto(url);
+    const results = await new AxeBuilder({ page }).analyze();
+
+    console.log(\`\\n=== Análisis: \${url} ===\`);
+
+    // Buscar violaciones críticas conocidas
+    const encontradas = results.violations.filter(
+        v => VIOLACIONES_CRITICAS.includes(v.id)
+    );
+
+    if (encontradas.length === 0) {
+        console.log('Sin violaciones críticas comunes.');
+    } else {
+        for (const v of encontradas) {
+            console.log(\`  [\${v.impact}] \${v.id}: \${v.help}\`);
+            for (const node of v.nodes.slice(0, 3)) { // Mostrar máximo 3
+                console.log(\`    -> \${node.html.slice(0, 80)}\`);
+            }
+        }
+    }
+
+    return results;
+}
+
+(async () => {
+    const browser = await chromium.launch();
+    const page = await browser.newPage();
+
+    // Analizar múltiples páginas
+    const urls = [
+        'https://mi-app.com/login',
+        'https://mi-app.com/dashboard',
+        'https://mi-app.com/reportes',
+    ];
+
+    for (const url of urls) {
+        await analizarPagina(page, url);
+    }
+
+    await browser.close();
+})();</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>📄 Generar reportes de accesibilidad</h3>
@@ -531,7 +843,18 @@ with sync_playwright() as p:
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Generador de reporte JSON y HTML</h4>
-            <pre><code class="python">import json
+            <div class="code-tabs" data-code-id="L101-7">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python">import json
 from datetime import datetime
 from pathlib import Path
 from playwright.sync_api import sync_playwright
@@ -640,6 +963,127 @@ def generar_reporte_html(results, url, output_dir="a11y-reports"):
     filepath.write_text(html, encoding="utf-8")
     print(f"Reporte HTML guardado: {filepath}")
     return filepath</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">import * as fs from 'fs';
+import * as path from 'path';
+import type { AxeResults, Result } from 'axe-core';
+
+function generarReporteJson(
+    results: AxeResults,
+    url: string,
+    outputDir = 'a11y-reports'
+): string {
+    /** Genera un reporte JSON con los resultados de axe. */
+    fs.mkdirSync(outputDir, { recursive: true });
+
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, '').slice(0, 15);
+    const filename = \`a11y_report_\${timestamp}.json\`;
+
+    const violationsPorImpacto: Record<string, number> = {};
+    const violationsDetalle: object[] = [];
+
+    for (const v of results.violations) {
+        const impacto = v.impact ?? 'unknown';
+        violationsPorImpacto[impacto] =
+            (violationsPorImpacto[impacto] ?? 0) + 1;
+
+        violationsDetalle.push({
+            id: v.id,
+            impact: v.impact,
+            description: v.description,
+            help: v.help,
+            helpUrl: v.helpUrl,
+            tags: v.tags,
+            elementos: v.nodes.length,
+            targets: v.nodes.map(n => n.target),
+        });
+    }
+
+    const reporte = {
+        url,
+        timestamp: now.toISOString(),
+        resumen: {
+            violations: results.violations.length,
+            passes: results.passes.length,
+            incomplete: results.incomplete.length,
+            inapplicable: results.inapplicable.length,
+        },
+        violations_por_impacto: violationsPorImpacto,
+        violations_detalle: violationsDetalle,
+    };
+
+    const filepath = path.join(outputDir, filename);
+    fs.writeFileSync(filepath, JSON.stringify(reporte, null, 2), 'utf-8');
+    console.log(\`Reporte guardado: \${filepath}\`);
+    return filepath;
+}
+
+function generarReporteHtml(
+    results: AxeResults,
+    url: string,
+    outputDir = 'a11y-reports'
+): string {
+    /** Genera un reporte HTML visual con los resultados. */
+    fs.mkdirSync(outputDir, { recursive: true });
+
+    const now = new Date();
+    const timestamp = now.toISOString().replace(/[:.]/g, '').slice(0, 15);
+    const filename = \`a11y_report_\${timestamp}.html\`;
+
+    const coloresImpacto: Record<string, string> = {
+        critical: '#d32f2f',
+        serious: '#f57c00',
+        moderate: '#fbc02d',
+        minor: '#388e3c',
+    };
+
+    const filas = results.violations.map(v => {
+        const color = coloresImpacto[v.impact ?? ''] ?? '#666';
+        return \`
+        <tr>
+            <td><span style="color:\${color};font-weight:bold;">
+                \${(v.impact ?? '').toUpperCase()}</span></td>
+            <td>\${v.id}</td>
+            <td>\${v.help}</td>
+            <td>\${v.nodes.length}</td>
+            <td><a href="\${v.helpUrl}" target="_blank">Ver</a></td>
+        </tr>\`;
+    }).join('');
+
+    const fecha = now.toISOString().slice(0, 16).replace('T', ' ');
+    const html = \`<!DOCTYPE html>
+<html lang="es">
+<head><meta charset="UTF-8">
+<title>Reporte a11y - \${url}</title>
+<style>
+  body { font-family: Arial, sans-serif; margin: 20px; }
+  table { border-collapse: collapse; width: 100%; }
+  th, td { padding: 10px; border: 1px solid #ddd; text-align: left; }
+  th { background: #1565c0; color: white; }
+  tr:nth-child(even) { background: #f5f5f5; }
+</style></head>
+<body>
+<h1>Reporte de Accesibilidad</h1>
+<p><strong>URL:</strong> \${url}</p>
+<p><strong>Fecha:</strong> \${fecha}</p>
+<p><strong>Violaciones:</strong> \${results.violations.length} |
+   <strong>Passes:</strong> \${results.passes.length} |
+   <strong>Incomplete:</strong> \${results.incomplete.length}</p>
+<table>
+<tr><th>Impacto</th><th>Regla</th><th>Descripción</th>
+    <th>Elementos</th><th>Ayuda</th></tr>
+\${filas}
+</table></body></html>\`;
+
+    const filepath = path.join(outputDir, filename);
+    fs.writeFileSync(filepath, html, 'utf-8');
+    console.log(\`Reporte HTML guardado: \${filepath}\`);
+    return filepath;
+}</code></pre>
+            </div>
+            </div>
         </div>
 
         <h3>🧪 Integración con pytest: Assertions de accesibilidad</h3>
@@ -649,7 +1093,18 @@ def generar_reporte_html(results, url, output_dir="a11y-reports"):
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Fixture y helpers para pytest</h4>
-            <pre><code class="python"># tests/conftest.py
+            <div class="code-tabs" data-code-id="L101-8">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/conftest.py
 import pytest
 from axe_playwright_python.sync_playwright import Axe
 
@@ -695,11 +1150,68 @@ def assert_no_violations(results, impact_levels=None):
             f"Se encontraron {len(violations)} violaciones de "
             f"accesibilidad:\\n{detalle}"
         )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/a11y-helpers.ts
+import AxeBuilder from '@axe-core/playwright';
+import { test as base, expect } from '@playwright/test';
+import type { AxeResults, Result } from 'axe-core';
+
+// Extender test con fixture de AxeBuilder
+export const test = base.extend<{ makeAxeBuilder: () => AxeBuilder }>({
+    makeAxeBuilder: async ({ page }, use) => {
+        /** Proporciona un factory de AxeBuilder para tests de a11y. */
+        await use(() => new AxeBuilder({ page }));
+    },
+});
+
+export function assertNoViolations(
+    results: AxeResults,
+    impactLevels: string[] = ['critical', 'serious']
+): void {
+    /**
+     * Assert personalizado que falla si hay violaciones
+     * de accesibilidad del nivel indicado.
+     */
+    const violations = results.violations.filter(
+        v => impactLevels.includes(v.impact ?? '')
+    );
+
+    if (violations.length > 0) {
+        const mensajes = violations.map(v => {
+            const elementos = v.nodes
+                .slice(0, 5)
+                .map(n => n.target?.[0] ?? '?')
+                .join(', ');
+            return \`  [\${v.impact}] \${v.id}: \${v.help}\\n\` +
+                   \`    Elementos: \${elementos}\`;
+        });
+
+        const detalle = mensajes.join('\\n');
+        throw new Error(
+            \`Se encontraron \${violations.length} violaciones de \` +
+            \`accesibilidad:\\n\${detalle}\`
+        );
+    }
+}</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>✅ Tests de accesibilidad con pytest</h4>
-            <pre><code class="python"># tests/test_accesibilidad.py
+            <div class="code-tabs" data-code-id="L101-9">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_accesibilidad.py
 from conftest import assert_no_violations
 
 
@@ -762,11 +1274,91 @@ class TestAccesibilidadDashboard:
             if v["id"] == "heading-order"
         ]
         assert len(heading_violations) == 0</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/test-accesibilidad.spec.ts
+import { test, assertNoViolations } from './a11y-helpers';
+import { expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+
+test.describe('Accesibilidad Login', () => {
+    /** Tests de accesibilidad para el módulo de login. */
+
+    test('login sin violaciones críticas', async ({ page }) => {
+        /** El login no debe tener violaciones críticas. */
+        await page.goto('https://mi-app.com/login');
+        const results = await new AxeBuilder({ page }).analyze();
+        assertNoViolations(results, ['critical', 'serious']);
+    });
+
+    test('login formulario tiene labels', async ({ page }) => {
+        /** Todos los inputs del login deben tener labels. */
+        await page.goto('https://mi-app.com/login');
+        const results = await new AxeBuilder({ page }).analyze();
+
+        // Buscar específicamente la regla 'label'
+        const labelViolations = results.violations.filter(
+            v => v.id === 'label'
+        );
+        expect(labelViolations).toHaveLength(0);
+    });
+
+    test('login contraste suficiente', async ({ page }) => {
+        /** El login debe cumplir contraste mínimo AA. */
+        await page.goto('https://mi-app.com/login');
+        const results = await new AxeBuilder({ page }).analyze();
+
+        const contrastViolations = results.violations.filter(
+            v => v.id === 'color-contrast'
+        );
+        expect(
+            contrastViolations,
+            'Elementos con contraste insuficiente encontrados'
+        ).toHaveLength(0);
+    });
+});
+
+test.describe('Accesibilidad Dashboard', () => {
+    /** Tests de accesibilidad para el dashboard. */
+
+    test('dashboard WCAG AA', async ({ page }) => {
+        /** El dashboard debe cumplir WCAG 2.1 AA. */
+        await page.goto('https://mi-app.com/dashboard');
+        const results = await new AxeBuilder({ page }).analyze();
+        assertNoViolations(
+            results, ['critical', 'serious', 'moderate']
+        );
+    });
+
+    test('dashboard headings ordenados', async ({ page }) => {
+        /** Los headings del dashboard deben estar ordenados. */
+        await page.goto('https://mi-app.com/dashboard');
+        const results = await new AxeBuilder({ page }).analyze();
+
+        const headingViolations = results.violations.filter(
+            v => v.id === 'heading-order'
+        );
+        expect(headingViolations).toHaveLength(0);
+    });
+});</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #f3e5f5; padding: 15px; border-radius: 8px; margin: 15px 0;">
             <h4>🔬 Patrón avanzado: a11y check reutilizable por ruta</h4>
-            <pre><code class="python"># tests/test_a11y_suite.py
+            <div class="code-tabs" data-code-id="L101-10">
+            <div class="code-tabs-header">
+                <button class="code-tab active" data-lang="python" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🐍</span> Python
+                </button>
+                <button class="code-tab" data-lang="typescript" onclick="window.PWAcademy.switchTab(this)">
+                    <span class="code-tab-icon">🔷</span> TypeScript
+                </button>
+                <button class="code-copy-btn" onclick="window.PWAcademy.copyCode(this)" title="Copiar código">📋</button>
+            </div>
+            <div class="code-panel active" data-lang="python">
+                <pre><code class="language-python"># tests/test_a11y_suite.py
 """
 Suite completa de accesibilidad que verifica todas las rutas
 principales de la aplicación de forma parametrizada.
@@ -811,6 +1403,53 @@ def test_a11y_ruta(page, axe, nombre, ruta):
             f"\\n[WARN] {nombre}: {len(mejoras)} mejoras "
             f"sugeridas (moderate/minor)"
         )</code></pre>
+            </div>
+            <div class="code-panel" data-lang="typescript">
+                <pre><code class="language-typescript">// tests/test-a11y-suite.spec.ts
+/**
+ * Suite completa de accesibilidad que verifica todas las rutas
+ * principales de la aplicación de forma parametrizada.
+ */
+import { test, expect } from '@playwright/test';
+import AxeBuilder from '@axe-core/playwright';
+import { assertNoViolations } from './a11y-helpers';
+
+const RUTAS_CRITICAS = [
+    { nombre: 'Login', ruta: '/login' },
+    { nombre: 'Dashboard', ruta: '/dashboard' },
+    { nombre: 'Nómina', ruta: '/nomina' },
+    { nombre: 'Reportes', ruta: '/reportes' },
+    { nombre: 'Empleados', ruta: '/empleados' },
+    { nombre: 'Configuración', ruta: '/configuracion' },
+];
+
+const BASE_URL = 'https://mi-app.com';
+
+for (const { nombre, ruta } of RUTAS_CRITICAS) {
+    test(\`a11y - \${nombre}\`, async ({ page }) => {
+        /** Verifica accesibilidad en cada ruta crítica. */
+        await page.goto(\`\${BASE_URL}\${ruta}\`);
+        await page.waitForLoadState('networkidle');
+
+        const results = await new AxeBuilder({ page }).analyze();
+
+        // Fallar solo por critical y serious
+        assertNoViolations(results, ['critical', 'serious']);
+
+        // Reportar moderate y minor como warnings
+        const mejoras = results.violations.filter(
+            v => ['moderate', 'minor'].includes(v.impact ?? '')
+        );
+        if (mejoras.length > 0) {
+            console.log(
+                \`\\n[WARN] \${nombre}: \${mejoras.length} mejoras \` +
+                \`sugeridas (moderate/minor)\`
+            );
+        }
+    });
+}</code></pre>
+            </div>
+            </div>
         </div>
 
         <div style="background: #e0f7fa; padding: 15px; border-radius: 8px; margin: 15px 0;">
