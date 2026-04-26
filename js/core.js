@@ -602,10 +602,10 @@ function applyFilter(filterType) {
                     shouldShow = true;
                     break;
                 case 'beginner':
-                    shouldShow = lessonId >= 1 && lessonId <= 66;
+                    shouldShow = lessonId >= 1 && lessonId <= 52;
                     break;
                 case 'intermediate':
-                    shouldShow = lessonId >= 67 && lessonId <= 189;
+                    shouldShow = lessonId >= 53 && lessonId <= 98;
                     break;
                 case 'advanced':
                     shouldShow = lessonId >= 99 && lessonId <= 140;
@@ -1519,14 +1519,6 @@ function setupEventListeners() {
         }
     });
     
-    // Listener para carga dinámica completada - CORRECTAMENTE UBICADO
-    document.addEventListener('lessonsLoaded', function(event) {
-        console.log('🎯 Evento lessonsLoaded recibido, re-sincronizando...');
-        setTimeout(() => {
-            resyncAllLessons();
-            console.log('✅ Sistema totalmente sincronizado');
-        }, 500);
-    });
 }
 
 // ===== DUAL-LANGUAGE CODE TABS =====

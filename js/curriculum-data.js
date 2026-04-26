@@ -32,7 +32,7 @@ window.PLAYWRIGHT_CURRICULUM = {
         advanced: {
             name: "Avanzado",
             icon: "🔴",
-            description: "Enterprise, CI/CD y certificación (Lecciones 099-135)",
+            description: "Enterprise, CI/CD y certificación (Lecciones 099-140)",
             range: [99, 135]
         }
     },

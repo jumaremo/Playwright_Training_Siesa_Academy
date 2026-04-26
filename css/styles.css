@@ -624,7 +624,7 @@ a:hover {
   box-shadow: var(--shadow-md);
   max-height: 300px;
   overflow-y: auto;
-  z-index: 200;
+  z-index: var(--z-dropdown);
   display: none;
 }
 
